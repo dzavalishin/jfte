@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public class ExInput extends ExView implements KeyDefs 
+public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs 
 {
     String Prompt;
     String Line;
@@ -56,7 +56,7 @@ public class ExInput extends ExView implements KeyDefs
     void HandleEvent(TEvent Event) {
         switch (Event.What) {
         case evKeyDown:
-            switch (kbCode(Event.Key.Code)) {
+            switch (KeyDefs.kbCode(((TKeyEvent)Event).Code)) {
             case kbLeft: if (Pos > 0) Pos--; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
             case kbRight: Pos++; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
             case kbLeft | kfCtrl:
@@ -74,7 +74,7 @@ public class ExInput extends ExView implements KeyDefs
                 break;
             case kbRight | kfCtrl:
                 {
-                    unsigned int len = strlen(Line);
+                    int len = strlen(Line);
                     if (Pos < len) {
                         Pos++;
                         while (Pos < len) {
@@ -215,7 +215,7 @@ public class ExInput extends ExView implements KeyDefs
                 TabCount -= 2;
             case kbTab:
                 if (Comp) {
-                    char *Str2 = (char *) malloc(MaxLen + 1);
+                    String Str2 = malloc(MaxLen + 1);
                     int n;
 
                     assert(Str2);
@@ -241,7 +241,7 @@ public class ExInput extends ExView implements KeyDefs
                 {
                     char Ch;
 
-                    if (GetCharFromEvent(Event, &Ch) && (strlen(Line) < MaxLen)) {
+                    if( 0 != (Ch = GetCharFromEvent(Event)) && (strlen(Line) < MaxLen)) {
                         if (SelStart < SelEnd) {
                             memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
                             Pos = SelStart;

@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 
-public class ExASCII extends ExView implements Closeable 
+public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs 
 {
     int Pos, LPos;
     
@@ -30,22 +30,23 @@ public class ExASCII extends ExView implements Closeable
         return 1;
     }
 
-    void HandleEvent(TEvent &Event) {
-        int [] W, H;
+    void HandleEvent(TEvent Event) {
+        int [] W = {0}, H = {0};
         
         ConQuerySize(W, H);
         
         switch (Event.What) {
         case evKeyDown:
-            switch(kbCode(Event.Key.Code)) {
+            switch( KeyDefs.kbCode( ((TKeyEvent)Event).Code ) ) 
+            {
             case kbLeft:           Pos--; Event.What = evNone; break;
             case kbRight:          Pos++; Event.What = evNone; break;
             case kbHome:           Pos = 0; Event.What = evNone; break;
             case kbEnd:            Pos = 255; Event.What = evNone; break;
             case kbLeft + kfCtrl:  Pos -= 16; Event.What = evNone; break;
             case kbRight + kfCtrl: Pos += 16; Event.What = evNone; break;
-            case kbUp:             Pos -= W; LPos -= W; Event.What = evNone; break;
-            case kbDown:           Pos += W; LPos += W; Event.What = evNone; break;
+            case kbUp:             Pos -= W[0]; LPos -= W[0]; Event.What = evNone; break;
+            case kbDown:           Pos += W[0]; LPos += W[0]; Event.What = evNone; break;
             case kbEsc:            EndExec(-1); Event.What = evNone; break;
             case kbEnter:          EndExec(Pos); Event.What = evNone; break;
             }

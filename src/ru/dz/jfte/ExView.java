@@ -3,7 +3,7 @@ package ru.dz.jfte;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class ExView implements Closeable 
+public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs 
 {
     GxView Win;
     protected ExView Next;
@@ -38,18 +38,18 @@ public class ExView implements Closeable
 
     EEventMap GetEventMap() { return null; }
 
-    int ExecCommand(int Command, ExState State) { return ErFAIL; }
+    ExResult ExecCommand(int Command, ExState State) { return ExResult.ErFAIL; }
 
     int BeginMacro() {
         return 1;
     }
 
     void HandleEvent(TEvent Event) {
-        if (Event.What == evKeyDown && kbCode(Event.Key.Code) == kbF12)
+        if (Event.What == evKeyDown && KeyDefs.kbCode(((TKeyEvent)Event).Code) == kbF12)
             Win.Parent.SelectNext(0);
     }
 
-    void EndExec(int NewResult) {
+    void EndExec(int NewResult) throws IOException {
         if (Win.Result == -2) { // hack
             Win.EndExec(NewResult);
         } else {

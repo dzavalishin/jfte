@@ -5,5 +5,8 @@ public class ExMacro {
     int Count;
     CommandType []cmds;
 
+    static int CMacros = 0;
+    static ExMacro [] Macros = null;
+    
     
 }

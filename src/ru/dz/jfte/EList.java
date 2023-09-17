@@ -135,7 +135,7 @@ public class EList extends EModel
         
         if (LeftCol < 0) LeftCol = 0;
         if (Row >= Count) Row = Count - 1;
-        if (0 != Config.WeirdScroll)
+        if (Config.WeirdScroll)
             if (TopRow + H > Count) TopRow = Count - H;
         if (Row < 0) Row = 0;
         

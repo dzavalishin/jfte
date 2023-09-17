@@ -186,7 +186,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs
 
         //View.MView.ConQuerySize(&W, &H);
         W = View.MView.ConWidth();
-        W = View.MView.ConHeight();
+        H = View.MView.ConHeight();
 
         x = event.X;
         y = event.Y;
@@ -279,12 +279,12 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs
                 }
                 if (event.Buttons == 2) {
                     if (!View.MView.MouseMoved) {
-                        EEventMap *Map = View.MView.Win.GetEventMap();
-                        const char *MName = 0;
+                        EEventMap Map = View.MView.Win.GetEventMap();
+                        String MName = null;
 
                         if (Map)
                             MName = Map.GetMenu(EM_LocalMenu);
-                        if (MName == 0)
+                        if (MName == null)
                             MName = "Local";
                         View.MView.Win.Parent.PopupMenu(MName);
                     }

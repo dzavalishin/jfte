@@ -14,7 +14,7 @@ public class Config
 	//#if defined(DOS) || defined(DOSP32)
 	//char Prstatic intDevice[MAXPATH] = "PRN";
 	//#else
-	static String PrsintDevice = "\\DEV\\PRN";
+	static String PrintDevice = "\\DEV\\PRN";
 	//#endif
 	static String CompileCommand = "make";
 	static int KeepHistory = 0;

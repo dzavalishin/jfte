@@ -2,6 +2,9 @@ package ru.dz.jfte;
 
 public class GUI implements GuiDefs 
 {
+    String []fArgv;
+    int doLoop;
+
 	static GFrame frames = null;
 	static GUI gui = null;
 
@@ -29,7 +32,7 @@ public class GUI implements GuiDefs
 	    doLoop = 0;
 	}
 
-	int ConGrabEvents(TEventMask EventMask) {
+	int ConGrabEvents(int /*TEventMask*/ EventMask) {
 	    return 0;
 	}
 
@@ -40,7 +43,7 @@ public class GUI implements GuiDefs
 	    }
 	}
 
-	int ConGetEvent(TEventMask EventMask, TEvent Event, int WaitTime, int Delete, GView []view) {
+	int ConGetEvent(int /*TEventMask*/ EventMask, TEvent Event, int WaitTime, int Delete, GView []view) {
 	    if (view != null)
 	        view[0] = null;
 	    return ::ConGetEvent(EventMask, Event, WaitTime, Delete);
@@ -54,9 +57,8 @@ public class GUI implements GuiDefs
 	    return 0;
 	}
 
-	GUI(String args, int XSize, int YSize) { /*FOLD00*/
-	    fArgc = argc;
-	    fArgv = argv;
+	GUI(String []args, int XSize, int YSize) { /*FOLD00*/
+	    fArgv = args;
 	    ::ConInit(-1, -1);
 	    SaveScreen();
 	    ::ConSetSize(XSize, YSize);

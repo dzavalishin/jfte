@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public class EView implements GuiDefs 
+public class EView implements GuiDefs, EventDefs, ModeDefs 
 {
     EView Next;        // next view
     EView Prev;        // prev view
@@ -276,8 +276,8 @@ public class EView implements GuiDefs
 
     ExResult FilePrev() {
         if (Model != null) {
-            EModel n=Model.Prev;
-            if (IgnoreBufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Prev;
+            EModel n = Model.Prev;
+            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Prev;
             SelectModel(n);
             return ExResult.ErOK;
         }
@@ -286,8 +286,8 @@ public class EView implements GuiDefs
 
     ExResult FileNext() {
         if (Model != null) {
-            EModel n=Model.Next;
-            if (IgnoreBufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
+            EModel n = Model.Next;
+            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
             SelectModel(n);
             return ExResult.ErOK;
         }
@@ -297,7 +297,7 @@ public class EView implements GuiDefs
     ExResult FileLast() {
         if (Model != null) {
             EModel n=Model.Next;
-            if (IgnoreBufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
+            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
             SwitchToModel(n);
             return ExResult.ErOK;
         }
@@ -388,19 +388,18 @@ public class EView implements GuiDefs
     }
 
     ExResult SetPrintDevice(ExState State) {
-        String [] Dev;
+        String [] Dev = {Config.PrintDevice};
 
-        strcpy(Dev, PrintDevice);
         if (State.GetStrParam(this, Dev) == 0)
             if (MView.Win.GetStr("Print to", Dev, HIST_SETUP) == 0) return ExResult.ErFAIL;
 
-        PrintDevice = Dev[0];
+        Config.PrintDevice = Dev[0];
         return ExResult.ErOK;
     }
 
     ExResult ToggleSysClipboard(ExState State) {
-        SystemClipboard = SystemClipboard ? 0 : 1;
-        Msg(S_INFO, "SysClipboard is now %s.", SystemClipboard ? "ON" : "OFF");
+    	Config.SystemClipboard = Config.SystemClipboard != 0 ? 0 : 1;
+        Msg(S_INFO, "SysClipboard is now %s.", Config.SystemClipboard != 0 ? "ON" : "OFF");
         return ExResult.ErOK;
     }
 
@@ -455,13 +454,13 @@ public class EView implements GuiDefs
     }
 
     ExResult ViewBuffers(ExState State) {
-        if (BufferList == null) {
-            BufferList = new BufferView(0, EModel.ActiveModel);
-            SwitchToModel(BufferList);
+        if (BufferView.BufferList == null) {
+            BufferView.BufferList = new BufferView(0, EModel.ActiveModel);
+            SwitchToModel(BufferView.BufferList);
         } else {
-            BufferList.UpdateList();
-            BufferList.Row = 1;
-            SwitchToModel(BufferList);
+            BufferView.BufferList.UpdateList();
+            BufferView.BufferList.Row = 1;
+            SwitchToModel(BufferView.BufferList);
             return ExResult.ErOK;
         }
         return ExResult.ErFAIL;
@@ -721,8 +720,8 @@ public class EView implements GuiDefs
         return ExResult.ErOK;
     }
 
-    int GetStrVar(int var) {
-        return Model.GetStrVar(var);
+    int GetStrVar(int var, String [] str) {
+        return Model.GetStrVar(var, str);
     }
                           
     int GetIntVar(int var, int []value) {

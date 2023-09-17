@@ -550,7 +550,7 @@ public class EBuffer extends EModel implements BufferDefs
 		assert(Row >= 0 && Row < VCount && Col >= 0);
 
 		if (SetPos(Col, Row, tabMode) == 0) return 0;
-		if (View && View.Model == this) {
+		if (View != null && View.Model == this) {
 			Row -= GetVPort().Rows / 2;
 			if (Row < 0) Row = 0;
 			Col -= GetVPort().Cols - 8;

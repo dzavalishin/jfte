@@ -9,7 +9,7 @@ public abstract class TEvent implements EventDefs
 
 
 class TKeyEvent extends TEvent {
-    long /*TKeyCode*/  Code;
+    int /*TKeyCode*/  Code;
 } ;
 
 class TMouseEvent extends TEvent{
