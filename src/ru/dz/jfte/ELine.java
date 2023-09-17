@@ -17,5 +17,6 @@ public class ELine {
 			Chars = new BinaryString(AChars);
 	}
 
+	int getCount() { return Chars.length(); } // TODO is it ok?
 
 }

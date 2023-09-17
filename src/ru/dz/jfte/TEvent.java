@@ -1,21 +1,20 @@
 package ru.dz.jfte;
 
-public abstract class TEvent {
+public abstract class TEvent implements EventDefs 
+{
+    int /*TEventMask*/  What;
+    GView View;
 
 }
 
 
 class TKeyEvent extends TEvent {
-    long /*TEventMask*/  What;
-    GView View;
     long /*TKeyCode*/  Code;
 } ;
 
 class TMouseEvent extends TEvent{
-    long /*TEventMask*/  What;
-    GView View;
-    long X;
-    long Y;
+    int X;
+    int Y;
     int Buttons;
     int Count;
     long /*TKeyCode*/  KeyMask;
@@ -23,10 +22,8 @@ class TMouseEvent extends TEvent{
 
 class TMsgEvent extends TEvent
 {
-    long /*TEventMask*/  What;
-    GView View;
     EModel Model;
-    long /*TCommand*/  Command;
+    int /*TCommand*/  Command;
     long Param1;
     Object Param2;
 } ;

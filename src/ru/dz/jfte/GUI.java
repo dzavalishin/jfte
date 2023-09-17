@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class GUI {
+public class GUI implements GuiDefs 
+{
 	static GFrame frames = null;
 	static GUI gui = null;
 

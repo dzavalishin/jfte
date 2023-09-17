@@ -35,7 +35,7 @@ public class ExModelView extends ExView
         return View.GetEventMap();
     }
 
-    int ExecCommand(int Command, ExState State) {
+    ExResult ExecCommand(ExCommands Command, ExState State) {
         return View.ExecCommand(Command, State);
     }
 
@@ -59,6 +59,7 @@ public class ExModelView extends ExView
     void RepaintStatus() {
         View.RepaintStatus();
     }
+
     
     
 }

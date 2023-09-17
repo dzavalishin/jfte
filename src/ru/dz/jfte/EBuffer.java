@@ -1,13 +1,22 @@
 package ru.dz.jfte;
 
-public class EBuffer extends EModel 
+public class EBuffer extends EModel implements BufferDefs 
 {
+	String FileName = null;
+	int Modified = 0;
+	EPoint TP = new EPoint();
+	EPoint CP = new EPoint();
+
+	EPoint BB = new EPoint(-1, -1);
+	EPoint BE = new EPoint(-1, -1);
+	EPoint PrevPos = new EPoint(-1, -1);
+	EPoint SavedPos = new EPoint(-1, -1);
 
 	EBufferFlags Flags;
 	EMode Mode;
-	int BlockMode;
-	int ExtendGrab;
-	int AutoExtend;
+	int BlockMode = bmStream;
+	boolean ExtendGrab = false;
+	boolean AutoExtend = false;
 	boolean Loaded = false;
 
 	// TODO UndoStack US;
@@ -16,23 +25,24 @@ public class EBuffer extends EModel
 	int FileOk;
 	boolean Loading = false;
 
-	int RAllocated;   // text line allocation
-	int RGap;
-	int RCount;
-	ELine [] LL;
+	int RAllocated = 0;   // text line allocation
+	int RGap = 0;
+	int RCount = 0;
+	ELine [] LL = null;
 
-	int VAllocated;   // visible lines
-	int VGap;
-	int VCount;
-	int []VV;
+	int VAllocated = 0;   // visible lines
+	int VGap = 0;
+	int VCount = 0;
+	int [] VV  = null;
+
 
 	// TODO folds
-	//int FCount;
-	//EFold FF;
+	//int FCount = 0;
+	//EFold FF = null;
 
-	EPoint Match;
-	int MatchLen;
-	int MatchCount;
+	EPoint Match = new EPoint(-1, -1);
+	int MatchLen = 0;
+	int MatchCount = 0;
 	RxMatchRes MatchRes;
 
 	/* TODO /* TODO #ifdef CONFIG_BOOKMARKS
@@ -40,7 +50,7 @@ public class EBuffer extends EModel
     EBookmark *BMarks;
 #endif */
 
-/* TODO #ifdef CONFIG_OBJ_ROUTINE
+	/* TODO #ifdef CONFIG_OBJ_ROUTINE
     RoutineList rlst;
     RoutineView *Routines;
 #endif */ 
@@ -52,7 +62,7 @@ public class EBuffer extends EModel
     char **WordList;
     int WordCount;
 #endif */
-/* TODO #ifdef CONFIG_SYNTAX_HILIT
+	/* TODO #ifdef CONFIG_SYNTAX_HILIT
     SyntaxProc HilitProc;
     int StartHilit, EndHilit;
 #endif */ 
@@ -69,30 +79,21 @@ public class EBuffer extends EModel
 	static int suspendLoads;
 	static EBuffer SSBuffer = null; // scrap buffer (clipboard)
 
+	
+	int BFI(EBuffer y, int x)  { return (y.Flags.num[x & 0xFF]); }
+	void BFI_SET(EBuffer y, int x, int v) { y.Flags.num[x & 0xFF]=v; }
+	String BFS(EBuffer y,int x) { return y.Flags.str[x & 0xFF]; }
+	
 	///////////////////////////////////////////////////////////////////////////////
 
 	EBuffer(int createFlags, EModel []ARoot, String AName)
 	//:EModel(createFlags, ARoot), TP(0,0), CP(0,0), BB(-1,-1), BE(-1,-1),
 	//PrevPos(-1, -1), SavedPos(-1, -1), Match(-1, -1)
-	
+
 	{
 		super(createFlags, ARoot);
 
-		TP(0,0), CP(0,0), BB(-1,-1), BE(-1,-1),
-		PrevPos(-1, -1), SavedPos(-1, -1), Match(-1, -1)
-		
-		FileName = 0;
-		LL = 0;
-		VV = 0;
-		FF = 0;
-		RGap = RCount = RAllocated = 0;
-		VGap = VCount = VAllocated = 0;
-		FCount = 0;
-		Modified = 0;
-		BlockMode = bmStream;
-		ExtendGrab = 0;
-		AutoExtend = 0;
-		MatchLen = MatchCount = 0;
+
 		/*/* TODO #ifdef CONFIG_UNDOREDO
 		US.Num = 0;
 		US.Data = 0;
@@ -107,7 +108,7 @@ public class EBuffer extends EModel
 		BMarks = 0;
 		#endif */
 		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		rlst.Count = 0;
+		rlst.getCount() = 0;
 		rlst.Lines = 0;
 		Routines = 0;
 		#endif */
@@ -120,8 +121,11 @@ public class EBuffer extends EModel
 		AllocVis(0);
 		Mode = GetModeForName("");
 		Flags = (Mode.Flags);
-		BFI(this, BFI_Undo) = 0;
-		BFI(this, BFI_ReadOnly) = 0;
+		// was BFI(this, BFI_Undo) = 0;
+		BFI_SET(this, BFI_Undo,  0);
+		// was BFI(
+		BFI_SET(this, BFI_ReadOnly, 0);
+		
 		Modified = 0;
 		MinRedraw = -1;
 		MaxRedraw = -1;
@@ -132,7 +136,7 @@ public class EBuffer extends EModel
 		HilitProc = 0;
 		if (Mode && Mode.fColorize)
 			HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
-		#endif */ */
+		#endif */ 
 		InsertLine(CP,0,0); /* there should always be at least one line in the edit buffer */
 		Flags = (Mode.Flags);
 		Modified = 0;
@@ -159,7 +163,7 @@ public class EBuffer extends EModel
 			BMCount = 0;
 		}
 		#endif */
-		/* TODO #ifdef CONFIG_OBJ_ROUTINE
+	/* TODO #ifdef CONFIG_OBJ_ROUTINE
 		rlst.Lines = 0;
 		DeleteRelated();
 		#endif 
@@ -190,7 +194,7 @@ public class EBuffer extends EModel
 		WordList = 0;
 		#endif */
 		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		rlst.Count = 0;
+		rlst.getCount() = 0;
 		if (rlst.Lines) {
 			free(rlst.Lines);
 			rlst.Lines = 0;
@@ -204,8 +208,6 @@ public class EBuffer extends EModel
 		/* TODO #ifdef CONFIG_UNDOREDO
 		FreeUndo();
 		#endif */
-		FCount = 0;
-		FF = null;
 
 		return 0;
 	}
@@ -227,12 +229,12 @@ public class EBuffer extends EModel
 	#endif */
 
 	int Modify() {
-		if (BFI(this, BFI_ReadOnly)) {
+		if (BFI(this, BFI_ReadOnly)!=0) {
 			Msg(S_ERROR, "File is read-only.");
 			return 0;
 		}
 		if (Modified == 0) {
-			struct stat StatBuf;
+			//struct stat StatBuf;
 
 			if ((FileName != 0) && FileOk && (stat(FileName, &StatBuf) == 0)) {
 				if (FileStatus.st_size != StatBuf.st_size ||
@@ -271,7 +273,7 @@ public class EBuffer extends EModel
 		return 0;
 	}
 
-	int InsertLine(EPoint Pos, int ACount, char *AChars) {
+	int InsertLine(EPoint Pos, int ACount, String AChars) {
 		if (InsLine(Pos.Row, 0) == 0) return 0;
 		if (InsText(Pos.Row, Pos.Col, ACount, AChars) == 0) return 0;
 		return 1;
@@ -288,12 +290,12 @@ public class EBuffer extends EModel
 					M.Row += Rows;
 				break;
 			case bmStream:
-				if (Cols) {
+				if (Cols!=0) {
 					if (M.Row == Row)
 						if (M.Col >= Col)
 							M.Col += Cols;
 				}
-				if (Rows) {
+				if (Rows!=0) {
 					if (M.Row >= Row)
 						M.Row += Rows;
 				}
@@ -311,7 +313,7 @@ public class EBuffer extends EModel
 						M.Row -= Rows;
 				break;
 			case bmStream:
-				if (Cols) {
+				if (Cols!=0) {
 					if (M.Row == Row)
 						if (M.Col >= Col)
 							if (M.Col < Col + Cols)
@@ -319,7 +321,7 @@ public class EBuffer extends EModel
 							else
 								M.Col -= Cols;
 				}
-				if (Rows) {
+				if (Rows!=0) {
 					if (M.Row >= Row)
 						if (M.Row < Row + Rows) {
 							M.Row = Row;
@@ -395,7 +397,7 @@ public class EBuffer extends EModel
 		}
 
 		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		for (int i = 0; i < rlst.Count && rlst.Lines; i++) {
+		for (int i = 0; i < rlst.getCount() && rlst.Lines; i++) {
 			EPoint M;
 
 			M.Col = 0;
@@ -405,14 +407,15 @@ public class EBuffer extends EModel
 		}
 		#endif */
 
+		/* TODO FF
 		for (int f = 0; f < FCount; f++) {
-			EPoint M;
+			EPoint M = new EPoint();
 
 			M.Col = 0;
 			M.Row = FF[f].line;
 			UpdateMark(M, Type, Row, Col, Rows, Cols);
 			FF[f].line = M.Row;
-		}
+		} */
 
 		/* TODO #ifdef CONFIG_BOOKMARKS
 		for (int b = 0; b < BMCount; b++)
@@ -420,14 +423,14 @@ public class EBuffer extends EModel
 		#endif */
 
 		if (OldBB.Row != BB.Row) {
-			int MinL = Min(OldBB.Row, BB.Row);
-			int MaxL = Max(OldBB.Row, BB.Row);
+			int MinL = Math.min(OldBB.Row, BB.Row);
+			int MaxL = Math.max(OldBB.Row, BB.Row);
 			if (MinL != -1 && MaxL != -1)  
 				Draw(MinL, MaxL);
 		}
 		if (OldBE.Row != BE.Row) {
-			int MinL = Min(OldBE.Row, BE.Row);
-			int MaxL = Max(OldBE.Row, BE.Row);
+			int MinL = Math.min(OldBE.Row, BE.Row);
+			int MaxL = Math.max(OldBE.Row, BE.Row);
 			if (MinL != -1 && MaxL != -1)  
 				Draw(MinL, MaxL);
 		}
@@ -460,12 +463,12 @@ public class EBuffer extends EModel
 		FileOk = 0;
 
 		FileName = AFileName;
-		Mode = 0;
-		if (AMode)
+		Mode = null;
+		if (AMode != null)
 			Mode = FindMode(AMode);
-		if (Mode == 0)
+		if (Mode == null)
 			Mode = GetModeForName(AFileName);
-		assert(Mode != 0);
+		assert(Mode != null);
 		Flags = (Mode.Flags);
 		/* TODO #ifdef CONFIG_SYNTAX_HILIT
 		HilitProc = 0;
@@ -473,7 +476,7 @@ public class EBuffer extends EModel
 			HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
 		#endif */
 		UpdateTitle();
-		return FileName?1:0;
+		return FileName != null?1:0;
 	}
 
 	int SetPos(int Col, int Row, int tabMode) {
@@ -488,7 +491,7 @@ public class EBuffer extends EModel
 		#endif */
 		if (AutoExtend) {
 			BlockExtendBegin();
-			AutoExtend = 1;
+			AutoExtend = true;
 		}
 		PrevPos = CP;
 		PrevPos.Row = (CP.Row < VCount) ? VToR(CP.Row) : (CP.Row - VCount + RCount);
@@ -496,7 +499,7 @@ public class EBuffer extends EModel
 		CP.Col = Col;
 		if (AutoExtend) {
 			BlockExtendEnd();
-			AutoExtend = 1;
+			AutoExtend = true;
 		}
 		//        if (View && View.Model == this ) {
 		//            View.GetVPort();
@@ -587,12 +590,12 @@ public class EBuffer extends EModel
 	int LineLen(int Row) {
 		assert(Row >= 0 && Row < RCount);
 		ELine L = RLine(Row);
-		return ScreenPos(L, L.Count);
+		return ScreenPos(L, L.getCount());
 	}
 
 	int LineChars(int Row) {
 		assert(Row >= 0 && Row < RCount);
-		return RLine(Row).Count;
+		return RLine(Row).getCount();
 	}
 
 	int DelLine(int Row, int DoMark) {
@@ -618,13 +621,13 @@ public class EBuffer extends EModel
 
 		/* TODO #ifdef CONFIG_UNDOREDO
 		if (BFI(this, BFI_Undo) == 1) {
-			if (PushUData(RLine(Row).Chars, RLine(Row).Count) == 0) return 0;
-			if (PushULong(RLine(Row).Count) == 0) return 0;
+			if (PushUData(RLine(Row).Chars, RLine(Row).getCount()) == 0) return 0;
+			if (PushULong(RLine(Row).getCount()) == 0) return 0;
 			if (PushULong(Row) == 0) return 0;
 			if (PushUChar(ucDelLine) == 0) return 0;
 		}
 		#endif */
-		if (DoMark)
+		if (DoMark!=0)
 			UpdateMarker(umDelete, Row, 0, 1, 0);
 		//puts("Here");
 
@@ -636,8 +639,8 @@ public class EBuffer extends EModel
 
 		GapSize = RAllocated - RCount;
 
-		delete LL[RGap + GapSize];
-		LL[RGap + GapSize] = 0;
+		//delete LL[RGap + GapSize];
+		LL[RGap + GapSize] = null;
 		RCount--;
 		GapSize++;
 		if (RAllocated - RAllocated / 2 > RCount) {
@@ -672,7 +675,7 @@ public class EBuffer extends EModel
 		if (Row < 0) return 0;
 		if (Row > RCount) return 0;
 		if (Modify() == 0) return 0;
-		if (DoAppend) {
+		if (DoAppend!=0) {
 			Row++;
 		}
 		if (Row < RCount) {
@@ -684,7 +687,7 @@ public class EBuffer extends EModel
 		} else {
 			VLine = VCount;
 		}
-		L = new ELine(0, (char *)0);
+		L = new ELine();
 		if (L == 0) return 0;
 		/* TODO #ifdef CONFIG_UNDOREDO
 		if (BFI(this, BFI_Undo) == 1) {
@@ -741,9 +744,9 @@ public class EBuffer extends EModel
 		L = RLine(Row);
 
 		if (Ofs < 0) return 0;
-		if (Ofs >= L.Count) return 0;
-		if (Ofs + ACount >= L.Count)
-			ACount = L.Count - Ofs;
+		if (Ofs >= L.getCount()) return 0;
+		if (Ofs + ACount >= L.getCount())
+			ACount = L.getCount() - Ofs;
 		if (ACount == 0) return 1;
 
 		if (Modify() == 0) return 0;
@@ -758,17 +761,17 @@ public class EBuffer extends EModel
 		}
 		#endif */
 
-		if (L.Count > Ofs + ACount)
-			memmove(L.Chars + Ofs, L.Chars + Ofs + ACount, L.Count - Ofs - ACount);
-		L.Count -= ACount;
-		if (L.Allocate(L.Count) == 0) return 0;
+		if (L.getCount() > Ofs + ACount)
+			memmove(L.Chars + Ofs, L.Chars + Ofs + ACount, L.getCount() - Ofs - ACount);
+		L.getCount() -= ACount;
+		if (L.Allocate(L.getCount()) == 0) return 0;
 		Draw(Row, Row);
 		Hilit(Row);
 		//   printf("OK\n");
 		return 1;
 	}
 
-	int InsChars(int Row, int Ofs, int ACount, char *Buffer) {
+	int InsChars(int Row, int Ofs, int ACount, String Buffer) {
 		ELine L;
 
 		//   printf("InsChars: %d:%d %d\n", Row, Ofs, ACount);
@@ -777,7 +780,7 @@ public class EBuffer extends EModel
 		L = RLine(Row);
 
 		if (Ofs < 0) return 0;
-		if (Ofs > L.Count) return 0;
+		if (Ofs > L.getCount()) return 0;
 		if (ACount == 0) return 1;
 
 		if (Modify() == 0) return 0;
@@ -790,14 +793,14 @@ public class EBuffer extends EModel
 			if (PushUChar(ucInsChars) == 0) return 0;
 		}
 		#endif */
-		if (L.Allocate(L.Count + ACount) == 0) return 0;
-		if (L.Count > Ofs)
-			memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.Count - Ofs);
+		if (L.Allocate(L.getCount() + ACount) == 0) return 0;
+		if (L.getCount() > Ofs)
+			memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
 		if (Buffer == 0) 
 			memset(L.Chars + Ofs, ' ', ACount);
 		else
 			memmove(L.Chars + Ofs, Buffer, ACount);
-		L.Count += ACount;
+		L.getCount() += ACount;
 		Draw(Row, Row);
 		Hilit(Row);
 		// printf("OK\n");
@@ -811,7 +814,7 @@ public class EBuffer extends EModel
 		assert(Row >= 0 && Row < RCount && Col >= 0);
 		L = RLine(Row);
 		Ofs = CharOffset(L, Col);
-		if (Ofs >= L.Count)
+		if (Ofs >= L.getCount())
 			return 1;
 		if (L.Chars[Ofs] != '\t')
 			return 1;
@@ -826,14 +829,14 @@ public class EBuffer extends EModel
 		return 1;
 	}
 
-	int ChgChars(int Row, int Ofs, int ACount, char * /*Buffer*/) {
+	int ChgChars(int Row, int Ofs, int ACount, String Buffer) {
 		ELine L;
 
 		assert(Row >= 0 && Row < RCount && Ofs >= 0);
 		L = RLine(Row);
 
 		if (Ofs < 0) return 0;
-		if (Ofs > L.Count) return 0;
+		if (Ofs > L.getCount()) return 0;
 		if (ACount == 0) return 1;
 
 		if (Modify() == 0) return 0;
@@ -884,7 +887,7 @@ public class EBuffer extends EModel
 		return 1;
 	}
 
-	int InsText(int Row, int Col, int ACount, char *ABuffer, int DoMark) {
+	int InsText(int Row, int Col, int ACount, String ABuffer, int DoMark) {
 		int B, L;
 
 		//   printf("InsText: %d:%d %d\n", Row, Col, ACount);
@@ -892,10 +895,10 @@ public class EBuffer extends EModel
 		if (ACount == 0) return 1;
 		if (Modify() == 0) return 0;
 
-		if (DoMark) UpdateMarker(umInsert, Row, Col, 0, ACount);
+		if (DoMark!=0) UpdateMarker(umInsert, Row, Col, 0, ACount);
 		L = LineLen(Row);
 		if (L < Col) {
-			if (InsChars(Row, RLine(Row).Count, Col - L, 0) == 0)
+			if (InsChars(Row, RLine(Row).getCount(), Col - L, 0) == 0)
 				return 0;
 		} else
 			if (UnTabPoint(Row, Col) == 0) return 0;
@@ -910,7 +913,7 @@ public class EBuffer extends EModel
 
 		L = LineLen(Row);
 		if (L < Length)
-			if (InsChars(Row, RLine(Row).Count, Length - L, 0) == 0)
+			if (InsChars(Row, RLine(Row).getCount(), Length - L, 0) == 0)
 				return 0;
 		return 1;
 	}
@@ -923,7 +926,7 @@ public class EBuffer extends EModel
 		if (BFI(this, BFI_ReadOnly) == 1)
 			return 0;
 
-		L = ScreenPos(Line, Line.Count);
+		L = ScreenPos(Line, Line.getCount());
 		if (LCol >= L) return 1;
 		if (ACount == -1) ACount = L - LCol;
 		if (ACount + LCol > L) ACount = L - LCol;
@@ -931,7 +934,7 @@ public class EBuffer extends EModel
 		assert(ACount > 0);
 
 		B = Ofs = CharOffset(Line, LCol);
-		if (Ofs < Line.Count && Line.Chars[Ofs] == '\t') {
+		if (Ofs < Line.getCount() && Line.Chars[Ofs] == '\t') {
 			Pos = ScreenPos(Line, Ofs);
 			if (Pos < LCol) {
 				TPos = NextTab(Pos, BFI(this, BFI_TabSize));
@@ -944,7 +947,7 @@ public class EBuffer extends EModel
 			}
 		}
 		C = Ofs = CharOffset(Line, LCol + ACount);
-		if (Ofs < Line.Count && Line.Chars[Ofs] == '\t') {
+		if (Ofs < Line.getCount() && Line.Chars[Ofs] == '\t') {
 			Pos = ScreenPos(Line, Ofs);
 			if (Pos < LCol + ACount) {
 				if (InsText(Row, Col, LCol + ACount - Pos, 0) == 0)
@@ -991,7 +994,7 @@ public class EBuffer extends EModel
 				P = CharOffset(RLine(Row), Col);
 				L = LineLen(Row);
 
-				if (InsText(Row + 1, 0, RLine(Row).Count - P, RLine(Row).Chars + P, 0) == 0) return 0;
+				if (InsText(Row + 1, 0, RLine(Row).getCount() - P, RLine(Row).Chars + P, 0) == 0) return 0;
 				if (DelText(Row, Col, L - Col, 0) == 0) return 0;
 			}
 		}
@@ -1014,10 +1017,10 @@ public class EBuffer extends EModel
 			if (ExposeRow(Row + 1) == 0) return 0;
 		}
 		VLine = RToV(Row);
-		if (Col == 0 && RLine(Row).Count == 0) {
+		if (Col == 0 && RLine(Row).getCount() == 0) {
 			if (DelLine(Row, 1) == 0) return 0;
 		} else {
-			if (InsText(Row, Col, RLine(Row + 1).Count, RLine(Row + 1).Chars, 0) == 0) return 0;
+			if (InsText(Row, Col, RLine(Row + 1).getCount(), RLine(Row + 1).Chars, 0) == 0) return 0;
 			if (DelLine(Row + 1, 0) == 0) return 0;
 			UpdateMarker(umJoinLine, Row, Col, 0, 0);
 		}
@@ -1058,7 +1061,7 @@ public class EBuffer extends EModel
 
 
 
-
+	/*
 	int ScreenPos(ELine L, int Offset) {
 		int ExpandTabs = BFI(this, BFI_ExpandTabs);
 		int TabSize = BFI(this, BFI_TabSize);
@@ -1092,7 +1095,9 @@ public class EBuffer extends EModel
 			return Pos;
 		}
 	}
+	*/
 
+	/*
 	int CharOffset(ELine L, int ScreenPos) {
 		int ExpandTabs = BFI(this, BFI_ExpandTabs);
 		int TabSize = BFI(this, BFI_TabSize);
@@ -1118,9 +1123,10 @@ public class EBuffer extends EModel
 			return Ofs + ScreenPos - Pos;
 		}
 	}
-
+	*/
+	
 	int Allocate(int ACount) {
-		ELine L = (ELine *) realloc(LL, sizeof(ELine) * (ACount + 1));
+		ELine L = (ELine ) realloc(LL, sizeof(ELine) * (ACount + 1));
 		if (L == 0 && ACount != 0)
 			return 0;
 		RAllocated = ACount;
@@ -1156,9 +1162,9 @@ public class EBuffer extends EModel
 	}
 
 	int AllocVis(int ACount) {
-		int *V;
+		int []V;
 
-		V = (int *) realloc(VV, sizeof(int) * (ACount + 1));
+		V = (int []) realloc(VV, sizeof(int) * (ACount + 1));
 		if (V == 0 && ACount != 0) return 0;
 		VAllocated = ACount;
 		VV = V;
@@ -1242,29 +1248,29 @@ public class EBuffer extends EModel
 	}
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	ELine RLine(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		int N = GapLine(No, RGap, RCount, RAllocated);
@@ -1275,6 +1281,7 @@ public class EBuffer extends EModel
 		//#endif */
 		return LL[GapLine(No, RGap, RCount, RAllocated)];
 	}
+	
 	void RLine(int No, ELine L) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No >= 0))) printf("Set No = %d\n", No);
@@ -1282,6 +1289,7 @@ public class EBuffer extends EModel
 		// TODO #endif */
 		LL[GapLine(No, RGap, RCount, RAllocated)] = L;
 	}
+	
 	int Vis(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (No < 0 || No >= VCount) {
@@ -1291,6 +1299,7 @@ public class EBuffer extends EModel
 		// TODO #endif */
 		return VV[GapLine(No, VGap, VCount, VAllocated)];
 	}
+	
 	void Vis(int No, int V) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (No < 0 || No >= VCount) {
@@ -1300,6 +1309,7 @@ public class EBuffer extends EModel
 		//#endif */
 		VV[GapLine(No, VGap, VCount, VAllocated)] = V;
 	}
+	
 	ELine VLine(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No < VCount) && (No >= 0))) {
@@ -1311,6 +1321,7 @@ public class EBuffer extends EModel
 		//#endif */
 		return RLine(No + Vis(No));
 	}
+	
 	void VLine(int No, ELine L) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No >= 0))) {
@@ -1332,5 +1343,29 @@ public class EBuffer extends EModel
 		//#endif */
 		return No + Vis(No);
 	}
-	
+
+
+
+
+
+
+
+
+
+	EEditPort GetViewVPort(EView V) {
+		return (EEditPort )V.Port;
+	}
+
+	EEditPort GetVPort() {
+		return (EEditPort)View.Port;
+	}
+
+
+	void printf(String f, Object... o)
+	{
+		System.out.printf(f, o);
+	}
+
 }
+
+

@@ -75,13 +75,13 @@ public class ExView implements Closeable
         Repaint();
     }
 
-    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
+    int ConPutBox(int X, int Y, int W, int H, int /*TCell*/ Cell) {
         if (Win != null)
             return Win.ConPutBox(X, Y, W, H, Cell);
         return -1;
     }
 
-    int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
+    int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) {
         if (Win != null)
             return Win.ConScroll(Way, X, Y, W, H, Fill, Count);
         return -1;
@@ -93,6 +93,33 @@ public class ExView implements Closeable
         return -1;
     }
 
+	public int ConWidth() {
+	    int []X= {0};
+	    int []Y= {0};
+	    
+	    if (Win != null)
+	    {
+	    	Win.ConQuerySize(X, Y);
+	    	return X[0];
+	    }
+	    
+		throw new RuntimeException("Win.ConQuerySize");
+	}
+
+	public int ConHeight() {
+	    int []X= {0};
+	    int []Y= {0};
+	    
+	    if (Win != null)
+	    {
+	    	Win.ConQuerySize(X, Y);
+	    	return Y[0];
+	    }
+	    
+		throw new RuntimeException("Win.ConQuerySize");
+	}
+    
+    
     int ConSetCursorPos(int X, int Y) {
         if (Win != null)
             return Win.ConSetCursorPos(X, Y);
