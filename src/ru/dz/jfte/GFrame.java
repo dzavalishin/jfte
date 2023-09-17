@@ -216,7 +216,7 @@ public class GFrame {
 	    else if (c == null)
 	        c = Active = Top;
 	    else
-	        if (back!=null) {
+	        if (back!=0) {
 	            Active = Active.Prev;
 	        } else {
 	            Active = Active.Next;

@@ -3,11 +3,11 @@ package ru.dz.jfte;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class GxView extends GView implements Closeable 
+public class GxView extends GView implements Closeable, EventDefs, KeyDefs, ModeDefs 
 {
     ExView Top;
     ExView Bottom;
-    int MouseCaptured;
+    boolean MouseCaptured = false;
     
     ExView GetStatusContext() { if (Top != null) return Top.GetStatusContext(); else return null; }
     ExView GetViewContext() { if (Top != null) return Top.GetViewContext(); else return null; }
@@ -19,7 +19,6 @@ public class GxView extends GView implements Closeable
     	super(Parent, -1, -1); 
     
         Top = Bottom = null;
-        MouseCaptured = 0;
     }
 
     public void close() throws IOException {
@@ -83,10 +82,10 @@ public class GxView extends GView implements Closeable
         return null;
     }
 
-    int ExecCommand(int Command, ExState State) {
+    ExResult ExecCommand(int Command, ExState State) {
         if (Top != null)
             return Top.ExecCommand(Command, State);
-        return 0;
+        return ExResult.ErFAIL;
     }
 
     int BeginMacro() {
@@ -253,11 +252,10 @@ public class GxView extends GView implements Closeable
 
     long /*TKeyCode*/ GetChar(String Prompt) {
         int rc;
-        ExKey key;
         long /*TKeyCode*/K = 0;
 
-        key = new ExKey(Prompt);
-        if (key == 0)
+        ExKey key = new ExKey(Prompt);
+        if (key == null)
             return 0;
 
         PushView(key);
@@ -267,7 +265,7 @@ public class GxView extends GView implements Closeable
 
         if (rc == 1)
             K = key.Key;
-        delete key;
+        //delete key;
 
         return K;
     }
@@ -275,7 +273,7 @@ public class GxView extends GView implements Closeable
     int IncrementalSearch(EView View) {
         int rc;
         ExISearch search;
-        EBuffer B = 0;
+        EBuffer B = null;
 
         if (View.GetContext() != CONTEXT_FILE)
             return 0;
@@ -302,8 +300,6 @@ public class GxView extends GView implements Closeable
         ExASCII ascii;
 
         ascii = new ExASCII();
-        if (ascii == 0)
-            return 0;
 
         PushView(ascii);
         rc = Execute();

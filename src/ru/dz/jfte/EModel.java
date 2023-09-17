@@ -35,7 +35,7 @@ public class EModel implements ModeDefs
 	private static int lastid = -1;
 	int GetNewModelID(EModel B) {
 
-		if (ReassignModelIds) lastid = 0;   // 0 is used by buffer list
+		if (0 !=Config.ReassignModelIds) lastid = 0;   // 0 is used by buffer list
 		while (FindModelID(B, ++lastid) != 0) /* */;
 
 		return lastid;
