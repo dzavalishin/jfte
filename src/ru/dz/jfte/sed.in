@@ -1,0 +1,19 @@
+s/(void)/()/g
+s/->/./g
+s/.*\#include.*//g
+s/const/final/g
+
+s/uint32/int/g
+s/int32/int/g
+s/uint16/int/g
+s/int16/int/g
+
+s/uint8/byte/g
+s/int18/byte/g
+
+s/uint/int/g
+s/bool/boolean/g
+
+s/typedef struct/class/g
+s/NULL/null/g
+
