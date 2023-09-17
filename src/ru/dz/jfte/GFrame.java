@@ -6,20 +6,26 @@ public class GFrame {
     GFramePeer Peer;
     String Menu;
 
-	
+
+    static boolean ShowVScroll = true;
+    static boolean ShowHScroll = true;
+    static boolean ShowMenuBar = true;
+    static boolean ShowToolBar = false;
+    static boolean HaveGUIDialogs = false; // no gui dialogs in text gui
+    
 	
 	GFrame(int XSize, int YSize) {
 	    Menu = null;
-	    if (frames == 0) {
-	        frames = Prev = Next = this;
+	    if (GUI.frames == null) {
+	    	GUI.frames = Prev = Next = this;
 	    } else {
-	        Next = frames.Next;
-	        Prev = frames;
-	        frames.Next.Prev = this;
-	        frames.Next = this;
-	        frames = this;
+	        Next = GUI.frames.Next;
+	        Prev = GUI.frames;
+	        GUI.frames.Next.Prev = this;
+	        GUI.frames.Next = this;
+	        GUI.frames = this;
 	    }
-	    Top = Active = 0;
+	    Top = Active = null;
 	    Peer = new GFramePeer(this, XSize, YSize);
 	}
 
@@ -58,11 +64,11 @@ public class GFrame {
 	}
 
 	int ConSplitView(GView view, GView newview) {
-	    int dmy;
+	    int [] dmy;
 	    
 	    newview.Parent = this;
 	    newview.Peer.wX = 0;
-	    ConQuerySize(&newview.Peer.wW, &dmy);
+	    ConQuerySize(&newview.Peer.wW, dmy);
 	    if (ShowVScroll) 
 	        newview.Peer.wW--;
 	    newview.Peer.wY = view.Peer.wY + view.Peer.wH / 2;
@@ -87,27 +93,27 @@ public class GFrame {
 	}
 
 	int AddView(GView view) {
-	    if (Active != 0) {
+	    if (Active != null) {
 	        return ConSplitView(Active, view);
 	    } else {
-	        int W, H;
+	        int [] W = {0}, H = {0};
 	        
 	        view.Parent = this;
-	        view.Prev = view.Next = 0;
+	        view.Prev = view.Next = null;
 	        
 	        view.Peer.wX = 0;
 	        if (ShowMenuBar)
 	            view.Peer.wY = 1;
 	        else
 	            view.Peer.wY = 0;
-	        ConQuerySize(&W, &H);
+	        ConQuerySize(W, H);
 	        if (ShowMenuBar)
-	            H--;
+	            H[0]--;
 	        if (ShowVScroll)
-	            W--;
+	            W[0]--;
 	        if (ShowHScroll)
-	            H--;
-	        view.ConSetSize(W, H);
+	            H[0]--;
+	        view.ConSetSize(W[0], H[0]);
 	        InsertView(Top, view);
 	        return 0;
 	    }
@@ -140,7 +146,7 @@ public class GFrame {
 	    
 	    if (ShowMenuBar)
 	        DrawMenuBar();
-	    while (v) {
+	    while (v != null) {
 	        v.Repaint();
 	        if (ShowVScroll || ShowHScroll) {
 	            v.Peer.DrawScrollBar();
@@ -164,20 +170,20 @@ public class GFrame {
 	        view.Prev = view.Next = view;
 	        Top = view;
 	    }
-	    if (Active == 0) {
+	    if (Active == null) {
 	        Active = view;
 	        Active.Activate(1);
 	    }
 	}
 
 	void RemoveView(GView view) {
-	    if (!view) return ;
+	    if (view == null) return ;
 	    
 	    if (Active == view)
 	        Active.Activate(0);
 	    if (view.Next == view) {
-	        Top = Active = 0;
-	        delete this;
+	        Top = Active = null;
+	        close();
 	    } else {
 	        view.Next.Prev = view.Prev;
 	        view.Prev.Next = view.Next;
@@ -201,39 +207,39 @@ public class GFrame {
 	void SelectNext(int back) {
 	    GView c = Active;
 	    
-	    if (c == 0 && Top == 0)
+	    if (c == null && Top == null)
 	        return;
 	    
-	    if (FocusCapture != 0)
+	    if (FocusCapture != null)
 	        return ;
 	    
-	    else if (c == 0)
+	    else if (c == null)
 	        c = Active = Top;
 	    else
-	        if (back) {
+	        if (back!=null) {
 	            Active = Active.Prev;
 	        } else {
 	            Active = Active.Next;
 	        }
 	    if (c != Active) {
-	        if (c)
+	        if (c!=null)
 	            c.Activate(0);
-	        if (Active) 
+	        if (Active!=null) 
 	            Active.Activate(1);
 	    }
 	}
 
 	int SelectView(GView view) {
-	    if (Top == 0)
+	    if (Top == null)
 	        return 0;
 	    
 	    if (FocusCapture != 0)
 	        view = view;
 	    
-	    if (Active)
+	    if (Active!=null)
 	        Active.Activate(0);
 	    Active = view;
-	    if (Active)
+	    if (Active!=null)
 	        Active.Activate(1);
 	    return 1;
 	}
@@ -244,7 +250,7 @@ public class GFrame {
 	    
 	    
 	    V = Top;
-	    while (V) {
+	    while (V!=null) {
 	        count++;
 	        if (V == Top) break;
 	    }
@@ -253,7 +259,7 @@ public class GFrame {
 	        return;
 	    }
 	    
-	    if (!Top)
+	    if (Top==null)
 	        return;
 	    
 	    if (ShowVScroll)
@@ -305,7 +311,11 @@ public class GFrame {
 	}
 
 	void Activate() {
-	    frames = this;
+		GUI.frames = this;
+	}
+
+	boolean isLastFrame() {
+	    return (this == Next && GUI.frames == this);
 	}
 	
 }

@@ -13,13 +13,14 @@ public class GView {
     GViewPeer Peer;
     int Result;
 
+    static GView FocusCapture = null;
 
     
     GView(GFrame parent, int XSize, int YSize) {
         Parent = parent;
-        Prev = Next = 0;
+        Prev = Next = null;
         Peer = new GViewPeer(this, XSize, YSize);
-        if (Parent)
+        if (Parent != null)
             Parent.AddView(this);
     }
 
@@ -30,37 +31,37 @@ public class GView {
     } */
 
     int ConClear() {
-        int W, H;
+        int [] W, H;
         TDrawBuffer B;
         
-        ConQuerySize(&W, &H);
+        ConQuerySize(W, H);
         MoveChar(B, 0, W, ' ', 0x07, 1);
         ConSetBox(0, 0, W, H, B[0]);
         return 1;
     }
 
-    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
+    int ConPutBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return Peer.ConPutBox(X, Y, W, H, Cell);
     }
 
-    int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
+    int ConGetBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return Peer.ConGetBox(X, Y, W, H, Cell);
     }
 
-    int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
+    int ConPutLine(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return Peer.ConPutLine(X, Y, W, H, Cell);
     }
 
-    int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
+    int ConSetBox(int X, int Y, int W, int H, long /*TCell*/ Cell) {
         return Peer.ConSetBox(X, Y, W, H, Cell);
     }
 
-    int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
+    int ConScroll(int Way, int X, int Y, int W, int H, long /*TAttr*/ Fill, int Count) {
         return Peer.ConScroll(Way, X, Y, W, H, Fill, Count);
     }
 
     int ConSetSize(int X, int Y) {
-        if (Peer.ConSetSize(X, Y))
+        if (Peer.ConSetSize(X, Y) != 0)
             Resize(X, Y);
         else
             return 0;
@@ -141,7 +142,7 @@ public class GView {
         int NewResult;
         int didFocus = 0;
         
-        if (FocusCapture == 0) {
+        if (FocusCapture == null) {
             if (CaptureFocus(1) == 0) return -1;
             didFocus = 1;
         } else
@@ -157,7 +158,7 @@ public class GView {
         return NewResult;
     }
 
-    int IsActive() {
+    boolean IsActive() {
         return (Parent.Active == this);
     }
 

@@ -47,19 +47,19 @@ public class GViewPeer {
             FocusCapture = 0;
     } */
 
-    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
+    int ConPutBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return ::ConPutBox(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
+    int ConGetBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return ::ConGetBox(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
+    int ConPutLine(int X, int Y, int W, int H, long /*PCell*/ Cell) {
         return ::ConPutLine(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConSetBox(int X, int Y, int W, int H, TCell Cell) {
+    int ConSetBox(int X, int Y, int W, int H, long /*TCell*/ Cell) {
         return ::ConSetBox(X + wX, Y + wY, W, H, Cell);
     }
 

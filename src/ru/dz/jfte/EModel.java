@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class EModel {
+public class EModel implements ModeDefs 
+{
     EModel [] Root;   // root ptr of this list
     EModel Next;    // next model
     EModel Prev;    // prev model
@@ -27,8 +28,8 @@ public class EModel {
        return null;
    }
 
+   private static int lastid = -1;
    int GetNewModelID(EModel B) {
-       static int lastid = -1;
 
        if (ReassignModelIds) lastid = 0;   // 0 is used by buffer list
        while (FindModelID(B, ++lastid) != 0) /* */;
@@ -39,14 +40,14 @@ public class EModel {
    EModel(int createFlags, EModel [] ARoot) {
        Root = ARoot;
 
-       if (Root) {
-           if (*Root) {
+       if (Root!=null) {
+           if (Root[0]!=null) {
                if (createFlags & cfAppend) {
-                   Prev = *Root;
-                   Next = (*Root).Next;
+                   Prev = Root[0];
+                   Next = (Root[0]).Next;
                } else {
-                   Next = *Root;
-                   Prev = (*Root).Prev;
+                   Next = Root[0];
+                   Prev = (Root[0]).Prev;
                }
                Prev.Next = this;
                Next.Prev = this;
@@ -54,10 +55,10 @@ public class EModel {
                Prev = Next = this;
 
            if (!(createFlags & cfNoActivate))
-               *Root = this;
+               Root[0] = this;
        } else
            Prev = Next = this;
-       View = 0;
+       View = null;
        ModelNo = -1;
        ModelNo = GetNewModelID(this);
    }
@@ -76,23 +77,24 @@ public class EModel {
        if (Next != this) {
            Prev.Next = Next;
            Next.Prev = Prev;
-           if (*Root == this)
-               *Root = Next;
+           if (Root[0] == this)
+               Root[0] = Next;
        } else
-           *Root = 0;
+           Root[0] = 0;
    } */
 
    void AddView(EView V) {
        RemoveView(V);
-       if (V) 
+       if (V!=null) 
            V.NextView = View;
        View = V;
    }
 
    void RemoveView(EView V) {
+	   /* TODO
        EView **X = &View;
        
-       if (!V) return;
+       if (V==null) return;
        while (*X) {
            if ((*X) == V) {
                *X = V.NextView;
@@ -100,6 +102,7 @@ public class EModel {
            }
            X = (&(*X).NextView);
        }
+       */
    }
 
    void SelectView(EView V) {
@@ -111,22 +114,18 @@ public class EModel {
        return null;
    }
 
-   int ExecCommand(int Command, ExState State) {
-       return ErFAIL;
+   ExResult ExecCommand(int Command, ExState State) {
+       return ExResult.ErFAIL;
    }
 
-   void HandleEvent(TEvent &/*Event*/) {
+   void HandleEvent(TEvent Event) {
    }
 
-   void Msg(int level, const char *s, ...) {
-       va_list ap;
-       
-       if (View == 0)
+   void Msg(int level, String s, Object... o) {       
+       if (View == null)
            return;
        
-       va_start(ap, s);
-       vsprintf(msgbuftmp, s, ap);
-       va_end(ap);
+       vsprintf(msgbuftmp, s, o);
        
        if (level != S_BUSY)
            View.SetMsg(msgbuftmp);
@@ -147,7 +146,7 @@ public class EModel {
    String GetPath() { return null; }
    String GetInfo() { return null; }
    void GetTitle(String [] ATitle, String [] ASTitle) { ATitle[0] = null; ASTitle[0] = null; }
-   void NotifyPipe(int /*PipeId*/) { }
+   void NotifyPipe(int PipeId) { }
 
    void NotifyDelete(EModel Deleted) {
    }
@@ -156,24 +155,23 @@ public class EModel {
 
 
    void UpdateTitle() {
-       char Title[256] = ""; //fte: ";
-       char STitle[256] = ""; //"fte: ";
+       String Title[] = {null}; //fte: ";
+       String STitle[] = {null}; //"fte: ";
        EView V;
        
-       GetTitle((char *)(Title + 0), sizeof(Title) - 0,
-                (char *)(STitle + 0), sizeof(STitle) - 0);
+       GetTitle(Title,STitle);
 
        V = View;
-       while (V) {
-           V.MView.Win.UpdateTitle(Title, STitle);
+       while (V != null) {
+           V.MView.Win.UpdateTitle(Title[0], STitle[0]);
            V = V.NextView;
        }
    }
 
-   int GetStrVar(int var, String [] str, int buflen) {
+   int GetStrVar(int var, String [] str) {
        switch (var) {
        case mvCurDirectory:
-           return GetDefaultDirectory(this, str, buflen);
+           return GetDefaultDirectory(this, str);
        }
        return 0;
    }

@@ -10,7 +10,7 @@ public class EView {
     String CurMsg;
 
 
-
+    static EView ActiveView = null;
     
     EView(EModel AModel) {
         if (ActiveView != null) {
@@ -22,11 +22,11 @@ public class EView {
             Prev = Next = this;
         ActiveView = this;
         Model = AModel;
-        NextView = 0;
-        Port = 0;
-        MView = 0;
-        CurMsg = 0;
-        if (Model)
+        NextView = null;
+        Port = null;
+        MView = null;
+        CurMsg = null;
+        if (Model != null)
             Model.CreateViewPort(this);
     }
 
@@ -56,14 +56,14 @@ public class EView {
 
     void FocusChange(int GetFocus) {
         if (GetFocus != 0) {
-            if (Model.View && Model.View.Port)
+            if ((Model.View != null) && (Model.View.Port != null))
                 Model.View.Port.GetPos();
             Model.CreateViewPort(this);
         } else {
             if (Model != null) {
                 Model.RemoveView(this);
                 Port = null;
-                if (Model.View && Model.View.Port)
+                if ((Model.View != null) && (Model.View.Port != null))
                     Model.View.Port.StorePos();
             }
         }
@@ -76,7 +76,7 @@ public class EView {
 
     void SetModel(EModel AModel) {
         Model = AModel;
-        ActiveModel = Model;
+        EModel.ActiveModel = Model;
     }
 
     void SelectModel(EModel AModel) {
@@ -114,7 +114,7 @@ public class EView {
     }
 
     void Activate(int GotFocus) {
-        if (Model && Model.View != this && Port) {
+        if ((Model!=null) && Model.View != this && (Port!=null)) {
             Model.SelectView(this);
             if (GotFocus!=0) {
                 Port.StorePos();
@@ -136,10 +136,10 @@ public class EView {
     }
 
     int BeginMacro() {
-        return Model ? Model.BeginMacro() : 0;
+        return (Model!=null) ? Model.BeginMacro() : 0;
     }
 
-    int ExecCommand(int Command, ExState State) {
+    int ExecCommand(ExCommands Command, ExState State) {
         switch (Command) {
         case ExSwitchTo:            return SwitchTo(State);
         case ExFilePrev:            return FilePrev();
@@ -197,9 +197,9 @@ public class EView {
     }
 
     void HandleEvent(TEvent Event) {
-        if (Model)
+        if (Model!=null)
             Model.HandleEvent(Event);
-        if (Port)
+        if (Port!=null)
             Port.HandleEvent(Event);
         if (Event.What == evCommand) {
             switch (Event.Msg.Command) {
@@ -209,7 +209,7 @@ public class EView {
 
                     if (IsDirectory(file))
                         OpenDir(file);
-                    MultiFileLoad(0, file, NULL, this);
+                    MultiFileLoad(0, file, null, this);
                 }
                 break;
             }
@@ -248,20 +248,20 @@ public class EView {
         Msg(S_INFO, "Closing %s.", s);
 
         V = ActiveView = this;
-        while (V) {
+        while (V!=null) {
             M1 = V.Model;
             if (M1 == M) {
                 if (M.Next != M)
                     V.SelectModel(M.Next);
                 else
-                    V.SelectModel(0);
+                    V.SelectModel(null);
             }
             V = V.Next;
             if (V == ActiveView)
                 break;
         }
-        delete M;
-        SetMsg(0);
+        M.close();
+        SetMsg(null);
         return;
     }
 
@@ -303,13 +303,13 @@ public class EView {
         int No;
 
         if (State.GetIntParam(this, &No) == 0) {
-            char str[10] = "";
+            String [] str = {""};
 
-            if (MView.Win.GetStr("Obj.Number", sizeof(str), (char *)str, 0) == 0) return 0;
-            No = atoi(str);
+            if (MView.Win.GetStr("Obj.Number", str, 0) == 0) return 0;
+            No = atoi(str[0]);
         }
         M = Model;
-        while (M) {
+        while (M!=null) {
             if (M.ModelNo == No) {
                 SwitchToModel(M);
                 return 1;
@@ -339,20 +339,20 @@ public class EView {
     }
 
     int FileOpen(ExState State) {
-        String FName;
+        String [] FName;
 
-        if (FName = State.GetStrParam(this) == 0) {
+        if (FName[0] = State.GetStrParam(this) == null) {
             if (GetDefaultDirectory(Model, FName, sizeof(FName)) == 0)
                 return 0;
             if (MView.Win.GetFile("Open file", sizeof(FName), FName, HIST_PATH, GF_OPEN) == 0) return 0;
         }
 
-        if( strlen( FName ) == 0 ) return 0;
+        if( FName[0].length() == 0 ) return 0;
 
         if (IsDirectory(FName))
             return OpenDir(FName);
 
-        return MultiFileLoad(0, FName, NULL, this);
+        return MultiFileLoad(0, FName, null, this);
     }
 
     int FileOpenInMode(ExState State) {
@@ -423,33 +423,33 @@ public class EView {
     } */
 
     void SetMsg(String Msg) {
-        if (CurMsg)
-            free(CurMsg);
-        CurMsg = 0;
-        if (Msg && strlen(Msg))
-            CurMsg = strdup(Msg);
-        if (CurMsg && Msg && MView) {
+        if (CurMsg!=null)
+            CurMsg.close();
+        CurMsg = null;
+        if ((Msg!=null) && Msg.length()!=0)
+            CurMsg = Msg;
+        if ( (CurMsg!=null) && (Msg!=null) && (MView!=null)) {
             TDrawBuffer B;
             char SColor;
-            int Cols, Rows;
+            int [] Cols, Rows;
 
-            MView.ConQuerySize(&Cols, &Rows);
+            MView.ConQuerySize(Cols, Rows);
 
             if (MView.IsActive())
                 SColor = hcStatus_Active;
             else
                 SColor = hcStatus_Normal;
 
-            MoveChar(B, 0, Cols, ' ', SColor, Cols);
-            MoveStr(B, 0, Cols, CurMsg, SColor, Cols);
+            MoveChar(B, 0, Cols[0], ' ', SColor, Cols[0]);
+            MoveStr(B, 0, Cols[0], CurMsg, SColor, Cols[0]);
             if (MView.Win.GetStatusContext() == MView)
-                MView.ConPutBox(0, Rows - 1, Cols, 1, B);
+                MView.ConPutBox(0, Rows[0] - 1, Cols[0], 1, B);
             //printf("%s\n", Msg);
         }
     }
 
     int ViewBuffers(ExState State) {
-        if (BufferList == 0) {
+        if (BufferList == null) {
             BufferList = new BufferView(0, ActiveModel);
             SwitchToModel(BufferList);
         } else {
@@ -488,12 +488,12 @@ public class EView {
     }
 
     int DirOpen(ExState State) {
-        char Path[MAXPATH];
+        String [] Path = {""};
 
-        if (State.GetStrParam(this, Path, sizeof(Path)) == 0)
-            if (GetDefaultDirectory(Model, Path, sizeof(Path)) == 0)
+        if (State.GetStrParam(this, Path) == 0)
+            if (GetDefaultDirectory(Model, Path) == 0)
                 return 0;
-        return OpenDir(Path);
+        return OpenDir(Path[0]);
     }
 
     int OpenDir(String Path) {
@@ -526,7 +526,7 @@ public class EView {
 
 
     int Compile(ExState State) {
-        static char Cmd[256] = "";
+        String Cmd[] = {""};
         char Command[256] = "";
 
         if (CompilerMsgs != 0 && CompilerMsgs.Running) {
@@ -687,10 +687,10 @@ public class EView {
     }
 
     int RemoveGlobalBookmark(ExState State) {
-    	 String name = "";
+    	 String [] name = {""};
 
-        if (State.GetStrParam(this, name, sizeof(name)) == 0)
-            if (MView.Win.GetStr("Remove Global Bookmark", sizeof(name), name, HIST_BOOKMARK) == 0) return 0;
+        if (State.GetStrParam(this, name) == 0)
+            if (MView.Win.GetStr("Remove Global Bookmark", name, HIST_BOOKMARK) == 0) return 0;
         if (markIndex.remove(name) == 0) {
             Msg(S_ERROR, "Error removing global bookmark %s.", name);
             return 0;

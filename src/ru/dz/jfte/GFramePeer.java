@@ -16,10 +16,13 @@ public class GFramePeer {
         return ::ConSetSize(X, Y);
     }
 
-    int ConQuerySize(int *X, int *Y) {
-        ::ConQuerySize(&fW, &fH);
-        if (X) *X = fW;
-        if (Y) *Y = fH;
+    int ConQuerySize(int []X, int []Y) {
+        int [] tW, tH;
+        ::ConQuerySize(tW, tH);
+        fW = tW[0];
+        fH = tH[0];
+        if (X) *X = tW[0];
+        if (Y) *Y = tH[0];
         return 1;
     }   
 
