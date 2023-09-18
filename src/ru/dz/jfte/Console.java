@@ -136,6 +136,27 @@ public class Console {
 	
 	
 	
+
+	
+	static int GetDefaultDirectory(EModel M, String [] Path) {
+	    if (M!=null) 
+	        Path[0] = M.GetPath();
+	    if (M==null || Path[0] == null)
+	        if (ExpandPath(".", Path) == -1)
+	            return 0;
+	    SlashDir(Path);
+	    return 1;
+	}
+
+	static int SetDefaultDirectory(EModel M) {
+	    String [] Path;
+	    
+	    if (GetDefaultDirectory(M, Path) == 0)
+	        return 0;
+	    if (ChangeDir(Path) == -1)
+	        return 0;
+	    return 1;
+	}
 	
 	
 }

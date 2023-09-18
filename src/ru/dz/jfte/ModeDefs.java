@@ -253,4 +253,29 @@ public interface ModeDefs {
 	public static final int  STATE_NOGRAB       = 0x0004;
 
 
+	// Msg
+	
+	public static final int S_BUSY    = 0;
+	public static final int S_INFO    = 1;
+	public static final int S_BOLD    = 2;
+	public static final int S_ERROR   = 3;
+
+
+	// Macro variables
+	public static final int  mvFilePath = 1;      // TODO enum = 1,  // directory + name + extension 
+    public static final int  mvFileName = 2;      // name + extension 
+    public static final int  mvFileDirectory = 3; // directory + '/' 
+    public static final int  mvFileBaseName = 4;  // without the last extension 
+    public static final int  mvFileExtension = 5; // the last one 
+    public static final int  mvCurDirectory = 6;
+    public static final int  mvCurRow = 7;
+    public static final int  mvCurCol = 8;
+    public static final int  mvChar = 9;
+    public static final int  mvWord = 10;
+    public static final int  mvLine = 11;
+	
+
+    // etc
+    public static final int  ABBREV_HASH      = 16;
+    
 }

@@ -3,16 +3,14 @@ package ru.dz.jfte;
 public class ExModelView extends ExView 
 {
     EView View;
-    int MouseCaptured;
-    int MouseMoved;
+    boolean MouseCaptured = false;
+    boolean MouseMoved = false;
 
 
     
     ExModelView(EView AView) {
         View = AView;
         View.MView = this;
-        MouseCaptured = 0;
-        MouseMoved = 0;
     }
 
     /* ~ExModelView() {

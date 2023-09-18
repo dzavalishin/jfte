@@ -23,7 +23,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         
     @Override
     EEventMap GetEventMap() {
-        return FindEventMap("BUFFERS");
+        return EEventMap.FindEventMap("BUFFERS");
     }
 
     int GetContext() {

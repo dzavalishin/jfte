@@ -1,7 +1,8 @@
 package ru.dz.jfte;
 
-public class KeyTable {
-	class KeyMap {
+public class KeyTable implements KeyDefs 
+{
+	static class KeyMap {
 	    final String Name;
 	    final long /*TKeyCode*/ Key;
 	    
@@ -105,7 +106,7 @@ public class KeyTable {
 	    if (ks.Key  & kfShift) Key[0] += "S+";
 	    if (ks.Mask & kfShift) Key[0] += "S-";
 
-	    if (keyCode(ks.Key) < 256) {
+	    if (KeyDefs.keyCode(ks.Key) < 256) {
 	        char c[2];
 
 	        c[0] = (char)(ks.Key & 0xFF);
@@ -120,7 +121,7 @@ public class KeyTable {
 	            Key[0] += c;
 	    } else {
 	        for (KeyMap k : KeyList)
-	            if (k.Key == keyCode(ks.Key)) {
+	            if (k.Key == KeyDefs.keyCode(ks.Key)) {
 	            	Key[0] += k.Name;
 	                break;
 	            }

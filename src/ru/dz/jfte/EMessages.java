@@ -138,7 +138,7 @@ public class EMessages extends EList implements Closeable
     }
 
     EEventMap GetEventMap() {
-        return FindEventMap("MESSAGES");
+        return EEventMap.FindEventMap("MESSAGES");
     }
 
     int ExecCommand(int Command, ExState State) {

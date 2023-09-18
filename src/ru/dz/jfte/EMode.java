@@ -16,6 +16,9 @@ public class EMode {
     String filename;
 
     
+    static EMode [] Modes;
+    
+    
     EMode(EMode aMode, EEventMap Map, String aName) {
         fName = aName;
         fEventMap = Map;

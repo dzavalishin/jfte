@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.util.Arrays;
+
 public class EBuffer extends EModel implements BufferDefs 
 {
 	String FileName = null;
@@ -22,7 +24,7 @@ public class EBuffer extends EModel implements BufferDefs
 	// TODO UndoStack US;
 
 	//struct stat FileStatus;
-	int FileOk;
+	boolean FileOk = false;
 	boolean Loading = false;
 
 	int RAllocated = 0;   // text line allocation
@@ -236,7 +238,7 @@ public class EBuffer extends EModel implements BufferDefs
 		if (Modified == 0) {
 			//struct stat StatBuf;
 
-			if ((FileName != 0) && FileOk && (stat(FileName, &StatBuf) == 0)) {
+			if ((FileName != null) && FileOk && (stat(FileName, &StatBuf) == 0)) {
 				if (FileStatus.st_size != StatBuf.st_size ||
 						FileStatus.st_mtime != StatBuf.st_mtime)
 				{
@@ -460,7 +462,7 @@ public class EBuffer extends EModel implements BufferDefs
 	}
 
 	int SetFileName(String AFileName, String AMode) {
-		FileOk = 0;
+		FileOk = false;
 
 		FileName = AFileName;
 		Mode = null;
@@ -1061,7 +1063,7 @@ public class EBuffer extends EModel implements BufferDefs
 
 
 
-	/*
+	
 	int ScreenPos(ELine L, int Offset) {
 		int ExpandTabs = BFI(this, BFI_ExpandTabs);
 		int TabSize = BFI(this, BFI_TabSize);
@@ -1095,9 +1097,9 @@ public class EBuffer extends EModel implements BufferDefs
 			return Pos;
 		}
 	}
-	*/
+	
 
-	/*
+	
 	int CharOffset(ELine L, int ScreenPos) {
 		int ExpandTabs = BFI(this, BFI_ExpandTabs);
 		int TabSize = BFI(this, BFI_TabSize);
@@ -1123,14 +1125,16 @@ public class EBuffer extends EModel implements BufferDefs
 			return Ofs + ScreenPos - Pos;
 		}
 	}
-	*/
+	
 	
 	int Allocate(int ACount) {
-		ELine L = (ELine ) realloc(LL, sizeof(ELine) * (ACount + 1));
-		if (L == 0 && ACount != 0)
-			return 0;
+		//ELine [] L = (ELine ) realloc(LL, sizeof(ELine) * (ACount + 1));
+		
+		LL = new ELine [ACount];
+		Arrays.fill(LL, null);
+		
 		RAllocated = ACount;
-		LL = L;
+		
 		return 1;
 	}
 
@@ -1274,9 +1278,9 @@ public class EBuffer extends EModel implements BufferDefs
 	ELine RLine(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		int N = GapLine(No, RGap, RCount, RAllocated);
-		if (!((No < RCount) && (No >= 0) && (LL[N]))) {
+		if (!((No < RCount) && (No >= 0) && (LL[N]!=null))) {
 			printf("Get No = %d/%d Gap=%d RAlloc = %d, VCount = %d\n", No, RCount, RGap, RAllocated, VCount);
-			assert((No < RCount) && (No >= 0) && (LL[N]));
+			assert((No < RCount) && (No >= 0) && (LL[N]!=null));
 		}
 		//#endif */
 		return LL[GapLine(No, RGap, RCount, RAllocated)];

@@ -282,7 +282,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				if (((TMsgEvent)E).Command == cmResize) abort = -3;
 				break;
 			case evKeyDown:
-				switch (kbCode(E.Key.Code)) {
+				switch (KeyDefs.kbCode(E.Key.Code)) {
 				case kbPgDn:
 				case kbEnd: cur = Menus[id].Count;
 				case kbUp: 

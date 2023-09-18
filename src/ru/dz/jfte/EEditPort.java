@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 
-public class EEditPort extends EViewPort implements Closeable, EventDefs 
+public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDefs, ColorDefs 
 {
     EBuffer Buffer;
     EPoint TP, OldTP;
@@ -177,11 +177,11 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs
         case evMouseMove:
         case evMouseAuto:
         case evMouseUp:
-            HandleMouse(Event);
+            HandleMouse((TMouseEvent) Event);
             break;
         }
     }
-    void HandleMouse(TEvent event) {
+    void HandleMouse(TMouseEvent event) {
         int x, y, xx, yy, W, H;
 
         //View.MView.ConQuerySize(&W, &H);
@@ -202,8 +202,8 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs
             case evMouseDown:
                 if (event.Y == H - 1)
                     break;
-                if (View.MView.Win.CaptureMouse(1))
-                    View.MView.MouseCaptured = 1;
+                if (View.MView.Win.CaptureMouse(true))
+                    View.MView.MouseCaptured = true;
                 else
                     break;
 
@@ -244,7 +244,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs
                             else Buffer.BlockMarkStream();
                             Buffer.BlockUnmark();
                             if (event.What == evMouseMove)
-                                View.MView.MouseMoved = 1;
+                                View.MView.MouseMoved = true;
                         }
                         Buffer.BlockExtendBegin();
                         Buffer.SetNearPos(xx, yy);

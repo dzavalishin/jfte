@@ -90,7 +90,7 @@ public class EList extends EModel
     }
 
     EEventMap GetEventMap() {
-        return FindEventMap("LIST");
+        return EEventMap.FindEventMap("LIST");
     }
 
     void HandleEvent(TEvent Event) {

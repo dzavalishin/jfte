@@ -448,5 +448,21 @@ public class BitOps {
 	static  long BIGMULS(int a, int b) {
 		return (int)(((long)(a) * (long)(b)));
 	}	
+
 	 */
+	
+	
+	
+	
+	public static int HashStr(String p, int maxim) {
+	    int i = 1;
+	    int pp = 0;
+
+	    while (pp < p.length()) {
+	        i += i ^ (i << 3) ^ (p.charAt(pp)) ^ (i >> 3);
+	        pp++;
+	    }
+	    return i % maxim;
+	}
+
 }

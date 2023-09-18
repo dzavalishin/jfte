@@ -36,7 +36,7 @@ public class EModel implements ModeDefs
 	int GetNewModelID(EModel B) {
 
 		if (0 !=Config.ReassignModelIds) lastid = 0;   // 0 is used by buffer list
-		while (FindModelID(B, ++lastid) != 0) /* */;
+		while (FindModelID(B, ++lastid) != null) /* */;
 
 		return lastid;
 	}
@@ -125,7 +125,7 @@ public class EModel implements ModeDefs
 	void HandleEvent(TEvent Event) {
 	}
 
-	void Msg(int level, String s, Object... o) {       
+	public void Msg(int level, String s, Object... o) {       
 		if (View == null)
 			return;
 
@@ -175,7 +175,7 @@ public class EModel implements ModeDefs
 	int GetStrVar(int var, String [] str) {
 		switch (var) {
 		case mvCurDirectory:
-			return GetDefaultDirectory(this, str);
+			return Console.GetDefaultDirectory(this, str);
 		}
 		return 0;
 	}

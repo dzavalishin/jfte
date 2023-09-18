@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
 public class KeySel {
-    long /*TKeyCode*/ Mask;
-    long /*TKeyCode*/ Key;
+    int /*TKeyCode*/ Mask;
+    int /*TKeyCode*/ Key;
 }

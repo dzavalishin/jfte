@@ -482,7 +482,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
                 MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
                 return ExResult.ErFAIL;
             }
-            Buffer.Routines = new RoutineView(0, &EModel.ActiveModel, Buffer);
+            Buffer.Routines = new RoutineView(0, EModel.ActiveModel, Buffer);
             if (Buffer.Routines == 0)
                 return ExResult.ErFAIL;
         } else {

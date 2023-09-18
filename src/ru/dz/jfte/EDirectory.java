@@ -30,7 +30,7 @@ public class EDirectory extends EList
 
 
 	EEventMap GetEventMap() {
-	    return FindEventMap("DIRECTORY");
+	    return EEventMap.FindEventMap("DIRECTORY");
 	}
 
 	void DrawLine(int /*TCell*/ B, int Line, int Col, int /*ChColor*/ color, int Width) {
