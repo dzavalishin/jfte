@@ -82,9 +82,16 @@ class TMsgEvent extends TEvent
 		Param1 = p1;
 	}
 
+	public TMsgEvent(int w, GView v, int cmd) {
+		What = w;
+		View = v;
+		Command = cmd;
+	}
+	
 	public TMsgEvent(int w) {
 		What = w;
 	}
+
 
 
 	public TMsgEvent clone()
