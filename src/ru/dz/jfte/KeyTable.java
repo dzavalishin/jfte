@@ -1,12 +1,14 @@
 package ru.dz.jfte;
 
+import ru.dz.jfte.c.ByteArrayPtr;
+
 public class KeyTable implements KeyDefs 
 {
 	static class KeyMap {
 	    final String Name;
-	    final long /*TKeyCode*/ Key;
+	    final int /*TKeyCode*/ Key;
 	    
-	    KeyMap( String name, long key )
+	    KeyMap( String name, int key )
 	    {
 	    	this.Name = name;
 	    	this.Key = key;
@@ -49,23 +51,24 @@ public class KeyTable implements KeyDefs
 	};
 
 	static int ParseKey(String Key, KeySel ks) {
-	    unsigned char *p = (unsigned char *)Key;
+	    //unsigned char *p = (unsigned char *)Key;
+	    ByteArrayPtr p = new ByteArrayPtr(Key.getBytes());
 	    long /*TKeyCode*/ KeyFlags = 0;
 	    int i;
 
 	    ks.Mask = 0;
 	    ks.Key = 0;
-	    while ((*p) && ((p[1] == '+') || (p[1] == '-'))) {
-	        if (p[1] == '-') {
-	            switch (p[0]) {
+	    while (p.r(0) != 0 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
+	        if (p.r(1) == '-') {
+	            switch (p.r(0)) {
 	            case 'A': ks.Mask |= kfAlt; break;
 	            case 'C': ks.Mask |= kfCtrl; break;
 	            case 'S': ks.Mask |= kfShift; break;
 	            case 'G': ks.Mask |= kfGray; break;
 	            case 'X': ks.Mask |= kfSpecial; break;
 	            }
-	        } else if (p[1] == '+') {
-	            switch (p[0]) {
+	        } else if (p.r(1) == '+') {
+	            switch (p.r(0)) {
 	            case 'A': KeyFlags |= kfAlt; break;
 	            case 'C': KeyFlags |= kfCtrl; break;
 	            case 'S': KeyFlags |= kfShift; break;
@@ -73,16 +76,33 @@ public class KeyTable implements KeyDefs
 	            case 'X': KeyFlags |= kfSpecial; break;
 	            }
 	        }
-	        p += 2;
+	        //p += 2;
+	        p.shift(2);
 	    }
-	    for (i = 0; i < int(sizeof(KeyList)/sizeof(KeyList[0])); i++)
+	    
+	    /*for (i = 0; i < int(sizeof(KeyList)/sizeof(KeyList[0])); i++)
+	    {
 	        if (strcmp((char *)p, KeyList[i].Name) == 0) {
 	            ks.Key = KeyList[i].Key;
 	            break;
 	        }
+	    }*/
+	    
+	    for( KeyMap km : KeyList )
+	    {
+	    	String ps = p.getRestAsString();
+	    	if( km.Name.equals(ps) )
+	    	{
+	            ks.Key = km.Key;
+	            break;
+	    	}
+	    }
+	    
+	    
 	    if (ks.Key == 0)
-	        ks.Key = *p;
-	    if ((KeyFlags & kfCtrl) && !(KeyFlags & kfSpecial)) {
+	        ks.Key = p.r(0);
+	    if (0 !=(KeyFlags & kfCtrl) && 0==(KeyFlags & kfSpecial)) 
+	    {
 	        if (ks.Key < 256) {
 	            if (ks.Key < 32)
 	                ks.Key += 64;

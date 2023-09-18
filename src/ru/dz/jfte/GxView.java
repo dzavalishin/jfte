@@ -191,7 +191,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    int GetStr(String Prompt, String []Str, int HistId) {
+    int GetStr(String Prompt, String []Str, int HistId) throws IOException {
         if (0 != (GFrame.HaveGUIDialogs & GUIDLG_PROMPT) && 0 != Config.GUIDialogs) {
             return DLGGetStr(this, Prompt, Str, HistId, 0);
         } else {
@@ -199,11 +199,11 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    int GetFile(String Prompt, String []Str, int HistId, int Flags) {
+    int GetFile(String Prompt, String []Str, int HistId, int Flags) throws IOException {
         if ( 0 != (GFrame.HaveGUIDialogs & GUIDLG_FILE) && 0 != Config.GUIDialogs)
-            return DLGGetFile(this, Prompt, BufLen, Str, Flags);
+            return DLGGetFile(this, Prompt, Str, Flags);
         else
-            return ReadStr(Prompt, Str, CompletePath, SelectPathname, HistId);
+            return ReadStr(Prompt, Str, Console.CompletePath, Config.SelectPathname, HistId);
     }
 
     int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId) throws IOException {
@@ -230,10 +230,10 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int Choice(long Flags, String Title, int NSel, Object ... choices /*, format, args */) {
+    int Choice(int Flags, String Title, int NSel, String ... choices /*, format, args */) throws IOException {
         int rc;
 
-        if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) && Config.GUIDialogs) {
+        if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) != 0 && Config.GUIDialogs != 0) {
             rc = DLGPickChoice(this, Title, NSel, choices, Flags);
             return rc;
         } else {
@@ -282,8 +282,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
         search = new ExISearch(B);
 
-        if (search == 0)
-            return 0;
+        //if (search == 0)            return 0;
 
         PushView(search);
         rc = Execute();
@@ -310,7 +309,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int ICompleteWord(EView View) {
+    int ICompleteWord(EView View) throws IOException {
         int rc = 0;
 
         if (View.GetContext() == CONTEXT_FILE) {
@@ -353,7 +352,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return 0;
     }
 
-    static int DLGGetStr(GView View, String Prompt, String Str, int HistId, int Flags) {
+    static int DLGGetStr(GView View, String Prompt, String [] Str, int HistId, int Flags) {
         assert(1 == 0);
         return 0;
     }

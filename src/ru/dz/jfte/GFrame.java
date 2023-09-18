@@ -237,8 +237,7 @@ public class GFrame implements EventDefs
 	    if (Top == null)
 	        return 0;
 	    
-	    if (GView.FocusCapture != null)
-	        this.view = view;
+	    // TODO bug in orig FTE code if (GView.FocusCapture != null) view = view;
 	    
 	    if (Active!=null)
 	        Active.Activate(false);

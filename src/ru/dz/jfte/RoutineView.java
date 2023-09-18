@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public class RoutineView extends EList 
+public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, ColorDefs
 {
     EBuffer Buffer;
 
@@ -30,57 +30,53 @@ public class RoutineView extends EList
         return EEventMap.FindEventMap("ROUTINES");
     }
 
-    int ExecCommand(int Command, ExState State) {
+    ExResult ExecCommand(ExCommands Command, ExState State) {
         switch (Command) {
         case ExRescan:
             Buffer.ScanForRoutines();
             UpdateList();
-            return ErOK;
+            return ExResult.ErOK;
 
         case ExActivateInOtherWindow:
             if (Row < Buffer.rlst.Count) {
                 View.Next.SwitchToModel(Buffer);
-                Buffer.CenterPosR(0, Buffer.rlst.Lines[Row]);
-                return ErOK;
+                Buffer.CenterPosR(0, Buffer.rlst.Lines[Row], 0);
+                return ExResult.ErOK;
             }
-            return ErFAIL;
+            return ExResult.ErFAIL;
             
         case ExCloseActivate:
-            return ErFAIL;
+            return ExResult.ErFAIL;
         }
         return super.ExecCommand(Command, State);
     }
         
-    void DrawLine(PCell B, int Line, int Col, ChColor color, int Width) {
-        if (Buffer.RLine(Buffer.rlst.Lines[Line]).Count > Col) {
-            char str[1024];
-            int len;
-
-            len = UnTabStr(str, sizeof(str),
-                           Buffer.RLine(Buffer.rlst.Lines[Line]).Chars,
-                           Buffer.RLine(Buffer.rlst.Lines[Line]).Count);
+    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
+        if (Buffer.RLine(Buffer.rlst.Lines[Line]).getCount() > Col) {
+            String str = PCell.UnTabStr( Buffer.RLine(Buffer.rlst.Lines[Line]).Chars.toString() );
+            int len = str.length();
                         
             if (len > Col)
-                MoveStr(B, 0, Width, str + Col, color, len - Col);
+                B.MoveStr( 0, Width, str + Col, color, len - Col);
         }
     }
 
     String FormatLine(int Line) {
-        char *p = 0;
-        PELine L = Buffer.RLine(Buffer.rlst.Lines[Line]);
-        
+        //char *p = 0;
+        ELine L = Buffer.RLine(Buffer.rlst.Lines[Line]);
+        /*
         p = (char *) malloc(L.Count + 1);
         if (p) {
             memcpy(p, L.Chars, L.Count);
             p[L.Count] = 0;
-        }
-        return p;
+        } */
+        return L.toString();
     }
 
     int Activate(int No) {
         if (No < Buffer.rlst.Count) {
             View.SwitchToModel(Buffer);
-            Buffer.CenterPosR(0, Buffer.rlst.Lines[No]);
+            Buffer.CenterPosR(0, Buffer.rlst.Lines[No], 0);
             return 1;
         }
         return 0;

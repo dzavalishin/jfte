@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
+
 public class ExModelView extends ExView 
 {
     EView View;
@@ -24,7 +26,7 @@ public class ExModelView extends ExView
         return View.GetContext();
     }
 
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
         View.Activate(gotfocus);
     }
@@ -41,7 +43,7 @@ public class ExModelView extends ExView
         return View.BeginMacro();
     }
 
-    void HandleEvent(TEvent Event) {
+    void HandleEvent(TEvent Event) throws IOException {
         super.HandleEvent(Event);
         View.HandleEvent(Event);
     }

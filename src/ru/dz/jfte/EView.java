@@ -114,16 +114,16 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         }
     }
 
-    void Activate(int GotFocus) {
+    void Activate(boolean GotFocus) {
         if ((Model!=null) && Model.View != this && (Port!=null)) {
             Model.SelectView(this);
-            if (GotFocus!=0) {
+            if (GotFocus) {
                 Port.StorePos();
             } else {
                 Port.GetPos();
             }
             Port.RepaintView();
-            if (GotFocus!=0)
+            if (GotFocus)
                 ActiveView = this;
         }
     }

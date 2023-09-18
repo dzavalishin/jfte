@@ -1,5 +1,6 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public class UpMenu implements ColorDefs, EventDefs, KeyDefs 
@@ -172,7 +173,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		return 1;
 	}
 
-	static int ExecVertMenu(int x, int y, int id, TEvent E, UpMenu up) {
+	static int ExecVertMenu(int x, int y, int id, TEvent E, UpMenu up) throws IOException {
 		int cur = 0;
 		int abort;
 		int w, h;
@@ -271,8 +272,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			}
 			Console.ConHideCursor();
 			do {
-				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, 1);
-				if( 0!= (E.What & evNotify))
+				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, true);
+				if( E != null &&  0 != (E.What & evNotify))
 					GUI.gui.DispatchEvent(GUI.frames, GUI.frames.Active, E);
 			} while( 0!= (E.What & evNotify));
 			if( 0!= (E.What & evMouse)) {
@@ -509,7 +510,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 	static UpMenu top = new UpMenu(); // { 0, 0, 0, 0, 0, 0, 1 };
 
-	static int ExecMainMenu(TEvent E, char sub) 
+	static int ExecMainMenu(TEvent E, char sub) throws IOException 
 	{
 		int cur = 0;
 		int id = GetMenuId(GUI.frames.Menu);
@@ -586,8 +587,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			}
 			Console.ConHideCursor();
 			do {
-				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, 1);
-				if(0 != (E.What & evNotify))
+				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, true);
+				if(E != null && 0 != (E.What & evNotify))
 					GUI.gui.DispatchEvent(GUI.frames, GUI.frames.Active, E);
 			} while(0 != (E.What & evNotify));
 			dovert = 0;

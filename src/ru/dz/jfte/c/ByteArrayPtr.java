@@ -205,6 +205,10 @@ public class ByteArrayPtr implements IArrayPtr
 		//return displ >= from.displ && displ <= to.displ;
 		return displ >= from.displ && displ < to.displ;
 	}
+
+	public String getRestAsString() {		
+		return new String(mem, displ, mem.length-displ);
+	}
 	
 	
 	

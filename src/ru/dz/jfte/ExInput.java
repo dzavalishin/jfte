@@ -63,7 +63,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 if (Pos > 0) {
                     Pos--;
                     while (Pos > 0) {
-                        if (isalnum(Line[Pos]) && !isalnum(Line[Pos - 1]))
+                        if (KeyDefs.isalnum(Line.charAt(Pos)) && !KeyDefs.isalnum(Line.charAt(Pos - 1)))
                             break;
                         Pos--;
                     }
@@ -78,7 +78,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     if (Pos < len) {
                         Pos++;
                         while (Pos < len) {
-                            if (isalnum(Line[Pos]) && !isalnum(Line[Pos - 1]))
+                            if (KeyDefs.isalnum(Line.charAt(Pos)) && !KeyDefs.isalnum(Line.charAt(Pos - 1)))
                                 break;
                             Pos++;
                         }
@@ -113,8 +113,8 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                             Pos--;
                             memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
                             if (Pos == 0) break;
-                            Ch = Line[Pos - 1];
-                        } while (Pos > 0 && Ch != '\\' && Ch != '/' && Ch != '.' && isalnum(Ch));
+                            Ch = Line.charAt(Pos - 1);
+                        } while (Pos > 0 && Ch != '\\' && Ch != '/' && Ch != '.' && KeyDefs.isalnum(Ch));
                     }
                 }
                 SelStart = SelEnd = 0; 
@@ -156,7 +156,8 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     break;
                 }
                 SelStart = SelEnd = 0;
-                Line[Pos] = 0;
+                //Line[Pos] = 0;
+                Line = Line.substring(0,Pos);
                 TabCount = 0;
                 Event.What = evNone;
                 break;
@@ -214,19 +215,18 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbTab | kfShift:
                 TabCount -= 2;
             case kbTab:
-                if (Comp) {
-                    String Str2 = malloc(MaxLen + 1);
+                if (Comp!=null) {
+                    String []Str2 = {""};
                     int n;
 
-                    assert(Str2);
                     TabCount++;
                     if (TabCount < 1) TabCount = 1;
                     if ((TabCount == 1) && (kbCode(Event.Key.Code) == kbTab)) {
                         MatchStr = new String(Line);
                     }
-                    n = Comp(MatchStr, Str2, TabCount);
+                    n = Comp.complete(MatchStr, Str2, TabCount);
                     if ((n > 0) && (TabCount <= n)) {
-                        Line = new String(Str2);
+                        Line = new String(Str2[0]);
                         Pos = Line.length();
                     } else if (TabCount > n) TabCount = n;
                     //free(Str2);

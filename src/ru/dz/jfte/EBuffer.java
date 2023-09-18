@@ -62,10 +62,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
     EBookmark *BMarks;
 #endif */
 
-	/* TODO #ifdef CONFIG_OBJ_ROUTINE
+	///* TODO #ifdef CONFIG_OBJ_ROUTINE
     RoutineList rlst;
-    RoutineView *Routines;
-#endif */ 
+    RoutineView Routines;
+	//#endif */ 
 
 	int MinRedraw, MaxRedraw;
 	int RedrawToEos;
@@ -2255,6 +2255,58 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
+	
+	
+	
+	
+	
+	
+	
+	//#ifdef CONFIG_OBJ_ROUTINE
+	int ScanForRoutines() {
+		return 0; // TODO 
+		
+		/*
+	    RxNode regx;
+	    int line;
+	    RxMatchRes res;
+
+	    if (BFS(this, BFS_RoutineRegexp) == null) {
+	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
+	        return 0;
+	    }
+	    regx = RxCompile(BFS(this, BFS_RoutineRegexp));
+	    if (regx == 0) {
+	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to compile regexp '%s'", BFS(this, BFS_RoutineRegexp));
+	        return 0;
+	    }
+
+	    if (rlst.Lines) {
+	        free(rlst.Lines);
+	        rlst.Lines = 0;
+	    }
+	    rlst.Lines = 0;
+	    rlst.Count = 0;
+
+	    Msg(S_BUSY, "Matching %s", BFS(this, BFS_RoutineRegexp));
+	    for (line = 0; line < RCount; line++) {
+	    	ELine L = RLine(line);
+	        if (RxExec(regx, L.Chars, L.Count, L.Chars, res) == 1) {
+	            rlst.Count++;
+	            //rlst.Lines =  realloc((void *) rlst.Lines, sizeof(int) * (rlst.Count | 0x1F));
+	            rlst.Lines[rlst.Count - 1] = line;
+	            Msg(S_BUSY, "Routines: %d", rlst.Count);
+	        }
+	    }
+	    //RxFree(regx);
+	    return 1;
+	    */
+	}
+	//#endif
+
+	
+	
+	
 }
 
 

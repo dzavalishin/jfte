@@ -2,6 +2,8 @@ package ru.dz.jfte;
 
 public class Console {
 
+	public static Completer CompletePath = new FileCompleter();
+
 	static TEvent ReadConsoleEvent() { 
 		// TODO impl me
 		return null;
@@ -168,7 +170,7 @@ public class Console {
 		//return 0;
 	}
 
-	public static TEvent ConGetEvent(int i, int j, int k, int l) {
+	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) {
 		// TODO Auto-generated method stub
 		//return null;
 	}

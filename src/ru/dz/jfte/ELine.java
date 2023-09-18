@@ -56,5 +56,10 @@ public class ELine {
 		return Chars.getPointer();
 		
 	}
+
+	@Override
+	public String toString() {
+		return Chars.toString();
+	}
 	
 }

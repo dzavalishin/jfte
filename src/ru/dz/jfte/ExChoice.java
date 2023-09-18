@@ -79,7 +79,7 @@ public class ExChoice extends ExView implements ColorDefs
     }
 
     @Override
-    void HandleEvent(TEvent pEvent) 
+    void HandleEvent(TEvent pEvent) throws IOException 
     {
         switch (pEvent.What) {
         case evKeyDown:
@@ -101,7 +101,9 @@ public class ExChoice extends ExView implements ColorDefs
                     
                     
                     for (int i = 0; i < NOpt; i++) {
-                        if (strstr(SOpt[i], s) != 0) {
+                        //if (strstr(SOpt[i], s) != 0)
+                    	if( s.indexOf(SOpt[i]) >= 0)
+                        {
                             Win.EndExec(i);
                             break;
                         }
