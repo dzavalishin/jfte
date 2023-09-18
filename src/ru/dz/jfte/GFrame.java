@@ -65,11 +65,14 @@ public class GFrame implements EventDefs
 	}
 
 	int ConSplitView(GView view, GView newview) {
-	    int [] dmy;
+	    //int dmy;
 	    
 	    newview.Parent = this;
 	    newview.Peer.wX = 0;
-	    ConQuerySize(&newview.Peer.wW, dmy);
+	    //Console.ConQuerySize(&newview.Peer.wW, dmy);
+	    newview.Peer.wW = Console.getWidth();
+	    //dmy = Console.getHeigh();
+	    
 	    if (ShowVScroll) 
 	        newview.Peer.wW--;
 	    newview.Peer.wY = view.Peer.wY + view.Peer.wH / 2;
@@ -126,7 +129,7 @@ public class GFrame implements EventDefs
 	    UpdateMenu();
 	    while (v != null) {
 	        v.Update();
-	        if ((ShowVScroll || ShowHScroll) && (v.Peer.sbVupdate || v.Peer.sbHupdate)) {
+	        if ((ShowVScroll || ShowHScroll) && (v.Peer.sbVupdate != 0 || v.Peer.sbHupdate != 0)) {
 	            v.Peer.DrawScrollBar();
 	            v.Peer.sbVupdate = 0;
 	            v.Peer.sbHupdate = 0;
@@ -211,7 +214,7 @@ public class GFrame implements EventDefs
 	    if (c == null && Top == null)
 	        return;
 	    
-	    if (FocusCapture != null)
+	    if (GView.FocusCapture != null)
 	        return ;
 	    
 	    else if (c == null)
@@ -234,14 +237,17 @@ public class GFrame implements EventDefs
 	    if (Top == null)
 	        return 0;
 	    
-	    if (FocusCapture != 0)
-	        view = view;
+	    if (GView.FocusCapture != null)
+	        this.view = view;
 	    
 	    if (Active!=null)
-	        Active.Activate(0);
+	        Active.Activate(false);
+	    
 	    Active = view;
+	    
 	    if (Active!=null)
-	        Active.Activate(1);
+	        Active.Activate(true);
+	    
 	    return 1;
 	}
 
@@ -256,7 +262,7 @@ public class GFrame implements EventDefs
 	        if (V == Top) break;
 	    }
 	    if (height < 2 * count + 2 || width < 16) {
-	        ::ConSetSize(16, 2 * count + 1);
+	        Console.ConSetSize(16, 2 * count + 1);
 	        return;
 	    }
 	    
@@ -318,6 +324,12 @@ public class GFrame implements EventDefs
 
 	boolean isLastFrame() {
 	    return (this == Next && GUI.frames == this);
+	}
+
+	void DrawMenuBar() {
+	    int id = UpMenu.GetMenuId(Menu);
+
+	    UpMenu.DrawHMenu(0, 0, id, -1);
 	}
 	
 }
