@@ -12,7 +12,7 @@ public class ExChoice extends ExView implements ColorDefs
     int Cur;
     int lTitle;
     int lChoice;
-    boolean MouseCaptured;
+    boolean MouseCaptured = false;
 
 	
     
@@ -23,7 +23,6 @@ public class ExChoice extends ExView implements ColorDefs
         String fmt;
         
         Cur = 0;
-        MouseCaptured = 0;
         
         Title = ATitle;
         lTitle = Title.length();
@@ -32,7 +31,7 @@ public class ExChoice extends ExView implements ColorDefs
         
         for (i = 0; i < NSel; i++) {
             SOpt[i] = choice[i];
-            lChoice += CStrLen(SOpt[i]) + 1;
+            lChoice += PCell.CStrLen(SOpt[i]) + 1;
         }
         
         fmt = choice[i++];
@@ -48,7 +47,7 @@ public class ExChoice extends ExView implements ColorDefs
 
 
     @Override
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
     }
 
@@ -58,7 +57,7 @@ public class ExChoice extends ExView implements ColorDefs
 
     int FindChoiceByPoint(int x, int y) {
         int pos, i;
-        int [] W, H;
+        int [] W = {0}, H = {0};
         
         Win.ConQuerySize(W, H);
         
@@ -70,7 +69,7 @@ public class ExChoice extends ExView implements ColorDefs
             return -1;
         
         for (i = 0; i < NOpt; i++) {
-            int clen = CStrLen(SOpt[i]);
+            int clen = PCell.CStrLen(SOpt[i]);
             
             if (x > pos && x <= pos + clen)
                 return i;
@@ -125,7 +124,7 @@ public class ExChoice extends ExView implements ColorDefs
     {
         switch (Event.What) {
         case evMouseDown:
-            if (Win.CaptureMouse(1)!=0)
+            if (Win.CaptureMouse(true)!=0)
                 MouseCaptured = true;
             else
                 break;
@@ -139,7 +138,7 @@ public class ExChoice extends ExView implements ColorDefs
             break;
         case evMouseUp:
             if (MouseCaptured)
-                Win.CaptureMouse(0);
+                Win.CaptureMouse(false);
             else
                 break;
             MouseCaptured = false;
@@ -187,10 +186,10 @@ public class ExChoice extends ExView implements ColorDefs
             if (Cur < 0) Cur = 0;
         }
         
-        MoveCh(B, ' ', hcChoice_Background, W[0]);
-        MoveStr(B, 0, W[0], Title, hcChoice_Title, W[0]);
-        MoveChar(B, lTitle, W[0], ':', hcChoice_Background, 1);
-        MoveStr(B, lTitle + 2, W[0], Prompt, hcChoice_Param, W[0]);
+        B.MoveCh( ' ', hcChoice_Background, W[0]);
+        B.MoveStr( 0, W[0], Title, hcChoice_Title, W[0]);
+        B.MoveChar( lTitle, W[0], ':', hcChoice_Background, 1);
+        B.MoveStr( lTitle + 2, W[0], Prompt, hcChoice_Param, W[0]);
         
         pos = W[0] - lChoice;
         for (i = 0; i < NOpt; i++) {
@@ -203,9 +202,9 @@ public class ExChoice extends ExView implements ColorDefs
             }
             if (i == Cur)
                 ConSetCursorPos(pos + 1, H[0] - 1);
-            MoveChar(B, pos, W[0], ConGetDrawChar(DCH_V), hcChoice_Background, 1);
-            MoveCStr(B, pos + 1, W[0], SOpt[i], color1, color2, W);
-            pos += CStrLen(SOpt[i]) + 1;
+            B.MoveChar( pos, W[0], Console.ConGetDrawChar(DCH_V), hcChoice_Background, 1);
+            B.MoveCStr( pos + 1, W[0], SOpt[i], color1, color2, W);
+            pos += PCell.CStrLen(SOpt[i]) + 1;
         }
         ConPutBox(0, H[0] - 1, W[0], 1, B);
     }

@@ -8,37 +8,42 @@ public class GFramePeer {
         Frame = aFrame;
         if (Width != -1 && Height != -1)
             ConSetSize(Width, Height);
-        ConQuerySize(&fW, &fH);
+        
+        int [] w = {0}, h = {0};
+        ConQuerySize(w, h);
+        
+        fW = w[0];
+        fH = h[0];
     }
 
 
     int ConSetSize(int X, int Y) {
-        return ::ConSetSize(X, Y);
+        return Console.ConSetSize(X, Y);
     }
 
     int ConQuerySize(int []X, int []Y) {
-        int [] tW, tH;
-        ::ConQuerySize(tW, tH);
+        int [] tW = {0}, tH = {0};
+        Console.ConQuerySize(tW, tH);
         fW = tW[0];
         fH = tH[0];
-        if (X) *X = tW[0];
-        if (Y) *Y = tH[0];
+        if (X!=null) X[0] = tW[0];
+        if (Y!=null) Y[0] = tH[0];
         return 1;
     }   
 
     //int GFrame::ConQuerySize(int *X, int *Y) {
-//        ::ConQuerySize(X, Y);
+//        Console.ConQuerySize(X, Y);
 //        if (ShowVScroll)
 //            --*X;
     //}
 
     int ConSetTitle(String Title, String STitle) {
-        ::ConSetTitle(Title, STitle);
+        Console.ConSetTitle(Title, STitle);
         return 0;
     }
 
     int ConGetTitle(String []Title, String []STitle) {
-        return ::ConGetTitle(Title, STitle);
+        return Console.ConGetTitle(Title, STitle);
     }
     
     

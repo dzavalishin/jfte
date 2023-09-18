@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 public class EMessages extends EList implements Closeable 
 {
@@ -29,8 +30,9 @@ public class EMessages extends EList implements Closeable
         RunPipe(ADir, ACommand);
     }
 
-    close() {
-        gui.ClosePipe(PipeId);
+    @Override
+    public void close() {
+        GUI.gui.ClosePipe(PipeId);
         FreeErrors();
         CompilerMsgs = 0;
     }
@@ -51,24 +53,24 @@ public class EMessages extends EList implements Closeable
 
     void FindErrorFiles() {
         for (int i = 0; i < ErrCount; i++)
-            if (ErrList[i].Buf == 0 && ErrList[i].file != 0)
+            if (ErrList[i].Buf == null && ErrList[i].file != null)
                 FindErrorFile(i);
     }
 
     void FindErrorFile(int err) {
         assert(err >= 0 && err < ErrCount);
-        if (ErrList[err].file == 0)
+        if (ErrList[err].file == null)
             return ;
         
         EBuffer B;
 
-        ErrList[err].Buf = 0;
+        ErrList[err].Buf = null;
         
         B = FindFile(ErrList[err].file);
-        if (B == 0)
+        if (B == null)
             return ;
 
-        if (B.Loaded == 0)
+        if(!B.Loaded)
             return;
 
         AddFileError(B, err);
@@ -94,7 +96,7 @@ public class EMessages extends EList implements Closeable
             ErrList[err].Buf = B;
     }
 
-    void FindFileErrors(EBuffer *B) {
+    void FindFileErrors(EBuffer B) {
         for (int i = 0; i < ErrCount; i++)
             if (ErrList[i].Buf == 0 && ErrList[i].file != 0) {
                 if (filecmp(B.FileName, ErrList[i].file) == 0) {
@@ -103,15 +105,12 @@ public class EMessages extends EList implements Closeable
             }
     }
 
-    int RunPipe(StringADir, StringACommand) {
+    int RunPipe(String ADir, String ACommand) {
         if (!KeepMessages)
             FreeErrors();
         
-        free(Command);
-        free(Directory);
-            
-        Command = strdup(ACommand);
-        Directory = strdup(ADir);
+        Command = ACommand;
+        Directory = ADir;
         
         MatchCount = 0;
         ReturnCode = -1;
@@ -133,7 +132,7 @@ public class EMessages extends EList implements Closeable
         }
         
         ChangeDir(Directory);
-        PipeId = gui.OpenPipe(Command, this);
+        PipeId = GUI.gui.OpenPipe(Command, this);
         return 0;
     }
 
@@ -180,17 +179,13 @@ public class EMessages extends EList implements Closeable
         UpdateList();
     }
 
-    void AddError(Stringfile, int line, Stringmsg, const String text, int hilit) {
-        Error pe;
+    void AddError(String file, int line, String msg, String text, int hilit) {
+        Error pe = new Error();
 
-        pe = (Error ) malloc(sizeof(Error));
-        if (pe == 0)
-            return ;
-
-        pe.file = file ? strdup(file) : 0;
+        pe.file = file;
         pe.line = line;
-        pe.msg = msg ? strdup(msg) : 0;
-        pe.text = text ? strdup(text) : 0;
+        pe.msg = msg;
+        pe.text = text;
         pe.hilit = hilit;
 
         AddError(pe);
@@ -265,6 +260,7 @@ public class EMessages extends EList implements Closeable
         //fprintf(stderr, "GetLine: Got Line\n");
         return 1;
     }
+
     
 }
 

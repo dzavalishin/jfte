@@ -87,7 +87,7 @@ public class KeyTable implements KeyDefs
 	            if (ks.Key < 32)
 	                ks.Key += 64;
 	            else
-	                ks.Key = toupper(ks.Key);
+	                ks.Key = Character.toUpperCase(ks.Key);
 	        }
 	    }
 	    ks.Key |= KeyFlags;
@@ -97,28 +97,26 @@ public class KeyTable implements KeyDefs
 	static int GetKeyName(String []Key, KeySel ks) {
 	    Key[0] = "";
 
-	    if (ks.Key  & kfAlt)   Key[0] += "A+";
-	    if (ks.Mask & kfAlt)   Key[0] += "A-";
-	    if (ks.Key  & kfCtrl)  Key[0] += "C+";
-	    if (ks.Mask & kfCtrl)  Key[0] += "C-";
-	    if (ks.Key  & kfGray)  Key[0] += "G+";
-	    if (ks.Mask & kfGray)  Key[0] += "G-";
-	    if (ks.Key  & kfShift) Key[0] += "S+";
-	    if (ks.Mask & kfShift) Key[0] += "S-";
+	    if(0 != (ks.Key  & kfAlt))   Key[0] += "A+";
+	    if(0 != (ks.Mask & kfAlt))   Key[0] += "A-";
+	    if(0 != (ks.Key  & kfCtrl))  Key[0] += "C+";
+	    if(0 != (ks.Mask & kfCtrl))  Key[0] += "C-";
+	    if(0 != (ks.Key  & kfGray))  Key[0] += "G+";
+	    if(0 != (ks.Mask & kfGray))  Key[0] += "G-";
+	    if(0 != (ks.Key  & kfShift)) Key[0] += "S+";
+	    if(0 != (ks.Mask & kfShift)) Key[0] += "S-";
 
 	    if (KeyDefs.keyCode(ks.Key) < 256) {
-	        char c[2];
 
-	        c[0] = (char)(ks.Key & 0xFF);
-	        c[1] = 0;
+	        char c = (char)(ks.Key & 0xFF);
 
 	        //if (ks.Key & kfCtrl)
 	        //    if (c[0] < ' ')
 	        //        c[0] += '@';
-	        if (c[0] == 32)
+	        if (c == 32)
 	            Key[0] += "Space";
 	        else
-	            Key[0] += c;
+	            Key[0] += ""+c;
 	    } else {
 	        for (KeyMap k : KeyList)
 	            if (k.Key == KeyDefs.keyCode(ks.Key)) {

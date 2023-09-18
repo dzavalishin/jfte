@@ -22,7 +22,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         GetPos();
         TP = B.TP;
         CP = B.CP;
-        if (V && V.MView && V.MView.Win) {
+        if (V != null && V.MView != null && V.MView.Win != null) {
             V.MView.ConQuerySize(&Cols, &Rows);
             Rows--;
         }
@@ -290,7 +290,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                     }
                 }
                 if (event.Buttons == 4) {
-                    if (SystemClipboard) {
+                    if (Config.SystemClipboard!=0) {
                         Buffer.NextCommand();
                         if (event.KeyMask == 0)
                             Buffer.BlockPasteStream();

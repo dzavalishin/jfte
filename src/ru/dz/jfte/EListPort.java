@@ -151,7 +151,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
                     List.SetPos(yy, LeftCol);
                     if (Event.Count == 2) {
                         if (List.CanActivate(List.Row)) {
-                            View.MView.Win.CaptureMouse(0);
+                            View.MView.Win.CaptureMouse(false);
                             if (List.Activate() == 1) {
                                 //View.MView.EndExec(1);
                             }
@@ -165,7 +165,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
             break;
         case evMouseAuto:
         case evMouseMove:
-            if (View.MView.MouseCaptured!=0) {
+            if (View.MView.MouseCaptured) {
                 if (Event.Buttons == 1 || Event.Buttons == 2)
                     if (yy < List.Count && yy >= 0) {
                         List.SetPos(yy, LeftCol);
@@ -174,8 +174,8 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
             }
             break;
         case evMouseUp:
-            if (View.MView.MouseCaptured!=0)
-                View.MView.Win.CaptureMouse(0);
+            if (View.MView.MouseCaptured)
+                View.MView.Win.CaptureMouse(false);
             else
                 break;
             if (Event.Buttons == 2) {
@@ -235,7 +235,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
     }
 
     void PaintView(int PaintAll) {
-        TDrawBuffer B;
+        TDrawBuffer B = new TDrawBuffer();
         int I;
         int /*ChColor*/ color;
 
@@ -247,7 +247,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         
         int W, H;
         {
-            int [] Wp, Hp;
+            int [] Wp = {0}, Hp = {0};
 
             View.MView.ConQuerySize(Wp, Hp);
             
@@ -268,7 +268,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
                        (hilit ? hcList_HilitSelect : hcList_Selected)) :
                     (mark ? (hilit ? hcList_MarkHilit : hcList_Marked) :
                      (hilit ? hcList_Hilited : hcList_Normal));
-                MoveChar(B, 0, W, ' ', color, W);
+                B.MoveChar(0, W, ' ', color, W);
                 if (I + TopRow < List.Count)
                     List.DrawLine(B, I + TopRow, LeftCol, color, W);
                 View.MView.ConPutBox(0, I, W, 1, B);
@@ -315,14 +315,14 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
             SColor = hcStatus_Active;
         else
             SColor = hcStatus_Normal;
-        MoveCh(B, ' ', SColor, W);
-        if (View.CurMsg == 0) {
-            if (List.Title)
-                MoveStr(B, 0, W, List.Title, SColor, W);
-            String s = String.format("%c%d/%d", ConGetDrawChar(DCH_V), Row + 1, List.Count);
-            MoveStr(B, W - s.length(), W, s, SColor, W);
+        B.MoveCh( ' ', SColor, W);
+        if (View.CurMsg == null) {
+            if (List.Title!=null)
+            	B.MoveStr( 0, W, List.Title, SColor, W);
+            String s = String.format("%c%d/%d", Console.ConGetDrawChar(DCH_V), Row + 1, List.Count);
+            B.MoveStr( W - s.length(), W, s, SColor, W);
         } else {
-            MoveStr(B, 0, W, View.CurMsg, SColor, W);
+        	B.MoveStr( 0, W, View.CurMsg, SColor, W);
         }
         View.MView.ConPutBox(0, H - 1, W, 1, B);
 

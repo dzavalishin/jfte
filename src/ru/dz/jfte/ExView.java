@@ -27,7 +27,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
 
     
 
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
     }
 
     boolean IsActive() {
@@ -44,7 +44,8 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
         return 1;
     }
 
-    void HandleEvent(TEvent Event) {
+    void HandleEvent(TEvent Event) throws IOException
+    {
         if (Event.What == evKeyDown && KeyDefs.kbCode(((TKeyEvent)Event).Code) == kbF12)
             Win.Parent.SelectNext(0);
     }
@@ -75,7 +76,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
         Repaint();
     }
 
-    int ConPutBox(int X, int Y, int W, int H, int /*TCell*/ Cell) {
+    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         if (Win != null)
             return Win.ConPutBox(X, Y, W, H, Cell);
         return -1;

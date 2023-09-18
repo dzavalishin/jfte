@@ -309,7 +309,7 @@ public class RxNode implements RxDefs
 	static int CountWidth(RxNode N) {
 		int w = 0;
 
-		while (N) {
+		while (N!=null) {
 			if (N.fWhat < 32) w += 0;
 			else if (N.fWhat >= 32 && N.fWhat < 64)
 				w += 1;
@@ -323,7 +323,7 @@ public class RxNode implements RxDefs
 		if (N[0] != null) {
 			RxNode No;
 			RxNode New;
-			RxNode Jump, *Skip;
+			RxNode Jump, Skip;
 			RxNode Last = N[0];
 
 			if (Last.fWhat & RE_GROUP) {
@@ -532,22 +532,6 @@ public class RxNode implements RxDefs
 	}
 
 	void RxFree(RxNode n) {
-		RxNode p;
-
-		while (n) {
-			p = n;
-			n = n.fNext;
-			switch (p.fWhat) {
-			case RE_INSET:
-			case RE_NOTINSET:
-			case RE_CHAR:
-				free(p.fChar);
-				break;
-			default:
-				break;
-			}
-			free(p);
-		}
 	}
 
 	//static final int ChClass(x) (((((x) >= 'A') && ((x) <= 'Z')) || (((x) >= 'a') && ((x) <= 'z')) || (((x) >= '0') && ((x) <= '9')))?1:0)

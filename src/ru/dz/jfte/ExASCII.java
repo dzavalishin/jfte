@@ -1,8 +1,9 @@
 package ru.dz.jfte;
 
 import java.io.Closeable;
+import java.io.IOException;
 
-public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs 
+public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs, ColorDefs 
 {
     int Pos, LPos;
     
@@ -22,7 +23,7 @@ public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs
         SLPos = LPos;
     }
 
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
     }
 
@@ -30,7 +31,7 @@ public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs
         return 1;
     }
 
-    void HandleEvent(TEvent Event) {
+    void HandleEvent(TEvent Event) throws IOException {
         int [] W = {0}, H = {0};
         
         ConQuerySize(W, H);
@@ -107,8 +108,8 @@ public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs
     }
 
     void RepaintStatus() {
-        TDrawBuffer B;
-        int [] W, H;
+        TDrawBuffer B = new TDrawBuffer();
+        int [] W = {0}, H = {0};
         
         ConQuerySize(W, H);
         
@@ -120,7 +121,7 @@ public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs
         if (LPos < 0) LPos = 0;
         
         for (int i = 0; i < W[0]; i++)
-            MoveCh(B + i, (char)(i + LPos), hcAsciiChars, 1);
+        	new PCell(B,i).MoveCh( /*B + i, */ (char)(i + LPos), hcAsciiChars, 1);
         ConSetCursorPos(Pos - LPos, H[0] - 1);
         ConShowCursor();
         ConPutBox(0, H[0] - 1, W[0], 1, B);

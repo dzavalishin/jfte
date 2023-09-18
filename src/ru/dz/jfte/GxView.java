@@ -43,10 +43,10 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
             Top = Bottom = view;
             view.Next = null;
         } else {
-            Top.Activate(0);
+            Top.Activate(false);
             view.Next = Top;
             Top = view;
-            Top.Activate(1);
+            Top.Activate(true);
         }
         Top.Resize(W[0], H[0]);
     }
@@ -57,7 +57,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         if (Top == null)
             return null;
 
-        Top.Activate(0);
+        Top.Activate(false);
 
         V = Top;
         Top = Top.Next;
@@ -65,7 +65,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         if (Top == null)
             Bottom = null;
         else {
-            Top.Activate(1);
+            Top.Activate(true);
             Top.Repaint();
         }
         V.Win = null;
@@ -101,7 +101,8 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
             return CONTEXT_NONE;
     }
 
-    void HandleEvent(TEvent pEvent) {
+    @Override
+    void HandleEvent(TEvent pEvent) throws IOException {
         super.HandleEvent(pEvent);
         Top.HandleEvent(pEvent);
 
@@ -115,7 +116,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
             if (Event.What != evMouseDown || Event.Y == H[0] - 1) {
                 switch (Event.What) {
                 case evMouseDown:
-                    if (CaptureMouse(1)!=0)
+                    if (CaptureMouse(true)!=0)
                         MouseCaptured = true;
                     else
                         break;
@@ -134,7 +135,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
                     break;
                 case evMouseUp:
                     if (MouseCaptured)
-                        CaptureMouse(0);
+                        CaptureMouse(false);
                     else
                         break;
                     MouseCaptured = false;
@@ -157,11 +158,11 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         if (Top != null) {
             Top.Repaint();
         } else {
-            TDrawBuffer B;
-            int [] X, Y;
+            TDrawBuffer B = new TDrawBuffer();
+            int [] X = {0}, Y = {0};
 
             ConQuerySize(X, Y);
-            MoveCh(B, ' ', 0x07, X);
+            B.MoveCh(' ', 0x07, X[0]);
             ConPutLine(0, 0, X[0], Y[0], B);
         }
     }
@@ -177,7 +178,8 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    void Activate(int gotfocus) {
+    @Override
+    void Activate(boolean gotfocus) {
         if (Top != null)
             Top.Activate(gotfocus);
         super.Activate(gotfocus);

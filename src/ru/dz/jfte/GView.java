@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
+
 /**
  * 
  * Must be base class with implementations. for now just text mode
@@ -126,7 +128,9 @@ public class GView {
     void Repaint() {
     }
 
-    void HandleEvent(TEvent Event) {
+    
+    void HandleEvent(TEvent Event) throws IOException 
+    {
     }
 
     void Resize(int width, int height) {
@@ -149,7 +153,7 @@ public class GView {
             if (FocusCapture != this)
                 return -1;
         Result = -2;
-        while (Result == -2 && frames != 0)
+        while (Result == -2 && GUI.frames != null)
             GUI.gui.ProcessEvent();
         NewResult = Result;
         Result = SaveRc;

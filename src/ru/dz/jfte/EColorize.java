@@ -8,7 +8,7 @@ public class EColorize
     int SyntaxParser;
     ColorKeywords Keywords; // keywords to highlight
     HMachine hm;
-    ChColor Colors[COUNT_CLR];
+    int Colors[] = new int[COUNT_CLR];
 
     static EColorize Colorizers;
     

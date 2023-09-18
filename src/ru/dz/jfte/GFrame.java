@@ -187,7 +187,7 @@ public class GFrame implements EventDefs
 	        Active.Activate(false);
 	    if (view.Next == view) {
 	        Top = Active = null;
-	        close();
+	        //close();
 	    } else {
 	        view.Next.Prev = view.Prev;
 	        view.Prev.Next = view.Next;

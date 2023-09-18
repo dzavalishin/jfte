@@ -96,7 +96,7 @@ public class EList extends EModel
     void HandleEvent(TEvent Event) {
     }
 
-    void DrawLine(long /*TCell*/ B, int Line, int Col, int /*ChColor*/ color, int Width) {
+    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
     }
 
     String FormatLine(int Line) {

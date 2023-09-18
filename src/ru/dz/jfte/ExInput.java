@@ -45,7 +45,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
     }
 
 
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
     }
 
@@ -74,7 +74,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 break;
             case kbRight | kfCtrl:
                 {
-                    int len = strlen(Line);
+                    int len = Line.length();
                     if (Pos < len) {
                         Pos++;
                         while (Pos < len) {
@@ -89,7 +89,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 Event.What = evNone;
                 break;
             case kbHome: Pos = 0; SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
-            case kbEnd: Pos = strlen(Line); SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
+            case kbEnd: Pos = Line.length(); SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
             case kbEsc: EndExec(0); Event.What = evNone; break;
             case kbEnter: 
                 AddInputHistory(HistId, Line);
@@ -99,13 +99,13 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbBackSp | kfCtrl | kfShift:
                 SelStart = SelEnd = 0; 
                 Pos = 0;
-                Line[0] = 0;
+                Line = "";
                 TabCount = 0;
                 break;
             case kbBackSp | kfCtrl:
                 if (Pos > 0) {
-                    if (Pos > strlen(Line)) {
-                        Pos = strlen(Line);
+                    if (Pos > Line.length()) {
+                        Pos = Line.length();
                     } else {
                         char Ch;
                         
@@ -131,7 +131,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 }
                 if (Pos <= 0) break;
                 Pos--;
-                if (Pos < strlen(Line))
+                if (Pos < Line.length())
                     memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
                 TabCount = 0;
                 Event.What = evNone;
@@ -143,7 +143,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     SelStart = SelEnd = 0;
                     break;
                 }
-                if (Pos < strlen(Line))
+                if (Pos < Line.length())
                     memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
                 TabCount = 0;
                 Event.What = evNone;
@@ -165,7 +165,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 {
                     int len;
 
-                    if (SystemClipboard)
+                    if (Config.SystemClipboard != 0)
                         GetPMClip();
                     
                     if (SSBuffer == 0) break;
@@ -178,7 +178,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     }
 
                     len = SSBuffer.LineChars(0);
-                    if (strlen(Line) + len < MaxLen) {
+                    if (Line.length() + len < MaxLen) {
                         memmove(Line + Pos + len, Line + Pos, strlen(Line + Pos) + 1);
                         memcpy(Line + Pos, SSBuffer.RLine(0).Chars, len);
                         TabCount = 0;
@@ -190,7 +190,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbUp:
                 SelStart = SelEnd = 0;
                 if (CurItem == 0) 
-                    strcpy(CurStr, Line);
+                    CurStr = new String(Line);
                 CurItem += 2;
             case kbDown:
                 SelStart = SelEnd = 0;
@@ -203,10 +203,10 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     if (CurItem < 0) CurItem = 0;
                     
                     if (CurItem == 0)
-                        strcpy(Line, CurStr);
+                        Line = new String(CurStr);
                     else if (GetInputHistory(HistId, Line, MaxLen, CurItem));
-                    else strcpy(Line, CurStr);
-                    Pos = strlen(Line);
+                    else Line = new String(CurStr);
+                    Pos = Line.length();
 //                    SelStart = SelEnd = 0;
                 }
                 Event.What = evNone;
@@ -222,14 +222,14 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     TabCount++;
                     if (TabCount < 1) TabCount = 1;
                     if ((TabCount == 1) && (kbCode(Event.Key.Code) == kbTab)) {
-                        strcpy(MatchStr, Line);
+                        MatchStr = new String(Line);
                     }
                     n = Comp(MatchStr, Str2, TabCount);
                     if ((n > 0) && (TabCount <= n)) {
-                        strcpy(Line, Str2);
-                        Pos = strlen(Line);
+                        Line = new String(Str2);
+                        Pos = Line.length();
                     } else if (TabCount > n) TabCount = n;
-                    free(Str2);
+                    //free(Str2);
                 }
                 SelStart = SelEnd = 0;
                 Event.What = evNone;
@@ -241,7 +241,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 {
                     char Ch;
 
-                    if( 0 != (Ch = GetCharFromEvent(Event)) && (strlen(Line) < MaxLen)) {
+                    if( 0 != (Ch = GetCharFromEvent(Event)) && (Line.length() < MaxLen)) {
                         if (SelStart < SelEnd) {
                             memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
                             Pos = SelStart;
@@ -292,11 +292,11 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
         if (LPos + FLen <= Pos) LPos = Pos - FLen + 1;
         if (Pos < LPos) LPos = Pos;
         
-        MoveChar(B, 0, W[0], ' ', hcEntry_Field, W[0]);
-        MoveStr(B, 0, W[0], Prompt, hcEntry_Prompt, FPos);
-        MoveChar(B, FPos - 2, W[0], ':', hcEntry_Prompt, 1);
-        MoveStr(B, FPos, W[0], Line + LPos, hcEntry_Field, FLen);
-        MoveAttr(B, FPos + SelStart - LPos, W[0], hcEntry_Selection, SelEnd - SelStart);
+        B.MoveChar( 0, W[0], ' ', hcEntry_Field, W[0]);
+        B.MoveStr( 0, W[0], Prompt, hcEntry_Prompt, FPos);
+        B.MoveChar( FPos - 2, W[0], ':', hcEntry_Prompt, 1);
+        B.MoveStr( FPos, W[0], Line + LPos, hcEntry_Field, FLen);
+        B.MoveAttr( FPos + SelStart - LPos, W[0], hcEntry_Selection, SelEnd - SelStart);
         ConSetCursorPos(FPos + Pos - LPos, H[0] - 1);
         ConPutBox(0, H[0] - 1, W[0], 1, B);
         ConShowCursor();

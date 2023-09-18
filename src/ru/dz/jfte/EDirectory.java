@@ -36,14 +36,14 @@ public class EDirectory extends EList
 	void DrawLine(int /*TCell*/ B, int Line, int Col, int /*ChColor*/ color, int Width) {
 	    //char s[1024];
 
-	    MoveCh(B, ' ', color, Width);
+	    B.MoveCh( ' ', color, Width);
 	    if (Files && Line >= 0 && Line < FCount) {
 	        int Year, Mon, Day, Hour, Min, Sec;
-	        struct tm *t;
+	        tm t;
 	        time_t tim;
 
 	        tim = Files[Line].MTime();
-	        t = localtime(&tim);
+	        t = localtime(tim);
 
 	        if (t) {
 	            Year = t.tm_year + 1900;
@@ -67,7 +67,7 @@ public class EDirectory extends EList
 	        s += (Files[Line].Type() == fiDIRECTORY)? SLASH : ' ';
 
 	        if (Col < s.length())
-	            MoveStr(B, 0, Width, s + Col, color, Width);
+	            B.MoveStr( 0, Width, s + Col, color, Width);
 	    }
 	}
 
@@ -338,9 +338,9 @@ public class EDirectory extends EList
 	    return 1;
 	}
 
-	int FmChDir(const String Name) {
-	    char Dir[256];
-	    char CName[256] = "";
+	int FmChDir(String Name) {
+	    String Dir;
+	    String CName = "";
 
 	    if (strcmp(Name, SSLASH) == 0) {
 	        JustRoot(Path, Dir);
@@ -427,9 +427,9 @@ public class EDirectory extends EList
 	    return APath;
 	}
 
-	void GetInfo(String AInfo, int /*MaxLen*/) {
-	    char buf[256] = {0};
-	    char winTitle[256] = {0};
+	void GetInfo(String AInfo, int MaxLen) {
+		String buf[] = {0};
+		String winTitle[] = {0};
 
 	    JustFileName(Path, buf);
 	    if (buf[0] == '\0') // if there is no filename, try the directory name.

@@ -348,7 +348,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         String [] FName;
 
         if (State.GetStrParam(this,FName) == 0) {
-            if (GetDefaultDirectory(Model, FName) == 0)
+            if (Console.GetDefaultDirectory(Model, FName) == 0)
                 return 0;
             if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return ExResult.ErFAIL;
         }
@@ -373,7 +373,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             return ExResult.ErFAIL;
         }
 
-        if (GetDefaultDirectory(Model, FName) == 0)
+        if (Console.GetDefaultDirectory(Model, FName) == 0)
             return ExResult.ErFAIL;
         if (State.GetStrParam(this, FName) == 0)
             if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return 0;
@@ -445,8 +445,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             else
                 SColor = hcStatus_Normal;
 
-            MoveChar(B, 0, Cols[0], ' ', SColor, Cols[0]);
-            MoveStr(B, 0, Cols[0], CurMsg, SColor, Cols[0]);
+            B.MoveChar( 0, Cols[0], ' ', SColor, Cols[0]);
+            B.MoveStr( 0, Cols[0], CurMsg, SColor, Cols[0]);
             if (MView.Win.GetStatusContext() == MView)
                 MView.ConPutBox(0, Rows[0] - 1, Cols[0], 1, B);
             //printf("%s\n", Msg);

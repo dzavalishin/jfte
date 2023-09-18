@@ -35,7 +35,7 @@ public class Console {
 	{
 	}
 
-	static int ConSetBox(int X, int Y, int W, int H, TCell Cell) /*FOLD00*/
+	static int ConSetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
 	}
 	
@@ -156,6 +156,21 @@ public class Console {
 	    if (ChangeDir(Path) == -1)
 	        return 0;
 	    return 1;
+	}
+
+	public static void ConSetTitle(String title, String sTitle) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static int ConGetTitle(String[] title, String[] sTitle) {
+		// TODO Auto-generated method stub
+		//return 0;
+	}
+
+	public static TEvent ConGetEvent(int i, int j, int k, int l) {
+		// TODO Auto-generated method stub
+		//return null;
 	}
 	
 	

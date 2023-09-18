@@ -53,23 +53,23 @@ public class GViewPeer implements ColorDefs, EventDefs
     } */
 
     int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
-        return ::ConPutBox(X + wX, Y + wY, W, H, Cell);
+        return Console.ConPutBox(X + wX, Y + wY, W, H, Cell);
     }
 
     int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
-        return ::ConGetBox(X + wX, Y + wY, W, H, Cell);
+        return Console.ConGetBox(X + wX, Y + wY, W, H, Cell);
     }
 
     int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
-        return ::ConPutLine(X + wX, Y + wY, W, H, Cell);
+        return Console.ConPutLine(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConSetBox(int X, int Y, int W, int H, long /*TCell*/ Cell) {
-        return ::ConSetBox(X + wX, Y + wY, W, H, Cell);
+    int ConSetBox(int X, int Y, int W, int H, PCell Cell) {
+        return Console.ConSetBox(X + wX, Y + wY, W, H, Cell);
     }
 
     int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) {
-        return ::ConScroll(Way, X + wX, Y + wY, W, H, Fill, Count);
+        return Console.ConScroll(Way, X + wX, Y + wY, W, H, Fill, Count);
     }
         
     int ConSetSize(int X, int Y) {
@@ -92,7 +92,7 @@ public class GViewPeer implements ColorDefs, EventDefs
         cX = X;
         cY = Y;
         if(0 != (wState & sfFocus))
-            return ::ConSetCursorPos(cX + wX, cY + wY);
+            return Console.ConSetCursorPos(cX + wX, cY + wY);
         else
             return 1;
     }
@@ -106,7 +106,7 @@ public class GViewPeer implements ColorDefs, EventDefs
     int ConShowCursor() {
         cVisible = true;
         if(0 != (wState & sfFocus))
-            return ::ConShowCursor();
+            return Console.ConShowCursor();
         else
             return 1;
     }
@@ -114,7 +114,7 @@ public class GViewPeer implements ColorDefs, EventDefs
     int ConHideCursor() {
         cVisible = false;
         if(0 != (wState & sfFocus))
-            return ::ConHideCursor();
+            return Console.ConHideCursor();
         else
             return 1;
     }
@@ -127,7 +127,7 @@ public class GViewPeer implements ColorDefs, EventDefs
         cStart = Start;
         cEnd = End;
         if(0 != (wState & sfFocus))
-            return ::ConSetCursorSize(Start, End);
+            return Console.ConSetCursorSize(Start, End);
         else
             return 1;
     }
@@ -222,8 +222,8 @@ public class GViewPeer implements ColorDefs, EventDefs
     int DrawScrollBar() {
         TDrawBuffer B = new TDrawBuffer();
         int NRows, NCols, I;
-        char fore = ConGetDrawChar(DCH_HFORE);
-        char back = ConGetDrawChar(DCH_HBACK);
+        char fore = Console.ConGetDrawChar(DCH_HFORE);
+        char back = Console.ConGetDrawChar(DCH_HBACK);
         
         int W, H;
         {
@@ -234,9 +234,9 @@ public class GViewPeer implements ColorDefs, EventDefs
         }
 
         if (GFrame.ShowVScroll) {
-            B.MoveCh(ConGetDrawChar(DCH_AUP), hcScrollBar_Arrows, 1);
+            B.MoveCh(Console.ConGetDrawChar(DCH_AUP), hcScrollBar_Arrows, 1);
             ConPutBox(W, 0, 1, 1, B);
-            B.MoveCh(ConGetDrawChar(DCH_ADOWN), hcScrollBar_Arrows, 1);
+            B.MoveCh(Console.ConGetDrawChar(DCH_ADOWN), hcScrollBar_Arrows, 1);
             ConPutBox(W, H - 1, 1, 1, B);
             
             NRows = H - 2;
@@ -258,9 +258,9 @@ public class GViewPeer implements ColorDefs, EventDefs
             }
         }
         if (GFrame.ShowHScroll) {
-            B.MoveCh(ConGetDrawChar(DCH_ALEFT), hcScrollBar_Arrows, 1);
+            B.MoveCh(Console.ConGetDrawChar(DCH_ALEFT), hcScrollBar_Arrows, 1);
             ConPutBox(0, H, 1, 1, B);
-            B.MoveCh(ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
+            B.MoveCh(Console.ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
             ConPutBox(W - 1, H, 1, 1, B);
             
             NCols = W - 2;

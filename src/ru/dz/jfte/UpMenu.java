@@ -271,7 +271,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			do {
 				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, 1);
 				if( 0!= (E.What & evNotify))
-					GUI.gui.DispatchEvent(frames, frames.Active, E);
+					GUI.gui.DispatchEvent(GUI.frames, GUI.frames.Active, E);
 			} while( 0!= (E.What & evNotify));
 			if( 0!= (E.What & evMouse)) {
 				//fprintf(stderr, "Mouse: %d %d %d\n", E.What, E.X, E.Y);
@@ -312,7 +312,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						if (Menus[id].Items[cur].SubMenu < 0) {
 							TMsgEvent ne = new TMsgEvent(evCommand);
 							//E.What = evCommand;
-							ne.View = frames.Active;
+							ne.View = GUI.frames.Active;
 							ne.Command = Menus[id].Items[cur].Cmd;
 							E = ne;
 							abort = 1;
@@ -331,23 +331,23 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						char cc;
 						int i;
 
-						cc = (char)(toupper((char)(E.Key.Code & 0xFF)));
+						cc = Character.toUpperCase((char)(E.Key.Code & 0xFF));
 
 						for (i = 0; i < Menus[id].Count; i++) {
 							if (Menus[id].Items[i].Name!=null) {
 								char []o = strchr(Menus[id].Items[i].Name, '&');
 								if (o)
-									if (toupper(o[1]) == cc) {
+									if (Character.toUpperCase(o[1]) == cc) {
 										cur = i;
 										if (cur != -1) {
 											if (Menus[id].Items[cur].SubMenu == -1) {
 												//E.What = evCommand;
-												//E.Msg.View = frames.Active;
+												//E.Msg.View = GUI.frames.Active;
 												//E.Msg.Command = Menus[id].Items[cur].Cmd;
 
 												TMsgEvent ne = new TMsgEvent(evCommand);
 												//E.What = evCommand;
-												ne.View = frames.Active;
+												ne.View = GUI.frames.Active;
 												ne.Command = Menus[id].Items[cur].Cmd;
 												E = ne;
 												abort = 1;
@@ -445,7 +445,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					if (E.X >= x && E.Y >= y &&
 							E.X < x + w && E.Y < y + h);
 					else {
-						gui.ConPutEvent(E);
+						GUI.gui.ConPutEvent(E);
 						abort = -3;
 					}
 				} else {
@@ -453,7 +453,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							Menus[id].Items[cur].SubMenu == -1)
 					{
 						E.What = evCommand;
-						E.Msg.View = frames.Active;
+						E.Msg.View = GUI.frames.Active;
 						E.Msg.Command = Menus[id].Items[cur].Cmd;
 						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items[cur].Cmd);
 						abort = 1;
@@ -476,7 +476,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 	static int ExecMainMenu(TEvent E, char sub) 
 	{
 		int cur = 0;
-		int id = GetMenuId(frames.Menu);
+		int id = GetMenuId(GUI.frames.Menu);
 		int abort;
 		int dovert = 1;
 		int rx;
@@ -503,7 +503,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				if (Menus[id].Items[i].Name!=null) {
 					char []o = strchr(Menus[id].Items[i].Name, '&');
 					if (o)
-						if (toupper(o[1]) == toupper(sub)) {
+						if (Character.toUpperCase(o[1]) == Character.toUpperCase(sub)) {
 							cur = i;
 							break;
 						}
@@ -536,9 +536,9 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			}
 			Console.ConHideCursor();
 			do {
-				E = ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, 1);
+				E = Console.ConGetEvent(evCommand | evMouseDown | evMouseMove | evMouseUp | evKeyDown | evNotify, -1, 1);
 				if(0 != (E.What & evNotify))
-					GUI.gui.DispatchEvent(frames, frames.Active, E);
+					GUI.gui.DispatchEvent(GUI.frames, GUI.frames.Active, E);
 			} while(0 != (E.What & evNotify));
 			dovert = 0;
 			switch (E.What) {
@@ -574,7 +574,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					if (cur != -1) {
 						if (Menus[id].Items[cur].SubMenu == -1) {
 							E.What = evCommand;
-							E.Msg.View = frames.Active;
+							E.Msg.View = GUI.frames.Active;
 							E.Msg.Command = Menus[id].Items[cur].Cmd;
 							abort = 1;
 						} else {
@@ -587,18 +587,18 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						char cc;
 						int i;
 
-						cc = (char)(toupper(char(E.Key.Code & 0xFF)));
+						cc = Character.toUpperCase((char)(E.Key.Code & 0xFF));
 
 						for (i = 0; i < Menus[id].Count; i++) {
-							if (Menus[id].Items[i].Name) {
+							if (Menus[id].Items[i].Name != null) {
 								char []o = strchr(Menus[id].Items[i].Name, '&');
 								if (o)
-									if (toupper(o[1]) == cc) {
+									if (Character.toUpperCase(o[1]) == cc) {
 										cur = i;
 										if (cur != -1) {
 											if (Menus[id].Items[cur].SubMenu == -1) {
 												E.What = evCommand;
-												E.Msg.View = frames.Active;
+												E.Msg.View = GUI.frames.Active;
 												E.Msg.Command = Menus[id].Items[cur].Cmd;
 												abort = 1;
 											} else {
@@ -645,7 +645,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							Menus[id].Items[cur].SubMenu == -1) 
 					{
 						E.What = evCommand;
-						E.Msg.View = frames.Active;
+						E.Msg.View = GUI.frames.Active;
 						E.Msg.Command = Menus[id].Items[cur].Cmd;
 						abort = 1;
 					}

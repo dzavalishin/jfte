@@ -33,7 +33,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
         if (Line < BCount)
             if (Col < int(strlen(BList[Line])))
-                MoveStr(B, 0, Width, BList[Line] + Col, color, Width);
+                B.MoveStr( 0, Width, BList[Line] + Col, color, Width);
     }
 
     String FormatLine(int Line) {
@@ -47,7 +47,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         
         BList = null;
         BCount = 0;
-        while (B) {
+        while (B != null) {
             BCount++;
             B = B.Next;
             if (B == ActiveModel) break;
