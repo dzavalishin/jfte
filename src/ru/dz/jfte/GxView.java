@@ -12,7 +12,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     ExView GetStatusContext() { if (Top != null) return Top.GetStatusContext(); else return null; }
     ExView GetViewContext() { if (Top != null) return Top.GetViewContext(); else return null; }
     
-    int IsModelView() { return (Top != null) ? Top.IsModelView() : 0; }
+    boolean IsModelView() { return (Top != null) ? Top.IsModelView() : false; }
 
     
     GxView(GFrame Parent) {
@@ -82,7 +82,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return null;
     }
 
-    ExResult ExecCommand(int Command, ExState State) {
+    ExResult ExecCommand(ExCommands Command, ExState State) {
         if (Top != null)
             return Top.ExecCommand(Command, State);
         return ExResult.ErFAIL;

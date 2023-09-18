@@ -89,7 +89,7 @@ public class GUI implements GuiDefs, EventDefs
 		return 1;
 	}
 
-	int ShowEntryScreen() { /*FOLD00
+	ExResult ShowEntryScreen() { /*FOLD00
 	    TEvent E;
 
 	    ConHideMouse();

@@ -300,4 +300,21 @@ public interface ModeDefs {
 	public static final int   GUIDLG_FINDREPLACE = 0x00000020;
 
 
+	/* history values */
+	public static final int HIST_DEFAULT   = 0;
+	public static final int HIST_PATH      = 1;
+	public static final int HIST_SEARCH    = 2;
+	public static final int HIST_POSITION  = 3;
+	public static final int HIST_SETUP     = 4;
+	public static final int HIST_SHELL     = 5;
+	public static final int HIST_COMPILE   = 6;
+	public static final int HIST_SEARCHOPT = 7;
+	public static final int HIST_BOOKMARK  = 8;
+	public static final int HIST_REGEXP    = 9;
+	public static final int HIST_TRANS     =10;
+	public static final int HIST_TAGFILES  =11;
+	public static final int HIST_CVS       =12;
+	public static final int HIST_CVSDIFF   =13;
+	public static final int HIST_CVSCOMMIT =14;
+	
 }

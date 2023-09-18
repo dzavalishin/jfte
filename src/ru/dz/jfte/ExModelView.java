@@ -8,6 +8,7 @@ public class ExModelView extends ExView
     boolean MouseCaptured = false;
     boolean MouseMoved = false;
 
+    boolean IsModelView() { return true; }
 
     
     ExModelView(EView AView) {

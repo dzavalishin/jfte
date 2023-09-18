@@ -730,5 +730,10 @@ public enum ExCommands {
     /// Unmark all lines in list
     ExListToggleMarkAll
     /// Toggle marking of all lines in list
+;
+
+	static ExCommands byOrdinal(int ordinal) {
+		return values()[ordinal];
+	}
 	
 }

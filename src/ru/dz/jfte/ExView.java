@@ -15,7 +15,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
 	}
     
     
-    int IsModelView() { return 0; }
+    boolean IsModelView() { return false; }
     void WnSwitchBuffer(EModel M) { Next.WnSwitchBuffer(M); }
 
     void Repaint() { RepaintStatus(); RepaintView(); }
@@ -38,7 +38,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
 
     EEventMap GetEventMap() { return null; }
 
-    ExResult ExecCommand(int Command, ExState State) { return ExResult.ErFAIL; }
+    ExResult ExecCommand(ExCommands Command, ExState State) { return ExResult.ErFAIL; }
 
     int BeginMacro() {
         return 1;

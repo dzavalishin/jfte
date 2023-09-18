@@ -135,8 +135,8 @@ public class EModel implements ModeDefs
 			View.SetMsg(msgbuftmp);
 	}
 
-	int CanQuit() {
-		return 1;
+	boolean CanQuit() {
+		return true;
 	}
 
 	int ConfQuit(GxView  V, int multiFile) {
