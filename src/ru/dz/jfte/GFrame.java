@@ -12,7 +12,7 @@ public class GFrame implements EventDefs
     static boolean ShowHScroll = true;
     static boolean ShowMenuBar = true;
     static boolean ShowToolBar = false;
-    static boolean HaveGUIDialogs = false; // no gui dialogs in text gui
+    static int HaveGUIDialogs = 0; // no gui dialogs in text gui
     
 	
 	GFrame(int XSize, int YSize) {

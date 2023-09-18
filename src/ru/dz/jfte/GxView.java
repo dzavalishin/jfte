@@ -192,7 +192,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     }
 
     int GetStr(String Prompt, String []Str, int HistId) {
-        if ((GFrame.HaveGUIDialogs & GUIDLG_PROMPT) && Config.GUIDialogs) {
+        if (0 != (GFrame.HaveGUIDialogs & GUIDLG_PROMPT) && 0 != Config.GUIDialogs) {
             return DLGGetStr(this, Prompt, Str, HistId, 0);
         } else {
             return ReadStr(Prompt, Str, null, 1, HistId);
@@ -200,7 +200,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     }
 
     int GetFile(String Prompt, String []Str, int HistId, int Flags) {
-        if ((GFrame.HaveGUIDialogs & GUIDLG_FILE) && Config.GUIDialogs)
+        if ( 0 != (GFrame.HaveGUIDialogs & GUIDLG_FILE) && 0 != Config.GUIDialogs)
             return DLGGetFile(this, Prompt, BufLen, Str, Flags);
         else
             return ReadStr(Prompt, Str, CompletePath, SelectPathname, HistId);
@@ -325,5 +325,45 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
         return rc;
     }
+
+    
+    
+    
+    
+
+    // TODO placeholders?
+    
+    static int DLGGetFile(GView v, String Prompt,  String [] FileName, int Flags) {
+        assert(1==0);
+        return 0;
+    }
+
+    static int DLGPickChoice(GView v, String ATitle, int NSel, Object[] ap, int Flags) {
+        assert(1==0);
+        return 0;
+    }
+
+    static int DLGGetFind(GView View, SearchReplaceOptions [] sr) {
+        assert(1==0);
+        return 0;
+    }
+
+    static int DLGGetFindReplace(GView View, SearchReplaceOptions []sr) {
+        assert(1==0);
+        return 0;
+    }
+
+    static int DLGGetStr(GView View, String Prompt, String Str, int HistId, int Flags) {
+        assert(1 == 0);
+        return 0;
+    }
+
+
+    
+    
+    
+    
+    
+    
     
 }

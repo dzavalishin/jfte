@@ -277,5 +277,14 @@ public interface ModeDefs {
 
     // etc
     public static final int  ABBREV_HASH      = 16;
+
+    // GUI
+    public static final int   GUIDLG_CHOICE      = 0x00000001;
+    public static final int   GUIDLG_PROMPT      = 0x00000002;
+    public static final int   GUIDLG_PROMPT2     = 0x00000004;
+    public static final int   GUIDLG_FILE        = 0x00000008;
+    public static final int   GUIDLG_FIND        = 0x00000010;
+    public static final int   GUIDLG_FINDREPLACE = 0x00000020;
+    
     
 }
