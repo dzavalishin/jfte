@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class EBufferFlags {
+public class EBufferFlags implements ModeDefs 
+{
 	int num[];// = new Integer [BFI_COUNT];
 	String str[];// = new String[BFS_COUNT];
 	char WordChars[] = null;
@@ -104,9 +105,9 @@ public class EBufferFlags {
 		for (int i = 0; i < 256; i++)
 		{
 			if (Character.isAlphabetic(i) || Character.isDigit(i) || (i == '_')) {
-				WSETBIT(DefaultWordChars, i, 1);
+				ModeDefs.WSETBIT(DefaultWordChars, i, 1);
 				if ((i >= 'A' && i <= 'Z') || Character.isUpperCase(i))
-					WSETBIT(DefaultCapitalChars, i, 1);
+					ModeDefs.WSETBIT(DefaultCapitalChars, i, 1);
 			}
 		}
 	}

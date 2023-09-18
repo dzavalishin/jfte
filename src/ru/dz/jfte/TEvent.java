@@ -76,7 +76,7 @@ class TMsgEvent extends TEvent
 	long Param1 = 0;
 	Object Param2 = null;
 
-	public TMsgEvent(int w, int c, char p1) {
+	public TMsgEvent(int w, int c, int p1) {
 		What = w;
 		Command = c;
 		Param1 = p1;

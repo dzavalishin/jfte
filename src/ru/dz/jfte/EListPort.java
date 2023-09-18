@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 
-public class EListPort extends EViewPort implements Closeable, ColorDefs, EventDefs 
+public class EListPort extends EViewPort implements Closeable, ColorDefs, EventDefs, ModeDefs 
 {
     EList List;
     int Row, TopRow, LeftCol;
@@ -121,7 +121,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         
         //View.MView.ConQuerySize(&W, &H);
         {
-            int [] Wp, Hp;
+            int [] Wp= {0}, Hp = {0};
 
             View.MView.ConQuerySize(Wp, Hp);
             
@@ -141,8 +141,8 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         case evMouseDown:
             if (Event.Y == H - 1)
                 break;
-            if (View.MView.Win.CaptureMouse(1))
-                View.MView.MouseCaptured = 1;
+            if (View.MView.Win.CaptureMouse(true)!=0)
+                View.MView.MouseCaptured = true;
             else
                 break;
             
@@ -152,7 +152,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
                     if (Event.Count == 2) {
                         if (List.CanActivate(List.Row)) {
                             View.MView.Win.CaptureMouse(false);
-                            if (List.Activate() == 1) {
+                            if (List.Activate() == ExResult.ErOK) {
                                 //View.MView.EndExec(1);
                             }
                         }
@@ -192,7 +192,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
                     MName = "Local";
                 View.MView.Win.Parent.PopupMenu(MName);
             }
-            View.MView.MouseCaptured = 0;
+            View.MView.MouseCaptured = false;
             Event.What = evNone;
             break;
         }

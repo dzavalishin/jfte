@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
-public class EDirectory extends EList 
+import java.util.Arrays;
+
+public class EDirectory extends EList implements EventDefs 
 {
 
 	String Path;
@@ -33,7 +35,7 @@ public class EDirectory extends EList
 	    return EEventMap.FindEventMap("DIRECTORY");
 	}
 
-	void DrawLine(int /*TCell*/ B, int Line, int Col, int /*ChColor*/ color, int Width) {
+	void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
 	    //char s[1024];
 
 	    B.MoveCh( ' ', color, Width);
@@ -75,6 +77,7 @@ public class EDirectory extends EList
 	    return (Line >= 0 && Line < FCount) ? Files[Line].Type() == fiDIRECTORY : 0;
 	}
 
+	/*
 	int  FileNameCmp(const void *a, const void *b) {
 	    FileInfo *A = *(FileInfo **)a;
 	    FileInfo *B = *(FileInfo **)b;
@@ -86,7 +89,7 @@ public class EDirectory extends EList
 	        return -1;
 
 	    return filecmp(A.Name(), B.Name());
-	}
+	}*/
 
 	void RescanList() {
 	    String Dir;
@@ -110,13 +113,12 @@ public class EDirectory extends EList
 
 	    rc = ff.FindFirst(fi);
 	    while (rc == 0) {
-	        assert(fi != 0);
+	        assert(fi != null);
 	        if (strcmp(fi.Name(), ".") != 0) {
-	            Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
-	            if (Files == 0)
+	            //Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
+	        	Files = Arrays.copyOf(Files, (FCount | 255) + 1);
+	            if (Files == null)
 	            {
-	                delete fi;
-	                delete ff;
 	                return;
 	            }
 
@@ -127,23 +129,22 @@ public class EDirectory extends EList
 	                DirCount++;
 	            Count++;
 	            FCount++;
-	        } else
-	            delete fi;
-	        rc = ff.FindNext(&fi);
+	        }
+	        
+	        rc = ff.FindNext(fi);
 	    }
-	    delete ff;
+	    //delete ff;
 
 	    {
-	        char CTitle[256];
 
-	        sprintf(CTitle, "%d files%c%d dirs%c%d bytes%c%-200.200s",
-	                FCount, ConGetDrawChar(DCH_V),
-	                DirCount, ConGetDrawChar(DCH_V),
-	                SizeCount, ConGetDrawChar(DCH_V),
+	        String CTitle = String.format("%d files%c%d dirs%c%d bytes%c%-200.200s",
+	                FCount, Console.ConGetDrawChar(DCH_V),
+	                DirCount, Console.ConGetDrawChar(DCH_V),
+	                SizeCount, Console.ConGetDrawChar(DCH_V),
 	                Dir);
 	        SetTitle(CTitle);
 	    }
-	    qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);
+	    // TODO qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);
 	    NeedsRedraw = 1;
 	}
 
@@ -157,33 +158,33 @@ public class EDirectory extends EList
 
 	    JustDirectory(Path, FilePath);
 	    Slash(FilePath, 1);
-	    strcat(FilePath, Files[No].Name());
+	    FilePath += Files[No].Name();
 	    return IsDirectory(FilePath);
 	}
 
-	int ExecCommand(int Command, ExState State) {
+	ExResult ExecCommand(ExCommands Command, ExState State) {
 	    switch (Command) {
 	    case ExActivateInOtherWindow:
 	        SearchLen = 0;
 	        Msg(S_INFO, "");
-	        if (Files && Row >= 0 && Row < FCount) {
+	        if (Files != null && Row >= 0 && Row < FCount) {
 	            if (isDir(Row)) {
 	            } else {
 	                return FmLoad(Files[Row].Name(), View.Next);
 	            }
 	        }
-	        return ErFAIL;
+	        return ExResult.ErFAIL;
 
 	    case ExRescan:
 	        if (RescanDir() == 0)
-	            return ErFAIL;
-	        return ErOK;
+	            return ExResult.ErFAIL;
+	        return ExResult.ErOK;
 
 	    case ExDirGoUp:
 	        SearchLen = 0;
 	        Msg(S_INFO, "");
 	        FmChDir(SDOT SDOT);
-	        return ErOK;
+	        return ExResult.ErOK;
 
 	    case ExDirGoDown:
 	        SearchLen = 0;
@@ -191,10 +192,10 @@ public class EDirectory extends EList
 	        if (Files && Row >= 0 && Row < FCount) {
 	            if (isDir(Row)) {
 	                FmChDir(Files[Row].Name());
-	                return ErOK;
+	                return ExResult.ErOK;
 	            }
 	        }
-	        return ErFAIL;
+	        return ExResult.ErFAIL;
 
 	    case ExDirGoto:
 	        SearchLen = 0;
@@ -205,13 +206,13 @@ public class EDirectory extends EList
 	        SearchLen = 0;
 	        Msg(S_INFO, "");
 	        FmChDir(SSLASH);
-	        return ErOK;
+	        return ExResult.ErOK;
 
 	    case ExDirSearchCancel:
 	        // Kill search when moving
 	        SearchLen = 0;
 	        Msg(S_INFO, "");
-	        return ErOK;
+	        return ExResult.ErOK;
 
 	    case ExDirSearchNext:
 	        // Find next matching file, search is case in-sensitive while sorting is sensitive
@@ -223,7 +224,7 @@ public class EDirectory extends EList
 	                }
 	            }
 	        }
-	        return ErOK;
+	        return ExResult.ErOK;
 
 	    case ExDirSearchPrev:
 	        // Find prev matching file, search is case in-sensitive while sorting is sensitive
@@ -235,7 +236,7 @@ public class EDirectory extends EList
 	                }
 	            }
 	        }
-	        return ErOK;
+	        return ExResult.ErOK;
 
 	    case ExDeleteFile:
 	        SearchLen = 0;

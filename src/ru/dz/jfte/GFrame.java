@@ -330,5 +330,16 @@ public class GFrame implements EventDefs
 
 	    UpMenu.DrawHMenu(0, 0, id, -1);
 	}
+
+	
+	int PopupMenu(String Name) {
+	    //NextEvent.What = evCommand;
+	    //NextEvent.Msg.Command = cmPopupMenu;
+	    //NextEvent.Msg.Param1 = GetMenuId(Name);
+	    
+	    GUI.NextEvent = new TMsgEvent(evCommand, cmPopupMenu, UpMenu.GetMenuId(Name));
+	    return 0;
+	}
+	
 	
 }

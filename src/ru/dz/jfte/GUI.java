@@ -288,9 +288,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else if (y == wY + wH - 1) {
@@ -302,9 +302,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else if (y < wY + view.Peer.SbVBegin + 1) {
@@ -316,9 +316,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (1);
 	    } else if (y > wY + view.Peer.SbVEnd + 1) {
@@ -330,9 +330,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else {
@@ -348,9 +348,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    }
@@ -375,9 +375,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else if (x == wX + wW - 1) {
@@ -389,9 +389,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else if (x < wX + view.Peer.SbHBegin + 1) {
@@ -403,9 +403,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else if (x > wX + view.Peer.SbHEnd + 1) {
@@ -435,9 +435,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    }

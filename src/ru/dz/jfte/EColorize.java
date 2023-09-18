@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public class EColorize 
+public class EColorize implements ModeDefs
 {
     String Name;
     EColorize Next;

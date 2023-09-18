@@ -2,6 +2,7 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class EMessages extends EList implements Closeable 
 {
@@ -20,7 +21,7 @@ public class EMessages extends EList implements Closeable
     String MsgBuf;
     aDir   curr_dir = null;                       // top of dir stack.
 
-
+    static EMessages CompilerMsgs = null;
     
     EMessages(int createFlags, EModel []ARoot, String ADir, String ACommand) 
     {
@@ -34,7 +35,7 @@ public class EMessages extends EList implements Closeable
     public void close() {
         GUI.gui.ClosePipe(PipeId);
         FreeErrors();
-        CompilerMsgs = 0;
+        CompilerMsgs = null;
     }
 
 
@@ -77,12 +78,12 @@ public class EMessages extends EList implements Closeable
     }
 
     void AddFileError(EBuffer B, int err) {
-        char bk[16];
-        EPoint P;
+        EPoint P = new EPoint();
 
         assert(err >= 0 && err < ErrCount);
 
-        sprintf(bk, "_MSG.%d", err);
+        String bk = String.format("_MSG.%d", err);
+        
         P.Col = 0;
         P.Row = ErrList[err].line - 1; // offset 0
 
@@ -98,7 +99,7 @@ public class EMessages extends EList implements Closeable
 
     void FindFileErrors(EBuffer B) {
         for (int i = 0; i < ErrCount; i++)
-            if (ErrList[i].Buf == 0 && ErrList[i].file != 0) {
+            if (ErrList[i].Buf == null && ErrList[i].file != null) {
                 if (filecmp(B.FileName, ErrList[i].file) == 0) {
                     AddFileError(B, i);
                 }
@@ -106,7 +107,7 @@ public class EMessages extends EList implements Closeable
     }
 
     int RunPipe(String ADir, String ACommand) {
-        if (!KeepMessages)
+        if (Config.KeepMessages==0)
             FreeErrors();
         
         Command = ACommand;
@@ -119,15 +120,12 @@ public class EMessages extends EList implements Closeable
         Row = ErrCount - 1;
 
         {
-            char s[2 * MAXPATH * 4];
-
-            sprintf(s, "[running '%s' in '%s']", Command, Directory);
+            String s = String.format("[running '%s' in '%s']", Command, Directory);
             AddError(0, -1, 0, s);
         }
 
         {
-            char s[MAXPATH * 2];
-            sprintf(s, "Messages [%s]: %s", Directory, Command);
+        	String s = String.format("Messages [%s]: %s", Directory, Command);
             SetTitle(s);
         }
         
@@ -140,34 +138,34 @@ public class EMessages extends EList implements Closeable
         return EEventMap.FindEventMap("MESSAGES");
     }
 
-    int ExecCommand(int Command, ExState State) {
+    ExResult ExecCommand(ExCommands Command, ExState State) {
         switch (Command) {
         case ExChildClose:
             if (Running == 0 || PipeId == -1)
                 break;
-            ReturnCode = gui.ClosePipe(PipeId);
+            ReturnCode = GUI.gui.ClosePipe(PipeId);
             PipeId = -1;
             Running = 0;
             {
-                char s[30];
-                
-                sprintf(s, "[aborted, status=%d]", ReturnCode);
+                String s = String.format("[aborted, status=%d]", ReturnCode);
                 AddError(0, -1, 0, s);
             }
-            return ErOK;
+            return ExResult.ErOK;
             
         case ExActivateInOtherWindow:
             ShowError(View.Next, Row);
-            return ErOK;
+            return ExResult.ErOK;
         }
-        return EList::ExecCommand(Command, State);
+        return super.ExecCommand(Command, State);
     }
 
-    void AddError(Error p) {
+    void AddError(Error p) 
+    {
         ErrCount++;
-        ErrList = (Error **) realloc(ErrList, sizeof(void *) * ErrCount);
+        //ErrList = (Error **) realloc(ErrList, sizeof(void *) * ErrCount);
+        ErrList = Arrays.copyOf(ErrList, ErrCount);
         ErrList[ErrCount - 1] = p;
-        ErrList[ErrCount - 1].Buf = 0;
+        ErrList[ErrCount - 1].Buf = null;
         FindErrorFile(ErrCount - 1);
 
         if (ErrCount > Count)
@@ -192,33 +190,32 @@ public class EMessages extends EList implements Closeable
     }
 
     void FreeErrors() {
-        if (ErrList) {
+        if (ErrList!=null) {
             for (int i = 0; i < ErrCount; i++) {
-                if (ErrList[i].Buf != 0) {
-                    char bk[16];
-                    sprintf(bk, "_MSG.%d", i);
-                    ((EBuffer *)(ErrList[i].Buf)).RemoveBookmark(bk);
+                if (ErrList[i].Buf != null) {
+                    String bk = String.format("_MSG.%d", i);
+                    ((EBuffer)(ErrList[i].Buf)).RemoveBookmark(bk);
                 }
             }
         }
         ErrCount = 0;
-        ErrList = 0;
+        ErrList = null;
         BufLen = BufPos = 0;
     }
 
-    int GetLine(String Line, int maxim) {
+    int GetLine(String [] Line, int maxim) {
         int rc;
         String p;
         int l;
         
         //fprintf(stderr, "GetLine: %d\n", Running);
         
-        *Line = 0;
+        Line[0] = null;
         if (Running && PipeId != -1) {
-            rc = gui.ReadPipe(PipeId, MsgBuf + BufLen, sizeof(MsgBuf) - BufLen);
+            rc = GUI.gui.ReadPipe(PipeId, MsgBuf + BufLen, sizeof(MsgBuf) - BufLen);
             //fprintf(stderr, "GetLine: ReadPipe rc = %d\n", rc);
             if (rc == -1) {
-                ReturnCode = gui.ClosePipe(PipeId);
+                ReturnCode = GUI.gui.ClosePipe(PipeId);
                 PipeId = -1;
                 Running = 0;
             }

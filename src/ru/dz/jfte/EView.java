@@ -534,7 +534,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         String [] Cmd     = {""};
         String [] Command = {""};
 
-        if (CompilerMsgs != null && CompilerMsgs.Running) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
             Msg(S_INFO, "Already running...");
             return ExResult.ErFAIL;
         }
@@ -560,7 +560,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
     ExResult RunCompiler(ExState State) {
         String [] Command = {""};
 
-        if (CompilerMsgs != 0 && CompilerMsgs.Running) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
             Msg(S_INFO, "Already running...");
             return 0;
         }
@@ -581,37 +581,37 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         String [] Dir = {""};
         EMessages msgs;
         
-        if (CompilerMsgs != 0) {
-            Dir[0] = CompilerMsgs.Directory;
-            CompilerMsgs.RunPipe(Dir[0], Command);
-            msgs = CompilerMsgs;
+        if (EMessages.CompilerMsgs != null) {
+            Dir[0] = EMessages.CompilerMsgs.Directory;
+            EMessages.CompilerMsgs.RunPipe(Dir[0], Command);
+            msgs = EMessages.CompilerMsgs;
         } else {
-            if (GetDefaultDirectory(Model, Dir) == 0)
+            if (Console.GetDefaultDirectory(Model, Dir) == 0)
                 return ExResult.ErFAIL;
 
-            msgs = new EMessages(0, &EModel.ActiveModel, Dir[0], Command);
+            msgs = new EMessages(0, EModel.ActiveModel, Dir[0], Command);
         }
         SwitchToModel(msgs);
         return ExResult.ErOK;
     }
 
     ExResult ViewMessages(ExState State) {
-        if (CompilerMsgs != 0) {
-            SwitchToModel(CompilerMsgs);
+        if (EMessages.CompilerMsgs != null) {
+            SwitchToModel(EMessages.CompilerMsgs);
             return ExResult.ErOK;
         }
         return ExResult.ErFAIL;
     }
 
     ExResult CompilePrevError(ExState State) {
-        if (CompilerMsgs != 0)
-            return CompilerMsgs.CompilePrevError(this);
+        if (EMessages.CompilerMsgs != null)
+            return EMessages.CompilerMsgs.CompilePrevError(this);
         return ExResult.ErFAIL;
     }
 
     ExResult CompileNextError(ExState State) {
-        if (CompilerMsgs != 0)
-            return CompilerMsgs.CompileNextError(this);
+        if (EMessages.CompilerMsgs != null)
+            return EMessages.CompilerMsgs.CompileNextError(this);
         return ExResult.ErFAIL;
     }
 
@@ -622,7 +622,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
     }
 
     ExResult ViewModeMap(ExState State) {
-        if (TheEventMapView != 0)
+        if (TheEventMapView != null)
             TheEventMapView.ViewMap(GetEventMap());
         else
             new EventMapView(0, EModel.ActiveModel, GetEventMap());
@@ -634,13 +634,13 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
     }
 
     ExResult ClearMessages() {
-        if (CompilerMsgs != 0 && CompilerMsgs.Running) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
             Msg(S_INFO, "Running...");
             return ExResult.ErFAIL;
         }
-        if (CompilerMsgs != 0) {
-            CompilerMsgs.FreeErrors();
-            CompilerMsgs.UpdateList();
+        if (EMessages.CompilerMsgs != null) {
+        	EMessages.CompilerMsgs.FreeErrors();
+        	EMessages.CompilerMsgs.UpdateList();
         }
         return ExResult.ErOK;
     }

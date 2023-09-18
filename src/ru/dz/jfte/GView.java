@@ -54,7 +54,7 @@ public class GView {
         return Peer.ConPutLine(X, Y, W, H, Cell);
     }
 
-    int ConSetBox(int X, int Y, int W, int H, long /*TCell*/ Cell) {
+    int ConSetBox(int X, int Y, int W, int H, PCell Cell) {
         return Peer.ConSetBox(X, Y, W, H, Cell);
     }
 

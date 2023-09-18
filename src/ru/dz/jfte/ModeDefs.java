@@ -116,6 +116,19 @@ public interface ModeDefs {
 	public static final int  BFS_WordChars           = (100 | 256); // ext
 	public static final int  BFS_CapitalChars        = (101 | 256);
 
+	public static void WSETBIT(char [] x , int y, int z) 
+	{
+		int y3 = (y & 0xFF) >> 3;
+		int y7 = y & 0x7;
+
+		x[y3] = (char)(z != 0 ? 
+				(x[y3] | (1 << y7)) : 
+					(x[y3] & ~(1 << y7))
+				);
+
+	}
+
+
 	/*
 	public static final int  BFI(y,x) ((y)->Flags.num[(x) & 0xFF])
 	public static final int  BFI_SET(y,x,v) ((y)->Flags.num[(x) & 0xFF]=(v))
@@ -124,11 +137,11 @@ public interface ModeDefs {
 	public static final int  WSETBIT(x,y,z) \
 	    ((x)[(unsigned char)(y) >> 3] = char((z) ? \
 	    ((x)[(unsigned char)(y) >> 3] |  (1 << ((unsigned char)(y) & 0x7))) : \
-	    ((x)[(unsigned char)(y) >> 3] & ~(1 << ((unsigned char)(y) & 0x7)))))
+	    ((x)[(unsigned char)(y) >> 3] & ~(1 << ((unsigned char)(y) & 0x7))) ))
 
 	public static final int  WGETBIT(x,y) \
 	    (((x)[(unsigned char)(y) / 8] &  (1 << ((unsigned char)(y) % 8))) ? 1 : 0)
-	*/
+	 */
 
 	/*
 	typedef struct {
@@ -254,7 +267,7 @@ public interface ModeDefs {
 
 
 	// Msg
-	
+
 	public static final int S_BUSY    = 0;
 	public static final int S_INFO    = 1;
 	public static final int S_BOLD    = 2;
@@ -263,28 +276,28 @@ public interface ModeDefs {
 
 	// Macro variables
 	public static final int  mvFilePath = 1;      // TODO enum = 1,  // directory + name + extension 
-    public static final int  mvFileName = 2;      // name + extension 
-    public static final int  mvFileDirectory = 3; // directory + '/' 
-    public static final int  mvFileBaseName = 4;  // without the last extension 
-    public static final int  mvFileExtension = 5; // the last one 
-    public static final int  mvCurDirectory = 6;
-    public static final int  mvCurRow = 7;
-    public static final int  mvCurCol = 8;
-    public static final int  mvChar = 9;
-    public static final int  mvWord = 10;
-    public static final int  mvLine = 11;
-	
+	public static final int  mvFileName = 2;      // name + extension 
+	public static final int  mvFileDirectory = 3; // directory + '/' 
+	public static final int  mvFileBaseName = 4;  // without the last extension 
+	public static final int  mvFileExtension = 5; // the last one 
+	public static final int  mvCurDirectory = 6;
+	public static final int  mvCurRow = 7;
+	public static final int  mvCurCol = 8;
+	public static final int  mvChar = 9;
+	public static final int  mvWord = 10;
+	public static final int  mvLine = 11;
 
-    // etc
-    public static final int  ABBREV_HASH      = 16;
 
-    // GUI
-    public static final int   GUIDLG_CHOICE      = 0x00000001;
-    public static final int   GUIDLG_PROMPT      = 0x00000002;
-    public static final int   GUIDLG_PROMPT2     = 0x00000004;
-    public static final int   GUIDLG_FILE        = 0x00000008;
-    public static final int   GUIDLG_FIND        = 0x00000010;
-    public static final int   GUIDLG_FINDREPLACE = 0x00000020;
-    
-    
+	// etc
+	public static final int  ABBREV_HASH      = 16;
+
+	// GUI
+	public static final int   GUIDLG_CHOICE      = 0x00000001;
+	public static final int   GUIDLG_PROMPT      = 0x00000002;
+	public static final int   GUIDLG_PROMPT2     = 0x00000004;
+	public static final int   GUIDLG_FILE        = 0x00000008;
+	public static final int   GUIDLG_FIND        = 0x00000010;
+	public static final int   GUIDLG_FINDREPLACE = 0x00000020;
+
+
 }
