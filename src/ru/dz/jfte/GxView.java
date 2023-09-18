@@ -101,28 +101,30 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
             return CONTEXT_NONE;
     }
 
-    void HandleEvent(TEvent Event) {
-        super.HandleEvent(Event);
-        Top.HandleEvent(Event);
+    void HandleEvent(TEvent pEvent) {
+        super.HandleEvent(pEvent);
+        Top.HandleEvent(pEvent);
 
-        if (Event.What & evMouse) {
-            int [] W, H;
+        if( 0 != (pEvent.What & evMouse)) 
+        {
+        	TMouseEvent Event = (TMouseEvent) pEvent;
+            int [] W = {0}, H = {0};
 
             ConQuerySize(W, H);
 
-            if (Event.What != evMouseDown || Event.Mouse.Y == H - 1) {
+            if (Event.What != evMouseDown || Event.Y == H[0] - 1) {
                 switch (Event.What) {
                 case evMouseDown:
-                    if (CaptureMouse(1))
-                        MouseCaptured = 1;
+                    if (CaptureMouse(1)!=0)
+                        MouseCaptured = true;
                     else
                         break;
                     Event.What = evNone;
                     break;
                 case evMouseMove:
                     if (MouseCaptured) {
-                        if (Event.Mouse.Y != H - 1)
-                            ExpandHeight(Event.Mouse.Y - H + 1);
+                        if (Event.Y != H[0] - 1)
+                            ExpandHeight(Event.Y - H[0] + 1);
                         Event.What = evNone;
                     }
                     break;
@@ -135,7 +137,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
                         CaptureMouse(0);
                     else
                         break;
-                    MouseCaptured = 0;
+                    MouseCaptured = false;
                     Event.What = evNone;
                     break;
                 }
@@ -182,27 +184,27 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     }
 
     void UpdateTitle(String Title, String STitle) {
-        if (Parent && Parent.Active == this) {
+        if (Parent != null && Parent.Active == this) {
             Parent.ConSetTitle(Title, STitle);
         }
     }
 
     int GetStr(String Prompt, String []Str, int HistId) {
-        if ((HaveGUIDialogs & GUIDLG_PROMPT) && GUIDialogs) {
+        if ((GFrame.HaveGUIDialogs & GUIDLG_PROMPT) && Config.GUIDialogs) {
             return DLGGetStr(this, Prompt, Str, HistId, 0);
         } else {
-            return ReadStr(Prompt, Str, 0, 1, HistId);
+            return ReadStr(Prompt, Str, null, 1, HistId);
         }
     }
 
     int GetFile(String Prompt, String []Str, int HistId, int Flags) {
-        if ((HaveGUIDialogs & GUIDLG_FILE) && GUIDialogs)
+        if ((GFrame.HaveGUIDialogs & GUIDLG_FILE) && Config.GUIDialogs)
             return DLGGetFile(this, Prompt, BufLen, Str, Flags);
         else
             return ReadStr(Prompt, Str, CompletePath, SelectPathname, HistId);
     }
 
-    int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId) {
+    int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId) throws IOException {
         int rc;
         ExInput input;
 
@@ -229,15 +231,11 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     int Choice(long Flags, String Title, int NSel, Object ... choices /*, format, args */) {
         int rc;
 
-        if ((HaveGUIDialogs & GUIDLG_CHOICE) && GUIDialogs) {
+        if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) && Config.GUIDialogs) {
             rc = DLGPickChoice(this, Title, NSel, choices, Flags);
             return rc;
         } else {
-            ExChoice choice;
-
-            choice = new ExChoice(Title, NSel, choices);
-            if (choice == 0)
-                return 0;
+            ExChoice choice = new ExChoice(Title, NSel, choices);
 
             PushView(choice);
             rc = Execute();

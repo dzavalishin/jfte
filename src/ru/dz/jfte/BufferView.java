@@ -124,7 +124,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                 EModel B = GetBufferById(Row);
 
                 CancelSearch();
-                if (B) {
+                if (B!=null) {
                     View.Next.SwitchToModel(B);
                     return ExResult.ErOK;
                 }
@@ -135,7 +135,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
             return ExResult.ErOK;
         case ExBufListSearchNext:
             // Find next matching line
-            if (SearchLen) {
+            if (SearchLen!=0) {
                 int i = Row + 1;
                 i = getMatchingLine(i == BCount ? 0 : i, 1);
                 // Never returns -1 since something already found before call
@@ -144,7 +144,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
             return ExResult.ErOK;
         case ExBufListSearchPrev:
             // Find prev matching line
-            if (SearchLen) {
+            if (SearchLen!=0) {
                 int i = Row - 1;
                 i = getMatchingLine(i == -1 ? BCount - 1 : i, -1);
                 // Never returns -1 since something already found before call
@@ -212,7 +212,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         int i = start;
         do {
             // Find SearchString at any place in string for line i
-            for(int j = 0; BList[i][j]; j++)
+            for(int j = 0; BList[i] != null && !BList[i].isEmpty(); j++)
                 if (BList[i][j] == SearchString[0] && strnicmp(SearchString, BList[i]+j, SearchLen) == 0) {
                     return i;
                 }

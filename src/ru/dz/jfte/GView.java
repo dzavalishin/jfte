@@ -31,24 +31,24 @@ public class GView {
     } */
 
     int ConClear() {
-        int [] W, H;
-        TDrawBuffer B;
+        int [] W = {0}, H = {0};
+        TDrawBuffer B = new TDrawBuffer();
         
         ConQuerySize(W, H);
-        MoveChar(B, 0, W, ' ', 0x07, 1);
-        ConSetBox(0, 0, W, H, B[0]);
+        B.MoveChar( 0, W[0], ' ', 0x07, 1);
+        ConSetBox(0, 0, W[0], H[0], B.r(0));
         return 1;
     }
 
-    int ConPutBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         return Peer.ConPutBox(X, Y, W, H, Cell);
     }
 
-    int ConGetBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
         return Peer.ConGetBox(X, Y, W, H, Cell);
     }
 
-    int ConPutLine(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
         return Peer.ConPutLine(X, Y, W, H, Cell);
     }
 
@@ -56,7 +56,7 @@ public class GView {
         return Peer.ConSetBox(X, Y, W, H, Cell);
     }
 
-    int ConScroll(int Way, int X, int Y, int W, int H, long /*TAttr*/ Fill, int Count) {
+    int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) {
         return Peer.ConScroll(Way, X, Y, W, H, Fill, Count);
     }
 
@@ -88,7 +88,7 @@ public class GView {
         return Peer.ConHideCursor();
     }
 
-    int ConCursorVisible() {
+    boolean ConCursorVisible() {
         return Peer.ConCursorVisible(); 
     }
 
@@ -96,11 +96,11 @@ public class GView {
         return Peer.ConSetCursorSize(Start, End);
     }
 
-    int CaptureMouse(int grab) {
+    int CaptureMouse(boolean grab) {
         return Peer.CaptureMouse(grab);
     }
 
-    int CaptureFocus(int grab) {
+    int CaptureFocus(boolean grab) {
         return Peer.CaptureFocus(grab);
     }
 
@@ -140,21 +140,21 @@ public class GView {
     int Execute() {
         int SaveRc = Result;
         int NewResult;
-        int didFocus = 0;
+        boolean didFocus = false;
         
         if (FocusCapture == null) {
-            if (CaptureFocus(1) == 0) return -1;
-            didFocus = 1;
+            if (CaptureFocus(true) == 0) return -1;
+            didFocus = true;
         } else
             if (FocusCapture != this)
                 return -1;
         Result = -2;
         while (Result == -2 && frames != 0)
-            gui.ProcessEvent();
+            GUI.gui.ProcessEvent();
         NewResult = Result;
         Result = SaveRc;
         if (didFocus)
-            CaptureFocus(0);
+            CaptureFocus(false);
         return NewResult;
     }
 
@@ -162,12 +162,12 @@ public class GView {
         return (Parent.Active == this);
     }
 
-    void Activate(int gotfocus) {
+    void Activate(boolean gotfocus) {
         if (gotfocus) {
-            Peer.wState |= sfFocus;
+            Peer.wState |= GViewPeer.sfFocus;
             Peer.UpdateCursor();
         } else {
-            Peer.wState &= ~sfFocus;
+            Peer.wState &= ~GViewPeer.sfFocus;
         }
         Repaint();
     }

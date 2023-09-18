@@ -8,15 +8,21 @@ package ru.dz.jfte;
  *
  */
 
-public class GViewPeer {
+public class GViewPeer implements ColorDefs, EventDefs 
+{
     GView View;
     int wX, wY, wW, wH, wState;
-    int cX, cY, cVisible, cStart, cEnd;
+    int cX, cY, cStart, cEnd;
+    boolean cVisible = true;
     int sbVstart, sbVamount, sbVtotal, sbVupdate;
     int sbHstart, sbHamount, sbHtotal, sbHupdate;
     int SbVBegin, SbVEnd, SbHBegin, SbHEnd;
 
+    static GView MouseCapture = null;
+    static GView FocusCapture = null;
 	
+    public static final int sfFocus   = 1;
+
 	
     
     GViewPeer(GView view, int XSize, int YSize) {
@@ -34,7 +40,6 @@ public class GViewPeer {
         sbHamount = 0;
         sbHupdate = 1;
         wState = 0;
-        cVisible = 1;
         cStart = 0; // %
         cEnd = 100;
         cX = cY = 0;
@@ -47,15 +52,15 @@ public class GViewPeer {
             FocusCapture = 0;
     } */
 
-    int ConPutBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
         return ::ConPutBox(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConGetBox(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConGetBox(int X, int Y, int W, int H, PCell Cell) {
         return ::ConGetBox(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConPutLine(int X, int Y, int W, int H, long /*PCell*/ Cell) {
+    int ConPutLine(int X, int Y, int W, int H, PCell Cell) {
         return ::ConPutLine(X + wX, Y + wY, W, H, Cell);
     }
 
@@ -63,7 +68,7 @@ public class GViewPeer {
         return ::ConSetBox(X + wX, Y + wY, W, H, Cell);
     }
 
-    int ConScroll(int Way, int X, int Y, int W, int H, TAttr Fill, int Count) {
+    int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) {
         return ::ConScroll(Way, X + wX, Y + wY, W, H, Fill, Count);
     }
         
@@ -86,7 +91,7 @@ public class GViewPeer {
         if (Y >= wH) Y = wH - 1;
         cX = X;
         cY = Y;
-        if (wState & sfFocus)
+        if(0 != (wState & sfFocus))
             return ::ConSetCursorPos(cX + wX, cY + wY);
         else
             return 1;
@@ -99,36 +104,36 @@ public class GViewPeer {
     }
 
     int ConShowCursor() {
-        cVisible = 1;
-        if (wState & sfFocus)
+        cVisible = true;
+        if(0 != (wState & sfFocus))
             return ::ConShowCursor();
         else
             return 1;
     }
 
     int ConHideCursor() {
-        cVisible = 0;
-        if (wState & sfFocus)
+        cVisible = false;
+        if(0 != (wState & sfFocus))
             return ::ConHideCursor();
         else
             return 1;
     }
 
-    int ConCursorVisible() {
+    boolean ConCursorVisible() {
         return cVisible;
     }
 
     int ConSetCursorSize(int Start, int End) {
         cStart = Start;
         cEnd = End;
-        if (wState & sfFocus)
+        if(0 != (wState & sfFocus))
             return ::ConSetCursorSize(Start, End);
         else
             return 1;
     }
 
-    int CaptureMouse(int grab) {
-        if (MouseCapture == 0) {
+    int CaptureMouse(boolean grab) {
+        if (MouseCapture == null) {
             if (grab)
                 MouseCapture = View;
             else
@@ -137,13 +142,13 @@ public class GViewPeer {
             if (grab || MouseCapture != View)
                 return 0;
             else
-                MouseCapture = 0;
+                MouseCapture = null;
         }
         return 1;
     }
 
-    int CaptureFocus(int grab) {
-        if (FocusCapture == 0) {
+    int CaptureFocus(boolean grab) {
+        if (FocusCapture == null) {
             if (grab)
                 FocusCapture = View;
             else
@@ -152,7 +157,7 @@ public class GViewPeer {
             if (grab || FocusCapture != View)
                 return 0;
             else
-                FocusCapture = 0;
+                FocusCapture = null;
         }
         return 1;
     }
@@ -215,18 +220,23 @@ public class GViewPeer {
     }
 
     int DrawScrollBar() {
-        TDrawBuffer B;
+        TDrawBuffer B = new TDrawBuffer();
         int NRows, NCols, I;
-        int W, H;
         char fore = ConGetDrawChar(DCH_HFORE);
         char back = ConGetDrawChar(DCH_HBACK);
         
-        ConQuerySize(&W, &H);
+        int W, H;
+        {
+            int [] Wp = {0}, Hp = {0};
+            ConQuerySize(Wp, Hp);
+            W = Wp[0];
+            H = Hp[0];
+        }
 
-        if (ShowVScroll) {
-            MoveCh(B, ConGetDrawChar(DCH_AUP), hcScrollBar_Arrows, 1);
+        if (GFrame.ShowVScroll) {
+            B.MoveCh(ConGetDrawChar(DCH_AUP), hcScrollBar_Arrows, 1);
             ConPutBox(W, 0, 1, 1, B);
-            MoveCh(B, ConGetDrawChar(DCH_ADOWN), hcScrollBar_Arrows, 1);
+            B.MoveCh(ConGetDrawChar(DCH_ADOWN), hcScrollBar_Arrows, 1);
             ConPutBox(W, H - 1, 1, 1, B);
             
             NRows = H - 2;
@@ -241,16 +251,16 @@ public class GViewPeer {
             
             for (I = 0; I < NRows; I++) {
                 if (I >= SbVBegin && I <= SbVEnd)
-                    MoveCh(B, fore, hcScrollBar_Fore, 1);
+                    B.MoveCh(fore, hcScrollBar_Fore, 1);
                 else
-                    MoveCh(B, back, hcScrollBar_Back, 1);
+                	B.MoveCh(back, hcScrollBar_Back, 1);
                 ConPutBox(W, I + 1, 1, 1, B);
             }
         }
-        if (ShowHScroll) {
-            MoveCh(B, ConGetDrawChar(DCH_ALEFT), hcScrollBar_Arrows, 1);
+        if (GFrame.ShowHScroll) {
+            B.MoveCh(ConGetDrawChar(DCH_ALEFT), hcScrollBar_Arrows, 1);
             ConPutBox(0, H, 1, 1, B);
-            MoveCh(B, ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
+            B.MoveCh(ConGetDrawChar(DCH_ARIGHT), hcScrollBar_Arrows, 1);
             ConPutBox(W - 1, H, 1, 1, B);
             
             NCols = W - 2;
@@ -266,14 +276,14 @@ public class GViewPeer {
             // could be made faster
             for (I = 0; I < NCols; I++) {
                 if (I >= SbHBegin && I <= SbHEnd)
-                    MoveCh(B, fore, hcScrollBar_Fore, 1);
+                    B.MoveCh(fore, hcScrollBar_Fore, 1);
                 else
-                    MoveCh(B, back, hcScrollBar_Back, 1);
+                    B.MoveCh(back, hcScrollBar_Back, 1);
                 ConPutBox(I + 1, H, 1, 1, B);
             }
         }
-        if (ShowVScroll && ShowHScroll) {
-            MoveCh(B, ' ', hcScrollBar_Arrows, 1);
+        if (GFrame.ShowVScroll && GFrame.ShowHScroll) {
+            B.MoveCh(' ', hcScrollBar_Arrows, 1);
             ConPutBox(W, H, 1, 1, B);
         }
             

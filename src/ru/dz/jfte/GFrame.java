@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class GFrame {
+public class GFrame implements EventDefs 
+{
     GFrame Prev, Next;
     GView Top, Active;
     GFramePeer Peer;
@@ -172,7 +173,7 @@ public class GFrame {
 	    }
 	    if (Active == null) {
 	        Active = view;
-	        Active.Activate(1);
+	        Active.Activate(true);
 	    }
 	}
 
@@ -180,7 +181,7 @@ public class GFrame {
 	    if (view == null) return ;
 	    
 	    if (Active == view)
-	        Active.Activate(0);
+	        Active.Activate(false);
 	    if (view.Next == view) {
 	        Top = Active = null;
 	        close();
@@ -199,7 +200,7 @@ public class GFrame {
 	        
 	        if (Active == view) {
 	            Active = view.Prev;
-	            Active.Activate(1);
+	            Active.Activate(true);
 	        }
 	    }
 	}
@@ -223,9 +224,9 @@ public class GFrame {
 	        }
 	    if (c != Active) {
 	        if (c!=null)
-	            c.Activate(0);
+	            c.Activate(false);
 	        if (Active!=null) 
-	            Active.Activate(1);
+	            Active.Activate(true);
 	    }
 	}
 
@@ -296,9 +297,10 @@ public class GFrame {
 	}
 
 	int ExecMainMenu(char Sub) {
-	    NextEvent.What = evCommand;
-	    NextEvent.Msg.Command = cmMainMenu;
-	    NextEvent.Msg.Param1 = Sub;
+		GUI.NextEvent = new TMsgEvent(evCommand, cmMainMenu, Sub);
+	    //GUI.NextEvent.What = evCommand;
+	    //GUI.NextEvent.Msg.Command = cmMainMenu;
+	    //GUI.NextEvent.Msg.Param1 = Sub;
 	    return 0;
 	}
 
