@@ -1,8 +1,18 @@
 package ru.dz.jfte;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 
-public class EBuffer extends EModel implements BufferDefs 
+import ru.dz.jfte.c.ArrayPtr;
+import ru.dz.jfte.c.BitOps;
+import ru.dz.jfte.c.ByteArrayPtr;
+
+public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs 
 {
 	String FileName = null;
 	int Modified = 0;
@@ -23,7 +33,7 @@ public class EBuffer extends EModel implements BufferDefs
 
 	// TODO UndoStack US;
 
-	//struct stat FileStatus;
+	BasicFileAttributes FileStatus = null;
 	boolean FileOk = false;
 	boolean Loading = false;
 
@@ -65,9 +75,9 @@ public class EBuffer extends EModel implements BufferDefs
     int WordCount;
 #endif */
 	/* TODO #ifdef CONFIG_SYNTAX_HILIT
+#endif */ 
     SyntaxProc HilitProc;
     int StartHilit, EndHilit;
-#endif */ 
 
 
 
@@ -81,11 +91,11 @@ public class EBuffer extends EModel implements BufferDefs
 	static int suspendLoads;
 	static EBuffer SSBuffer = null; // scrap buffer (clipboard)
 
-	
+
 	int BFI(EBuffer y, int x)  { return (y.Flags.num[x & 0xFF]); }
 	void BFI_SET(EBuffer y, int x, int v) { y.Flags.num[x & 0xFF]=v; }
 	String BFS(EBuffer y,int x) { return y.Flags.str[x & 0xFF]; }
-	
+
 	///////////////////////////////////////////////////////////////////////////////
 
 	EBuffer(int createFlags, EModel []ARoot, String AName)
@@ -127,7 +137,7 @@ public class EBuffer extends EModel implements BufferDefs
 		BFI_SET(this, BFI_Undo,  0);
 		// was BFI(
 		BFI_SET(this, BFI_ReadOnly, 0);
-		
+
 		Modified = 0;
 		MinRedraw = -1;
 		MaxRedraw = -1;
@@ -139,7 +149,7 @@ public class EBuffer extends EModel implements BufferDefs
 		if (Mode && Mode.fColorize)
 			HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
 		#endif */ 
-		InsertLine(CP,0,0); /* there should always be at least one line in the edit buffer */
+		InsertLine(CP,0,null); /* there should always be at least one line in the edit buffer */
 		Flags = (Mode.Flags);
 		Modified = 0;
 	}
@@ -231,16 +241,29 @@ public class EBuffer extends EModel implements BufferDefs
 	#endif */
 
 	int Modify() {
-		if (BFI(this, BFI_ReadOnly)!=0) {
+		if (BFI(this, BFI_ReadOnly)!=0) 
+		{
 			Msg(S_ERROR, "File is read-only.");
 			return 0;
 		}
 		if (Modified == 0) {
-			//struct stat StatBuf;
 
-			if ((FileName != null) && FileOk && (stat(FileName, &StatBuf) == 0)) {
-				if (FileStatus.st_size != StatBuf.st_size ||
-						FileStatus.st_mtime != StatBuf.st_mtime)
+
+			if ((FileName != null) && FileOk) 
+			{
+				Path fp = Paths.get(FileName);
+				BasicFileAttributes StatBuf = null;
+				try {
+					StatBuf = Files.readAttributes( fp, BasicFileAttributes.class);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				if( StatBuf != null &&
+						(FileStatus == null || FileStatus.size() != StatBuf.size() ||
+						FileStatus.lastModifiedTime() != StatBuf.lastModifiedTime())
+						)
 				{
 					View.MView.Win.Choice(GPC_ERROR, "Warning! Press Esc!",
 							0,
@@ -276,8 +299,8 @@ public class EBuffer extends EModel implements BufferDefs
 	}
 
 	int InsertLine(EPoint Pos, int ACount, String AChars) {
-		if (InsLine(Pos.Row, 0) == 0) return 0;
-		if (InsText(Pos.Row, Pos.Col, ACount, AChars) == 0) return 0;
+		if (InsLine(Pos.Row, 0, false) == 0) return 0;
+		if (InsText(Pos.Row, Pos.Col, ACount, AChars, false) == 0) return 0;
 		return 1;
 	}
 
@@ -457,7 +480,7 @@ public class EBuffer extends EModel implements BufferDefs
 
 	int AssertLine(int Row) {
 		if (Row == RCount)
-			if (InsLine(RCount, 0) == 0) return 0;
+			if (InsLine(RCount, 0, false) == 0) return 0;
 		return 1;
 	}
 
@@ -600,7 +623,7 @@ public class EBuffer extends EModel implements BufferDefs
 		return RLine(Row).getCount();
 	}
 
-	int DelLine(int Row, int DoMark) {
+	int DelLine(int Row, boolean DoMark) {
 		int VLine;
 		int GapSize;
 		//   printf("DelLine: %d\n", Row);
@@ -629,7 +652,7 @@ public class EBuffer extends EModel implements BufferDefs
 			if (PushUChar(ucDelLine) == 0) return 0;
 		}
 		#endif */
-		if (DoMark!=0)
+		if (DoMark)
 			UpdateMarker(umDelete, Row, 0, 1, 0);
 		//puts("Here");
 
@@ -646,9 +669,8 @@ public class EBuffer extends EModel implements BufferDefs
 		RCount--;
 		GapSize++;
 		if (RAllocated - RAllocated / 2 > RCount) {
-			memmove(LL + RGap + GapSize - RAllocated / 3,
-					LL + RGap + GapSize,
-					sizeof(ELine) * (RCount - RGap));
+			//memmove(LL + RGap + GapSize - RAllocated / 3, LL + RGap + GapSize, sizeof(ELine) * (RCount - RGap));
+			System.arraycopy(LL, RGap + GapSize, LL, RGap + GapSize - RAllocated / 3, RCount - RGap);
 			if (Allocate(RAllocated - RAllocated / 3) == 0) return 0;
 		}
 
@@ -660,16 +682,15 @@ public class EBuffer extends EModel implements BufferDefs
 		VCount--;
 		GapSize++;
 		if (VAllocated - VAllocated / 2 > VCount) {
-			memmove(VV + VGap + GapSize - VAllocated / 3,
-					VV + VGap + GapSize,
-					sizeof(VV[0]) * (VCount - VGap));
+			//memmove(VV + VGap + GapSize - VAllocated / 3,VV + VGap + GapSize,sizeof(VV[0]) * (VCount - VGap));
+			System.arraycopy(VV, VGap + GapSize, VV, VGap + GapSize - VAllocated / 3, VCount - VGap);
 			if (AllocVis(VAllocated - VAllocated / 3) == 0) return 0;
 		}
 		return 1;
 	}
 
-	int InsLine(int Row, int DoAppend, int DoMark) {
-		ELine L;
+	int InsLine(int Row, int DoAppend, boolean DoMark) {
+		//ELine L;
 		int VLine = -1;
 
 		//    printf("InsLine: %d\n", Row);
@@ -689,8 +710,8 @@ public class EBuffer extends EModel implements BufferDefs
 		} else {
 			VLine = VCount;
 		}
-		L = new ELine();
-		if (L == 0) return 0;
+		ELine L = new ELine("");
+		//if (L == 0) return 0;
 		/* TODO #ifdef CONFIG_UNDOREDO
 		if (BFI(this, BFI_Undo) == 1) {
 			if (PushULong(Row) == 0) return 0;
@@ -774,12 +795,10 @@ public class EBuffer extends EModel implements BufferDefs
 	}
 
 	int InsChars(int Row, int Ofs, int ACount, String Buffer) {
-		ELine L;
-
 		//   printf("InsChars: %d:%d %d\n", Row, Ofs, ACount);
 
 		assert(Row >= 0 && Row < RCount && Ofs >= 0);
-		L = RLine(Row);
+		ELine L = RLine(Row);
 
 		if (Ofs < 0) return 0;
 		if (Ofs > L.getCount()) return 0;
@@ -795,14 +814,18 @@ public class EBuffer extends EModel implements BufferDefs
 			if (PushUChar(ucInsChars) == 0) return 0;
 		}
 		#endif */
-		if (L.Allocate(L.getCount() + ACount) == 0) return 0;
+		L.Allocate(L.getCount() + ACount);
 		if (L.getCount() > Ofs)
-			memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
-		if (Buffer == 0) 
-			memset(L.Chars + Ofs, ' ', ACount);
+			//memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
+			L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs);
+		if (Buffer == null) 
+			//memset(L.Chars + Ofs, ' ', ACount);
+			L.memset(Ofs, ' ', ACount);
 		else
-			memmove(L.Chars + Ofs, Buffer, ACount);
-		L.getCount() += ACount;
+			//memmove(L.Chars + Ofs, Buffer, ACount);
+			L.copyIn(Ofs, Buffer, ACount);
+
+		//L.getCount() += ACount;
 		Draw(Row, Row);
 		Hilit(Row);
 		// printf("OK\n");
@@ -818,14 +841,14 @@ public class EBuffer extends EModel implements BufferDefs
 		Ofs = CharOffset(L, Col);
 		if (Ofs >= L.getCount())
 			return 1;
-		if (L.Chars[Ofs] != '\t')
+		if (L.charAt(Ofs) != '\t')
 			return 1;
 		Pos = ScreenPos(L, Ofs);
 		if (Pos < Col) {
 			TPos = NextTab(Pos, BFI(this, BFI_TabSize));
 			if (DelChars(Row, Ofs, 1) != 1)
 				return 0;
-			if (InsChars(Row, Ofs, TPos - Pos, 0) != 1)
+			if (InsChars(Row, Ofs, TPos - Pos, null) != 1)
 				return 0;
 		}
 		return 1;
@@ -861,7 +884,7 @@ public class EBuffer extends EModel implements BufferDefs
 		return 1;
 	}
 
-	int DelText(int Row, int Col, int ACount, int DoMark) {
+	int DelText(int Row, int Col, int ACount, boolean DoMark) {
 		int L, B, C;
 
 		//   printf("DelTExt: %d:%d %d\n", Row, Col, ACount);
@@ -889,7 +912,7 @@ public class EBuffer extends EModel implements BufferDefs
 		return 1;
 	}
 
-	int InsText(int Row, int Col, int ACount, String ABuffer, int DoMark) {
+	int InsText(int Row, int Col, int ACount, String ABuffer, boolean DoMark) {
 		int B, L;
 
 		//   printf("InsText: %d:%d %d\n", Row, Col, ACount);
@@ -897,10 +920,10 @@ public class EBuffer extends EModel implements BufferDefs
 		if (ACount == 0) return 1;
 		if (Modify() == 0) return 0;
 
-		if (DoMark!=0) UpdateMarker(umInsert, Row, Col, 0, ACount);
+		if (DoMark) UpdateMarker(umInsert, Row, Col, 0, ACount);
 		L = LineLen(Row);
 		if (L < Col) {
-			if (InsChars(Row, RLine(Row).getCount(), Col - L, 0) == 0)
+			if (InsChars(Row, RLine(Row).getCount(), Col - L, null) == 0)
 				return 0;
 		} else
 			if (UnTabPoint(Row, Col) == 0) return 0;
@@ -915,7 +938,7 @@ public class EBuffer extends EModel implements BufferDefs
 
 		L = LineLen(Row);
 		if (L < Length)
-			if (InsChars(Row, RLine(Row).getCount(), Length - L, 0) == 0)
+			if (InsChars(Row, RLine(Row).getCount(), Length - L, null) == 0)
 				return 0;
 		return 1;
 	}
@@ -936,11 +959,11 @@ public class EBuffer extends EModel implements BufferDefs
 		assert(ACount > 0);
 
 		B = Ofs = CharOffset(Line, LCol);
-		if (Ofs < Line.getCount() && Line.Chars[Ofs] == '\t') {
+		if (Ofs < Line.getCount() && Line.charAt(Ofs) == '\t') {
 			Pos = ScreenPos(Line, Ofs);
 			if (Pos < LCol) {
 				TPos = NextTab(Pos, BFI(this, BFI_TabSize));
-				if (InsText(Row, Col, TPos - LCol, 0) == 0)
+				if (InsText(Row, Col, TPos - LCol, null, false) == 0)
 					return 0;
 				Col += TPos - LCol;
 				ACount -= TPos - LCol;
@@ -949,10 +972,10 @@ public class EBuffer extends EModel implements BufferDefs
 			}
 		}
 		C = Ofs = CharOffset(Line, LCol + ACount);
-		if (Ofs < Line.getCount() && Line.Chars[Ofs] == '\t') {
+		if (Ofs < Line.getCount() && Line.charAt(Ofs) == '\t') {
 			Pos = ScreenPos(Line, Ofs);
 			if (Pos < LCol + ACount) {
-				if (InsText(Row, Col, LCol + ACount - Pos, 0) == 0)
+				if (InsText(Row, Col, LCol + ACount - Pos, null, false) == 0)
 					return 0;
 			}
 		}
@@ -982,11 +1005,11 @@ public class EBuffer extends EModel implements BufferDefs
 		VL = RToV(Row);
 		assert(VL != -1);
 		if (Col == 0) {
-			if (InsLine(Row, 0, 1) == 0) return 0;
+			if (InsLine(Row, 0, true) == 0) return 0;
 		} else {
 			UpdateMarker(umSplitLine, Row, Col, 0, 0);
-			if (InsLine(Row, 1, 0) == 0) return 0;
-			RLine(Row).StateE = short((Row > 0) ? RLine(Row - 1).StateE : 0);
+			if (InsLine(Row, 1, false) == 0) return 0;
+			RLine(Row).StateE = (short)((Row > 0) ? RLine(Row - 1).StateE : 0);
 			if (Col < LineLen(Row)) {
 				int P, L;
 				//if (RLine(Row).ExpandTabs(Col, -2, &Flags) == 0) return 0;
@@ -997,7 +1020,7 @@ public class EBuffer extends EModel implements BufferDefs
 				L = LineLen(Row);
 
 				if (InsText(Row + 1, 0, RLine(Row).getCount() - P, RLine(Row).Chars + P, 0) == 0) return 0;
-				if (DelText(Row, Col, L - Col, 0) == 0) return 0;
+				if (DelText(Row, Col, L - Col, false) == 0) return 0;
 			}
 		}
 		Draw(Row, -1);
@@ -1020,10 +1043,10 @@ public class EBuffer extends EModel implements BufferDefs
 		}
 		VLine = RToV(Row);
 		if (Col == 0 && RLine(Row).getCount() == 0) {
-			if (DelLine(Row, 1) == 0) return 0;
+			if (DelLine(Row, true) == 0) return 0;
 		} else {
-			if (InsText(Row, Col, RLine(Row + 1).getCount(), RLine(Row + 1).Chars, 0) == 0) return 0;
-			if (DelLine(Row + 1, 0) == 0) return 0;
+			if (InsText(Row, Col, RLine(Row + 1).getCount(), RLine(Row + 1).Chars, false) == 0) return 0;
+			if (DelLine(Row + 1, false) == 0) return 0;
 			UpdateMarker(umJoinLine, Row, Col, 0, 0);
 		}
 		Draw(Row, -1);
@@ -1063,45 +1086,50 @@ public class EBuffer extends EModel implements BufferDefs
 
 
 
-	
+
 	int ScreenPos(ELine L, int Offset) {
-		int ExpandTabs = BFI(this, BFI_ExpandTabs);
+		boolean ExpandTabs = BFI(this, BFI_ExpandTabs) != 0;
 		int TabSize = BFI(this, BFI_TabSize);
 
 		if (!ExpandTabs) {
 			return Offset;
 		} else {
-			char *p = L.Chars;
-			int Len = L.Count;
+			//char *p = L.Chars;
+			ArrayPtr<Character> p = L.getPointer();
+			int Len = L.getCount();
 			int Pos = 0;
 			int Ofs = Offset;
 
 			if (Ofs > Len) {
 				while (Len > 0) {
-					if (*p++ != '\t')
+					//if (*p++ != '\t')
+					if (p.r() != '\t')
 						Pos++;
 					else
 						Pos = NextTab(Pos, TabSize);
 					Len--;
+					p.inc();
 				}
-				Pos += Ofs - L.Count;
+				Pos += Ofs - L.getCount();
 			} else {
 				while (Ofs > 0) {
-					if (*p++ != '\t')
+					//if (*p++ != '\t')
+					if (p.r() != '\t')
 						Pos++;
 					else
 						Pos = NextTab(Pos, TabSize);
 					Ofs--;
+					p.inc();
 				}
 			}
 			return Pos;
 		}
 	}
-	
 
-	
+
+
 	int CharOffset(ELine L, int ScreenPos) {
-		int ExpandTabs = BFI(this, BFI_ExpandTabs);
+		boolean ExpandTabs = BFI(this, BFI_ExpandTabs) != 0;
 		int TabSize = BFI(this, BFI_TabSize);
 
 		if (!ExpandTabs) {
@@ -1109,11 +1137,13 @@ public class EBuffer extends EModel implements BufferDefs
 		} else {
 			int Pos = 0;
 			int Ofs = 0;
-			char *p = L.Chars;
-			int Len = L.Count;
+			//char *p = L.Chars;
+			ArrayPtr<Character> p = L.getPointer();
+			int Len = L.getCount();
 
 			while (Len > 0) {
-				if (*p++ != '\t')
+				//if (*p++ != '\t')
+				if (p.rpp() != '\t')
 					Pos++;
 				else
 					Pos = NextTab(Pos, TabSize);
@@ -1125,16 +1155,16 @@ public class EBuffer extends EModel implements BufferDefs
 			return Ofs + ScreenPos - Pos;
 		}
 	}
-	
-	
+
+
 	int Allocate(int ACount) {
 		//ELine [] L = (ELine ) realloc(LL, sizeof(ELine) * (ACount + 1));
-		
+
 		LL = new ELine [ACount];
 		Arrays.fill(LL, null);
-		
+
 		RAllocated = ACount;
-		
+
 		return 1;
 	}
 
@@ -1148,17 +1178,15 @@ public class EBuffer extends EModel implements BufferDefs
 			if (RPos - RGap == 1) {
 				LL[RGap] = LL[RGap + GapSize];
 			} else {
-				memmove(LL + RGap,
-						LL + RGap + GapSize,
-						sizeof(ELine) * (RPos - RGap));
+				//memmove(LL + RGap, LL + RGap + GapSize,	sizeof(ELine) * (RPos - RGap));
+				System.arraycopy(LL, RGap + GapSize, LL, RGap, RPos - RGap);
 			}
 		} else {
 			if (RGap - RPos == 1) {
 				LL[RPos + GapSize] = LL[RPos];
 			} else {
-				memmove(LL + RPos + GapSize,
-						LL + RPos,
-						sizeof(ELine) * (RGap - RPos));
+				//memmove(LL + RPos + GapSize, LL + RPos,	sizeof(ELine) * (RGap - RPos));
+				System.arraycopy(LL, RPos, LL, RPos + GapSize, RGap - RPos);
 			}
 		}
 		RGap = RPos;
@@ -1166,12 +1194,13 @@ public class EBuffer extends EModel implements BufferDefs
 	}
 
 	int AllocVis(int ACount) {
-		int []V;
+		//int []V;
 
-		V = (int []) realloc(VV, sizeof(int) * (ACount + 1));
-		if (V == 0 && ACount != 0) return 0;
+		//V = (int []) realloc(VV, sizeof(int) * (ACount + 1));
+		//if (V == 0 && ACount != 0) return 0;
 		VAllocated = ACount;
-		VV = V;
+		//VV = V;
+		VV = Arrays.copyOf(VV, ACount);
 		return 1;
 	}
 
@@ -1185,17 +1214,15 @@ public class EBuffer extends EModel implements BufferDefs
 			if (VPos - VGap == 1) {
 				VV[VGap] = VV[VGap + GapSize];
 			} else {
-				memmove(VV + VGap,
-						VV + VGap + GapSize,
-						sizeof(VV[0]) * (VPos - VGap));
+				//memmove(VV + VGap, VV + VGap + GapSize, sizeof(VV[0]) * (VPos - VGap));
+				System.arraycopy( VV, VGap + GapSize, VV, VGap, VPos - VGap );
 			}
 		} else {
 			if (VGap - VPos == 1) {
 				VV[VPos + GapSize] = VV[VPos];
 			} else {
-				memmove(VV + VPos + GapSize,
-						VV + VPos,
-						sizeof(VV[0]) * (VGap - VPos));
+				//memmove(VV + VPos + GapSize, VV + VPos, sizeof(VV[0]) * (VGap - VPos));
+				System.arraycopy( VV, VPos, VV, VPos + GapSize, VGap - VPos );
 			}
 		}
 		VGap = VPos;
@@ -1285,7 +1312,7 @@ public class EBuffer extends EModel implements BufferDefs
 		//#endif */
 		return LL[GapLine(No, RGap, RCount, RAllocated)];
 	}
-	
+
 	void RLine(int No, ELine L) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No >= 0))) printf("Set No = %d\n", No);
@@ -1293,7 +1320,7 @@ public class EBuffer extends EModel implements BufferDefs
 		// TODO #endif */
 		LL[GapLine(No, RGap, RCount, RAllocated)] = L;
 	}
-	
+
 	int Vis(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (No < 0 || No >= VCount) {
@@ -1303,7 +1330,7 @@ public class EBuffer extends EModel implements BufferDefs
 		// TODO #endif */
 		return VV[GapLine(No, VGap, VCount, VAllocated)];
 	}
-	
+
 	void Vis(int No, int V) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (No < 0 || No >= VCount) {
@@ -1313,7 +1340,7 @@ public class EBuffer extends EModel implements BufferDefs
 		//#endif */
 		VV[GapLine(No, VGap, VCount, VAllocated)] = V;
 	}
-	
+
 	ELine VLine(int No) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No < VCount) && (No >= 0))) {
@@ -1325,7 +1352,7 @@ public class EBuffer extends EModel implements BufferDefs
 		//#endif */
 		return RLine(No + Vis(No));
 	}
-	
+
 	void VLine(int No, ELine L) {
 		// TODO /* TODO #ifdef DEBUG_EDITOR
 		if (!((No >= 0))) {
@@ -1400,271 +1427,271 @@ public class EBuffer extends EModel implements BufferDefs
 
 
 	int ExposeRow(int Row) { /*FOLD00*/
-	    int V;
-	    int f, level, oldlevel = 100;
+		int V;
+		int f, level, oldlevel = 100;
 
-	    //DumpFold();
+		//DumpFold();
 
-	    assert(Row >= 0 && Row < RCount); // range
+		assert(Row >= 0 && Row < RCount); // range
 
-	    V = RToV(Row);
-	    if (V != -1) return 1; // already exposed
+		V = RToV(Row);
+		if (V != -1) return 1; // already exposed
 
-	    f = FindNearFold(Row);
-	    assert(f != -1); // if not visible, must be folded
+		f = FindNearFold(Row);
+		assert(f != -1); // if not visible, must be folded
 
-	    while (f >= 0) {
-	        level = FF[f].level;
-	        if (level < oldlevel) {
-	            if (FF[f].open == 0) {
-//	                printf("opening fold %d\n", f);
-	                if (FoldOpen(FF[f].line) == 0) return 0;
-	            }
-	            oldlevel = level;
-	        }
-	        f--;
-	        if (level == 0) break;
-	    }
+		while (f >= 0) {
+			level = FF[f].level;
+			if (level < oldlevel) {
+				if (FF[f].open == 0) {
+					//	                printf("opening fold %d\n", f);
+					if (FoldOpen(FF[f].line) == 0) return 0;
+				}
+				oldlevel = level;
+			}
+			f--;
+			if (level == 0) break;
+		}
 
-	    V = RToV(Row);
-//	    if (V == -1) {
-//	        printf("Expose Row = %d\n", Row);
-//	        DumpFold();
-//	    }
-	    assert (V != -1);
-	    return 1;
+		V = RToV(Row);
+		//	    if (V == -1) {
+		//	        printf("Expose Row = %d\n", Row);
+		//	        DumpFold();
+		//	    }
+		assert (V != -1);
+		return 1;
 	}
 
 
 
 
-	
-	int GetMap(int Row, int *StateLen, hsState **StateMap) {
-	    hlState State = 0;
 
-	    Rehilit(Row);
+	int GetMap(int Row, int []StateLen, byte /*hsState*/ [][]StateMap) {
+		byte/*hlState*/ State = 0;
 
-	    *StateLen = LineChars(Row);
-	    if (Row > 0) State = RLine(Row - 1).StateE;
-	    if (*StateLen > 0) {
-	        PELine L = RLine(Row);
-	        int ECol;
+		Rehilit(Row);
 
-	        *StateMap = (hsState *) malloc(*StateLen);
-	        if (*StateMap == 0) return 0;
+		StateLen[0] = LineChars(Row);
+		if (Row > 0) State = RLine(Row - 1).StateE;
+		if (StateLen[0] > 0) {
+			ELine L = RLine(Row);
+			int [] ECol = {0};
 
-	/* TODO #ifdef CONFIG_SYNTAX_HILIT
+			StateMap[0] = new byte[StateLen[0]];
+			if (StateMap[0] == null) return 0;
+
+			/* TODO #ifdef CONFIG_SYNTAX_HILIT
 	        if (BFI(this, BFI_HilitOn) == 1 && HilitProc != 0)
 	            HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
 	        else
 	#endif */
-	            Hilit_Plain(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
-	        //        if (L.StateE != State) {
-	        //            L.StateE = State;
-	        //        }
-	    } else {
-	        *StateLen = 1;
-	        *StateMap = (hsState *) malloc(1);
-	        if (*StateMap == 0) return 0;
-	        (*StateMap)[0] = (hsState) (State & 0xFF);
-	    }
-	    return 1;
+			// TODO Hilit_Plain(this, Row, 0, 0, StateLen[0], L, State, StateMap[0], ECol);
+			//        if (L.StateE != State) {
+			//            L.StateE = State;
+			//        }
+		} else {
+			StateLen[0] = 1;
+			StateMap[0] = new byte[1];
+			//if (*StateMap == 0) return 0;
+			StateMap[0][0] = (byte)(State & 0xFF);
+		}
+		return 1;
 	}
 
 	void FullRedraw() { // redraw all views
-	    EView V = View;
-	    EEditPort *W;
-	    int Min, Max;
+		EView V = View;
+		EEditPort W;
+		int Min, Max;
 
-	    while (V != null) {
-	        W = GetViewVPort(V);
-	        // Need to use real lines, not virtual
-	        // (similar to HilitMatchBracket)
-	        Min = VToR(W.TP.Row);
-	        Max = W.TP.Row + W.Rows;
-	        if (Max >= VCount)
-	            Max = RCount;
-	        else
-	            Max = VToR(Max);
-	        Draw(Min, Max);
-	        V = V.Next;
-	        if (V == View)
-	            break;
-	    }
+		while (V != null) {
+			W = GetViewVPort(V);
+			// Need to use real lines, not virtual
+			// (similar to HilitMatchBracket)
+			Min = VToR(W.TP.Row);
+			Max = W.TP.Row + W.Rows;
+			if (Max >= VCount)
+				Max = RCount;
+			else
+				Max = VToR(Max);
+			Draw(Min, Max);
+			V = V.Next;
+			if (V == View)
+				break;
+		}
 	}
 
 	void Hilit(int FromRow) {
-	    if (FromRow != -1) {
-	        if (StartHilit == -1)
-	            StartHilit = FromRow;
-	        else if (FromRow < StartHilit)
-	            StartHilit = FromRow;
-	    }
+		if (FromRow != -1) {
+			if (StartHilit == -1)
+				StartHilit = FromRow;
+			else if (FromRow < StartHilit)
+				StartHilit = FromRow;
+		}
 	}
 
 	void Rehilit(int ToRow) {
-	    hlState State;
-	    int HilitX;
-	    PELine L;
-	    int ECol;
+		byte /*hlState*/ State;
+		int HilitX;
+		//ELine L;
+		int [] ECol = {0};
 
-	    if (StartHilit == -1)   // all ok
-	        return ;
+		if (StartHilit == -1)   // all ok
+			return ;
 
-	    if (BFI(this, BFI_MultiLineHilit) == 0) // everything handled in redisplay
-	        return;
+		if (BFI(this, BFI_MultiLineHilit) == 0) // everything handled in redisplay
+			return;
 
-	    if (ToRow <= StartHilit) // will be handled in redisplay
-	        return;
+		if (ToRow <= StartHilit) // will be handled in redisplay
+			return;
 
-	    if (ToRow >= RCount)
-	        ToRow = RCount;
+		if (ToRow >= RCount)
+			ToRow = RCount;
 
-	    HilitX = 1;
-	    while ((StartHilit < RCount) && ((StartHilit < ToRow) || HilitX)) {
-	        L = RLine(StartHilit);
+		HilitX = 1;
+		while ((StartHilit < RCount) && ((StartHilit < ToRow) || HilitX != 0 )) {
+			ELine L = RLine(StartHilit);
 
-	        HilitX = 0;
-	        if (StartHilit > 0)
-	            State = RLine(StartHilit - 1).StateE;
-	        else
-	            State = 0;
+			HilitX = 0;
+			if (StartHilit > 0)
+				State = RLine(StartHilit - 1).StateE;
+			else
+				State = 0;
 
-	        if (BFI(this, BFI_HilitOn) == 1 && HilitProc != 0) {
-	            HilitProc(this, StartHilit, 0, 0, 0, L, State, 0, &ECol);
-	        } else {
-	            Hilit_Plain(this, StartHilit, 0, 0, 0, L, State, 0, &ECol);
-	        }
-	        if (L.StateE != State) {
-	            HilitX = 1;
-	            L.StateE = State;
-	        }
-	        Draw(StartHilit, StartHilit);  // ?
-	        if (StartHilit > EndHilit)
-	            EndHilit = StartHilit;
-	        if (HilitX == 0) // jump over (can we always do this ?)
-	            if (StartHilit < EndHilit) {
-	                StartHilit = EndHilit;
-	            }
-	        StartHilit++;
-	    }
+			if (BFI(this, BFI_HilitOn) == 1 && HilitProc != null) {
+				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, 0, ECol);
+			} else {
+				Hilit_Plain(this, StartHilit, 0, 0, 0, L, State, 0, ECol);
+			}
+			if (L.StateE != State) {
+				HilitX = 1;
+				L.StateE = State;
+			}
+			Draw(StartHilit, StartHilit);  // ?
+			if (StartHilit > EndHilit)
+				EndHilit = StartHilit;
+			if (HilitX == 0) // jump over (can we always do this ?)
+				if (StartHilit < EndHilit) {
+					StartHilit = EndHilit;
+				}
+			StartHilit++;
+		}
 	}
 
 	void Draw(int Row0, int RowE) {
-	    //    printf("r0 = %d, re = %d\n", Row0, RowE);
-	    //    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
-	    if (Row0 == -1) Row0 = 0;
-	    if ((Row0 < MinRedraw) || (MinRedraw == -1)) {
-	        MinRedraw = Row0;
-	        if (MaxRedraw == -1) MaxRedraw = MinRedraw;
-	    }
-	    if (RowE == -1) {
-	        RedrawToEos = 1;
-	        MaxRedraw = MinRedraw;
-	    } else if (((RowE > MaxRedraw) || (MaxRedraw == -1)) && (RowE != -1))
-		MaxRedraw = RowE;
-	    //    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
+		//    printf("r0 = %d, re = %d\n", Row0, RowE);
+		//    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
+		if (Row0 == -1) Row0 = 0;
+		if ((Row0 < MinRedraw) || (MinRedraw == -1)) {
+			MinRedraw = Row0;
+			if (MaxRedraw == -1) MaxRedraw = MinRedraw;
+		}
+		if (RowE == -1) {
+			RedrawToEos = 1;
+			MaxRedraw = MinRedraw;
+		} else if (((RowE > MaxRedraw) || (MaxRedraw == -1)) && (RowE != -1))
+			MaxRedraw = RowE;
+		//    printf("m = %d, max = %d, rts = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
 	}
 
 	void DrawLine(TDrawBuffer B, int VRow, int C, int W, int [] HilitX) {
-	    hlState State;
-	    int StartPos, EndPos;
+		byte /*hlState*/ State;
+		int StartPos, EndPos;
 
-	    HilitX = 0;
-	    MoveChar(B, 0, W, ' ', hcPlain_Background, W);
-	    //    if ((VRow == VCount - 1) && !BFI(this, BFI_ForceNewLine)) {
-	    // if (BFI(this, BFI_ShowMarkers))
-	    //     MoveChar(B, 0, W, EOF_MARKER, hcPlain_Markers, W);
-	    //    }
-	    if (VRow < VCount) {
-	        int Row = VToR(VRow);
-	        PELine L = RLine(Row);
-	        int ECol = 0;
+		HilitX = null;
+		B.MoveChar( 0, W, ' ', hcPlain_Background, W);
+		//    if ((VRow == VCount - 1) && !BFI(this, BFI_ForceNewLine)) {
+		// if (BFI(this, BFI_ShowMarkers))
+		//     MoveChar(B, 0, W, EOF_MARKER, hcPlain_Markers, W);
+		//    }
+		if (VRow < VCount) {
+			int Row = VToR(VRow);
+			ELine L = RLine(Row);
+			int ECol = 0;
 
-	        if (Row > 0) State = RLine(Row - 1).StateE;
-	        else State = 0;
-	/* TODO #ifdef CONFIG_SYNTAX_HILIT
+			if (Row > 0) State = RLine(Row - 1).StateE;
+			else State = 0;
+			/* TODO #ifdef CONFIG_SYNTAX_HILIT
 	        if (BFI(this, BFI_HilitOn) == 1 && HilitProc != 0)
 	            HilitProc(this, Row, B, C, W, L, State, 0, &ECol);
 	        else
 	#endif */
-	        	int [] ecp = {0};
-	            Hilit_Plain(this, Row, B, C, W, L, State, 0, ecp);
-	            ECol = ecp[0];
-	            
-	        if (L.StateE != State) {
-	            HilitX = 1;
-	            L.StateE = State;
-	        }
-	        if (BFI(this, BFI_ShowMarkers)) {
-	            MoveChar(B, ECol - C, W, ConGetDrawChar((Row == RCount - 1) ? DCH_EOF : DCH_EOL), hcPlain_Markers, 1);
-	            ECol += 1;
-	        }
-	        if (Row < RCount) {
-	            int f;
-	            int Folded = 0;
-	            //static char fold[20];
-	            int l;
+			int [] ecp = {0};
+			Hilit_Plain(this, Row, B, C, W, L, State, 0, ecp);
+			ECol = ecp[0];
 
-	            f = FindFold(Row);
-	            if (f != -1) {
-	                int foldColor;
-	                if (FF[f].level<5) foldColor=hcPlain_Folds[FF[f].level];
-	                else foldColor=hcPlain_Folds[4];
-	                if (FF[f].open == 1) {
-	                    l = sprintf(fold, "[%d]", FF[f].level);
-	                    MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
-	                    ECol += l;
-	                } else {
-	                    if (VRow < VCount - 1) {
-	                        Folded = Vis(VRow + 1) - Vis(VRow) + 1;
-	                    } else if (VRow < VCount) {
-	                        Folded = RCount - (VRow + Vis(VRow));
-	                    }
-	                    l = sprintf(fold, "(%d:%d)", FF[f].level, Folded);
-	                    MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
-	                    ECol += l;
-	                    MoveAttr(B, 0, W, foldColor, W);
-	                }
-	            }
-	        }
-	        if (BB.Row != -1 && BE.Row != -1 && Row >= BB.Row && Row <= BE.Row) {
-	            switch(BlockMode) {
-	            case bmLine:
-	                StartPos = 0;
-	                if (Row == BE.Row) EndPos = 0;
-	                else EndPos = W;
-	                break;
-	            case bmColumn:
-	                StartPos = BB.Col - C;
-	                if (Row == BE.Row) EndPos = BB.Col - C;
-	                else EndPos = BE.Col - C;
-	                break;
-	            case bmStream:
-	                if (Row == BB.Row && Row == BE.Row) {
-	                    StartPos = BB.Col - C;
-	                    EndPos = BE.Col - C;
-	                } else if (Row == BB.Row) {
-	                    StartPos = BB.Col - C;
-	                    EndPos = W;
-	                } else if (Row == BE.Row) {
-	                    StartPos = 0;
-	                    EndPos = BE.Col - C;
-	                } else {
-	                    StartPos = 0;
-	                    EndPos = W;
-	                }
-	                break;
-	            default:
-	                StartPos = EndPos = 0;
-	                break;
-	            }
-	            if (BFI(this, BFI_SeeThruSel))
-	                MoveBgAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
-	            else
-	                MoveAttr(B, StartPos, W, hcPlain_Selected, EndPos - StartPos);
-	        }
-	/* TODO #ifdef CONFIG_BOOKMARKS
+			if (L.StateE != State) {
+				HilitX = 1;
+				L.StateE = State;
+			}
+			if (BFI(this, BFI_ShowMarkers)) {
+				MoveChar(B, ECol - C, W, ConGetDrawChar((Row == RCount - 1) ? DCH_EOF : DCH_EOL), hcPlain_Markers, 1);
+				ECol += 1;
+			}
+			if (Row < RCount) {
+				int f;
+				int Folded = 0;
+				//static char fold[20];
+				int l;
+
+				f = FindFold(Row);
+				if (f != -1) {
+					int foldColor;
+					if (FF[f].level<5) foldColor=hcPlain_Folds[FF[f].level];
+					else foldColor=hcPlain_Folds[4];
+					if (FF[f].open == 1) {
+						l = sprintf(fold, "[%d]", FF[f].level);
+						MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
+						ECol += l;
+					} else {
+						if (VRow < VCount - 1) {
+							Folded = Vis(VRow + 1) - Vis(VRow) + 1;
+						} else if (VRow < VCount) {
+							Folded = RCount - (VRow + Vis(VRow));
+						}
+						l = sprintf(fold, "(%d:%d)", FF[f].level, Folded);
+						MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
+						ECol += l;
+						MoveAttr(B, 0, W, foldColor, W);
+					}
+				}
+			}
+			if (BB.Row != -1 && BE.Row != -1 && Row >= BB.Row && Row <= BE.Row) {
+				switch(BlockMode) {
+				case bmLine:
+					StartPos = 0;
+					if (Row == BE.Row) EndPos = 0;
+					else EndPos = W;
+					break;
+				case bmColumn:
+					StartPos = BB.Col - C;
+					if (Row == BE.Row) EndPos = BB.Col - C;
+					else EndPos = BE.Col - C;
+					break;
+				case bmStream:
+					if (Row == BB.Row && Row == BE.Row) {
+						StartPos = BB.Col - C;
+						EndPos = BE.Col - C;
+					} else if (Row == BB.Row) {
+						StartPos = BB.Col - C;
+						EndPos = W;
+					} else if (Row == BE.Row) {
+						StartPos = 0;
+						EndPos = BE.Col - C;
+					} else {
+						StartPos = 0;
+						EndPos = W;
+					}
+					break;
+				default:
+					StartPos = EndPos = 0;
+					break;
+				}
+				if( 0 != (BFI(this, BFI_SeeThruSel)))
+					B.MoveBgAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
+				else
+					B.MoveAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
+			}
+			/* TODO #ifdef CONFIG_BOOKMARKS
 	        if (BFI(this, BFI_ShowBookmarks)) {
 	            int i = 0;
 	            char *Name;
@@ -1681,326 +1708,326 @@ public class EBuffer extends EModel implements BufferDefs
 	            }
 	        }
 	#endif */
-	        if (Match.Row != -1 && Match.Col != -1) {
-	            if (Row == Match.Row) {
-	                if (BFI(this, BFI_SeeThruSel))
-	                    MoveBgAttr(B, Match.Col - C, W, hcPlain_Found, MatchLen);
-	                else
-	                    MoveAttr(B, Match.Col - C, W, hcPlain_Found, MatchLen);
-	            }
-	        }
-	    } else if (VRow == VCount) {
-	        if (BFI(this, BFI_ShowMarkers))
-	            MoveChar(B, 0, W, ConGetDrawChar(DCH_END), hcPlain_Markers, W);
-	    }
+			if (Match.Row != -1 && Match.Col != -1) {
+				if (Row == Match.Row) {
+					if(0 != (BFI(this, BFI_SeeThruSel)))
+						B.MoveBgAttr( Match.Col - C, W, hcPlain_Found, MatchLen);
+					else
+						B.MoveAttr( Match.Col - C, W, hcPlain_Found, MatchLen);
+				}
+			}
+		} else if (VRow == VCount) {
+			if(0 != (BFI(this, BFI_ShowMarkers)))
+				B.MoveChar( 0, W, ConGetDrawChar(DCH_END), hcPlain_Markers, W);
+		}
 	}
 
 	void Redraw() {
-	    int HilitX;
-	    EView V;
-	    EEditPort W;
-	    int Row;
-	    TDrawBuffer B = new TDrawBuffer();
-	    //char s[256];
-	    ChColor SColor;
-	    int RowA, RowZ;
+		int HilitX;
+		EView V;
+		EEditPort W;
+		int Row;
+		TDrawBuffer B = new TDrawBuffer();
+		//char s[256];
+		int /*ChColor*/ SColor;
+		int RowA, RowZ;
 
-	    {
-	        int [] W1, H1;
-	        if (!(View && View.MView))
-	            return;
-	        View.MView.ConQuerySize(W1, H1);
+		{
+			int [] W1, H1;
+			if (!(View != null && View.MView != null))
+				return;
+			View.MView.ConQuerySize(W1, H1);
 
-	        if (H1[0] < 1 || W1[0] < 1) return;
-	    }
-	    //    printf("Redraw\n");
-	    if (CP.Row >= VCount) CP.Row = VCount - 1;
-	    if (CP.Row < 0) CP.Row = 0;
+			if (H1[0] < 1 || W1[0] < 1) return;
+		}
+		//    printf("Redraw\n");
+		if (CP.Row >= VCount) CP.Row = VCount - 1;
+		if (CP.Row < 0) CP.Row = 0;
 
-	    CheckBlock();
-	    V = View; /* check some window data */
-	    if (!V) {
-	        MinRedraw = MaxRedraw = -1;
-	        RedrawToEos = 0;
-	        return;
-	    }
-	    if (View == 0 || View.MView == 0 || View.MView.Win == 0)
-	        return ;
+		CheckBlock();
+		V = View; /* check some window data */
+		if (V==null) {
+			MinRedraw = MaxRedraw = -1;
+			RedrawToEos = 0;
+			return;
+		}
+		if (View == null|| View.MView == null || View.MView.Win == null)
+			return ;
 
-	    for ( ; V; V = V.NextView) {
-	        //        printf("Checking\x7\n");
-	        if (V.Model != this)
-	            assert(1 == 0);
+		for ( ; V != null; V = V.NextView) {
+			//        printf("Checking\x7\n");
+			if (V.Model != this)
+				assert(1 == 0);
 
-	        W = GetViewVPort(V);
+			W = GetViewVPort(V);
 
-	        if (W.Rows < 1 || W.Cols < 1)
-	            continue;
+			if (W.Rows < 1 || W.Cols < 1)
+				continue;
 
-	        if (V == View) {
-	            int scrollJumpX = Min(ScrollJumpX, W.Cols / 2);
-	            int scrollJumpY = Min(ScrollJumpY, W.Rows / 2);
-	            int scrollBorderX = Min(ScrollBorderX, W.Cols / 2);
-	            int scrollBorderY = Min(ScrollBorderY, W.Rows / 2);
+			if (V == View) {
+				int scrollJumpX = Math.min(ScrollJumpX, W.Cols / 2);
+				int scrollJumpY = Math.min(ScrollJumpY, W.Rows / 2);
+				int scrollBorderX = Math.min(ScrollBorderX, W.Cols / 2);
+				int scrollBorderY = Math.min(ScrollBorderY, W.Rows / 2);
 
-	            W.CP = CP;
-	            TP = W.TP;
+				W.CP = CP;
+				TP = W.TP;
 
-	            if (W.ReCenter) {
-	                W.TP.Row = CP.Row - W.Rows / 2;
-	                W.TP.Col = CP.Col - W.Cols + 8;
-	                W.ReCenter = 0;
-	            }
+				if (W.ReCenter!=0) {
+					W.TP.Row = CP.Row - W.Rows / 2;
+					W.TP.Col = CP.Col - W.Cols + 8;
+					W.ReCenter = 0;
+				}
 
-	            if (W.TP.Row + scrollBorderY > CP.Row) W.TP.Row = CP.Row - scrollJumpY + 1 - scrollBorderY;
-	            if (W.TP.Row + W.Rows - scrollBorderY <= CP.Row) W.TP.Row = CP.Row - W.Rows + 1 + scrollJumpY - 1 + scrollBorderY;
-	            if (!WeirdScroll)
-	                if (W.TP.Row + W.Rows >= VCount) W.TP.Row = VCount - W.Rows;
-	            if (W.TP.Row < 0) W.TP.Row = 0;
+				if (W.TP.Row + scrollBorderY > CP.Row) W.TP.Row = CP.Row - scrollJumpY + 1 - scrollBorderY;
+				if (W.TP.Row + W.Rows - scrollBorderY <= CP.Row) W.TP.Row = CP.Row - W.Rows + 1 + scrollJumpY - 1 + scrollBorderY;
+				if (!Config.WeirdScroll)
+					if (W.TP.Row + W.Rows >= VCount) W.TP.Row = VCount - W.Rows;
+				if (W.TP.Row < 0) W.TP.Row = 0;
 
-	            if (W.TP.Col + scrollBorderX > CP.Col) W.TP.Col = CP.Col - scrollJumpX - scrollBorderX;
-	            if (W.TP.Col + W.Cols - scrollBorderX <= CP.Col) W.TP.Col = CP.Col - W.Cols + scrollJumpX + scrollBorderX;
-	            if (W.TP.Col < 0) W.TP.Col = 0;
+				if (W.TP.Col + scrollBorderX > CP.Col) W.TP.Col = CP.Col - scrollJumpX - scrollBorderX;
+				if (W.TP.Col + W.Cols - scrollBorderX <= CP.Col) W.TP.Col = CP.Col - W.Cols + scrollJumpX + scrollBorderX;
+				if (W.TP.Col < 0) W.TP.Col = 0;
 
-	            if (W.OldTP.Row != -1 && W.OldTP.Col != -1 && RedrawToEos == 0) {
+				if (W.OldTP.Row != -1 && W.OldTP.Col != -1 && RedrawToEos == 0) {
 
-	                if ((W.OldTP.Row != W.TP.Row) || (W.OldTP.Col != W.TP.Col)) {
-	                    int A, B;
-	                    int DeltaX, DeltaY;
-	                    int Rows = W.Rows;
-	                    int Delta1 = 0, Delta2 = 0;
+					if ((W.OldTP.Row != W.TP.Row) || (W.OldTP.Col != W.TP.Col)) {
+						int A, B;
+						int DeltaX, DeltaY;
+						int Rows = W.Rows;
+						int Delta1 = 0, Delta2 = 0;
 
-	                    DeltaY = W.TP.Row - W.OldTP.Row ;
-	                    DeltaX = W.TP.Col - W.OldTP.Col;
+						DeltaY = W.TP.Row - W.OldTP.Row ;
+						DeltaX = W.TP.Col - W.OldTP.Col;
 
-	                    if ((DeltaX == 0) && (-Rows < DeltaY) && (DeltaY < Rows)) {
-	                        if (DeltaY < 0) {
-	                            W.ScrollY(DeltaY);
-	                            A = W.TP.Row;
-				    B = W.TP.Row - DeltaY;
-	                        } else {
-	                            W.ScrollY(DeltaY);
-	                            A = W.TP.Row + Rows - DeltaY;
-	                            B = W.TP.Row + Rows;
-	                        }
-	                    } else {
-	                        A = W.TP.Row;
-	                        B = W.TP.Row + W.Rows;
-	                    }
-	                    if (A >= VCount) {
-	                        Delta1 = A - VCount + 1;
-	                        A = VCount - 1;
-	                    }
-	                    if (B >= VCount) {
-	                        Delta2 = B - VCount + 1;
-	                        B = VCount - 1;
-	                    }
-	                    if (A < 0) A = 0;
-	                    if (B < 0) B = 0;
-			    Draw(VToR(A) + Delta1, VToR(B) + Delta2);
-	                }
-	            } else {
-	                int A = W.TP.Row;
-	                int B = A + W.Rows;
-	                int Delta = 0;
+						if ((DeltaX == 0) && (-Rows < DeltaY) && (DeltaY < Rows)) {
+							if (DeltaY < 0) {
+								W.ScrollY(DeltaY);
+								A = W.TP.Row;
+								B = W.TP.Row - DeltaY;
+							} else {
+								W.ScrollY(DeltaY);
+								A = W.TP.Row + Rows - DeltaY;
+								B = W.TP.Row + Rows;
+							}
+						} else {
+							A = W.TP.Row;
+							B = W.TP.Row + W.Rows;
+						}
+						if (A >= VCount) {
+							Delta1 = A - VCount + 1;
+							A = VCount - 1;
+						}
+						if (B >= VCount) {
+							Delta2 = B - VCount + 1;
+							B = VCount - 1;
+						}
+						if (A < 0) A = 0;
+						if (B < 0) B = 0;
+						Draw(VToR(A) + Delta1, VToR(B) + Delta2);
+					}
+				} else {
+					int A = W.TP.Row;
+					int B = A + W.Rows;
+					int Delta = 0;
 
-	                if (B > VCount) {
-	                    Delta += B - VCount;
-	                    B = VCount;
-	                }
-	                int LastV = VToR(VCount - 1);
-	                int B1 = (B == VCount) ? RCount : VToR(B);
+					if (B > VCount) {
+						Delta += B - VCount;
+						B = VCount;
+					}
+					int LastV = VToR(VCount - 1);
+					int B1 = (B == VCount) ? RCount : VToR(B);
 
-	                if (B1 >= LastV) {
-	                    Delta += B1 - LastV;
-	                    B1 = LastV;
-	                }
-	                if (B1 < 0) B1 = 0;
-	                Draw(VToR(A), B1 + Delta);
-	            }
+					if (B1 >= LastV) {
+						Delta += B1 - LastV;
+						B1 = LastV;
+					}
+					if (B1 < 0) B1 = 0;
+					Draw(VToR(A), B1 + Delta);
+				}
 
-	            W.OldTP = W.TP;
-	            TP = W.TP;
-	        }
-	        if (W.CP.Row >= VCount) W.CP.Row = VCount - 1;
-	        if (W.CP.Row < 0) W.CP.Row = 0;
-	        if (W.TP.Row > W.CP.Row) W.TP.Row = W.CP.Row;
-	        if (W.TP.Row < 0) W.TP.Row = 0;
+				W.OldTP = W.TP;
+				TP = W.TP;
+			}
+			if (W.CP.Row >= VCount) W.CP.Row = VCount - 1;
+			if (W.CP.Row < 0) W.CP.Row = 0;
+			if (W.TP.Row > W.CP.Row) W.TP.Row = W.CP.Row;
+			if (W.TP.Row < 0) W.TP.Row = 0;
 
-	        if (V.MView.IsActive()) // hack
-	            SColor = hcStatus_Active;
-	        else
-	            SColor = hcStatus_Normal;
-	        MoveChar(B, 0, W.Cols, ' ', SColor, W.Cols);
+			if (V.MView.IsActive()) // hack
+				SColor = hcStatus_Active;
+			else
+				SColor = hcStatus_Normal;
+			B.MoveChar( 0, W.Cols, ' ', SColor, W.Cols);
 
-	        if (V.MView.Win.GetViewContext() == V.MView) {
-	            V.MView.Win.SetSbVPos(W.TP.Row, W.Rows, VCount + (WeirdScroll ? W.Rows - 1 : 0));
-	            V.MView.Win.SetSbHPos(W.TP.Col, W.Cols, 1024 + (WeirdScroll ? W.Cols - 1 : 0));
-	        }
+			if (V.MView.Win.GetViewContext() == V.MView) {
+				V.MView.Win.SetSbVPos(W.TP.Row, W.Rows, VCount + (Config.WeirdScroll ? W.Rows - 1 : 0));
+				V.MView.Win.SetSbHPos(W.TP.Col, W.Cols, 1024 + (Config.WeirdScroll ? W.Cols - 1 : 0));
+			}
 
-	        if (V.CurMsg == 0) {
-	            {
-	                int CurLine = W.CP.Row;
-	                int ActLine = VToR(W.CP.Row);
-	                int CurColumn = W.CP.Col;
-	                int CurPos = CharOffset(RLine(ActLine), CurColumn);
-	                int NumLines = RCount;
-	                int NumChars = RLine(ActLine).Count;
-	                //            int NumColumns = ScreenPos(Line(CurLine), NumChars);
-	                String fName = FileName;
-	                char CurCh = 0xFF;
-	                int lf = strlen(fName);
-	                //char CCharStr[20] = "";
+			if (V.CurMsg == null) {
+				{
+					int CurLine = W.CP.Row;
+					int ActLine = VToR(W.CP.Row);
+					int CurColumn = W.CP.Col;
+					int CurPos = CharOffset(RLine(ActLine), CurColumn);
+					int NumLines = RCount;
+					int NumChars = RLine(ActLine).Count;
+					//            int NumColumns = ScreenPos(Line(CurLine), NumChars);
+					String fName = FileName;
+					char CurCh = 0xFF;
+					int lf = fName.length();
+					String CCharStr; //[20] = "";
 
-	                if (lf > 34) fName += lf - 34;
+					if (lf > 34) fName += lf - 34;
 
-	                if (CurPos < NumChars) {
-	                    CurCh = VLine(CurLine).Chars[CurPos];
-	                    sprintf(CCharStr, "%3u,%02X", CurCh, CurCh);
-	                } else {
-	                    if (CurPos > NumChars) strcpy(CCharStr, "      ");
-	                    else if (CurLine < NumLines - 1) strcpy(CCharStr, "   EOL");
-	                    else strcpy(CCharStr, "   EOF");
-	                }
+					if (CurPos < NumChars) {
+						CurCh = VLine(CurLine).Chars[CurPos];
+						CCharStr = String.format("%3u,%02X", CurCh, CurCh);
+					} else {
+						if (CurPos > NumChars) CCharStr = "      ";
+						else if (CurLine < NumLines - 1) CCharStr = "   EOL";
+						else CCharStr = "   EOF";
+					}
 
-	                sprintf(s, "%04d:%02d %c%c%c%c%c %.6s %c"
-	//#ifdef DOS
-	//                        " %lu "
-	//#endif
-	                        ,
-	                        //                    CurLine + 1,
-	                        ActLine + 1,
-	                        CurColumn + 1,
-	                        //                    CurPos + 1,
-	                        (BFI(this, BFI_Insert)) ? 'I' : ' ',
-	                        (BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
-	                        //                    (BFI(this, BFI_ExpandTabs))?'T':' ',
-	                        (BFI(this, BFI_MatchCase)) ? 'C' : ' ',
-	                        AutoExtend ?
-	                        (
-	                         (BlockMode == bmStream) ? 's' :
-	                         (BlockMode == bmLine) ? 'l' : 'c'
-	                        ) :
-	                        ((BlockMode == bmStream) ? 'S' :
-	                         (BlockMode == bmLine) ? 'L': 'C'
-	                        ),
-	/* TODO #ifdef CONFIG_WORDWRAP
+					String s = String.format( "%04d:%02d %c%c%c%c%c %.6s %c"
+							//#ifdef DOS
+							//                        " %lu "
+							//#endif
+							,
+							//                    CurLine + 1,
+							ActLine + 1,
+							CurColumn + 1,
+							//                    CurPos + 1,
+							(BFI(this, BFI_Insert)) ? 'I' : ' ',
+									(BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
+											//                    (BFI(this, BFI_ExpandTabs))?'T':' ',
+											(BFI(this, BFI_MatchCase)) ? 'C' : ' ',
+													AutoExtend ?
+															(
+																	(BlockMode == bmStream) ? 's' :
+																		(BlockMode == bmLine) ? 'l' : 'c'
+																	) :
+																		((BlockMode == bmStream) ? 'S' :
+																			(BlockMode == bmLine) ? 'L': 'C'
+																				),
+																		/* TODO #ifdef CONFIG_WORDWRAP
 	                        (BFI(this, BFI_WordWrap) == 3) ? 't' :
 	                        (BFI(this, BFI_WordWrap) == 2) ? 'W' :
 	                        (BFI(this, BFI_WordWrap) == 1) ? 'w' :
 	                        ' ',
 	#endif */
-	                        //                    (BFI(this, BFI_Undo))?'U':' ',
-	                        //                    (BFI(this, BFI_Trim))?'E':' ',
-	                        //                    (Flags.KeepBackups)?'B':' ',
-	                        Mode.fName,
-	                        (Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
-	                       );
+																		//                    (BFI(this, BFI_Undo))?'U':' ',
+																		//                    (BFI(this, BFI_Trim))?'E':' ',
+																		//                    (Flags.KeepBackups)?'B':' ',
+																		Mode.fName,
+																		(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
+							);
 
-	                int l = strlen(s);
-	                int fw = W.Cols - l;
-	                int fl = strlen(FileName);
-	                //char num[10];
+					int l = s.length();
+					int fw = W.Cols - l;
+					int fl = FileName.length();
+					//char num[10];
 
-	                B.MoveStr( 0, W.Cols, s, SColor, W.Cols);
-	                sprintf(num, " %s %d", CCharStr, ModelNo);
-	                B.MoveStr( W.Cols - strlen(num), W.Cols, num, SColor, W.Cols);
+					B.MoveStr( 0, W.Cols, s, SColor, W.Cols);
+					String num = String.format(" %s %d", CCharStr, ModelNo);
+					B.MoveStr( W.Cols - num.length(), W.Cols, num, SColor, W.Cols);
 
-	                fw -= strlen(num);
+					fw -= num.length();
 
-	                if (fl > fw) {
-	                	B.MoveStr( l, W.Cols, FileName + fl - fw, SColor, W.Cols);
-	                } else {
-	                	B.MoveStr( l, W.Cols, FileName, SColor, W.Cols);
-	                }
-	            }
-	        } else {
-	        	B.MoveStr( 0, W.Cols, V.CurMsg, SColor, W.Cols);
-	        }
-	        if (V.MView.Win.GetStatusContext() == V.MView) {
-	            V.MView.ConPutBox(0, W.Rows, W.Cols, 1, B);
-	            if (V.MView.IsActive()) {
-	                V.MView.ConShowCursor();
-	                V.MView.ConSetCursorPos(W.CP.Col - W.TP.Col, W.CP.Row - W.TP.Row);
-	                if (BFI(this, BFI_Insert)) {
-	                    V.MView.ConSetCursorSize(CursorInsSize[0], CursorInsSize[1]);
-	                } else {
-	                    V.MView.ConSetCursorSize(CursorOverSize[0], CursorOverSize[1]);
-	                }
-	            }
-	        }
-	    }
+					if (fl > fw) {
+						B.MoveStr( l, W.Cols, FileName + fl - fw, SColor, W.Cols);
+					} else {
+						B.MoveStr( l, W.Cols, FileName, SColor, W.Cols);
+					}
+				}
+			} else {
+				B.MoveStr( 0, W.Cols, V.CurMsg, SColor, W.Cols);
+			}
+			if (V.MView.Win.GetStatusContext() == V.MView) {
+				V.MView.ConPutBox(0, W.Rows, W.Cols, 1, B);
+				if (V.MView.IsActive()) {
+					V.MView.ConShowCursor();
+					V.MView.ConSetCursorPos(W.CP.Col - W.TP.Col, W.CP.Row - W.TP.Row);
+					if (BFI(this, BFI_Insert)) {
+						V.MView.ConSetCursorSize(CursorInsSize[0], CursorInsSize[1]);
+					} else {
+						V.MView.ConSetCursorSize(CursorOverSize[0], CursorOverSize[1]);
+					}
+				}
+			}
+		}
 
-	    Rehilit(VToR(CP.Row));
+		Rehilit(VToR(CP.Row));
 
-	    if (BFI(this, BFI_AutoHilitParen) == 1) {
-	        if (Match.Row == -1 && Match.Col == -1)
-	            HilitMatchBracket();
-	    }
+		if (BFI(this, BFI_AutoHilitParen) == 1) {
+			if (Match.Row == -1 && Match.Col == -1)
+				HilitMatchBracket();
+		}
 
-	    //    if ((Window == WW) && (MinRedraw == -1))
-	    //        MaxRedraw = MinRedraw = VToR(CP.Row);
+		//    if ((Window == WW) && (MinRedraw == -1))
+		//        MaxRedraw = MinRedraw = VToR(CP.Row);
 
-	    //printf("\n\nMinRedraw = %d, MaxRedraw = %d", MinRedraw, MaxRedraw);
-	    if (MinRedraw == -1)
-	        return;
+		//printf("\n\nMinRedraw = %d, MaxRedraw = %d", MinRedraw, MaxRedraw);
+		if (MinRedraw == -1)
+			return;
 
-	    //    printf("Will redraw: %d to %d, to eos = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
-	    if (MinRedraw >= VCount) MinRedraw = VCount - 1;
-	    if (MinRedraw < 0) MinRedraw = 0;
-	    //    puts("xxx\x7");
-	    //    printf("%d\n", MinRedraw);
-	    Row = RowA = RToVN(MinRedraw);
-	    //    puts("xxx\x7");
-	    RowZ = MaxRedraw;
-	    if (MaxRedraw != -1) {
-	        int Delta = 0;
+		//    printf("Will redraw: %d to %d, to eos = %d\n", MinRedraw, MaxRedraw, RedrawToEos);
+		if (MinRedraw >= VCount) MinRedraw = VCount - 1;
+		if (MinRedraw < 0) MinRedraw = 0;
+		//    puts("xxx\x7");
+		//    printf("%d\n", MinRedraw);
+		Row = RowA = RToVN(MinRedraw);
+		//    puts("xxx\x7");
+		RowZ = MaxRedraw;
+		if (MaxRedraw != -1) {
+			int Delta = 0;
 
-	        if (MaxRedraw >= RCount) {
-	            Delta = MaxRedraw - RCount + 1;
-	            MaxRedraw = RCount - 1;
-	        }
-	        if (MaxRedraw < 0) MaxRedraw = 0;
-	        //        printf("%d\n", MaxRedraw);
-	        RowZ = RToVN(MaxRedraw) + Delta;
-	    }
-	    //    puts("xxx\x7");
-	    //printf("\nRowA = %d, RowZ = %d", RowA, RowZ);
+			if (MaxRedraw >= RCount) {
+				Delta = MaxRedraw - RCount + 1;
+				MaxRedraw = RCount - 1;
+			}
+			if (MaxRedraw < 0) MaxRedraw = 0;
+			//        printf("%d\n", MaxRedraw);
+			RowZ = RToVN(MaxRedraw) + Delta;
+		}
+		//    puts("xxx\x7");
+		//printf("\nRowA = %d, RowZ = %d", RowA, RowZ);
 
-	    V = View;
-	    while (V) {
-	        if (V.Model != this)
-	            assert(1 == 0);
+		V = View;
+		while (V!=null) {
+			if (V.Model != this)
+				assert(1 == 0);
 
-	        W = GetViewVPort(V);
+			W = GetViewVPort(V);
 
-	        for (int R = W.TP.Row; R < W.TP.Row + W.Rows; R++) {
-	            Row = R;
-	            if ((Row >= RowA) &&
-	                (RedrawToEos || Row <= RowZ))
-	            {
-	                DrawLine(B, Row, W.TP.Col, W.Cols, HilitX);
-	                W.DrawLine(Row, B);
-	                if (HilitX && Row == RowZ)
-	                    RowZ++;
-	            }
-	        }
-	        V = V.NextView;
-	    }
-	    MinRedraw = MaxRedraw = -1;
-	    RedrawToEos = 0;
+			for (int R = W.TP.Row; R < W.TP.Row + W.Rows; R++) {
+				Row = R;
+				if ((Row >= RowA) &&
+						(RedrawToEos || Row <= RowZ))
+				{
+					DrawLine(B, Row, W.TP.Col, W.Cols, HilitX);
+					W.DrawLine(Row, B);
+					if (HilitX && Row == RowZ)
+						RowZ++;
+				}
+			}
+			V = V.NextView;
+		}
+		MinRedraw = MaxRedraw = -1;
+		RedrawToEos = 0;
 	}
 
 	int GetHilitWord(int len, String str, int /*ChColor*/ []clr, int IgnCase) {
-	    //char *p;
+		//char *p;
 
-	    if (Mode == 0 || Mode.fColorize == 0)
-	        return 0;
+		if (Mode == null || Mode.fColorize == 0)
+			return 0;
 
-	    if (len >= CK_MAXLEN)
-	        return 0;
+		if (len >= CK_MAXLEN)
+			return 0;
 
-	/* TODO #ifdef CONFIG_WORD_HILIT
+		/* TODO #ifdef CONFIG_WORD_HILIT
 	    {
 	        char s[CK_MAXLEN + 1];
 	        s[CK_MAXLEN] = 0;
@@ -2012,38 +2039,219 @@ public class EBuffer extends EModel implements BufferDefs
 	        }
 	    }
 	#endif */
-	    if (len < 1) return 0;
-	    p = Mode.fColorize.Keywords.key[len];
-	    if (IgnCase) {
-	        while (p && p[0]) {
-	            if (strnicmp(p, str, len) == 0) {
-	                clr = p[len];
-	                return 1;
-	            }
-	            p += len + 1;
-	        }
-	    } else {
-	        while (p && p[0]) {
-	            if (memcmp(p, str, len) == 0) {
-	                clr = p[len];
-	                return 1;
-	            }
-	            p += len + 1;
-	        }
-	    }
-	    if (len < 128) {
-	        //char s[128];
+		if (len < 1) return 0;
+		p = Mode.fColorize.Keywords.key[len];
+		if (IgnCase) {
+			while (p && p[0]) {
+				if (strnicmp(p, str, len) == 0) {
+					clr = p[len];
+					return 1;
+				}
+				p += len + 1;
+			}
+		} else {
+			while (p && p[0]) {
+				if (memcmp(p, str, len) == 0) {
+					clr = p[len];
+					return 1;
+				}
+				p += len + 1;
+			}
+		}
+		if (len < 128) {
+			//char s[128];
 
-	        memcpy(s, str, len);
-	        s[len] = 0;
-	        if (BFI(this, BFI_HilitTags)&&TagDefined(s)) {
-		    //clr = 0x0A;
-		    clr = Mode.fColorize.Colors[CLR_HexNumber];
-	            return 1;
-	        }
-	    }
-	    
-	    return 0;
+			memcpy(s, str, len);
+			s[len] = 0;
+			if (BFI(this, BFI_HilitTags)&&TagDefined(s)) {
+				//clr = 0x0A;
+				clr = Mode.fColorize.Colors[CLR_HexNumber];
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	int FindStr(String Data, int Len, int Options) {
+		int LLen, Start, End;
+		int C, L;
+		ELine X;
+		//char *P;
+
+		boolean osBack = 0 != (Options & SEARCH_BACK);
+		boolean osWordBeg = 0 != (Options & SEARCH_WORDBEG);
+		boolean osWordEnd = 0 != (Options & SEARCH_WORDEND);
+		boolean osNCase = 0 != (Options & SEARCH_NCASE);
+
+		if(0 != (Options & SEARCH_RE))
+			return 0;
+		if (Len <= 0)
+			return 0;
+
+		if(0 != (Options & SEARCH_NOPOS)) {
+			C = Match.Col;
+			L = Match.Row;
+		} else {
+			C = CP.Col;
+			L = VToR(CP.Row);
+		}
+		if (Match.Row != -1)
+			Draw(Match.Row, Match.Row);
+		Match.Row = -1;
+		Match.Col = -1;
+		X = RLine(L);
+		C = CharOffset(X, C);
+
+		if(0 != (Options & SEARCH_NEXT)) {
+			int CC = MatchCount != 0 ? MatchCount : 1;
+
+			if(osBack) {
+				C -= CC;
+				if (C < 0) {
+					if (L == 0) return 0;
+					L--;
+					X = RLine(L);
+					C = X.getCount();
+				}
+			} else {
+				C += CC;
+				if (C >= X.getCount()) {
+					C = 0;
+					L++;
+					if (L == RCount) return 0;
+				}
+			}
+		}
+		MatchLen = 0;
+		MatchCount = 0;
+
+		if(0 != (Options & SEARCH_BLOCK)) {
+			if(osBack) {
+				if (BlockMode == bmStream) {
+					if (L > BE.Row) {
+						L = BE.Row;
+						C = BE.Col;
+					}
+					if (L == BE.Row && C > BE.Col)
+						C = BE.Col;
+				} else {
+					if (L >= BE.Row && BE.Row > 0) {
+						L = BE.Row - 1;
+						C = RLine(L).getCount();
+					}
+					if (BlockMode == bmColumn)
+						if (L == BE.Row - 1 && C >= BE.Col)
+							C = BE.Col;
+				}
+			} else {
+				if (L < BB.Row) {
+					L = BB.Row;
+					C = 0;
+				}
+				if (L == BB.Row && C < BB.Col)
+					C = BB.Col;
+			}
+		}
+		while (true) {
+			if(0 != (Options & SEARCH_BLOCK)) {
+				if (BlockMode == bmStream) {
+					if (L > BE.Row || L < BB.Row) break;
+				} else
+					if (L >= BE.Row || L < BB.Row) break;
+			} else
+				if (L >= RCount || L < 0) break;
+
+			X = RLine(L);
+
+			LLen = X.getCount();
+			//P = X.Chars;
+			//int Ppos = 0;
+			Start = 0;
+			End = LLen;
+
+			if(0 != (Options & SEARCH_BLOCK)) {
+				if (BlockMode == bmColumn) {
+					Start = CharOffset(X, BB.Col);
+					End = CharOffset(X, BE.Col);
+				} else if (BlockMode == bmStream) {
+					if (L == BB.Row)
+						Start = CharOffset(X, BB.Col);
+					if (L == BE.Row)
+						End = CharOffset(X, BE.Col);
+				}
+			}
+			if(osBack) {
+				if (C >= End - Len)
+					C = End - Len;
+			} else {
+				if (C < Start)
+					C = Start;
+			}
+
+
+
+			while (((!osBack) && (C <= End - Len)) || (osBack && (C >= Start))) 
+			{
+				if (
+						(!osWordBeg
+								|| (C == 0)
+								|| (BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C - 1) /*P[C - 1]*/) == 0))
+						&&
+						(!osWordEnd
+								|| (C + Len >= End)
+								|| (BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C + Len)/*P[C + Len]*/) == 0))
+						&&
+						((!osNCase
+								&& ( X.Chars.charAt(C)/*P[C]*/ == Data[0])
+								&& (memcmp(P + C, Data, Len) == 0))
+								||
+								(osNCase
+										&& (toupper(X.Chars.charAt(C)/*P[C]*/) == toupper(Data[0]))
+										&& (strnicmp(P + C, Data, Len) == 0))
+								) /* && BOL | EOL */
+						)
+				{
+					Match.Col = ScreenPos(X, C);
+					Match.Row = L;
+					MatchCount = Len;
+					MatchLen = ScreenPos(X, C + Len) - Match.Col;
+					if (!(Options & SEARCH_NOPOS)) {
+						if (Options & SEARCH_CENTER)
+							CenterPosR(Match.Col, Match.Row);
+						else
+							SetPosR(Match.Col, Match.Row);
+					}
+					Draw(L, L);
+					return 1;
+				}
+				if (Options & SEARCH_BACK) C--; else C++;
+			}
+			if (Options & SEARCH_BACK) {
+				L--;
+				if (L >= 0)
+					C = RLine(L).Count;
+			} else {
+				C = 0;
+				L++;
+			}
+		}
+		//SetPos(OC, OL);
+		return 0;
 	}
 
 

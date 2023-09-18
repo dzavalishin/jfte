@@ -44,7 +44,8 @@ public class ExISearch extends ExView implements KeyDefs
        switch (Event.What) {
        case evKeyDown:
            SetState(IState.IOk);
-           switch (kbCode(Event.Key.Code)) {
+           int kcode = ((TKeyEvent)Event).Code;
+           switch (KeyDefs.kbCode(kcode)) {
            case kbEsc: 
                Buffer.SetPos(Orig.Col, Orig.Row);
                EndExec(0); 
@@ -57,9 +58,9 @@ public class ExISearch extends ExView implements KeyDefs
                        if (Buffer.CenterPos(stack[stacklen].Col, stack[stacklen].Row) == 0) return;
                    }
                    len--;
-                   ISearchStr[len] = 0;
+                   ISearchStr = ISearchStr.substring(0,len);
                    if (len > 0 && Buffer.FindStr(ISearchStr, len, Case | Direction) == 0) {
-                       SetState(INoMatch);
+                       SetState(IState.INoMatch);
                    }
                } else {
                    if (Buffer.CenterPos(Orig.Col, Orig.Row) == 0) return;
@@ -98,8 +99,8 @@ public class ExISearch extends ExView implements KeyDefs
            case kbTab | kfShift:
                Direction = SEARCH_BACK;
                if (len == 0) {
-                   strcpy(ISearchStr, PrevISearch);
-                   len = strlen(ISearchStr);
+                   ISearchStr = PrevISearch;
+                   len = ISearchStr.length();
                    if (len == 0)
                        break;
                }
@@ -111,8 +112,8 @@ public class ExISearch extends ExView implements KeyDefs
            case kbTab:
                Direction = 0;
                if (len == 0) {
-                   strcpy(ISearchStr, PrevISearch);
-                   len = strlen(ISearchStr);
+                   ISearchStr = PrevISearch;
+                   len = ISearchStr.length();
                    if (len == 0)
                        break;
                }
@@ -125,17 +126,19 @@ public class ExISearch extends ExView implements KeyDefs
                Event.What = evKeyDown;
                Event.Key.Code = Win.GetChar(0);
            default:
-               if (isAscii(Event.Key.Code) && (len < MAXISEARCH)) {
-                   char Ch = (char) Event.Key.Code;
+               if (KeyDefs.isAscii(kcode) && (len < MAXISEARCH)) {
+                   char Ch = (char) kcode;
                    
                    stack[stacklen++] = Buffer.CP;
-                   ISearchStr[len++] = Ch;
-                   ISearchStr[len] = 0;
+                   
+                   ISearchStr += ""+Ch;
+                   len++;
+                   
                    if (Buffer.FindStr(ISearchStr, len, Case | Direction) == 0) {
-                       SetState(INoMatch);
+                       SetState(IState.INoMatch);
                        len--;
                        stacklen--;
-                       ISearchStr[len] = 0;
+                       ISearchStr = ISearchStr.substring(0,len);
                        Buffer.FindStr(ISearchStr, len, Case | Direction);
                    } else {
                    }
@@ -162,12 +165,11 @@ public class ExISearch extends ExView implements KeyDefs
    }
 
    void RepaintStatus() {
-       TDrawBuffer B;
-       char s[MAXISEARCH + 1];
-       const char *p;
-       int W, H;
+       TDrawBuffer B = new TDrawBuffer();
+       String p;
+       int [] W = {0}, H = {0};
        
-       ConQuerySize(&W, &H);
+       ConQuerySize(W, H);
        
        switch (state) {
        case INoMatch: p = " No Match. "; break;
@@ -176,11 +178,11 @@ public class ExISearch extends ExView implements KeyDefs
        case IOk: default: p = ""; break;
        }
        
-       sprintf(s, "ISearch [%s]%s", ISearchStr, p);
-       MoveCh(B, ' ', 0x17, W);
-       MoveStr(B, 0, W, s, 0x17, W);
-       ConPutBox(0, H - 1, W, 1, B);
-       ConSetCursorPos(strlen(s) - 1, H - 1);
+       String s = String.format("ISearch [%s]%s", ISearchStr, p);
+       B.MoveCh( ' ', 0x17, W);
+       B.MoveStr( 0, W[0], s, 0x17, W[0]);
+       ConPutBox(0, H[0] - 1, W[0], 1, B);
+       ConSetCursorPos(s.length() - 1, H[0] - 1);
        ConShowCursor();
    }
 

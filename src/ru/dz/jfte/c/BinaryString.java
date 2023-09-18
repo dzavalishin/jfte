@@ -18,13 +18,15 @@ public class BinaryString
 	private static final int ALLOC_STEP = 15;
 	private static final int ALLOC_START = 15;
 	
-	private char[] mem; // = new byte[ALLOC_START];
+	private Character[] mem; // = new byte[ALLOC_START];
 	private int usedLen; // = 15;
 	private int pos = 0;
 
 	public BinaryString() 
 	{
-		mem = new char[ALLOC_START];
+		//mem = new char[ALLOC_START];
+		mem = new Character[ALLOC_START];
+		
 		usedLen = 0;
 		pos = 0;
 	}
@@ -38,7 +40,7 @@ public class BinaryString
 
 	public BinaryString( String s ) 
 	{
-		mem = new char[s.length()];
+		mem = new Character[s.length()];
 		usedLen = 0;
 		pos = 0;
 		append(s);
@@ -52,7 +54,7 @@ public class BinaryString
 	 */
 	public BinaryString(byte[] s, int ppos, int len) 
 	{
-		mem = new char[len];
+		mem = new Character[len];
 		usedLen = 0;
 		pos = 0;
 		
@@ -63,13 +65,13 @@ public class BinaryString
 	/**
 	 * NB! Uses buf as is, no copy.
 	 * @param buf
-	 */
+	 * /
 	private BinaryString(char[] buf) 
 	{
 		mem = buf;
 		usedLen = buf.length;
 		pos = usedLen;
-	}
+	}*/
 
 	public BinaryString(byte[] ba) {
 		this(ba, 0, ba.length);
@@ -81,17 +83,38 @@ public class BinaryString
 	}
 
 	public int length() { return usedLen; }
-	
+
+	/*
 	public void setLength(int i) 
 	{
 		usedLen = Math.min( usedLen, i );
 		if( pos > usedLen ) pos = usedLen;
+	}*/
+
+	public void trySetSize(int size)
+	{
+		if(size <= mem.length)
+			TryContract(size);
+		else
+			tryExtend(size);
 	}
 
-
+	/**
+	 * Shorten
+	 * @param i ne size
+	 */
+	public void TryContract(int i) 
+	{
+		usedLen = Math.min( usedLen, i );
+		if( pos > usedLen ) pos = usedLen;
+	}
 	
-	
-	private void tryExtend(int size) {
+	/**
+	 * Lengthen
+	 * @param size
+	 */
+	private void tryExtend(int size) 
+	{
 		if( mem.length - pos > size)
 			return;
 		
@@ -127,7 +150,7 @@ public class BinaryString
 		return this;
 	}
 
-	public char[] toCharArray() {
+	public Character[] toCharArray() {
 		return Arrays.copyOf(mem, usedLen);
 	}
 	
@@ -135,18 +158,40 @@ public class BinaryString
 	
 	
 	
-
+	/*
 	public int READ_LE_int(int i) 
 	{
 		int hi = mem[1+i];
 		int lo = mem[0+i];
 		return (0xFF & lo) + ((0xFF & hi) << 8);
-	}
+	}*/
 
 
 	@Override
-	public String toString() {		
-		return String.valueOf(mem, 0, usedLen);
+	public String toString() {
+		char [] ca = new char[usedLen];
+		
+		for(int i = 0; i < usedLen; i++)
+			ca[i] = mem[i];
+		
+		return String.valueOf(ca, 0, usedLen);
+	}
+
+	public void memmove(int dest, int src, int len) {
+		System.arraycopy(mem, src, mem, dest, len);		
+	}
+
+	public void memset(int ofs, char c, int count) {
+		Arrays.fill(mem, ofs, ofs+count, c );		
+	}
+
+	public void copyIn(int ofs, String data, int count) {
+		char[] ca = data.toCharArray();
+		System.arraycopy(ca, 0, mem, ofs, count);		
+	}
+
+	public ArrayPtr<Character> getPointer() {
+		return new ArrayPtr<Character>(mem);
 	}
 	
 }

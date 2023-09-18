@@ -465,4 +465,11 @@ public class BitOps {
 	    return i % maxim;
 	}
 
+	
+	
+	public static final int  WGETBIT(char[] x, char y) 
+	{
+		return ((x[(y / 8) & 0xFF] &  (1 << ((y % 8)&0xFF) )) != 0 ? 1 : 0);
+	}
+	
 }
