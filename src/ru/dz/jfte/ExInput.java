@@ -221,7 +221,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 
                     TabCount++;
                     if (TabCount < 1) TabCount = 1;
-                    if ((TabCount == 1) && (kbCode(Event.Key.Code) == kbTab)) {
+                    if ((TabCount == 1) && (KeyDefs.kbCode(((TKeyEvent)Event).Code) == kbTab)) {
                         MatchStr = new String(Line);
                     }
                     n = Comp.complete(MatchStr, Str2, TabCount);
@@ -241,7 +241,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 {
                     char Ch;
 
-                    if( 0 != (Ch = GetCharFromEvent(Event)) && (Line.length() < MaxLen)) {
+                    if( 0 != (Ch = ((TKeyEvent)Event).GetChar()) && (Line.length() < MaxLen)) {
                         if (SelStart < SelEnd) {
                             memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
                             Pos = SelStart;

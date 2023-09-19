@@ -34,7 +34,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
 
     void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
         if (Line < BCount)
-            if (Col < int(strlen(BList[Line])))
+            if (Col < BList[Line].length())
                 B.MoveStr( 0, Width, BList[Line] + Col, color, Width);
     }
 
@@ -54,13 +54,13 @@ public class BufferView extends EList implements EventDefs, KeyDefs
             B = B.Next;
             if (B == ActiveModel) break;
         }
-        BList = (char **) malloc(sizeof(char *) * BCount);
-        assert(BList != 0);
+        //BList = (char **) malloc(sizeof(char *) * BCount);
+        BList = new String[BCount];
         B = ActiveModel;
         No = 0;
-        while (B) {
-            B.GetInfo(s, sizeof(s) - 1);
-            BList[No++] = strdup(s);
+        while (B!=null) {
+            String s =B.GetInfo();
+            BList[No++] = s;
             B = B.Next;
             if (B == ActiveModel) break;
             if (No >= BCount) break;
@@ -169,12 +169,13 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                 resetSearch = 0;
                 break;
             case evKeyDown:
-            	TKeyEvent ke = EVent;
+            	TKeyEvent ke = (TKeyEvent) Event;
                 switch (KeyDefs.kbCode(ke.Code)) {
                     case kbBackSp:
                         resetSearch = 0;
                         if (SearchLen > 0) {
-                            SearchString[--SearchLen] = null;
+                            //SearchString[--SearchLen] = 0;
+                        	SearchString = SearchString.substring(0,--SearchLen);
                             Row = SearchPos[SearchLen];
                             Msg(S_INFO, "Search: [%s]", SearchString);
                         } else
@@ -185,15 +186,16 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                         break;
                     default:
                         resetSearch = 0;
-                        if (isAscii(ke.Code) && (SearchLen < MAXISEARCH)) {
+                        if (KeyDefs.isAscii(ke.Code) && (SearchLen < MAXISEARCH)) {
                             char Ch = (char) ke.Code;
 
                             SearchPos[SearchLen] = Row;
-                            SearchString[SearchLen] = Ch;
-                            SearchString[++SearchLen] = null;
+                            SearchString += Ch;
+                            //SearchString[++SearchLen] = null;
                             int i = getMatchingLine(Row, 1);
                             if (i == -1)
-                                SearchString[--SearchLen] = null;
+                                //SearchString[--SearchLen] = null;
+                            	SearchString = SearchString.substring(0,--SearchLen);
                             else
                                 Row = i;
                             Msg(S_INFO, "Search: [%s]", SearchString);
@@ -201,7 +203,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                         break;
                 }
         }
-        if (resetSearch) {
+        if (resetSearch != 0) {
             SearchLen = 0;
         }
     }
@@ -216,7 +218,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         do {
             // Find SearchString at any place in string for line i
             for(int j = 0; BList[i] != null && !BList[i].isEmpty(); j++)
-                if (BList[i][j] == SearchString[0] && strnicmp(SearchString, BList[i]+j, SearchLen) == 0) {
+                if (BList[i].charAt(j) == SearchString.charAt(0) && BitOps.strnicmp(SearchString, BList[i]+j, SearchLen) == 0) {
                     return i;
                 }
             i += direction;

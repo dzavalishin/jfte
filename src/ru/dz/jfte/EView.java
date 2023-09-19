@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
+
 public class EView implements GuiDefs, EventDefs, ModeDefs 
 {
     EView Next;        // next view
@@ -48,7 +50,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             delete Port;
     }*/
 
-    int CanQuit() {
+    boolean CanQuit() {
         if (Model != null)
             return Model.CanQuit();
         else
@@ -208,14 +210,14 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if (Port!=null)
             Port.HandleEvent(Event);
         if (Event.What == evCommand) {
-            switch (Event.Msg.Command) {
+            switch (((TMsgEvent)Event).Command) {
             case cmDroppedFile:
                 {
                     String file = (String)Event.Msg.Param2;
 
-                    if (IsDirectory(file))
+                    if (Console.IsDirectory(file))
                         OpenDir(file);
-                    MultiFileLoad(0, file, null, this);
+                    Console.MultiFileLoad(0, file, null, this);
                 }
                 break;
             }
@@ -349,23 +351,23 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
         if (State.GetStrParam(this,FName) == 0) {
             if (Console.GetDefaultDirectory(Model, FName) == 0)
-                return 0;
+                return ExResult.ErFAIL;
             if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return ExResult.ErFAIL;
         }
 
         if( FName[0].length() == 0 ) return 0;
 
-        if (IsDirectory(FName[0]))
+        if (Console.IsDirectory(FName[0]))
             return OpenDir(FName[0]);
 
-        return MultiFileLoad(0, FName[0], null, this);
+        return Console.MultiFileLoad(0, FName[0], null, this);
     }
 
     ExResult FileOpenInMode(ExState State) {
     	String [] Mode = {""};
         String [] FName = {""};
 
-        if (Mode = State.GetStrParam(this) == 0)
+        if ( State.GetStrParam(this, Mode) == 0)
             if (MView.Win.GetStr("Mode", Mode, HIST_SETUP) != 1) return ExResult.ErFAIL;
 
         if (FindMode(Mode[0]) == 0) {
@@ -378,16 +380,16 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if (State.GetStrParam(this, FName) == 0)
             if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return 0;
 
-        if (IsDirectory(FName[0]))
+        if (Console.IsDirectory(FName[0]))
             return OpenDir(FName[0]);
 
 
         if( FName[0].length() == 0 ) return ExResult.ErFAIL;
 
-        return MultiFileLoad(0, FName, Mode, this);
+        return Console.MultiFileLoad(0, FName, Mode, this);
     }
 
-    ExResult SetPrintDevice(ExState State) {
+    ExResult SetPrintDevice(ExState State) throws IOException {
         String [] Dev = {Config.PrintDevice};
 
         if (State.GetStrParam(this, Dev) == 0)
@@ -410,7 +412,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         ks.Mask = 0;
         ks.Key = MView.Win.GetChar(0);
 
-        GetKeyName(buf, ks);
+        KeyTable.GetKeyName(buf, ks);
         Msg(S_INFO, "Key: '%s' - '%8X'", buf[0], ks.Key);
         return ExResult.ErOK;
     }
@@ -477,13 +479,13 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             return ExResult.ErFAIL;
         Buffer = (EBuffer)M;
 
-        if (Buffer.Routines == 0) {
+        if (Buffer.Routines == null) {
             if (BFS(Buffer, BFS_RoutineRegexp) == 0) {
                 MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
                 return ExResult.ErFAIL;
             }
             Buffer.Routines = new RoutineView(0, EModel.ActiveModel, Buffer);
-            if (Buffer.Routines == 0)
+            if (Buffer.Routines == null)
                 return ExResult.ErFAIL;
         } else {
             Buffer.Routines.UpdateList();
@@ -505,7 +507,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         String XPath;
         EDirectory dir = null;
 
-        if (ExpandPath(Path, XPath) == -1)
+        if (Console.ExpandPath(Path, XPath) == -1)
             return ExResult.ErFAIL;
         {
             EModel x = Model;
@@ -522,8 +524,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
                     break;
             }
         }
-        if (dir == 0)
-            dir = new EDirectory(0, &EModel.ActiveModel, XPath);
+        if (dir == null)
+            dir = new EDirectory(0, EModel.ActiveModel, XPath);
         SelectModel(dir);
         return ExResult.ErOK;
     }
@@ -562,7 +564,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
         if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
         if (State.GetStrParam(this, Command) == 0) {
@@ -572,7 +574,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
                     Command[0] = BFS(B, BFS_CompileCommand);
             }
             if (Command[0] == null)
-                Command[0] = CompileCommand;
+                Command[0] = Config.CompileCommand;
         }
         return Compile(Command[0]);
     }
@@ -617,7 +619,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
 
     ExResult ShowVersion() {
-        MView.Win.Choice(0, "About", 1, "O&K", PROGRAM + " " + VERSION + " " + COPYRIGHT);
+        MView.Win.Choice(0, "About", 1, "O&K", MainConst.PROGRAM + " " + MainConst.VERSION + " " + MainConst.COPYRIGHT);
         return ExResult.ErOK;
     }
 
@@ -647,23 +649,23 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
     
     int TagLoad(ExState State) {
-        char Tag[MAXPATH];
-        char FullTag[MAXPATH];
+        String Tag[] = {""};
+        String FullTag[];
 
-        char const* pTagFile = getenv("TAGFILE");
-        if (pTagFile == NULL)
+        String pTagFile = Main.getenv("TAGFILE");
+        if (pTagFile == null)
         {
             pTagFile = "tags";
         }
         if (ExpandPath(pTagFile, Tag) == -1)
             return 0;
-        if (State.GetStrParam(this, Tag, sizeof(Tag)) == 0)
-            if (MView.Win.GetFile("Load tags", sizeof(Tag), Tag, HIST_TAGFILES, GF_OPEN) == 0) return 0;
+        if (State.GetStrParam(this, Tag) == 0)
+            if (MView.Win.GetFile("Load tags", Tag, HIST_TAGFILES, GF_OPEN) == 0) return 0;
 
         if (ExpandPath(Tag, FullTag) == -1)
             return 0;
 
-        if (!FileExists(FullTag)) {
+        if (!Console.FileExists(FullTag)) {
             Msg(S_INFO, "Tag file '%s' not found.", FullTag);
             return 0;
         }
@@ -673,15 +675,15 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
     
 
     ExResult ConfigRecompile(ExState State) {
-        if (ConfigSourcePath == 0 || ConfigFileName[0] == 0) {
+        if (Config.ConfigSourcePath == null || Config.ConfigFileName) {
             Msg(S_ERROR, "Cannot recompile (must use external configuration).");
             return ExResult.ErFAIL;
         }
 
-        String command = "cfte "+ConfigSourcePath+" ";
+        String command = "cfte "+Config.ConfigSourcePath+" ";
     //#ifdef UNIX
         if (ExpandPath("~/.fterc", command + strlen(command)) != 0)
-            return 0;
+            return ExResult.ErFAIL;
     /*TODO #else
         strcat(command, ConfigFileName);
     #endif */
@@ -703,7 +705,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
     ExResult GotoGlobalBookmark(ExState State) {
         String [] name = {""};
 
-        if (State.GetStrParam(this, name, ) == 0)
+        if (State.GetStrParam(this, name ) == 0)
             if (MView.Win.GetStr("Goto Global Bookmark", name, HIST_BOOKMARK) == 0) return 0;
         if (markIndex.view(this, name[0]) == 0) {
             Msg(S_ERROR, "Error locating global bookmark %s.", name[0]);

@@ -33,6 +33,11 @@ class TKeyEvent extends TEvent
 		What = what;
 	}
 
+	public TKeyEvent(int what, int ch) {
+		What = what;
+		Code = ch;
+	}
+
 	public TKeyEvent clone()
 	{
 		TKeyEvent e = new TKeyEvent(What);
@@ -43,6 +48,12 @@ class TKeyEvent extends TEvent
 		return e;
 	}
 
+	public char GetChar() {
+		char[] Ch = {0};
+		GetChar(Ch);
+		return Ch[0];
+	}
+	
 	public boolean GetChar(char[] Ch) {
 	    Ch[0] = 0;
 	    

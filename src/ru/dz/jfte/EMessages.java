@@ -121,7 +121,7 @@ public class EMessages extends EList implements Closeable
 
         {
             String s = String.format("[running '%s' in '%s']", Command, Directory);
-            AddError(0, -1, 0, s);
+            AddError(null, -1, null, s);
         }
 
         {
@@ -129,7 +129,7 @@ public class EMessages extends EList implements Closeable
             SetTitle(s);
         }
         
-        ChangeDir(Directory);
+        Console.ChangeDir(Directory);
         PipeId = GUI.gui.OpenPipe(Command, this);
         return 0;
     }
@@ -148,7 +148,7 @@ public class EMessages extends EList implements Closeable
             Running = 0;
             {
                 String s = String.format("[aborted, status=%d]", ReturnCode);
-                AddError(0, -1, 0, s);
+                AddError(null, -1, null, s);
             }
             return ExResult.ErOK;
             

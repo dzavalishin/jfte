@@ -180,8 +180,8 @@ public class ExComplete extends ExView implements GuiDefs
 			int rc = 0;
 			int l = Words[WordPos].length();
 
-			if (0 != Buffer.InsText(Buffer.VToR(Orig.Row), Orig.Col, l, Words[WordPos], true)
-					&& 0 != Buffer.SetPos(Orig.Col + l, Orig.Row)) {
+			if (Buffer.InsText(Buffer.VToR(Orig.Row), Orig.Col, l, Words[WordPos], true)
+					&& Buffer.SetPos(Orig.Col + l, Orig.Row)) {
 				Buffer.Draw(Buffer.VToR(Orig.Row), Buffer.VToR(Orig.Row));
 				rc = 1;
 			}
@@ -267,7 +267,7 @@ public class ExComplete extends ExView implements GuiDefs
 	int RefreshComplete()
 	{
 		if ((Buffer.CP.Col == 0)
-				|| (Buffer.SetPos(Buffer.CP.Col, Buffer.CP.Row) == 0))
+				|| (!Buffer.SetPos(Buffer.CP.Col, Buffer.CP.Row)))
 			return 0;
 
 		ELine L = Buffer.VLine(Buffer.CP.Row);
@@ -278,7 +278,7 @@ public class ExComplete extends ExView implements GuiDefs
 			return 0;
 
 		int P1 = P;
-		while ((P > 0) && CheckASCII(L.Chars[P - 1]))
+		while ((P > 0) && CheckASCII(L.Chars.charAt(P - 1)))
 			P--;
 
 		int wlen = P1 - P;

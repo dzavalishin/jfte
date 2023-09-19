@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 
-public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDefs, ColorDefs 
+public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDefs, ColorDefs, GuiDefs, ModeDefs
 {
     EBuffer Buffer;
     EPoint TP, OldTP;
@@ -23,7 +23,10 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         TP = B.TP;
         CP = B.CP;
         if (V != null && V.MView != null && V.MView.Win != null) {
-            V.MView.ConQuerySize(&Cols, &Rows);
+        	int [] c = {0}, r = {0};
+            V.MView.ConQuerySize(c, r);
+            Cols = c[0];
+            Rows = r[0];
             Rows--;
         }
     }
@@ -106,7 +109,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         case evKeyDown:
             {
                 char Ch;
-                if(0 != (Ch = GetCharFromEvent(Event))) {
+                if(0 != (Ch = ((TKeyEvent)Event).GetChar())) {
                     if (Buffer.BeginMacro() == 0)
                         return ;
                     Buffer.TypeChar(Ch);
@@ -115,7 +118,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
             }
             break;
         case evCommand:
-            switch (Event.Msg.Command) {
+            switch (((TMsgEvent)Event).Command) {
             case cmVScrollUp:
                 Buffer.ScrollDown(1);
                 Event.What = evNone;
@@ -138,8 +141,8 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
 
 //                    fprintf(stderr, "Pos = %d\n\x7", Event.Msg.Param1);
                     ypos = Buffer.CP.Row - TP.Row;
-                    Buffer.SetNearPos(Buffer.CP.Col, Event.Msg.Param1 + ypos);
-                    SetTop(TP.Col, Event.Msg.Param1);
+                    Buffer.SetNearPos(Buffer.CP.Col, (int)((TMsgEvent)Event).Param1 + ypos);
+                    SetTop(TP.Col, (int)((TMsgEvent)Event).Param1);
                     RedrawAll();
                 }
                 Event.What = evNone;
@@ -165,8 +168,8 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                     int xpos;
 
                     xpos = Buffer.CP.Col - TP.Col;
-                    Buffer.SetNearPos(Event.Msg.Param1 + xpos, Buffer.CP.Row);
-                    SetTop(Event.Msg.Param1, TP.Row);
+                    Buffer.SetNearPos((int)((TMsgEvent)Event).Param1 + xpos, Buffer.CP.Row);
+                    SetTop((int)((TMsgEvent)Event).Param1, TP.Row);
                     RedrawAll();
                 }
                 Event.What = evNone;
@@ -202,12 +205,12 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
             case evMouseDown:
                 if (event.Y == H - 1)
                     break;
-                if (View.MView.Win.CaptureMouse(true))
+                if (View.MView.Win.CaptureMouse(true)!=0)
                     View.MView.MouseCaptured = true;
                 else
                     break;
 
-                View.MView.MouseMoved = 0;
+                View.MView.MouseMoved = false;
 
                 if (event.Buttons == 1) {
                     Buffer.SetNearPos(xx, yy);
@@ -225,9 +228,9 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                         break;
                     }
                     //            Window.Buffer.Redraw();
-                    if (SystemClipboard) {
+                    if (Config.SystemClipboard!=0) {
                         Buffer.NextCommand();
-                        Buffer.BlockCopy(0);
+                        Buffer.BlockCopy(false);
                     }
                     event.What = evNone;
                 } else if (event.Buttons == 2) {
@@ -266,15 +269,15 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                 break;*/
             case evMouseUp:
                 if (View.MView.MouseCaptured)
-                    View.MView.Win.CaptureMouse(0);
+                    View.MView.Win.CaptureMouse(false);
                 else
                     break;
-                View.MView.MouseCaptured = 0;
+                View.MView.MouseCaptured = false;
                 if (event.Buttons == 1) {
                     if (View.MView.MouseMoved)
-                        if (SystemClipboard) {
+                        if (Config.SystemClipboard!=0) {
                             Buffer.NextCommand();
-                            Buffer.BlockCopy(0);
+                            Buffer.BlockCopy(false);
                         }
                 }
                 if (event.Buttons == 2) {
@@ -282,7 +285,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                         EEventMap Map = View.MView.Win.GetEventMap();
                         String MName = null;
 
-                        if (Map)
+                        if (Map!=null)
                             MName = Map.GetMenu(EM_LocalMenu);
                         if (MName == null)
                             MName = "Local";

@@ -55,11 +55,11 @@ public class ExISearch extends ExView implements KeyDefs
                if (len > 0) {
                    if (stacklen > 0) {
                        stacklen--;
-                       if (Buffer.CenterPos(stack[stacklen].Col, stack[stacklen].Row) == 0) return;
+                       if (!Buffer.CenterPos(stack[stacklen].Col, stack[stacklen].Row)) return;
                    }
                    len--;
                    ISearchStr = ISearchStr.substring(0,len);
-                   if (len > 0 && Buffer.FindStr(ISearchStr, len, Case | Direction) == 0) {
+                   if (len > 0 && !Buffer.FindStr(ISearchStr, len, Case | Direction)) {
                        SetState(IState.INoMatch);
                    }
                } else {
@@ -123,8 +123,9 @@ public class ExISearch extends ExView implements KeyDefs
                }
                break;
            case 'Q' | kfCtrl:
-               Event.What = evKeyDown;
-               Event.Key.Code = Win.GetChar(0);
+               //Event.What = evKeyDown;
+               //Event.Key.Code = Win.GetChar(null);
+               Event = new TKeyEvent(evKeyDown,(int)Win.GetChar(null));
            default:
                if (KeyDefs.isAscii(kcode) && (len < MAXISEARCH)) {
                    char Ch = (char) kcode;
@@ -134,7 +135,7 @@ public class ExISearch extends ExView implements KeyDefs
                    ISearchStr += ""+Ch;
                    len++;
                    
-                   if (Buffer.FindStr(ISearchStr, len, Case | Direction) == 0) {
+                   if (!Buffer.FindStr(ISearchStr, len, Case | Direction)) {
                        SetState(IState.INoMatch);
                        len--;
                        stacklen--;

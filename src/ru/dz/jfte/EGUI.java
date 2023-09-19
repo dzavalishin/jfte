@@ -400,7 +400,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         return ExResult.ErOK;
     }
 
-    ExResult WinZoom(GxView View) {
+    ExResult WinZoom(GxView View) throws IOException {
         GView V = View.Next;
         GView V1;
 

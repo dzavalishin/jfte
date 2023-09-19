@@ -225,5 +225,114 @@ public class Console {
 	    }
 	    return Path;
 	}
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	EBuffer FindFile(String FileName) {
+	    EModel M;
+	    EBuffer B;
+	    
+	    M = EModel.ActiveModel;
+	    while (M!=null) {
+	        if (M.GetContext() == CONTEXT_FILE) {
+	            B = (EBuffer )M;
+	            if (filecmp(B.FileName, FileName) == 0) { return B; }
+	        }
+	        M = M.Next;
+	        if (M == EModel.ActiveModel) break;
+	    }
+	    return null;
+	}
+
+	/*#if 0
+	static void SwitchModel(EModel *AModel) {
+	    if (AModel != AcgiveModel && MM && AModel) {
+	        AModel.Prev.Next = AModel.Next;
+	        AModel.Next.Prev = AModel.Prev;
+
+	        AModel.Next = MM;
+	        AModel.Prev = MM.Prev;
+	        AModel.Prev.Next = AModel;
+	        MM.Prev = AModel;
+	        MM = AModel;
+	    }
+	}
+	#endif */
+
+	int FileLoad(int createFlags, String FileName, String Mode, EView View) {
+	    String Name[] = {""};
+	    EBuffer B;
+
+	    assert(View != null);
+	    
+	    if (ExpandPath(FileName, Name) == -1) {
+	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FileName);
+	        return 0;
+	    }
+	    B = FindFile(Name[0]);
+	    if (B) {
+	        if (Mode != null)
+	            B.SetFileName(Name, Mode);
+	        View.SwitchToModel(B);
+	        return 1;
+	    }
+	    B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
+	    B.SetFileName(Name[0], Mode);
+
+	    View.SwitchToModel(B);
+	    return 1;
+	}
+
+	int MultiFileLoad(int createFlags, String FileName, String Mode, EView View) {
+		String  fX[];
+	    int count = 0;
+	    String  FPath[];
+	    String  FName[];
+	    FileFind ff;
+	    FileInfo fi;
+	    int rc;
+
+	    assert(View != null);
+
+	    JustDirectory(FileName, fX);
+	    if (fX[0] == 0) strcpy(fX, ".");
+	    JustFileName(FileName, FName);
+	    if (ExpandPath(fX, FPath) == -1) return 0;
+	    Slash(FPath, 1);
+
+	    ff = new FileFind(FPath, FName, ffHIDDEN | ffFULLPATH);
+	    if (ff == 0)
+	        return 0;
+	    rc = ff.FindFirst(fi);
+	    while (rc == 0) {
+	        count++;
+	        if (FileLoad(createFlags, fi.Name(), Mode, View) == 0) {
+	            return 0;
+	        }
+	        rc = ff.FindNext(fi);
+	    }
+	    if (count == 0)
+	        return FileLoad(createFlags, FileName, Mode, View);
+	    return 1;
+	}
+	
+	
+	
 	
 }

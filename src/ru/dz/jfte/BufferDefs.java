@@ -25,8 +25,8 @@ public interface BufferDefs {
 	static final int  RWBUFSIZE     = 32768;
 
 
-	default int ChClass(char x) { return (WGETBIT(Flags.WordChars, (x)) ? 1 : 0); }
-	default int ChClassK(char x) { return ((x == ' ') || (x == (char)9)) ? 2 : ChClass(x); }
+	//default int ChClass(char x) { return (WGETBIT(Flags.WordChars, (x)) ? 1 : 0); }
+	//default int ChClassK(char x) { return ((x == ' ') || (x == (char)9)) ? 2 : ChClass(x); }
 	    
 	default boolean InRange(int a, int x, int b) { return  (((a) <= (x)) && ((x) < (b))); }
 	

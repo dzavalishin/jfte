@@ -567,6 +567,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return SetPos(Col, L, tabMode);
 	}
 
+	boolean SetNearPos(int Col, int Row) {
+		return SetNearPos(Col, Row, 0);
+		}	
+	
 	boolean SetNearPos(int Col, int Row, int tabMode) {
 		if (Row >= VCount) Row = VCount - 1;
 		if (Row < 0) Row = 0;
@@ -873,7 +877,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			return true;
 		Pos = ScreenPos(L, Ofs);
 		if (Pos < Col) {
-			TPos = NextTab(Pos, BFI(this, BFI_TabSize));
+			TPos = NextTab(Pos, iBFI(this, BFI_TabSize));
 			if (!DelChars(Row, Ofs, 1))
 				return false;
 			if (!InsChars(Row, Ofs, TPos - Pos, null))
@@ -984,7 +988,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		//fprintf(stderr, "\n\nInsLineText: %d:%d %d %d", Row, Col, ACount, LCol);
 		assert(Row >= 0 && Row < RCount && Col >= 0 && LCol >= 0);
-		if (BFI(this, BFI_ReadOnly) == 1)
+		if (iBFI(this, BFI_ReadOnly) == 1)
 			return false;
 
 		L = ScreenPos(Line, Line.getCount());
@@ -1028,7 +1032,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		assert(Row >= 0 && Row < RCount && Col >= 0);
 
-		if (BFI(this, BFI_ReadOnly) == 1) return false;
+		if (iBFI(this, BFI_ReadOnly) == 1) return false;
 
 		VL = RToV(Row);
 		if (VL == -1) 
@@ -1165,8 +1169,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	int CharOffset(ELine L, int ScreenPos) {
-		boolean ExpandTabs = BFI(this, BFI_ExpandTabs) != 0;
-		int TabSize = BFI(this, BFI_TabSize);
+		boolean ExpandTabs = BFI(this, BFI_ExpandTabs);
+		int TabSize = iBFI(this, BFI_TabSize);
 
 		if (!ExpandTabs) {
 			return ScreenPos;
@@ -1575,7 +1579,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (StartHilit == -1)   // all ok
 			return ;
 
-		if (BFI(this, BFI_MultiLineHilit) == 0) // everything handled in redisplay
+		if (!BFI(this, BFI_MultiLineHilit)) // everything handled in redisplay
 			return;
 
 		if (ToRow <= StartHilit) // will be handled in redisplay
@@ -1594,7 +1598,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			else
 				State = 0;
 
-			if (BFI(this, BFI_HilitOn) == 1 && HilitProc != null) {
+			if (BFI(this, BFI_HilitOn) && HilitProc != null) {
 				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, 0, ECol);
 			} else {
 				Hilit_Plain(this, StartHilit, 0, 0, 0, L, State, 0, ECol);
@@ -1723,7 +1727,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					StartPos = EndPos = 0;
 					break;
 				}
-				if( 0 != (BFI(this, BFI_SeeThruSel)))
+				if(BFI(this, BFI_SeeThruSel))
 					B.MoveBgAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
 				else
 					B.MoveAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
@@ -1747,14 +1751,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	#endif */
 			if (Match.Row != -1 && Match.Col != -1) {
 				if (Row == Match.Row) {
-					if(0 != (BFI(this, BFI_SeeThruSel)))
+					if(BFI(this, BFI_SeeThruSel))
 						B.MoveBgAttr( Match.Col - C, W, hcPlain_Found, MatchLen);
 					else
 						B.MoveAttr( Match.Col - C, W, hcPlain_Found, MatchLen);
 				}
 			}
 		} else if (VRow == VCount) {
-			if(0 != (BFI(this, BFI_ShowMarkers)))
+			if(BFI(this, BFI_ShowMarkers))
 				B.MoveChar( 0, W, Console.ConGetDrawChar(DCH_END), hcPlain_Markers, W);
 		}
 	}
@@ -1764,7 +1768,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		EView V;
 		EEditPort W;
 		int Row;
-		TDrawBuffer B = new TDrawBuffer();
+		TDrawBuffer dB = new TDrawBuffer();
 		//char s[256];
 		int /*ChColor*/ SColor;
 		int RowA, RowZ;
@@ -1967,20 +1971,20 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					int fl = FileName.length();
 					//char num[10];
 
-					B.MoveStr( 0, W.Cols, s, SColor, W.Cols);
+					dB.MoveStr( 0, W.Cols, s, SColor, W.Cols);
 					String num = String.format(" %s %d", CCharStr, ModelNo);
-					B.MoveStr( W.Cols - num.length(), W.Cols, num, SColor, W.Cols);
+					dB.MoveStr( W.Cols - num.length(), W.Cols, num, SColor, W.Cols);
 
 					fw -= num.length();
 
 					if (fl > fw) {
-						B.MoveStr( l, W.Cols, FileName + fl - fw, SColor, W.Cols);
+						dB.MoveStr( l, W.Cols, FileName + fl - fw, SColor, W.Cols);
 					} else {
-						B.MoveStr( l, W.Cols, FileName, SColor, W.Cols);
+						dB.MoveStr( l, W.Cols, FileName, SColor, W.Cols);
 					}
 				}
 			} else {
-				B.MoveStr( 0, W.Cols, V.CurMsg, SColor, W.Cols);
+				dB.MoveStr( 0, W.Cols, V.CurMsg, SColor, W.Cols);
 			}
 			if (V.MView.Win.GetStatusContext() == V.MView) {
 				V.MView.ConPutBox(0, W.Rows, W.Cols, 1, B);
@@ -1998,7 +2002,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		Rehilit(VToR(CP.Row));
 
-		if (BFI(this, BFI_AutoHilitParen) == 1) {
+		if (BFI(this, BFI_AutoHilitParen)) {
 			if (Match.Row == -1 && Match.Col == -1)
 				HilitMatchBracket();
 		}
@@ -2248,11 +2252,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				if (
 						(!osWordBeg
 								|| (C == 0)
-								|| (BitOps.BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C - 1) /*P[C - 1]*/) == 0))
+								|| (BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C - 1) /*P[C - 1]*/) == 0))
 						&&
 						(!osWordEnd
 								|| (C + Len >= End)
-								|| (BitOps.BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C + Len)/*P[C + Len]*/) == 0))
+								|| (BitOps.WGETBIT(Flags.WordChars, X.Chars.charAt(C + Len)/*P[C + Len]*/) == 0))
 						&&
 						((!osNCase
 								&& ( X.Chars.charAt(C)/*P[C]*/ == Data[0])
@@ -2260,7 +2264,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 								||
 								(osNCase
 										&& (toupper(X.Chars.charAt(C)/*P[C]*/) == toupper(Data[0]))
-										&& (strnicmp(P + C, Data, Len) == 0))
+										&& (BitOps.strnicmp(P + C, Data, Len) == 0))
 								) /* && BOL | EOL */
 						)
 				{
@@ -2434,8 +2438,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (P >= L.getCount()) return false;
 
-		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P]) == wS)) P++;
-		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P]) == wE)) P++;
+		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P)) == wS)) P++;
+		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P)) == wE)) P++;
 		C = ScreenPos(L, P);
 		return SetPos(C, CP.Row);
 	}
@@ -2508,9 +2512,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (P >= L.getCount()) return false;
 
-		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.CapitalChars, L.Chars.charAt(P]) == 1)) P++;
-		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P]) == 1) && (BitOps.WGETBIT(Flags.CapitalChars, L.Chars.charAt(P]) == 0)) P++;
-		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P]) == 0)) P++;
+		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.CapitalChars, L.Chars.charAt(P)) == 1)) P++;
+		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P)) == 1) && (BitOps.WGETBIT(Flags.CapitalChars, L.Chars.charAt(P)) == 0)) P++;
+		while ((P < L.getCount()) && (BitOps.WGETBIT(Flags.WordChars, L.Chars.charAt(P)) == 0)) P++;
 		C = ScreenPos(L, P);
 		return SetPos(C, CP.Row);
 	}
@@ -2698,7 +2702,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int P = CP.Col;
 
 		if (P > 0) {
-			P = ((P - 1) / BFI(this, BFI_TabSize)) * BFI(this, BFI_TabSize);
+			P = ((P - 1) / iBFI(this, BFI_TabSize)) * iBFI(this, BFI_TabSize);
 			return SetPos(P, CP.Row);
 		} else return false;
 	}
@@ -2991,8 +2995,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (CheckBlock() && BFI(this, BFI_BackSpKillBlock)) {
 			if (BlockKill() == false)
 				return false;
-		} else if (BFI(this, BFI_WordWrap) == 2 && CP.Row > 0 && !IsLineBlank(Y - 1) &&
-					CP.Col <= BFI(this, BFI_LeftMargin) && CP.Col <= LineIndented(Y))
+		} else if (iBFI(this, BFI_WordWrap) == 2 && CP.Row > 0 && !IsLineBlank(Y - 1) &&
+					CP.Col <= iBFI(this, BFI_LeftMargin) && CP.Col <= LineIndented(Y))
 		{
 			if (SetPos(LineLen(Y - 1), CP.Row - 1) == false) return false;
 		} else if (CP.Col == 0) {
@@ -3156,7 +3160,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return RCount;
 	}
 
-	boolean CLine() {
+	int CLine() {
 		assert(1 == 0);
 		return VToR(CP.Row);
 	}
@@ -3292,10 +3296,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					return false;
 
 		if (TSize <= 0)
-			TSize = BFI(this, BFI_TabSize);
+			TSize = iBFI(this, BFI_TabSize);
 
 		P1 = NextTab(P, TSize);
-		if (BFI(this, BFI_Insert) == 0) {
+		if (!BFI(this, BFI_Insert)) {
 			if (CP.Col < LineLen())
 				if (DelText(VToR(CP.Row), CP.Col, P1 - P) == false) return false;
 		}
@@ -3823,7 +3827,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	boolean BlockBegin() {
-		EPoint X;
+		EPoint X = new EPoint();
 
 		X.Row = VToR(CP.Row);
 		X.Col = CP.Col;
@@ -3833,7 +3837,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	boolean BlockEnd() {
-		EPoint X;
+		EPoint X = new EPoint();
 
 		X.Row = VToR(CP.Row);
 		X.Col = CP.Col;
@@ -4653,7 +4657,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int O, C, O1, C1;
 		char tab = '\t';
 
-		AutoExtend = 0;
+		AutoExtend = false;
 		if (CheckBlock() == false) return false;
 		if (RCount <= 0) return false;
 		B = BB;
@@ -4665,12 +4669,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			O1 = C1 = 0;
 			while (O < L.getCount()) {
 				if (L.Chars.charAt(O) == '\t') { // see if there are spaces to remove
-					int C2 = NextTab(C, BFI(this, BFI_TabSize));
-					int N = BFI(this, BFI_TabSize) - (C2 - C);
+					int C2 = NextTab(C, iBFI(this, BFI_TabSize));
+					int N = iBFI(this, BFI_TabSize) - (C2 - C);
 					if (O - O1 < N)
 						N = O - O1;
 					if (N > 0) {
-						if (DelChars(i, O - N, N) != 1)
+						if (!DelChars(i, O - N, N))
 							return false;
 						O -= N;
 						C = C2;
@@ -4688,18 +4692,18 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					C++;
 					C1 = C;
 					O1 = O;
-				} else if (((C % BFI(this, BFI_TabSize)) == (BFI(this, BFI_TabSize) - 1)) &&
+				} else if (((C % iBFI(this, BFI_TabSize)) == (iBFI(this, BFI_TabSize) - 1)) &&
 						(C - C1 > 0))
 				{ // reached a tab and can put one
-					int N = BFI(this, BFI_TabSize);
+					int N = iBFI(this, BFI_TabSize);
 					if (O - O1 + 1 < N) {
 						N = O - O1 + 1;
 					} else if (O - O1 + 1 > N) {
 						O1 = O - N + 1;
 					}
-					if (DelChars(i, O1, N) != 1)
+					if (!DelChars(i, O1, N))
 						return false;
-					if (InsChars(i, O1, 1, ""+tab) != 1)
+					if (!InsChars(i, O1, 1, ""+tab))
 						return false;
 					O1++;
 					O = O1;
