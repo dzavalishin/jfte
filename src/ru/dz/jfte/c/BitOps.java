@@ -472,7 +472,9 @@ public class BitOps {
 		return ((x[(y / 8) & 0xFF] &  (1 << ((y % 8)&0xFF) )) != 0 ? 1 : 0);
 	}
 
-	public static int strncmp(String s1, String s2, int len) {
+	// TODO check +1/-1 for > <
+	public static int strncmp(String s1, String s2, int len) 
+	{
 		for(int i = 0; i < len; i++)
 		{
 			if( i > s1.length() ) return -1;
@@ -487,10 +489,25 @@ public class BitOps {
 		return 0;
 	}
 
+	public static int strnicmp(String s1, String s2, int len) {
+		for(int i = 0; i < len; i++)
+		{
+			if( i > s1.length() ) return -1;
+			if( i > s2.length() ) return 1;
+			
+			char c1 = Character.toUpperCase(s1.charAt(i));
+			char c2 = Character.toUpperCase(s2.charAt(i));
+			
+			if( c1 > c2 ) return 1;
+			if( c1 < c2 ) return -1;
+		}
+		return 0;
+	}
 
 	// TODO compare str 
 	public static int strcmp(String s1, String s2) {	
 		return s1.compareTo(s2);
 	}
+
 	
 }

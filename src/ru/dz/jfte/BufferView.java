@@ -1,5 +1,8 @@
 package ru.dz.jfte;
 
+import ru.dz.jfte.c.BitOps;
+
+
 public class BufferView extends EList implements EventDefs, KeyDefs 
 {
 	public static final int MAXISEARCH = 256;
@@ -218,9 +221,12 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         do {
             // Find SearchString at any place in string for line i
             for(int j = 0; BList[i] != null && !BList[i].isEmpty(); j++)
-                if (BList[i].charAt(j) == SearchString.charAt(0) && BitOps.strnicmp(SearchString, BList[i]+j, SearchLen) == 0) {
+            {
+            	String ss = BList[i].substring(j);
+                if (BList[i].charAt(j) == SearchString.charAt(0) && BitOps.strnicmp(SearchString, ss/*BList[i]+j*/, SearchLen) == 0) {
                     return i;
                 }
+            }
             i += direction;
             if (i == BCount) i = 0; else if (i == -1) i = BCount - 1;
         } while (i != start);

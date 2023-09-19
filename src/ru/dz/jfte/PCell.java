@@ -90,6 +90,7 @@ public class PCell extends ArrayPtr<Long>
 
 
 	/*
+	
 	void MoveMem(PCell B, int Pos, int Width, const char* Ch, int   Attr, int Count) {
 		//unsigned char *p = (unsigned char *) B;
 		PCell p = new PCell(B);
@@ -110,26 +111,37 @@ public class PCell extends ArrayPtr<Long>
 		}
 	}
 
-	void MoveStr(PCell B, int Pos, int Width, const char* Ch, int   Attr, int MaxCount) {
+	*/
+
+	void MoveStr(/*PCell B,*/ int Pos, int Width, String Ch, int Attr, int MaxCount) {
 		//unsigned char *p = (unsigned char *) B;
-		PCell p = new PCell(B);
+		PCell p = new PCell(this);
 
 		if (Pos < 0) {
+			/* TODO pos <0
 			MaxCount += Pos;
 			Ch -= Pos;
-			Pos = 0;
+			Pos = 0; */
+			throw new RuntimeException("MoveStr pos < 0");
 		}
+		
 		if (Pos >= Width) return;
 		if (Pos + MaxCount > Width) MaxCount = Width - Pos;
 		if (MaxCount <= 0) return;
 
 		p.shift(Pos);
-		for (; MaxCount > 0 && (*Ch != 0); MaxCount--) {
-			*p++ = (unsigned char) (*Ch++);
-			*p++ = (unsigned char) Attr;
+		int chpos = 0;
+		for (; MaxCount > 0 && (chpos < Ch.length()); MaxCount--) 
+		{
+			//*p++ = (unsigned char) Ch.charAt(chpos++);
+			//*p++ = (unsigned char) Attr;
+			long set = charAndAttr(Ch.charAt(chpos++), Attr);
+			p.wpp(set);
+
 		}
 	} 
 
+	/*
 	void MoveCStr(PCell B, int Pos, int Width, const char* Ch, int   A0, int A1, int MaxCount) {
 		//unsigned char *p = (unsigned char *) B;
 		PCell p = new PCell(B);

@@ -177,6 +177,46 @@ public class BinaryString
 		return String.valueOf(ca, 0, usedLen);
 	}
 
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * Returns partial String 
+	 * 
+	 * <p>TODO test me
+	 * 
+	 * @param start first character position
+	 * @param end position AFTER last character 
+	 * @return String or empty String if no intersection
+	 */
+	
+	public String substring(int start, int end) {
+		if( start >= usedLen )
+			return "";
+	
+		if( end > usedLen )
+			end = usedLen;
+
+		int len = end - start;
+		
+		char [] ca = new char[len];
+		
+		for(int i = 0; i < usedLen; i++)
+			ca[i] = mem[i+start];
+		
+		return String.valueOf(ca, 0, len);
+	}
+
+	/**
+	 * Substring from start point to end of string
+	 * @param start
+	 * @return
+	 */
+	public String substring(int start) {
+		return substring(start, usedLen);
+	}	
+	
 	public void memmove(int dest, int src, int len) {
 		System.arraycopy(mem, src, mem, dest, len);		
 	}
@@ -193,5 +233,6 @@ public class BinaryString
 	public ArrayPtr<Character> getPointer() {
 		return new ArrayPtr<Character>(mem);
 	}
+
 	
 }

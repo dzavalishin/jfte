@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
+
 import ru.dz.jfte.c.BitOps;
 
 public class ExComplete extends ExView implements GuiDefs 
@@ -59,7 +61,7 @@ public class ExComplete extends ExView implements GuiDefs
 		return 1;
 	}
 
-	void HandleEvent(TKeyEvent Event)
+	void HandleEvent(TKeyEvent Event) throws IOException
 	{
 		int kb = KeyDefs.kbCode(Event.Code);
 		boolean DoQuit = false;
@@ -72,7 +74,7 @@ public class ExComplete extends ExView implements GuiDefs
 				Event.What = evNone;
 			}
 		} else if (Event.What == evKeyDown) {
-			int i = 0;
+			//int i = 0;
 
 			switch(kb) {
 			case kbPgUp:
@@ -80,7 +82,7 @@ public class ExComplete extends ExView implements GuiDefs
 				// if there would not be locale sort, we could check only
 				// the next string, but with `locale sort` this is impossible!!
 				// this loop is little inefficient but it's quite short & nice
-				for (i = WordPos; i-- > 0;)
+				for (int i = WordPos; i-- > 0;)
 					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
 						WordPos = i;
 						break;
@@ -89,7 +91,7 @@ public class ExComplete extends ExView implements GuiDefs
 				break;
 			case kbPgDn:
 			case kbRight:
-				for(i = WordPos; i++ < WordsLast - 1;)
+				for(int i = WordPos; i++ < WordsLast - 1;)
 					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
 						WordPos = i;
 						break;
@@ -97,13 +99,13 @@ public class ExComplete extends ExView implements GuiDefs
 				Event.What = evNone;
 				break;
 			case kbHome:
-				for (i = 0; i < WordPos; i++)
+				for (int i = 0; i < WordPos; i++)
 					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0)
 						WordPos = i;
 				Event.What = evNone;
 				break;
 			case kbEnd:
-				for (i = WordsLast - 1; i > WordPos; i--)
+				for (int i = WordsLast - 1; i > WordPos; i--)
 					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0)
 						WordPos = i;
 				Event.What = evNone;
@@ -150,26 +152,26 @@ public class ExComplete extends ExView implements GuiDefs
 				if (CheckASCII(Event.Code&~kfShift)) {
 					//char *s = new char[WordFixed + 2];
 					String s = "";
-						if (WordFixed > 0)
-							//strncpy(s, Words[WordPos], WordFixed);
-							s = Words[WordPos].substring(0,WordFixed);
-						
-						//s[WordFixed] = (char)(Event.Code & 0xFF);
-						//s[WordFixed + 1] = 0;
-						
-						s += (char)(Event.Code & 0xFF);
-						
-						for (int i = 0; i < WordsLast; i++)
-							if (BitOps.strncmp(s, Words[i], WordFixed + 1) == 0) {
-								WordPos = i;
-								if (WordFixedCount == 1)
-									DoQuit = true;
-								else
-									FixedUpdate(1);
-								break;
-							}
-						//delete s;
-					
+					if (WordFixed > 0)
+						//strncpy(s, Words[WordPos], WordFixed);
+						s = Words[WordPos].substring(0,WordFixed);
+
+					//s[WordFixed] = (char)(Event.Code & 0xFF);
+					//s[WordFixed + 1] = 0;
+
+					s += (char)(Event.Code & 0xFF);
+
+					for (int i = 0; i < WordsLast; i++)
+						if (BitOps.strncmp(s, Words[i], WordFixed + 1) == 0) {
+							WordPos = i;
+							if (WordFixedCount == 1)
+								DoQuit = true;
+							else
+								FixedUpdate(1);
+							break;
+						}
+					//delete s;
+
 					Event.What = evNone;
 				}
 				break;
@@ -236,10 +238,12 @@ public class ExComplete extends ExView implements GuiDefs
 				&& (Words[WordPos]) != null) 
 		{
 			//const char *sc = STRCOMPLETE;
+			String sc = STRCOMPLETE;
 			int p = STRCOMPLETE.length();
 			if (W < 35) {
 				// if the width is quite small
-				sc += p - 1; // jump to last character
+				//sc += p - 1; // jump to last character
+				sc = sc.substring(p-1);
 				p = 1;
 			}
 			B.MoveStr( 0, W, sc, COM_NORM, W);
@@ -270,25 +274,26 @@ public class ExComplete extends ExView implements GuiDefs
 				|| (!Buffer.SetPos(Buffer.CP.Col, Buffer.CP.Row)))
 			return 0;
 
-		ELine L = Buffer.VLine(Buffer.CP.Row);
+		ELine LL = Buffer.VLine(Buffer.CP.Row);
 		int C = Buffer.CP.Col;
-		int P = Buffer.CharOffset(L, C);
+		int P = Buffer.CharOffset(LL, C);
 
-		if (!P || P > L.getCount())
+		if (P == 0 || P > LL.getCount())
 			return 0;
 
 		int P1 = P;
-		while ((P > 0) && CheckASCII(L.Chars.charAt(P - 1)))
+		while ((P > 0) && CheckASCII(LL.Chars.charAt(P - 1)))
 			P--;
 
 		int wlen = P1 - P;
 		if (0==wlen)
 			return 0;
 
-		WordBegin = ""; //new char[wlen + 1];
+		//WordBegin = ""; //new char[wlen + 1];
+		//strncpy(WordBegin, L.Chars + P, wlen);
+		//WordBegin[wlen] = 0;
 
-		strncpy(WordBegin, L.Chars + P, wlen);
-		WordBegin[wlen] = 0;
+		WordBegin = LL.substring(P, P=wlen);
 
 		// fprintf(stderr, "Calling %d  %s\n", wlen, WordBegin);
 		// Search words in TAGS
@@ -302,17 +307,18 @@ public class ExComplete extends ExView implements GuiDefs
 		// the first word at position 0,0 for match :-)
 		long mask = SEARCH_NOPOS | SEARCH_WORDBEG;
 
-		while (Buffer.FindStr(L.Chars + P, wlen, mask) == 1) {
+		String ss = LL.substring(P); // L.Chars + P;
+		while (Buffer.FindStr(ss, wlen, (int)mask)) {
 			mask |= SEARCH_NEXT;
 			ELine M = Buffer.RLine(Buffer.Match.Row);
 			int X = Buffer.CharOffset(M, Buffer.Match.Col);
 
-			if ((L.Chars == M.Chars) && (P == X))
+			if ((LL.Chars == M.Chars) && (P == X))
 				continue;
 
 			int XL = X;
 
-			while ((XL < M.getCount()) && CheckASCII(M.Chars[XL]))
+			while ((XL < M.getCount()) && CheckASCII(M.Chars.charAt(XL)))
 				XL++;
 
 			int len = XL - X - wlen;
@@ -321,47 +327,47 @@ public class ExComplete extends ExView implements GuiDefs
 				continue;
 
 			//char *s = new char[len + 1];
-			String s;
+			String s = M.substring(X + wlen, X + wlen + len);
 
-				strncpy(s, M.Chars + X + wlen, len);
-				s[len] = 0;
+			//strncpy(s, M.Chars + X + wlen, len);
+			//s[len] = 0;
 
-				int c = 1, H = 0, L = 0, R = WordsLast;
+			int c = 1, H = 0, L = 0, R = WordsLast;
 
-				// using sort to insert only unique words
-				while (L < R) {
-					H = (L + R) / 2;
-					c = BitOps.strcmp(s, Words[H]);
-					if (c < 0)
-						R = H;
-					else if (c > 0)
-						L = H + 1;
-					else
-						break;
+			// using sort to insert only unique words
+			while (L < R) {
+				H = (L + R) / 2;
+				c = BitOps.strcmp(s, Words[H]);
+				if (c < 0)
+					R = H;
+				else if (c > 0)
+					L = H + 1;
+				else
+					break;
+			}
+
+			if (c != 0) {
+				// Loop exited without finding the word. Instead,
+				// it found the spot where the new should be inserted.
+				WordsLast++;
+
+				int i = WordsLast;
+
+				while (i > L) {
+					Words[i] = Words[i-1];
+					i--;
 				}
 
-				if (c != 0) {
-					// Loop exited without finding the word. Instead,
-					// it found the spot where the new should be inserted.
-					WordsLast++;
+				Words[i] = s;
 
-					int i = WordsLast;
+				if (WordsLast >= MAXCOMPLETEWORDS)
+					break;
+			} else
+			{
+				// word was already listed, free duplicate.
+				//delete s;
+			}
 
-					while (i > L) {
-						Words[i] = Words[i-1];
-						i--;
-					}
-
-					Words[i] = s;
-
-					if (WordsLast >= MAXCOMPLETEWORDS)
-						break;
-				} else
-				{
-					// word was already listed, free duplicate.
-					//delete s;
-				}
-			
 		}
 		Buffer.Match.Row = Buffer.Match.Col = -1;
 		Buffer.MatchLen = Buffer.MatchCount = 0;

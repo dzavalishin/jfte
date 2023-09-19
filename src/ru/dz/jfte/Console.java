@@ -331,6 +331,11 @@ public class Console {
 	        return FileLoad(createFlags, FileName, Mode, View);
 	    return 1;
 	}
+
+	public static boolean FileExists(String fileName) {
+		File f = new File(fileName);
+		return f.isFile();
+	}
 	
 	
 	

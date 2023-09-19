@@ -61,5 +61,22 @@ public class ELine {
 	public String toString() {
 		return Chars.toString();
 	}
+
+	/**
+	 * 
+	 * Returns partial String 
+	 * 
+	 * @param start first character position
+	 * @param end position AFTER last character 
+	 * @return String or empty String if no intersection
+	 */
+	public String substring(int start, int end) {
+		return Chars.substring( start,  end);
+	}
+
+	public String substring(int start) {
+		return Chars.substring( start);
+	}
+	
 	
 }
