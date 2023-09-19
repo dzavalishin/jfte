@@ -143,7 +143,7 @@ public class GView implements Closeable
         Result = NewResult;
     }
 
-    int Execute() {
+    int Execute() throws IOException {
         int SaveRc = Result;
         int NewResult;
         boolean didFocus = false;
@@ -179,7 +179,8 @@ public class GView implements Closeable
     }
 
 	@Override
-	public void close() {
+	public void close() throws IOException
+	{
 		// TODO Auto-generated method stub
 		
 	}

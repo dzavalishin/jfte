@@ -2,11 +2,13 @@ package ru.dz.jfte;
 
 public class BufferView extends EList implements EventDefs, KeyDefs 
 {
+	public static final int MAXISEARCH = 256;
+	
     String [] BList = null;
     int BCount = 0;
     int SearchLen = 0;
-    String [] SearchString;
-    int [] SearchPos[MAXISEARCH];
+    String SearchString;
+    int [] SearchPos = new int[MAXISEARCH];
 
     static BufferView BufferList = null;
     
@@ -101,7 +103,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
 
                 CancelSearch();
                 if (B != null && B != this && Count > 1) {
-                    if (B.ConfQuit(View.MView.Win)) {
+                    if (B.ConfQuit(View.MView.Win,0)!=0) {
                         View.DeleteModel(B);
                     }
                     UpdateList();
@@ -167,7 +169,8 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                 resetSearch = 0;
                 break;
             case evKeyDown:
-                switch (kbCode(Event.Key.Code)) {
+            	TKeyEvent ke = EVent;
+                switch (KeyDefs.kbCode(ke.Code)) {
                     case kbBackSp:
                         resetSearch = 0;
                         if (SearchLen > 0) {
@@ -182,8 +185,8 @@ public class BufferView extends EList implements EventDefs, KeyDefs
                         break;
                     default:
                         resetSearch = 0;
-                        if (isAscii(Event.Key.Code) && (SearchLen < MAXISEARCH)) {
-                            char Ch = (char) Event.Key.Code;
+                        if (isAscii(ke.Code) && (SearchLen < MAXISEARCH)) {
+                            char Ch = (char) ke.Code;
 
                             SearchPos[SearchLen] = Row;
                             SearchString[SearchLen] = Ch;

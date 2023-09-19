@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
-public class ExComplete extends ExView 
+import ru.dz.jfte.c.BitOps;
+
+public class ExComplete extends ExView implements GuiDefs 
 {
 
 	EPoint Orig;
@@ -13,15 +15,16 @@ public class ExComplete extends ExView
 	int WordFixed;
 	int WordFixedCount;
 
-	static int CheckASCII(int c) {
+	static boolean CheckASCII(int c) {
 		return ((c < 256)
-				&& (isalnum(c) || (c == '_') || (c == '.'))) ? 1 : 0;
+				&& (KeyDefs.isalnum((char)c) || (c == '_') || (c == '.')));
 	}
 
 
 
 	static final String STRCOMPLETE = "Complete Word: [";
 	static final String STRNOCOMPLETE = "No word for completition...";
+	static final int MAXCOMPLETEWORDS = 300;
 
 	/*
 	static int CmpStr(const void *p1, const void *p2) {
@@ -56,20 +59,21 @@ public class ExComplete extends ExView
 		return 1;
 	}
 
-	void HandleEvent(TEvent Event)
+	void HandleEvent(TKeyEvent Event)
 	{
-		long kb = kbCode(Event.Key.Code);
+		int kb = KeyDefs.kbCode(Event.Code);
 		boolean DoQuit = false;
-		int i = 0;
 
 		if (WordsLast < 2) {
 			if ((WordsLast == 1) && (kb != kbEsc)) {
-				DoQuit = 1;
+				DoQuit = true;
 			} else {
 				EndExec(0);
 				Event.What = evNone;
 			}
 		} else if (Event.What == evKeyDown) {
+			int i = 0;
+
 			switch(kb) {
 			case kbPgUp:
 			case kbLeft:
@@ -77,7 +81,7 @@ public class ExComplete extends ExView
 				// the next string, but with `locale sort` this is impossible!!
 				// this loop is little inefficient but it's quite short & nice
 				for (i = WordPos; i-- > 0;)
-					if (strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
+					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
 						WordPos = i;
 						break;
 					}
@@ -86,7 +90,7 @@ public class ExComplete extends ExView
 			case kbPgDn:
 			case kbRight:
 				for(i = WordPos; i++ < WordsLast - 1;)
-					if (strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
+					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0) {
 						WordPos = i;
 						break;
 					}
@@ -94,21 +98,21 @@ public class ExComplete extends ExView
 				break;
 			case kbHome:
 				for (i = 0; i < WordPos; i++)
-					if (strncmp(Words[WordPos], Words[i], WordFixed) == 0)
+					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0)
 						WordPos = i;
 				Event.What = evNone;
 				break;
 			case kbEnd:
 				for (i = WordsLast - 1; i > WordPos; i--)
-					if (strncmp(Words[WordPos], Words[i], WordFixed) == 0)
+					if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0)
 						WordPos = i;
 				Event.What = evNone;
 				break;
 			case kbTab:
 				while (WordPos < WordsLast - 1) {
 					WordPos++;
-					if (strncmp(Words[WordPos], Words[WordPos - 1],
-							WordFixed + 1))
+					if (BitOps.strncmp(Words[WordPos], Words[WordPos - 1],
+							WordFixed + 1)!=0)
 						break;
 				}
 				Event.What = evNone;
@@ -116,8 +120,8 @@ public class ExComplete extends ExView
 			case kbTab | kfShift:
 				while (WordPos > 0) {
 					WordPos--;
-					if (strncmp(Words[WordPos], Words[WordPos + 1],
-							WordFixed + 1))
+					if (BitOps.strncmp(Words[WordPos], Words[WordPos + 1],
+							WordFixed + 1)!=0)
 						break;
 				}
 				Event.What = evNone;
@@ -140,27 +144,32 @@ public class ExComplete extends ExView
 			case kbEnter:
 			case kbSpace:
 			case kbTab | kfCtrl:
-				DoQuit = 1;
+				DoQuit = true;
 				break;
 			default:
-				if (CheckASCII(Event.Key.Code&~kfShift)) {
+				if (CheckASCII(Event.Code&~kfShift)) {
 					//char *s = new char[WordFixed + 2];
-					if (s != null) {
+					String s = "";
 						if (WordFixed > 0)
-							strncpy(s, Words[WordPos], WordFixed);
-						s[WordFixed] = (char)(Event.Key.Code & 0xFF);
-						s[WordFixed + 1] = 0;
+							//strncpy(s, Words[WordPos], WordFixed);
+							s = Words[WordPos].substring(0,WordFixed);
+						
+						//s[WordFixed] = (char)(Event.Code & 0xFF);
+						//s[WordFixed + 1] = 0;
+						
+						s += (char)(Event.Code & 0xFF);
+						
 						for (int i = 0; i < WordsLast; i++)
-							if (strncmp(s, Words[i], WordFixed + 1) == 0) {
+							if (BitOps.strncmp(s, Words[i], WordFixed + 1) == 0) {
 								WordPos = i;
 								if (WordFixedCount == 1)
-									DoQuit = 1;
+									DoQuit = true;
 								else
 									FixedUpdate(1);
 								break;
 							}
 						//delete s;
-					}
+					
 					Event.What = evNone;
 				}
 				break;
@@ -171,8 +180,8 @@ public class ExComplete extends ExView
 			int rc = 0;
 			int l = Words[WordPos].length();
 
-			if (Buffer.InsText(Buffer.VToR(Orig.Row), Orig.Col, l, Words[WordPos], 1)
-					&& Buffer.SetPos(Orig.Col + l, Orig.Row)) {
+			if (0 != Buffer.InsText(Buffer.VToR(Orig.Row), Orig.Col, l, Words[WordPos], true)
+					&& 0 != Buffer.SetPos(Orig.Col + l, Orig.Row)) {
 				Buffer.Draw(Buffer.VToR(Orig.Row), Buffer.VToR(Orig.Row));
 				rc = 1;
 			}
@@ -261,11 +270,11 @@ public class ExComplete extends ExView
 				|| (Buffer.SetPos(Buffer.CP.Col, Buffer.CP.Row) == 0))
 			return 0;
 
-		PELine L = Buffer.VLine(Buffer.CP.Row);
+		ELine L = Buffer.VLine(Buffer.CP.Row);
 		int C = Buffer.CP.Col;
 		int P = Buffer.CharOffset(L, C);
 
-		if (!P || P > L.Count)
+		if (!P || P > L.getCount())
 			return 0;
 
 		int P1 = P;
@@ -273,19 +282,17 @@ public class ExComplete extends ExView
 			P--;
 
 		int wlen = P1 - P;
-		if (!wlen)
+		if (0==wlen)
 			return 0;
 
-		WordBegin = new char[wlen + 1];
-		if (WordBegin == null)
-			return 0;
+		WordBegin = ""; //new char[wlen + 1];
 
 		strncpy(WordBegin, L.Chars + P, wlen);
 		WordBegin[wlen] = 0;
 
 		// fprintf(stderr, "Calling %d  %s\n", wlen, WordBegin);
 		// Search words in TAGS
-		TagComplete(Words, &WordsLast, MAXCOMPLETEWORDS, WordBegin);
+		// TODO TagComplete(Words, &WordsLast, MAXCOMPLETEWORDS, WordBegin);
 		// fprintf(stderr, "Located %d words\n", WordsLast);
 		// these words are already sorted
 
@@ -297,7 +304,7 @@ public class ExComplete extends ExView
 
 		while (Buffer.FindStr(L.Chars + P, wlen, mask) == 1) {
 			mask |= SEARCH_NEXT;
-			PELine M = Buffer.RLine(Buffer.Match.Row);
+			ELine M = Buffer.RLine(Buffer.Match.Row);
 			int X = Buffer.CharOffset(M, Buffer.Match.Col);
 
 			if ((L.Chars == M.Chars) && (P == X))
@@ -305,7 +312,7 @@ public class ExComplete extends ExView
 
 			int XL = X;
 
-			while ((XL < M.Count) && CheckASCII(M.Chars[XL]))
+			while ((XL < M.getCount()) && CheckASCII(M.Chars[XL]))
 				XL++;
 
 			int len = XL - X - wlen;
@@ -314,8 +321,8 @@ public class ExComplete extends ExView
 				continue;
 
 			//char *s = new char[len + 1];
+			String s;
 
-			if (s != null) {
 				strncpy(s, M.Chars + X + wlen, len);
 				s[len] = 0;
 
@@ -324,7 +331,7 @@ public class ExComplete extends ExView
 				// using sort to insert only unique words
 				while (L < R) {
 					H = (L + R) / 2;
-					c = strcmp(s, Words[H]);
+					c = BitOps.strcmp(s, Words[H]);
 					if (c < 0)
 						R = H;
 					else if (c > 0)
@@ -354,7 +361,7 @@ public class ExComplete extends ExView
 					// word was already listed, free duplicate.
 					//delete s;
 				}
-			}
+			
 		}
 		Buffer.Match.Row = Buffer.Match.Col = -1;
 		Buffer.MatchLen = Buffer.MatchCount = 0;
@@ -387,7 +394,7 @@ public class ExComplete extends ExView
 		if (WordFixed > 0) {
 			WordFixedCount = 0;
 			for(int i = 0; i < WordsLast; i++)
-				if (strncmp(Words[WordPos], Words[i], WordFixed) == 0)
+				if (BitOps.strncmp(Words[WordPos], Words[i], WordFixed) == 0)
 					WordFixedCount++;
 		} else
 			WordFixedCount = WordsLast;

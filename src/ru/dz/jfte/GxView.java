@@ -250,7 +250,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    long /*TKeyCode*/ GetChar(String Prompt) {
+    long /*TKeyCode*/ GetChar(String Prompt) throws IOException {
         int rc;
         long /*TKeyCode*/K = 0;
 
@@ -270,7 +270,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return K;
     }
 
-    int IncrementalSearch(EView View) {
+    int IncrementalSearch(EView View) throws IOException {
         int rc;
         ExISearch search;
         EBuffer B = null;
@@ -294,7 +294,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int PickASCII() {
+    int PickASCII() throws IOException {
         int rc;
         ExASCII ascii;
 
