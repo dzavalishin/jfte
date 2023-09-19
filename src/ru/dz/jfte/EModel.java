@@ -1,6 +1,9 @@
 package ru.dz.jfte;
 
-public class EModel implements ModeDefs 
+import java.io.Closeable;
+import java.io.IOException;
+
+public class EModel implements ModeDefs, Closeable 
 {
 	EModel [] Root;   // root ptr of this list
 	EModel Next;    // next model
@@ -182,6 +185,12 @@ public class EModel implements ModeDefs
 
 	int GetIntVar(int var, int [] value) {
 		return 0;
+	}
+
+	@Override
+	public void close() throws IOException {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

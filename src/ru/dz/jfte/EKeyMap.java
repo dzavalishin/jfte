@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class EKeyMap {
+public class EKeyMap implements KeyDefs 
+{
     EKeyMap fParent;
     EKey fKeys;
 
@@ -25,6 +26,48 @@ public class EKeyMap {
     void AddKey(EKey aKey) {
         aKey.fNext = fKeys;
         fKeys = aKey;
+    }
+
+    
+    static int MatchKey( int /*TKeyCode*/ aKey, KeySel aSel) 
+    {
+        int flags = aKey & ~ 0xFFFF;
+        int key = aKey & 0xFFFF;
+
+        flags &= ~kfAltXXX;
+
+        if(0!= (flags & kfShift)) {
+            if (key < 256)
+                if (flags == kfShift)
+                    flags &= ~kfShift;
+                else if (KeyDefs.isAscii(key))
+                    key = Character.toUpperCase(key); 
+        }
+        if (0 != (flags & kfCtrl) && 0 == (flags & kfSpecial))
+            if (key < 32)
+                key += 64;
+
+        flags &= ~aSel.Mask;
+
+        if(0!= (aSel.Mask & kfShift)) {
+            if (key < 256)
+                if (KeyDefs.isAscii(key))
+                    key = Character.toUpperCase(key);
+        }
+        aKey = key | flags;
+        if (aKey == aSel.Key)
+            return 1;
+        return 0;
+    }
+
+    EKey FindKey(int /*TKeyCode*/ aKey) {
+        EKey p = fKeys;
+
+        while (p!=null) {
+            if (MatchKey(aKey, p.fKey)!=0) return p;
+            p = p.fNext;
+        }
+        return null;
     }
     
 }

@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public abstract class TEvent implements EventDefs 
+public abstract class TEvent implements EventDefs, KeyDefs 
 {
 	int /*TEventMask*/  What = evNone;
 	GView View = null;
@@ -25,7 +25,8 @@ class TEmptyEvent extends TEvent {
 }
 
 
-class TKeyEvent extends TEvent {
+class TKeyEvent extends TEvent 
+{
 	int /*TKeyCode*/  Code;
 
 	public TKeyEvent(int what) {
@@ -41,6 +42,33 @@ class TKeyEvent extends TEvent {
 
 		return e;
 	}
+
+	public boolean GetChar(char[] Ch) {
+	    Ch[0] = 0;
+	    
+	    if(0!= (Code & kfModifier))
+	        return false;
+	    
+	    if (KeyDefs.kbCode(Code) == kbEsc) { Ch[0] = 27; return true; }
+	    if (KeyDefs.kbCode(Code) == kbEnter) { Ch[0] = 13; return true; }
+	    if (KeyDefs.kbCode(Code) == (kbEnter | kfCtrl)) { Ch[0] = 10; return true; }
+	    if (KeyDefs.kbCode(Code) == kbBackSp) { Ch[0] = 8; return true; }
+	    if (KeyDefs.kbCode(Code) == (kbBackSp | kfCtrl)) { Ch[0] = 127; return true; }
+	    if (KeyDefs.kbCode(Code) == kbTab) { Ch[0] = 9; return true; }
+	    if (KeyDefs.kbCode(Code) == kbDel) { Ch[0] = 127; return true; }
+	    
+	    if (KeyDefs.keyType(Code) == kfCtrl) {
+	        Ch[0] = (char) (Code & 0x1F);
+	        return true;
+	    }
+	    if (KeyDefs.isAscii(Code)) {
+	        Ch[0] = (char)Code;
+	        return true;
+	    }
+	    
+	    return false;
+	}
+	
 }
 
 class TMouseEvent extends TEvent{

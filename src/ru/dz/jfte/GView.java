@@ -1,5 +1,6 @@
 package ru.dz.jfte;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 /**
@@ -9,7 +10,8 @@ import java.io.IOException;
  * @author dz
  *
  */
-public class GView {
+public class GView implements Closeable 
+{
     GFrame Parent;
     GView Next, Prev;
     GViewPeer Peer;
@@ -175,6 +177,12 @@ public class GView {
         }
         Repaint();
     }
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
     
     
     

@@ -1,45 +1,14 @@
 package ru.dz.jfte;
 
-public class Main 
+import java.nio.file.Path;
+import java.io.File;
+
+public class Main implements MainConst
 {
-
-	/* default locations for the configuration files */
-	static final String Unix_RCPaths[] = {
-	    "/usr/local/etc/fte/system.fterc",
-	    "/etc/fte/system.fterc",
-	    "/usr/X11R6/lib/X11/fte/system.fterc",
-	};
-
-
 	String ConfigFileName = "";
 
 	static void Usage() {
-	    System.out.print("Usage: " PROGRAM " [-?] [-h] [--help] [-CDHTmlrt] files...\n"+
-	           "Version: " VERSION " " COPYRIGHT "\n"+
-	           "   You may distribute under the terms of either the GNU General Public\n"+
-	           "   License or the Artistic License, as specified in the README file.\n"+
-	           "\n"+
-	           "Options:\n"+
-	           "  --                End of options, only files remain.\n"+
-	           "  -+                Next option is file.\n"+
-	           "  -? -h --help      Display usage.\n"+
-	           "  -!                Ignore config file, use builtin defaults (also -c).\n"+
-	           "  -C[<.cnf>]        Use specified configuration file (no arg=builtin).\n"+
-	/*#ifdef CONFIG_DESKTOP
-	           "  -D[<.dsk>]        Load/Save desktop from <.dsk> file (no arg=disable desktop).\n"
-	#endif
-	#ifdef CONFIG_HISTORY
-	           "  -H[<.his>]        Load/Save history from <.his> file (no arg=disable history).\n"
-	#endif */
-	           "  -m[<mode>]        Override mode for remaining files (no arg=no override).\n"+
-	           "  -l<line>[,<col>]  Go to line (and column) in next file.\n"+
-	           "  -r                Open next file as read-only.\n"
-	/*#ifdef CONFIG_TAGS
-	           "  -T[<tagfile>]     Load tags file at startup.\n"
-	           "  -t<tag>           Locate specified tag.\n"
-	#endif */
-//	           "       -p        Load files into already running FTE.\n"
-	        );
+	    System.out.print(usage);
 	}
 
 	/*
@@ -69,7 +38,7 @@ public class Main
 	static int GetConfigFileName(String [] argv, String [] ConfigFileName) {
 	    String CfgName = "";
 
-	    if (ConfigFileName[0] == 0) {
+	    if (ConfigFileName[0] == null) {
 	/*#if defined(UNIX)
 	        // ? use ./.fterc if by current user ?
 	        ExpandPath("~/.fterc", CfgName);
@@ -78,29 +47,33 @@ public class Main
 	        String ph;
 	//#if defined(OS2)
 	        ph = getenv("HOME");
-	        if (ph) strcpy(home, ph);
+	        if (ph!=null) home = ph;
 	//#endif
 	//#if defined(NT)
 	        ph = getenv("HOMEDRIVE");
-	        if (ph) strcpy(home, ph);
+	        if (ph!=null) home = ph;
 	        ph = getenv("HOMEPATH");
-	        if (ph) strcat(home, ph);
+	        if (ph!=null) home += ph;
 	//#endif
-	        if (home[0]) {
-	            strcpy(CfgName, home);
-	            Slash(CfgName, 1);
-	            strcat(CfgName, "fte.cnf");
+	        if (!home.isBlank()) {
+	            CfgName = home;
+	            Console.Slash(CfgName, 1);
+	            CfgName += "fte.cnf";
 	        }
 
-	        if (!home[0] || access(CfgName, 0) != 0) {
-	            strcpy(CfgName, argv[0]);
-	            strcpy(findPathExt(CfgName), ".cnf");
+	        if (!home.isBlank() || Console.access(CfgName, 0)) {
+	            CfgName = argv[0];
+	            //strcpy(findPathExt(CfgName), ".cnf");
+	            //Path p = Path.of(CfgName);
+	            //File f = new File(CfgName);
+	            // TODO ext
+	            CfgName += ".cnf";
 	        }
 	
 
-	        ConfigFileName = CfgName;
+	        ConfigFileName[0] = CfgName;
 	    }
-	    if (access(ConfigFileName, 0) == 0)
+	    if (!Console.access(ConfigFileName[0], 0))
 	        return 1;
 
 	/* #if defined(UNIX)
@@ -114,11 +87,18 @@ public class Main
 	    return 0;
 	}
 
+	private static String getenv(String string) {		
+		return System.getenv(string);
+	}
+
+	
 	static int CmdLoadConfiguration(String [] argv) {
+		/* TODO CmdLoadConfiguration
 	    int ign = 0;
 	    int QuoteAll = 0, QuoteNext = 0;
 	    int haveConfig = 0;
 	    int Arg;
+	    int argc = argv.length;
 
 	    for (Arg = 1; Arg < argc; Arg++) {
 	        if (!QuoteAll && !QuoteNext && (argv[Arg][0] == '-')) {
@@ -175,10 +155,10 @@ public class Main
 
 	    if (ign) {
 	        if (UseDefaultConfig() == -1)
-	            DieError(1, "Error in internal configuration??? FATAL!");
+	            Console.DieError(1, "Error in internal configuration??? FATAL!");
 	    } else {
 	        if (LoadConfig(argc, argv, ConfigFileName) == -1)
-	            DieError(1,
+	            Console.DieError(1,
 	                     "Failed to load configuration file '%s'.\n"
 	                     "Use '-C' option.", ConfigFileName);
 	    }
@@ -222,6 +202,7 @@ public class Main
 	    }
 	    if (LoadDesktopOnEntry == 2)
 	        LoadDesktopOnEntry = 1;
+	    */
 	    return 1;
 	}
 
@@ -237,9 +218,9 @@ public class Main
 
 	    //STARTFUNC("main");
 
-	    EGUI g = new EGUI( argv, ScreenSizeX, ScreenSizeY);
-	    if (gui == 0 || g == 0)
-	        DieError(1, "Failed to initialize display\n");
+	    EGUI g = new EGUI( argv, Config.ScreenSizeX, Config.ScreenSizeY);
+	    if (GUI.gui == null || g == null)
+	        Console.DieError(1, "Failed to initialize display\n");
 
 	    GUI.gui.Run();
 

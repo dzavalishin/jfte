@@ -101,7 +101,7 @@ public class GUI implements GuiDefs, EventDefs
 	    if (frames)
 	        frames.Repaint();
 	 */
-		return 1;
+		return ExResult.ErOK;
 	}
 
 
@@ -417,9 +417,9 @@ public class GUI implements GuiDefs, EventDefs
 	            frames.Update();
 	            do {
 	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if (E.What & evNotify)
+	                if(0 != (E.What & evNotify))
 	                    gui.DispatchEvent(frames, view, E);
-	            } while (E.What & evNotify);
+	            } while(0 != (E.What & evNotify));
 	            if (scrollBreak(E)) break;
 	        } while (true);
 	    } else {

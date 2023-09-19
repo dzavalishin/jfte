@@ -1,5 +1,15 @@
 package ru.dz.jfte;
 
+import java.io.File;
+
+/**
+ * 
+ * All the OS dependent stuff is here
+ * 
+ * @author dz
+ *
+ */
+
 public class Console {
 
 	public static Completer CompletePath = new FileCompleter();
@@ -175,5 +185,45 @@ public class Console {
 		//return null;
 	}
 	
+
+	static void DieError(int rc, String msg, Object... p) {
+		System.err.printf(msg,p);
+	    System.exit(rc);
+	}
+
+	public static boolean access(String fileName, int mode) {
+		File f = new File(fileName);
+		return f.isFile();
+	}
+
+
+	static boolean ISSLASH(char c) { return ((c == '/') || (c == '\\')); }
+	static boolean ISSEP(char c) { return  ((c == ':') || ISSLASH(c)); }
+
+	/**
+	 * 
+	 * @param Path
+	 * @param Add if not - remove final separator
+	 * @return
+	 */
+	static String Slash(String Path, int Add) {
+	    int len = Path.length();
+
+	    if (Add!=0) {
+	        if ((len == 0) || !ISSLASH(Path.charAt(len - 1)))
+	            Path += '/';
+	    } else {
+	        if ((len > 1)
+	//#if PATHTYPE == PT_DOSISH
+	            && ((len > 3) || (Path.charAt(1) != ':'))
+	//#endif
+	           ) {
+	            if (ISSLASH(Path.charAt(len - 1))) {
+	                Path = Path.substring(len - 1);
+	            }
+	        }
+	    }
+	    return Path;
+	}
 	
 }

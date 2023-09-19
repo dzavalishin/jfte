@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.IOException;
 
-public class EGUI extends GUI implements ModeDefs, GuiDefs 
+public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs 
 {
     EKeyMap ActiveMap;
     EKeyMap OverrideMap;
@@ -11,6 +11,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
     static final int  RUN_WAIT = 0;
     static final int  RUN_ASYNC = 1;
     
+    static int LastEventChar = -1;
 
     
     EGUI(String [] argv, int XSize, int YSize)
@@ -22,7 +23,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
     }
 
 
-    ExResult ExecCommand(GxView view, ExCommands Command, ExState State) 
+    ExResult ExecCommand(GxView view, ExCommands Command, ExState State) throws IOException 
     {
     	/* TODO 
         if(0 != (Command & CMD_EXT))
@@ -75,14 +76,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
          */
         case ExChangeKeys:
             {
-                //char kmaps[64] = "";
-                EEventMap m;
+                String[] kmaps = {null};
 
-                if (State.GetStrParam(0, kmaps ) == 0) {
+                if (State.GetStrParam(null, kmaps ) == 0) {
                     SetOverrideMap(null, null);
                     return ExResult.ErFAIL;
                 }
-                m = FindEventMap(kmaps);
+                EEventMap m = EEventMap.FindEventMap(kmaps[0]);
                 if (m == null)
                     return ExResult.ErFAIL;
                 SetOverrideMap(m.KeyMap, m.Name);
@@ -152,44 +152,43 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
     }
 
     void SetMap(EKeyMap aMap, KeySel ks) {
-        char key[32] = "";
+        String [] key = {""};
 
         ActiveMap = aMap;
         if (ActiveMap == null) {
             SetMsg(null);
         } else {
-            if (ks != 0) {
-                GetKeyName(key, *ks);
-                SetMsg(key);
+            if (ks != null) {
+                KeyTable.GetKeyName(key, ks);
+                SetMsg(key[0]);
             }
         }
     }
 
-    void DispatchKey(GxView view, TEvent Event) {
+    void DispatchKey(GxView view, TKeyEvent Event) {
         EEventMap EventMap;
-        EKeyMap map;
         EKey key = null;
         char [] Ch = {0};
 
-        if (Event.Key.Code & kfModifier)
+        if(0 != (Event.Code & kfModifier))
             return;
 
         LastEventChar = -1;
-        if (GetCharFromEvent(Event, Ch))
-            LastEventChar = Ch;
+        if(Event.GetChar(Ch))
+            LastEventChar = Ch[0];
 
         if ((EventMap = view.GetEventMap()) == null)
             return;
 
-        map = EventMap.KeyMap;
+        EKeyMap map = EventMap.KeyMap;
 
         if (ActiveMap!=null || OverrideMap!=null) {
             map = ActiveMap;
             if (OverrideMap!=null)
                 map = OverrideMap;
             while (map!=null) {
-                if ((key = map.FindKey(Event.Key.Code)) != 0) {
-                    if (key.fKeyMap) {
+                if ((key = map.FindKey(Event.Code)) != null) {
+                    if (key.fKeyMap!=null) {
                         SetMap(key.fKeyMap, key.fKey);
                         Event.What = evNone;
                         return ;
@@ -211,8 +210,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         }
         while (EventMap!=null) {
             if (map!=null) {
-                if ((key = map.FindKey(Event.Key.Code)) != 0) {
-                    if (key.fKeyMap) {
+                if ((key = map.FindKey(Event.Code)) != null) {
+                    if (key.fKeyMap != null) {
                         SetMap(key.fKeyMap, key.fKey);
                         Event.What = evNone;
                         return ;
@@ -232,7 +231,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         SetMap(null, null);
     }
 
-    void DispatchCommand(GxView view, TEvent pEvent) 
+    void DispatchCommand(GxView view, TEvent pEvent) throws IOException 
     {
     	TMsgEvent Event = (TMsgEvent) pEvent;
         if (Event.Command > 65536 + 16384)
@@ -251,27 +250,29 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         }
     }
 
-    void DispatchEvent(GFrame frame, GView view, TEvent Event) {
+    void DispatchEvent(GFrame frame, GView view, TEvent Event) throws IOException {
         GxView xview = (GxView) view;
 
         if (Event.What == evNone ||
-            (Event.What == evMouseMove && Event.Mouse.Buttons == 0))
+            (Event.What == evMouseMove && ((TMouseEvent)Event).Buttons == 0))
             return ;
 
-        if (Event.What == evNotify && Event.Msg.Command == cmPipeRead) {
-            Event.Msg.Model.NotifyPipe(Event.Msg.Param1);
+        if (Event.What == evNotify && ((TMsgEvent)Event).Command == cmPipeRead) {
+        	((TMsgEvent)Event).Model.NotifyPipe((int)((TMsgEvent)Event).Param1);
             return;
         }
+        
         if (xview.GetEventMap() != null) {
             switch (Event.What) {
             case evKeyDown:
-                DispatchKey(xview, Event);
+                DispatchKey(xview, (TKeyEvent) Event);
                 break;
             case evCommand:
-                if (Event.Msg.Command >= 65536) {
+            	TMsgEvent mEvent = (TMsgEvent) Event;
+                if (mEvent.Command >= 65536) {
                     DispatchCommand(xview, Event);
                 } else {
-                    switch (Event.Msg.Command) {
+                    switch (mEvent.Command) {
                     case cmClose:
                         {
                             assert(EView.ActiveView != null);
@@ -282,6 +283,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
                 }
             }
         }
+        
         super.DispatchEvent(frame, view, Event);
     }
 
@@ -298,7 +300,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         return ExResult.ErOK;
     }
 
-    ExResult FileCloseX(EView View, int CreateNew, int XClose) {
+    ExResult FileCloseX(EView View, int CreateNew, int XClose) throws IOException {
         String [] Path = {""};
 
         // this should never fail!
@@ -340,7 +342,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
     }
 
 
-    ExResult FileClose(EView View, ExState State) {
+    ExResult FileClose(EView View, ExState State) throws IOException {
         int [] x = {0};
 
         if (State.GetIntParam(View, x) == 0)
@@ -349,7 +351,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         return FileCloseX(View, x[0], 0);
     }
 
-    ExResult FileCloseAll(EView View, ExState State) {
+    ExResult FileCloseAll(EView View, ExState State) throws IOException {
         int [] x = {0};
 
         if (State.GetIntParam(View, x) == 0)
@@ -552,10 +554,10 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
         GxView view;
         ExModelView edit;
 
-        if (!multiFrame() && frames)
+        if (0==multiFrame() && frames!=null)
             return ExResult.ErFAIL;
 
-        new EFrame(ScreenSizeX, ScreenSizeY);
+        new EFrame(Config.ScreenSizeX, Config.ScreenSizeY);
         assert(frames != null);
 
         //frames.SetMenu("Main"); //??
@@ -689,16 +691,19 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs
     }
     //#endif */
 
-    void EditorInit() {
-        SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
-        assert(SSBuffer != 0);
-        BFI(SSBuffer, BFI_Undo) = 0; // disable undo for clipboard
-        EModel.ActiveModel = 0;
+    void EditorInit() 
+    {
+    	EModel [] ssm = {EBuffer.SSBuffer};
+    	EBuffer.SSBuffer = new EBuffer(0, ssm, "Scrap");
+        //SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
+        //assert(SSBuffer != null);
+        BFI(EBuffer.SSBuffer, BFI_Undo) = 0; // disable undo for clipboard
+        EModel.ActiveModel = null;
     }
 
     int InterfaceInit() {
         if (FrameNew() == null)
-            DieError(1, "Failed to create window\n");
+            Console.DieError(1, "Failed to create window\n");
         return 0;
     }
 
