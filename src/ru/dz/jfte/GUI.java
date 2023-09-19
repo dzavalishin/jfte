@@ -45,10 +45,15 @@ public class GUI implements GuiDefs, EventDefs
 		}
 	}
 
+	
+	static TEvent ConGetEvent(int /*TEventMask*/ EventMask, int WaitTime, int Delete) {
+		return Console.ConGetEvent(EventMask, WaitTime, Delete!=0);
+	}
+	
 	TEvent ConGetEvent(int /*TEventMask*/ EventMask, int WaitTime, int Delete, GView []view) {
 		if (view != null)
 			view[0] = null;
-		return Console.ConGetEvent(EventMask, WaitTime, Delete);
+		return Console.ConGetEvent(EventMask, WaitTime, Delete!=0);
 	}
 
 	int ConPutEvent(TEvent Event) {
@@ -106,7 +111,7 @@ public class GUI implements GuiDefs, EventDefs
 
 
 	static TEvent NextEvent = null;
-	void ProcessEvent() {
+	void ProcessEvent() throws IOException {
 		TEvent E;
 
 		E = NextEvent.clone();
@@ -115,24 +120,26 @@ public class GUI implements GuiDefs, EventDefs
 			NextEvent.What = evNone;
 		}
 		if (E.What == evNone &&
-				( (E = Console.ConGetEvent(evMouse | evCommand | evKeyboard, 0, 1, 0)) == null ||
+				( (E = Console.ConGetEvent(evMouse | evCommand | evKeyboard, 0, true)) == null ||
 				E.What == evNone )
 				)
 		{
 			frames.Update();
-			while( (E=Console.ConGetEvent(evMouse | evCommand | evKeyboard, -1, 1, 0)) == null ||
-					(E.What == evMouseMove && E.Buttons == 0));
+			while( (E=Console.ConGetEvent(evMouse | evCommand | evKeyboard, -1, true)) == null ||
+					(E.What == evMouseMove && ((TMouseEvent)E).Buttons == 0));
 		}
 		if (E.What != evNone) {
 			GView view = frames.Active;
 
-			if( 0 != (E.What & evMouse)) {
-				if (E.What == evMouseDown && E.Y == 0 && GFrame.ShowMenuBar &&
+			if( 0 != (E.What & evMouse)) 
+			{
+				TMouseEvent mE = (TMouseEvent) E;
+				if (E.What == evMouseDown && mE.Y == 0 && GFrame.ShowMenuBar &&
 						GViewPeer.MouseCapture == null && GViewPeer.FocusCapture == null)
 				{
 					frames.Update(); // sync before menu
-					if (ExecMainMenu(E, 0) == -1) {
-						if (E.What == evCommand && E.Msg.Command == cmResize) {
+					if (UpMenu.ExecMainMenu(E, (char)0) == -1) {
+						if (E.What == evCommand && ((TMsgEvent)E).Command == cmResize) {
 							int [] X = {0}, Y = {0};
 							Console.ConQuerySize(X, Y);
 							frames.Resize(X[0], Y[0]);
@@ -145,8 +152,8 @@ public class GUI implements GuiDefs, EventDefs
 					GView V = frames.Active;
 
 					while (V!=null) {
-						if (E.Y >= V.Peer.wY &&
-								E.Y <  V.Peer.wY + V.Peer.wH + (GFrame.ShowHScroll ? 1 : 0))
+						if (mE.Y >= V.Peer.wY &&
+								mE.Y <  V.Peer.wY + V.Peer.wH + (GFrame.ShowHScroll ? 1 : 0))
 						{
 							frames.SelectView(V);
 							view = V;
@@ -159,30 +166,33 @@ public class GUI implements GuiDefs, EventDefs
 				}
 				if (GFrame.ShowVScroll && GFrame.ShowHScroll && E.What == evMouseDown &&
 						GViewPeer.MouseCapture == null && GViewPeer.FocusCapture == null &&
-						E.Y == view.Peer.wY + view.Peer.wH &&
-						E.X == view.Peer.wX + view.Peer.wW)
+						mE.Y == view.Peer.wY + view.Peer.wH &&
+						mE.X == view.Peer.wX + view.Peer.wW)
 				{
 				} else {
 					if (GFrame.ShowVScroll && E.What == evMouseDown && GViewPeer.MouseCapture == null && GViewPeer.FocusCapture == null &&
-							E.X == view.Peer.wX + view.Peer.wW)
+							mE.X == view.Peer.wX + view.Peer.wW)
 					{
-						HandleVScroll(view, E);
+						HandleVScroll(view, (TMouseEvent) E);
 						return ;
 					}
 					if (GFrame.ShowHScroll && E.What == evMouseDown && GViewPeer.MouseCapture == null && GViewPeer.FocusCapture == null &&
-							E.Y == view.Peer.wY + view.Peer.wH)
+							mE.Y == view.Peer.wY + view.Peer.wH)
 					{
-						HandleHScroll(view, E);
+						HandleHScroll(view, (TMouseEvent) E);
 						return ;
 					}
 				}
 				if(0 != (E.What & evMouse)) {
-					E.Y -= view.Peer.wY;
-					E.X -= view.Peer.wX;
+					mE.Y -= view.Peer.wY;
+					mE.X -= view.Peer.wX;
 				}
 			}
-			if (E.What == evCommand) {
-				switch (E.Msg.Command) {
+			
+			if (E.What == evCommand) 
+			{
+				TMsgEvent mE = (TMsgEvent) E;
+				switch (mE.Command) {
 				case cmResize: 
 				{
 					int [] X = {0}, Y = {0};
@@ -192,11 +202,11 @@ public class GUI implements GuiDefs, EventDefs
 				break;
 				case cmMainMenu:
 				{
-					char Sub = (char)E.Msg.Param1;
+					char Sub = (char)mE.Param1;
 
 					frames.Update(); // sync before menu
 					if (UpMenu.ExecMainMenu(E, Sub) != 1) {//;
-						if (E.What == evCommand && E.Msg.Command == cmResize) {
+						if (E.What == evCommand && mE.Command == cmResize) {
 							int [] X = {0}, Y = {0};
 							Console.ConQuerySize(X, Y);
 							frames.Resize(X[0], Y[0]);
@@ -207,7 +217,7 @@ public class GUI implements GuiDefs, EventDefs
 				break;
 				case cmPopupMenu:
 				{
-					int id = E.Msg.Param1;
+					int id = (int) mE.Param1;
 					int [] Cols = {0}, Rows = {0};
 
 					if (id == -1) return;
@@ -218,7 +228,7 @@ public class GUI implements GuiDefs, EventDefs
 
 					frames.Update(); // sync before menu
 					if (UpMenu.ExecVertMenu(x[0], y[0], id, E, null) != 1) {
-						if (E.What == evCommand && E.Msg.Command == cmResize) {
+						if (E.What == evCommand && mE.Command == cmResize) {
 							int [] X = {0}, Y = {0};
 							Console.ConQuerySize(X, Y);
 							frames.Resize(X[0], Y[0]);
@@ -238,7 +248,12 @@ public class GUI implements GuiDefs, EventDefs
 		if (Start(fArgv) == 0) {
 			doLoop = true;
 			while (doLoop)
-				ProcessEvent();
+				try {
+					ProcessEvent();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			Stop();
 			return 0;
 		}
@@ -270,178 +285,152 @@ public class GUI implements GuiDefs, EventDefs
 	
 	
 	
-	static void HandleVScroll(GView view, TEvent E) {
+	static void HandleVScroll(GView view, TMouseEvent E) throws IOException {
 	    int y; //, x
 	    int wY, wH;
 	    TEvent E1;
 	    
 	    //x = E.Mouse.X;
-	    y = E.Mouse.Y;
+	    y = E.Y;
 	    wY = view.Peer.wY;
 	    wH = view.Peer.wH;
 	    if (y == wY) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmVScrollUp;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmVScrollUp;
+	            E1 = new TMsgEvent(evCommand, view, cmVScrollUp);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else if (y == wY + wH - 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmVScrollDown;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmVScrollDown;
+	            E1 = new TMsgEvent(evCommand, view, cmVScrollDown);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else if (y < wY + view.Peer.SbVBegin + 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmVScrollPgUp;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmVScrollPgUp;
+	            E1 = new TMsgEvent(evCommand, view, cmVScrollPgUp);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
-	        } while (1);
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
+	        } while (true);
 	    } else if (y > wY + view.Peer.SbVEnd + 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmVScrollPgDn;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmVScrollPgDn;
+	            E1 = new TMsgEvent(evCommand, view, cmVScrollPgDn);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else {
 	        int delta = y - 1 - view.Peer.SbVBegin - wY;
 	        
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmVScrollMove;
-	            E1.Msg.Param1 = (E.Mouse.Y - wY - 1 - delta + 1) * view.Peer.sbVtotal / (wH - 2);
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmVScrollMove;
+	            /*E1.Msg.*/ int Param1 = (E.Y - wY - 1 - delta + 1) * view.Peer.sbVtotal / (wH - 2);
+	            E1 = new TMsgEvent(evCommand, view, cmVScrollMove, Param1 );
 //	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    }
 	    E.What = evNone;
 	}
 
-	static void HandleHScroll(GView view, TEvent E) {
+	static void HandleHScroll(GView view, TMouseEvent E) throws IOException {
 	    int x; //, x
 	    int wX, wW;
 	    TEvent E1;
 	    
 	    //x = E.Mouse.X;
-	    x = E.Mouse.X;
+	    x = E.X;
 	    wX = view.Peer.wX;
 	    wW = view.Peer.wW;
 	    if (x == wX) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmHScrollLeft;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmHScrollLeft;
+	            E1 = new TMsgEvent(evCommand, view, cmHScrollLeft);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else if (x == wX + wW - 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmHScrollRight;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmHScrollRight;
+	            E1 = new TMsgEvent(evCommand, view, cmHScrollRight);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else if (x < wX + view.Peer.SbHBegin + 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmHScrollPgLt;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmHScrollPgLt;
+	            E1 = new TMsgEvent(evCommand, view, cmHScrollPgLt);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else if (x > wX + view.Peer.SbHEnd + 1) {
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmHScrollPgRt;
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmHScrollPgRt;
+	            E1 = new TMsgEvent(evCommand, view, cmHScrollPgRt);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    } else {
 	        int delta = x - 1 - view.Peer.SbHBegin - wX;
 	        
 	        do {
-	            E1.What = evCommand;
-	            E1.Msg.View = view;
-	            E1.Msg.Command = cmHScrollMove;
-	            E1.Msg.Param1 = (E.Mouse.X - wX - 1 - delta + 1) * view.Peer.sbHtotal / (wW - 2);
+	            //E1.What = evCommand;
+	            //E1.Msg.View = view;
+	            //E1.Msg.Command = cmHScrollMove;
+	            /*E1.Msg.*/ int Param1 = (E.X - wX - 1 - delta + 1) * view.Peer.sbHtotal / (wW - 2);
+	            E1 = new TMsgEvent(evCommand, view, cmHScrollMove, Param1);
 //	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
 	            gui.DispatchEvent(frames, view, E1);
-	            frames.Update();
-	            do {
-	                E = ConGetEvent(evMouse | evNotify, -1, 1);
-	                if(0 != (E.What & evNotify))
-	                    gui.DispatchEvent(frames, view, E);
-	            } while(0 != (E.What & evNotify));
-	            if (scrollBreak(E)) break;
+	            //E = localDispatch(view);
+	            if (scrollBreak(localDispatch(view))) break;
 	        } while (true);
 	    }
 	    E.What = evNone;
+	}
+
+	/**
+	 * Strange stuff...
+	 */
+	private static TEvent localDispatch(GView view) throws IOException {
+		TEvent E;
+		frames.Update();
+		do {
+		    E = ConGetEvent(evMouse | evNotify, -1, 1);
+		    if(0 != (E.What & evNotify))
+		        gui.DispatchEvent(frames, view, E);
+		} while(0 != (E.What & evNotify));
+		return E;
 	}
 
 	

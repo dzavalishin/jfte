@@ -104,23 +104,45 @@ class TMsgEvent extends TEvent
 	long Param1 = 0;
 	Object Param2 = null;
 
+
+	public TMsgEvent(int w) {
+		What = w;
+	}
+
+	
 	public TMsgEvent(int w, int c, int p1) {
 		What = w;
 		Command = c;
 		Param1 = p1;
 	}
 
+	/**
+	 * 
+	 * @param w What
+	 * @param v View
+	 * @param cmd Command
+	 */
 	public TMsgEvent(int w, GView v, int cmd) {
 		What = w;
 		View = v;
 		Command = cmd;
 	}
 	
-	public TMsgEvent(int w) {
+
+
+	/**
+	 * 
+	 * @param w What
+	 * @param view View
+	 * @param cmd Command
+	 * @param param1 Param1
+	 */
+	public TMsgEvent(int w, GView view, int cmd, int param1) {
 		What = w;
+		View = view;
+		Command = cmd;
+		Param1 = param1;
 	}
-
-
 
 	public TMsgEvent clone()
 	{
