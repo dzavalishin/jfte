@@ -3623,27 +3623,37 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    FullRedraw(); \
 	    return true;
 	 */
+	private void TOGGLE_R(int x) { TOGGLE(x); FullRedraw(); } 
 
-	boolean ToggleAutoIndent() { TOGGLE(AutoIndent); }
-	boolean ToggleInsert() { TOGGLE(Insert); }
-	boolean ToggleExpandTabs() { TOGGLE_R(ExpandTabs); }
-	boolean ToggleShowTabs() { TOGGLE_R(ShowTabs); }
-	boolean ToggleUndo() { FreeUndo(); TOGGLE(Undo); }
-	boolean ToggleReadOnly() { TOGGLE(ReadOnly); }
-	boolean ToggleKeepBackups() { TOGGLE(KeepBackups); }
-	boolean ToggleMatchCase() { TOGGLE(MatchCase); }
-	boolean ToggleBackSpKillTab() { TOGGLE(BackSpKillTab); }
-	boolean ToggleDeleteKillTab() { TOGGLE(DeleteKillTab); }
-	boolean ToggleSpaceTabs() { TOGGLE(SpaceTabs); }
-	boolean ToggleIndentWithTabs() { TOGGLE(IndentWithTabs); }
-	boolean ToggleBackSpUnindents() { TOGGLE(BackSpUnindents); }
-	boolean ToggleTrim() { TOGGLE(Trim); }
-	boolean ToggleShowMarkers() { TOGGLE_R(ShowMarkers); }
-	boolean ToggleHilitTags() { TOGGLE_R(HilitTags); }
-	boolean ToggleShowBookmarks() { TOGGLE_R(ShowBookmarks); }
+	private void TOGGLE(int x)
+	{
+		Flags.num[x] = (Flags.num[x] != 0) ? 0 : 1; 
+	}
+	
+	
+	boolean ToggleAutoIndent() { TOGGLE(BFI_AutoIndent);  return true; }
+	boolean ToggleInsert() { TOGGLE(BFI_Insert);  return true; }
+	boolean ToggleExpandTabs() { TOGGLE_R(BFI_ExpandTabs);  return true; }
+	boolean ToggleShowTabs() { TOGGLE_R(BFI_ShowTabs);  return true; }
+	boolean ToggleUndo() { FreeUndo(); TOGGLE(BFI_Undo);  return true; }
+	boolean ToggleReadOnly() { TOGGLE(BFI_ReadOnly);  return true; }
+	boolean ToggleKeepBackups() { TOGGLE(BFI_KeepBackups);  return true; }
+	boolean ToggleMatchCase() { TOGGLE(BFI_MatchCase);  return true; }
+	boolean ToggleBackSpKillTab() { TOGGLE(BFI_BackSpKillTab);  return true; }
+	boolean ToggleDeleteKillTab() { TOGGLE(BFI_DeleteKillTab);  return true; }
+	boolean ToggleSpaceTabs() { TOGGLE(BFI_SpaceTabs);  return true; }
+	boolean ToggleIndentWithTabs() { TOGGLE(BFI_IndentWithTabs);  return true; }
+	boolean ToggleBackSpUnindents() { TOGGLE(BFI_BackSpUnindents);  return true; }
+	boolean ToggleTrim() { TOGGLE(BFI_Trim);  return true; }
+	boolean ToggleShowMarkers() { TOGGLE_R(BFI_ShowMarkers);  return true; }
+	boolean ToggleHilitTags() { TOGGLE_R(BFI_HilitTags);  return true; }
+	boolean ToggleShowBookmarks() { TOGGLE_R(BFI_ShowBookmarks);  return true; }
 
 	boolean ToggleWordWrap() { 
-		BFI(this, BFI_WordWrap) = (BFI(this, BFI_WordWrap) + 1) % 3;
+		//BFI(this, BFI_WordWrap) = (BFI(this, BFI_WordWrap) + 1) % 3;
+		
+		Flags.num[BFI_WordWrap]++; 
+		Flags.num[BFI_WordWrap] %= 3; 
 		/*Msg(INFO,
 	        "WordWrap is now %s.",
 	        (BFI(this, BFI_WordWrap) == 2) ? "AUTO" :
@@ -3652,14 +3662,16 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	boolean SetLeftMargin() {
-		BFI(this, BFI_LeftMargin) = CP.Col;
-		Msg(S_INFO, "LeftMargin set to %d.", BFI(this, BFI_LeftMargin) + 1);
+		//BFI(this, BFI_LeftMargin) = CP.Col;
+		Flags.num[BFI_LeftMargin] = CP.Col;
+		Msg(S_INFO, "LeftMargin set to %d.", iBFI(this, BFI_LeftMargin) + 1);
 		return true;
 	}
 
 	boolean SetRightMargin() {
-		BFI(this, BFI_RightMargin) = CP.Col;
-		Msg(S_INFO, "RightMargin set to %d.", BFI(this, BFI_RightMargin) + 1);
+		//BFI(this, BFI_RightMargin) = CP.Col;
+		Flags.num[BFI_RightMargin] = CP.Col;
+		Msg(S_INFO, "RightMargin set to %d.", iBFI(this, BFI_RightMargin) + 1);
 		return true;
 	}
 
