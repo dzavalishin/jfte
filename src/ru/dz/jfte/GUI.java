@@ -438,5 +438,9 @@ public class GUI implements GuiDefs, EventDefs
 	{
 	    return (E.What == evMouseUp);
 	}
+
+	public void RunProgram(int runWait, String string) {
+		Console.RunProgram(runWait,string,frames);
+	}
 	
 }

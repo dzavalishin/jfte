@@ -489,7 +489,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             Console.SetDefaultDirectory(EModel.ActiveModel);
 
         if (State.GetStrParam(EView.ActiveView, Cmd) == 0)
-            if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
+			try {
+				if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return ExResult.ErFAIL;
+			}
         
         gui.RunProgram(RUN_WAIT, Cmd[0]);
         return ExResult.ErOK;
@@ -501,7 +507,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         	Console.SetDefaultDirectory(EModel.ActiveModel);
 
         if (State.GetStrParam(EView.ActiveView, Cmd ) == 0)
-            if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
+			try {
+				if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return ExResult.ErFAIL;
+			}
         gui.RunProgram(RUN_ASYNC, Cmd[0]);
         return ExResult.ErOK;
     }
@@ -697,7 +709,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     	EBuffer.SSBuffer = new EBuffer(0, ssm, "Scrap");
         //SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
         //assert(SSBuffer != null);
-        BFI(EBuffer.SSBuffer, BFI_Undo) = 0; // disable undo for clipboard
+    	EBuffer.BFI_SET(EBuffer.SSBuffer, BFI_Undo, 0); // disable undo for clipboard
         EModel.ActiveModel = null;
     }
 

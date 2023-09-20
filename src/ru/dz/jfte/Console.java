@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.attribute.BasicFileAttributes;
 
 /**
@@ -354,6 +355,44 @@ public class Console {
 
 	public static boolean rename(String from, String to) {
 		return new File(from).renameTo(new File(to));
+	}
+
+	public static int RunProgram(int runWait, String Command, GFrame frames) {
+		    int [] W = {0}, H = {0}, W1 = {0}, H1 = {0};
+
+		    ConQuerySize(W, H);
+		    ConHideMouse();
+		    // TODO ConSuspend();
+
+		    // TODO unix
+		    if (Command == null)      // empty string = shell
+		        Command = System.getenv( "COMSPEC" );
+
+		    //int rc = System.system(Command);
+		    
+		    
+		    int rc = 0;
+		    if(runWait!=0)
+				try {
+				    Process p = Runtime.getRuntime().exec(Command);
+					rc = p.waitFor();
+				} catch (InterruptedException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					rc = -1;
+				}
+		    
+		    // TODO ConContinue();
+		    ConShowMouse();
+		    ConQuerySize(W1, H1);
+
+		    if (W != W1 || H != H1) {
+		        frames.Resize(W1[0], H1[0]);
+		    }
+		    frames.Repaint();
+		    
+		    return rc;
+		
 	}
 	
 	
