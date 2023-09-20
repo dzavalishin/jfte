@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.io.File;
+import java.nio.file.attribute.BasicFileAttributes;
 
 /**
  * 
@@ -335,6 +336,11 @@ public class Console {
 	public static boolean FileExists(String fileName) {
 		File f = new File(fileName);
 		return f.isFile();
+	}
+
+	public static BasicFileAttributes stat(String fileName) {
+		// TODO Auto-generated method stub
+		//return null;
 	}
 	
 	

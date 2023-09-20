@@ -230,17 +230,17 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int Choice(int Flags, String Title, int NSel, String ... choices /*, format, args */) throws IOException {
-        int rc;
+    int Choice(int Flags, String Title, int NSel, String ... choices /*, format, args */)  {
+
+		try {
 
         if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) != 0 && Config.GUIDialogs != 0) {
-            rc = DLGPickChoice(this, Title, NSel, choices, Flags);
-            return rc;
+            return DLGPickChoice(this, Title, NSel, choices, Flags);
         } else {
             ExChoice choice = new ExChoice(Title, NSel, choices);
 
             PushView(choice);
-            rc = Execute();
+            int rc = Execute();
             PopView();
             Repaint();
 
@@ -248,6 +248,11 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
             return rc;
         }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return -1; // TODO check callers check it
+		}
     }
 
     long /*TKeyCode*/ GetChar(String Prompt) throws IOException {
