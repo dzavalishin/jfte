@@ -92,7 +92,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbEnd: Pos = Line.length(); SelStart = SelEnd = 0; TabCount = 0; Event.What = evNone; break;
             case kbEsc: EndExec(0); Event.What = evNone; break;
             case kbEnter: 
-                AddInputHistory(HistId, Line);
+                // TODO AddInputHistory(HistId, Line);
                 EndExec(1);
                 Event.What = evNone; 
                 break;
@@ -167,10 +167,10 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     int len;
 
                     if (Config.SystemClipboard != 0)
-                        GetPMClip();
+                        ClipData.GetPMClip();
                     
-                    if (SSBuffer == 0) break;
-                    if (SSBuffer.RCount == 0) break;
+                    if (EBuffer.SSBuffer == null) break;
+                    if (EBuffer.SSBuffer.RCount == 0) break;
 
                     if (SelStart < SelEnd) {
                         memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
@@ -178,10 +178,10 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                         SelStart = SelEnd = 0;
                     }
 
-                    len = SSBuffer.LineChars(0);
+                    len = EBuffer.SSBuffer.LineChars(0);
                     if (Line.length() + len < MaxLen) {
                         memmove(Line + Pos + len, Line + Pos, strlen(Line + Pos) + 1);
-                        memcpy(Line + Pos, SSBuffer.RLine(0).Chars, len);
+                        memcpy(Line + Pos, EBuffer.SSBuffer.RLine(0).Chars, len);
                         TabCount = 0;
                         Event.What = evNone;
                         Pos += len;
@@ -197,7 +197,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 SelStart = SelEnd = 0;
                 if (CurItem == 0) break;
                 CurItem--;
-                {
+                /* TODO {
                     int cnt = CountInputHistory(HistId);
                     
                     if (CurItem > cnt) CurItem = cnt;
@@ -209,7 +209,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     else Line = new String(CurStr);
                     Pos = Line.length();
 //                    SelStart = SelEnd = 0;
-                }
+                } */
                 Event.What = evNone;
                 break;
             case kbTab | kfShift:
@@ -235,8 +235,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 Event.What = evNone;
                 break;
             case 'Q' | kfCtrl:
-                Event.What = evKeyDown;
-                Event.Key.Code = Win.GetChar(0);
+                //Event.What = evKeyDown;
+                //Event.Key.Code = Win.GetChar(null);
+                Event = new TKeyEvent(evKeyDown, (int) Win.GetChar(null));
             default:
                 {
                     char Ch;
@@ -277,8 +278,8 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
     }
 
     void RepaintStatus() {
-        TDrawBuffer B;
-        int [] W, H;
+        TDrawBuffer B = new TDrawBuffer();
+        int [] W = {0}, H = {0};
         int FLen, FPos;
         
         ConQuerySize(W, H);

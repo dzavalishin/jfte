@@ -193,6 +193,12 @@ public class Console {
 	    System.exit(rc);
 	}
 
+	/**
+	 * 
+	 * @param fileName
+	 * @param mode
+	 * @return true if file exists
+	 */
 	public static boolean access(String fileName, int mode) {
 		File f = new File(fileName);
 		return f.isFile();

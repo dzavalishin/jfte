@@ -40,7 +40,8 @@ public class GView implements Closeable
         
         ConQuerySize(W, H);
         B.MoveChar( 0, W[0], ' ', 0x07, 1);
-        ConSetBox(0, 0, W[0], H[0], B.r(0));
+        //ConSetBox(0, 0, W[0], H[0], B.r(0));
+        ConSetBox(0, 0, W[0], H[0], B);
         return 1;
     }
 

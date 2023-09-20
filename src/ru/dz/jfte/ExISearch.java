@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
-public class ExISearch extends ExView implements KeyDefs 
+import java.io.IOException;
+
+public class ExISearch extends ExView implements KeyDefs, GuiDefs 
 {
 	static enum IState { IOk, INoMatch, INoPrev, INoNext }
 	static final int  MAXISEARCH = 256; 
@@ -37,8 +39,8 @@ public class ExISearch extends ExView implements KeyDefs
 
    int BeginMacro() { return 1; }
 
-   void HandleEvent(TEvent Event) {
-       int Case = BFI(Buffer, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+   void HandleEvent(TEvent Event) throws IOException {
+       int Case = EBuffer.BFI(Buffer, BFI_MatchCase) ? 0 : SEARCH_NCASE;
        
        super.HandleEvent(Event);
        switch (Event.What) {
@@ -63,7 +65,7 @@ public class ExISearch extends ExView implements KeyDefs
                        SetState(IState.INoMatch);
                    }
                } else {
-                   if (Buffer.CenterPos(Orig.Col, Orig.Row) == 0) return;
+                   if (!Buffer.CenterPos(Orig.Col, Orig.Row)) return;
                }
                break;
            case kbUp:
@@ -104,7 +106,7 @@ public class ExISearch extends ExView implements KeyDefs
                    if (len == 0)
                        break;
                }
-               if (Buffer.FindStr(ISearchStr, len, Case | Direction | SEARCH_NEXT) == 0) {
+               if (!Buffer.FindStr(ISearchStr, len, Case | Direction | SEARCH_NEXT)) {
                    Buffer.FindStr(ISearchStr, len, Case);
                    SetState(IState.INoPrev);
                }
@@ -117,7 +119,7 @@ public class ExISearch extends ExView implements KeyDefs
                    if (len == 0)
                        break;
                }
-               if (Buffer.FindStr(ISearchStr, len, Case | Direction | SEARCH_NEXT) == 0) {
+               if (!Buffer.FindStr(ISearchStr, len, Case | Direction | SEARCH_NEXT)) {
                    Buffer.FindStr(ISearchStr, len, Case);
                    SetState(IState.INoNext);
                }
@@ -180,7 +182,7 @@ public class ExISearch extends ExView implements KeyDefs
        }
        
        String s = String.format("ISearch [%s]%s", ISearchStr, p);
-       B.MoveCh( ' ', 0x17, W);
+       B.MoveCh( ' ', 0x17, W[0]);
        B.MoveStr( 0, W[0], s, 0x17, W[0]);
        ConPutBox(0, H[0] - 1, W[0], 1, B);
        ConSetCursorPos(s.length() - 1, H[0] - 1);
