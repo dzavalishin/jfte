@@ -33,7 +33,7 @@ public class Config
 	static int LoadDesktopMode = 0;
 	static String HelpCommand = "man -a";
 	static String ConfigSourcePath = null;
-	static int IgnoreBufferList = 0;
+	static boolean IgnoreBufferList = false;
 	//GUICharactersEntry *GUICharacters = NULL;
 	static String CvsCommand = "cvs";
 	static String CvsLogMode = "PLAIN";

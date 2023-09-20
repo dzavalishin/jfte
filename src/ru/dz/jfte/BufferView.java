@@ -17,7 +17,11 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     
 
     
-    
+    static BufferView newBufferView(int createFlags, EModel mm)  
+    {
+    	EModel [] m = {mm};
+    	return new BufferView(createFlags,m);
+    }    
     
     BufferView(int createFlags, EModel []ARoot)  
     {

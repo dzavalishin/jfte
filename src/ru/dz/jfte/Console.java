@@ -15,6 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class Console {
 
 	public static Completer CompletePath = new FileCompleter();
+	static int CursorVisible = 1;
 
 	static TEvent ReadConsoleEvent() { 
 		// TODO impl me
@@ -399,6 +400,10 @@ public class Console {
 		    
 		    return rc;
 		
+	}
+
+	public static boolean IsDirectory(String file) {
+		return new File(file).isDirectory();
 	}
 	
 	

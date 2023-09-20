@@ -123,8 +123,8 @@ public class RxNode implements RxDefs
 		unsigned char set[NNN];
 		int s = 0;
 		int c = 0;
-		unsigned int i, xx;
-		unsigned char Ch, C1 = 0, C2 = 0;
+		 int i, xx;
+		 char Ch, C1 = 0, C2 = 0;
 		int doset = 0;
 
 		memset(set, 0, sizeof(set));

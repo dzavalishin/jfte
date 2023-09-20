@@ -5,7 +5,7 @@ import java.io.File;
 
 public class Main implements MainConst
 {
-	String ConfigFileName = "";
+	static String ConfigFileName = null;
 
 	static void Usage() {
 	    System.out.print(usage);

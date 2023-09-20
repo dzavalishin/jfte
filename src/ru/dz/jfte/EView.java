@@ -279,7 +279,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     ExResult FilePrev() {
         if (Model != null) {
             EModel n = Model.Prev;
-            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Prev;
+            if (Config.IgnoreBufferList && n!=null && n.GetContext ()==CONTEXT_BUFFERS) n=n.Prev;
             SelectModel(n);
             return ExResult.ErOK;
         }
@@ -289,7 +289,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     ExResult FileNext() {
         if (Model != null) {
             EModel n = Model.Next;
-            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
+            if (Config.IgnoreBufferList && n!=null && n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
             SelectModel(n);
             return ExResult.ErOK;
         }
@@ -299,7 +299,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     ExResult FileLast() {
         if (Model != null) {
             EModel n=Model.Next;
-            if (IgnoreBufferView.BufferList&&n&&n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
+            if (Config.IgnoreBufferList && n!=null && n.GetContext ()==CONTEXT_BUFFERS) n=n.Next;
             SwitchToModel(n);
             return ExResult.ErOK;
         }
@@ -347,7 +347,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
 
     ExResult FileOpen(ExState State) {
-        String [] FName;
+        String [] FName = {""};
 
         if (State.GetStrParam(this,FName) == 0) {
             if (Console.GetDefaultDirectory(Model, FName) == 0)
@@ -378,7 +378,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         if (Console.GetDefaultDirectory(Model, FName) == 0)
             return ExResult.ErFAIL;
         if (State.GetStrParam(this, FName) == 0)
-            if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return 0;
+            if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return ExResult.ErFAIL;
 
         if (Console.IsDirectory(FName[0]))
             return OpenDir(FName[0]);
@@ -406,7 +406,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
 
     ExResult ShowKey(ExState State) {
-        String [] buf;
+        String [] buf = {""};
         KeySel ks = new KeySel();
 
         ks.Mask = 0;
@@ -417,17 +417,18 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         return ExResult.ErOK;
     }
 
-    /* TODO
-    void Msg(int level, String s, Object o ...) {
-        va_list ap;
+    void Msg(int level, String s, Object... o) 
+    {
+    	String m = String.format(s, o);
+        /*va_list ap;
 
         va_start(ap, s);
         vsprintf(msgbuftmp, s, ap);
-        va_end(ap);
+        va_end(ap); */
 
         if (level != S_BUSY)
-            SetMsg(msgbuftmp);
-    } */
+            SetMsg(m);
+    }
 
     void SetMsg(String Msg) {
         if (CurMsg!=null)
@@ -457,7 +458,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
 
     ExResult ViewBuffers(ExState State) {
         if (BufferView.BufferList == null) {
-            BufferView.BufferList = new BufferView(0, EModel.ActiveModel);
+            BufferView.BufferList = BufferView.newBufferView(0, EModel.ActiveModel);
             SwitchToModel(BufferView.BufferList);
         } else {
             BufferView.BufferList.UpdateList();
@@ -484,7 +485,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
                 MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
                 return ExResult.ErFAIL;
             }
-            Buffer.Routines = new RoutineView(0, EModel.ActiveModel, Buffer);
+            EModel [] am = {EModel.ActiveModel};
+            Buffer.Routines = new RoutineView(0, am, Buffer);
             if (Buffer.Routines == null)
                 return ExResult.ErFAIL;
         } else {
@@ -675,7 +677,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     
 
     ExResult ConfigRecompile(ExState State) {
-        if (Config.ConfigSourcePath == null || Config.ConfigFileName) {
+        if (Config.ConfigSourcePath == null || Main.ConfigFileName !=null) {
             Msg(S_ERROR, "Cannot recompile (must use external configuration).");
             return ExResult.ErFAIL;
         }

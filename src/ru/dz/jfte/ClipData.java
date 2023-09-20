@@ -1,5 +1,13 @@
 package ru.dz.jfte;
 
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+
 public class ClipData {
 	private String data = "";
 
@@ -14,12 +22,24 @@ public class ClipData {
 	
 	boolean GetClipText()
 	{
-		// TODO
+		try {
+			data = (String) Toolkit.getDefaultToolkit()
+			        .getSystemClipboard().getData(DataFlavor.stringFlavor);
+		} catch (HeadlessException | UnsupportedFlavorException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	boolean PutClipText()
 	{
-		// TODO 
+		StringSelection stringSelection = new StringSelection(data);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(stringSelection, null);
+
+		return true;
 	}
 
 

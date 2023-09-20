@@ -57,5 +57,6 @@ public interface ColorDefs {
 	int /*ChColor*/  hcChoice_NormalItem = 0x1F;
 	int /*ChColor*/  hcChoice_NormalChar = 0x1E;
 	
+	static final int CK_MAXLEN = 32;
 	
 }

@@ -281,7 +281,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
     }
 
     void RepaintStatus() {
-        TDrawBuffer B;
+        TDrawBuffer B = new TDrawBuffer();
         //char s[80];
         char SColor;
         
@@ -290,7 +290,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         
         int W, H;
         {
-            int [] Wp, Hp;
+            int [] Wp = {0}, Hp = {0};
 
             View.MView.ConQuerySize(Wp, Hp);
             
