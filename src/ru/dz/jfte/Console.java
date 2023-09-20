@@ -30,12 +30,14 @@ public class Console {
 	}
 
 	static int ConInit(int XSize, int YSize) {
-		
+		// ignore size here - not really used
+		return 0;
 	}
 	
 	static int ConDone()
 	{
-		
+		//jc.close();
+		return 0;
 	}
 	
 	
@@ -93,27 +95,29 @@ public class Console {
 	static int getHeigh() { return jc.getHeight(); } 
 	
 	static int ConSetCursorPos(int X, int Y) { /*FOLD00*/
+		jc.setCursorPos(X,Y);
 	}
 			
 	
 	static int ConQueryCursorPos(int []X, int []Y) { /*FOLD00*/
+		jc.queryCursorPos(X, Y);
 	}
 
 	
 	static int ConShowCursor() { /*FOLD00*/
 	    CursorVisible = 1;
-	    DrawCursor(1);
+	    jc.drawCursor(1);
 	    return 0;
 	}
 
 	static int ConHideCursor() { /*FOLD00*/
 	    CursorVisible = 0;
-	    DrawCursor(0);
+	    jc.drawCursor(0);
 	    return 0;
 	}
 
 	static int ConCursorVisible() { /*FOLD00*/
-	    return (CursorVisible == 1);
+	    return CursorVisible;
 	}
 
 	static int ConSetCursorSize(int Start, int End) { /*FOLD00*/
@@ -152,22 +156,13 @@ public class Console {
 	    return 0;
 	}
 
-	static int ConPutEvent(TEvent Event) { /*FOLD00*/
-	    EventBuf = Event;
-	    return 0;
-	}
-
 	static int ConFlush() { /*FOLD00*/
 	    return 0;
 	}
 
-	static int ConGrabEvents(int /*TEventMask*/ EventMask) { /*FOLD00*/
-	    return 0;
-	}
-
 	public static char ConGetDrawChar(int index) {
-		// TODO Auto-generated method stub
-		//return ;
+		// TODO ConGetDrawChar
+		return '+';
 	}
 	
 	
@@ -194,20 +189,90 @@ public class Console {
 	    return 1;
 	}
 
+	
+	
+	
+	
+	private static String tt = "", stt = "";
 	public static void ConSetTitle(String title, String sTitle) {
-		// TODO Auto-generated method stub
+
+		tt = title;
+		stt = sTitle;
 		
+		// TODO see orig code
+		jc.setTitle("jFTE - "+title+" - "+sTitle);
 	}
 
 	public static int ConGetTitle(String[] title, String[] sTitle) {
-		// TODO Auto-generated method stub
-		//return 0;
+		title[0] = tt;
+		sTitle[0] = stt;
+		return 0;
 	}
 
-	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) {
-		// TODO Auto-generated method stub
-		//return null;
+	
+	
+	
+	
+	
+	
+	static TEvent EventBuf = null;
+	static int ConPutEvent(TEvent Event) { /*FOLD00*/
+	    EventBuf = Event;
+	    return 0;
 	}
+
+	
+	
+	private static TEvent e = null;
+
+	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) 
+	{
+		// TODO pipe events?
+		//return null;
+		
+		while(e == null)
+			fillEvent();
+		
+		TEvent ret = e;
+		
+		if(delete) 
+			e = null;
+		
+		return ret;
+	}
+	
+	private static void fillEvent()
+	{
+		// must wait for mult objects, will just poll
+		while(true)
+		{
+			if(EventBuf !=null)
+			{
+				e = EventBuf;
+				EventBuf = null;
+				break;
+			}
+			
+			e = pollMouse();
+			if(e != null) break;
+
+			e = pollKeyb();
+			if(e != null) break;
+			
+			// TODO poll pipes?
+		}
+		
+	}
+	
+	static int ConGrabEvents(int /*TEventMask*/ EventMask) { /*FOLD00*/
+	    return 0;
+	}
+
+	
+	
+	
+	
+	
 	
 
 	static void DieError(int rc, String msg, Object... p) {

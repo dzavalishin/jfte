@@ -72,5 +72,13 @@ public class ConData {
 
 	public int getXSize() { return xSize; }
 	public int getYSize() { return ySize; }
+
+	public int getWidth() {
+		return xSize * xCell;
+	}
+
+	public int getHeight() {
+		return ySize * yCell;
+	}
 	
 }

@@ -1,5 +1,6 @@
 package ru.dz.jfte.ui;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -13,8 +14,8 @@ public class ConCanvas extends JPanel {
 
 	private ConData cd;
 
-	public ConCanvas(ConData cd) {
-
+	public ConCanvas(ConData cd) 
+	{
 		this.cd = cd;
 
 		addMouseMotionListener(
@@ -25,8 +26,9 @@ public class ConCanvas extends JPanel {
 					{
 						//repaint();
 					}
-				}//end anonymous inner class
-				);//end call to the addMouseMotionListener
+				} );
+		
+		setMinimumSize(new Dimension(cd.getWidth(), cd.getHeight()));
 	}
 
 	@Override

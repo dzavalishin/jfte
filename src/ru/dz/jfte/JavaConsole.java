@@ -2,12 +2,19 @@ package ru.dz.jfte;
 
 import ru.dz.jfte.ui.ConCanvas;
 import ru.dz.jfte.ui.ConData;
+import ru.dz.jfte.ui.ConFrame;
 
 public class JavaConsole implements GuiDefs, EventDefs
 {
 	private ConData cd = new ConData();
 	ConCanvas cc = new ConCanvas(cd );
+	private ConFrame cf;
+	private boolean cursorVisible = true;
 
+	public JavaConsole() {
+		cf = new ConFrame(cc);
+	}
+	
 	public void clear() {
 		cd.clear();		
 	}
@@ -93,6 +100,15 @@ public class JavaConsole implements GuiDefs, EventDefs
 			
 		}
 
+	}
+
+	public void drawCursor(int i) {
+		cursorVisible  = i != 0;
+		
+	}
+
+	public void setTitle(String string) {
+		cf.setTitle(string);
 	}
 	
 }
