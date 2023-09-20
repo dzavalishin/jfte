@@ -18,7 +18,7 @@ public class EMessages extends EList implements Closeable
 	int PipeId;
 	int ReturnCode = -1;
 	int MatchCount = 0;
-	String MsgBuf;
+	//String MsgBuf;
 	aDir   curr_dir = null;                       // top of dir stack.
 
 	static EMessages CompilerMsgs = null;
@@ -37,6 +37,9 @@ public class EMessages extends EList implements Closeable
 		FreeErrors();
 		CompilerMsgs = null;
 	}
+
+	@Override
+    int GetContext() { return CONTEXT_MESSAGES; }
 
 
 	void NotifyDelete(EModel Deleting) {
@@ -100,7 +103,7 @@ public class EMessages extends EList implements Closeable
 	void FindFileErrors(EBuffer B) {
 		for (int i = 0; i < ErrCount; i++)
 			if (ErrList[i].Buf == null && ErrList[i].file != null) {
-				if (filecmp(B.FileName, ErrList[i].file) == 0) {
+				if (§(B.FileName, ErrList[i].file) == 0) {
 					AddFileError(B, i);
 				}
 			}
@@ -208,6 +211,25 @@ public class EMessages extends EList implements Closeable
 		String p;
 		int l;
 
+		Line[0] = null;
+
+		if (Running && PipeId != -1) {
+			p = GUI.gui.ReadPipe(PipeId);
+			//fprintf(stderr, "GetLine: ReadPipe rc = %d\n", rc);
+			if (p == null) {
+				ReturnCode = GUI.gui.ClosePipe(PipeId);
+				PipeId = -1;
+				Running = false;
+			}
+
+			// got line
+			Line[0] = p;
+			return 1;
+			
+		}
+		return 0;
+		
+		/*
 		//fprintf(stderr, "GetLine: %d\n", Running);
 
 		Line[0] = null;
@@ -256,15 +278,16 @@ public class EMessages extends EList implements Closeable
 		BufPos = 0;
 		//fprintf(stderr, "GetLine: Got Line\n");
 		return 1;
+		*/
 	}
 
 
 
-	int CompilePrevError(EView V) 
+	ExResult CompilePrevError(EView V) 
 	{
 		if (ErrCount <= 0) {
 			V.Msg(S_INFO, "No errors.");
-			return 0;
+			return ExResult.ErFAIL;
 		}
 
 		while(Row > 0) {
@@ -272,22 +295,22 @@ public class EMessages extends EList implements Closeable
 			if (ErrList[Row].line == -1 || null == ErrList[Row].file) 
 				continue;
 			ShowError(V, Row);
-			return 1;
+			return ExResult.ErOK;
 		}
 
 		V.Msg(S_INFO, "No previous error.");
-		return 0;
+		return ExResult.ErFAIL;
 
 	}
 
-	int CompileNextError(EView V) 
+	ExResult CompileNextError(EView V) 
 	{
 		if (ErrCount <= 0) {
 			if (Running) 
 				V.Msg(S_INFO, "No errors (yet).");
 			else
 				V.Msg(S_INFO, "No errors.");
-			return 0;
+			return ExResult.ErFAIL;
 		}		
 
 		while(Row < ErrCount - 1) {
@@ -295,13 +318,13 @@ public class EMessages extends EList implements Closeable
 			if (ErrList[Row].line == -1 || null == ErrList[Row].file) 
 				continue;
 			ShowError(V, Row);
-			return 1;
+			return ExResult.ErOK;
 		}
 		if (Running)
 			V.Msg(S_INFO, "No more errors (yet).");
 		else
 			V.Msg(S_INFO, "No more errors.");
-		return 0;
+		return ExResult.ErFAIL;
 	}
 
 

@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class GUI implements GuiDefs, EventDefs 
 {
@@ -45,11 +47,11 @@ public class GUI implements GuiDefs, EventDefs
 		}
 	}
 
-	
+
 	static TEvent ConGetEvent(int /*TEventMask*/ EventMask, int WaitTime, int Delete) {
 		return Console.ConGetEvent(EventMask, WaitTime, Delete!=0);
 	}
-	
+
 	TEvent ConGetEvent(int /*TEventMask*/ EventMask, int WaitTime, int Delete, GView []view) {
 		if (view != null)
 			view[0] = null;
@@ -188,7 +190,7 @@ public class GUI implements GuiDefs, EventDefs
 					mE.X -= view.Peer.wX;
 				}
 			}
-			
+
 			if (E.What == evCommand) 
 			{
 				TMsgEvent mE = (TMsgEvent) E;
@@ -265,158 +267,158 @@ public class GUI implements GuiDefs, EventDefs
 	}
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	static void HandleVScroll(GView view, TMouseEvent E) throws IOException {
-	    int y; //, x
-	    int wY, wH;
-	    TEvent E1;
-	    
-	    //x = E.Mouse.X;
-	    y = E.Y;
-	    wY = view.Peer.wY;
-	    wH = view.Peer.wH;
-	    if (y == wY) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmVScrollUp;
-	            E1 = new TMsgEvent(evCommand, view, cmVScrollUp);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (y == wY + wH - 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmVScrollDown;
-	            E1 = new TMsgEvent(evCommand, view, cmVScrollDown);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (y < wY + view.Peer.SbVBegin + 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmVScrollPgUp;
-	            E1 = new TMsgEvent(evCommand, view, cmVScrollPgUp);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (y > wY + view.Peer.SbVEnd + 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmVScrollPgDn;
-	            E1 = new TMsgEvent(evCommand, view, cmVScrollPgDn);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else {
-	        int delta = y - 1 - view.Peer.SbVBegin - wY;
-	        
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmVScrollMove;
-	            /*E1.Msg.*/ int Param1 = (E.Y - wY - 1 - delta + 1) * view.Peer.sbVtotal / (wH - 2);
-	            E1 = new TMsgEvent(evCommand, view, cmVScrollMove, Param1 );
-//	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    }
-	    E.What = evNone;
+		int y; //, x
+		int wY, wH;
+		TEvent E1;
+
+		//x = E.Mouse.X;
+		y = E.Y;
+		wY = view.Peer.wY;
+		wH = view.Peer.wH;
+		if (y == wY) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmVScrollUp;
+				E1 = new TMsgEvent(evCommand, view, cmVScrollUp);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (y == wY + wH - 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmVScrollDown;
+				E1 = new TMsgEvent(evCommand, view, cmVScrollDown);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (y < wY + view.Peer.SbVBegin + 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmVScrollPgUp;
+				E1 = new TMsgEvent(evCommand, view, cmVScrollPgUp);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (y > wY + view.Peer.SbVEnd + 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmVScrollPgDn;
+				E1 = new TMsgEvent(evCommand, view, cmVScrollPgDn);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else {
+			int delta = y - 1 - view.Peer.SbVBegin - wY;
+
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmVScrollMove;
+				/*E1.Msg.*/ int Param1 = (E.Y - wY - 1 - delta + 1) * view.Peer.sbVtotal / (wH - 2);
+				E1 = new TMsgEvent(evCommand, view, cmVScrollMove, Param1 );
+				//	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		}
+		E.What = evNone;
 	}
 
 	static void HandleHScroll(GView view, TMouseEvent E) throws IOException {
-	    int x; //, x
-	    int wX, wW;
-	    TEvent E1;
-	    
-	    //x = E.Mouse.X;
-	    x = E.X;
-	    wX = view.Peer.wX;
-	    wW = view.Peer.wW;
-	    if (x == wX) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmHScrollLeft;
-	            E1 = new TMsgEvent(evCommand, view, cmHScrollLeft);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (x == wX + wW - 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmHScrollRight;
-	            E1 = new TMsgEvent(evCommand, view, cmHScrollRight);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (x < wX + view.Peer.SbHBegin + 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmHScrollPgLt;
-	            E1 = new TMsgEvent(evCommand, view, cmHScrollPgLt);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else if (x > wX + view.Peer.SbHEnd + 1) {
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmHScrollPgRt;
-	            E1 = new TMsgEvent(evCommand, view, cmHScrollPgRt);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    } else {
-	        int delta = x - 1 - view.Peer.SbHBegin - wX;
-	        
-	        do {
-	            //E1.What = evCommand;
-	            //E1.Msg.View = view;
-	            //E1.Msg.Command = cmHScrollMove;
-	            /*E1.Msg.*/ int Param1 = (E.X - wX - 1 - delta + 1) * view.Peer.sbHtotal / (wW - 2);
-	            E1 = new TMsgEvent(evCommand, view, cmHScrollMove, Param1);
-//	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
-	            gui.DispatchEvent(frames, view, E1);
-	            //E = localDispatch(view);
-	            if (scrollBreak(localDispatch(view))) break;
-	        } while (true);
-	    }
-	    E.What = evNone;
+		int x; //, x
+		int wX, wW;
+		TEvent E1;
+
+		//x = E.Mouse.X;
+		x = E.X;
+		wX = view.Peer.wX;
+		wW = view.Peer.wW;
+		if (x == wX) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmHScrollLeft;
+				E1 = new TMsgEvent(evCommand, view, cmHScrollLeft);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (x == wX + wW - 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmHScrollRight;
+				E1 = new TMsgEvent(evCommand, view, cmHScrollRight);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (x < wX + view.Peer.SbHBegin + 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmHScrollPgLt;
+				E1 = new TMsgEvent(evCommand, view, cmHScrollPgLt);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else if (x > wX + view.Peer.SbHEnd + 1) {
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmHScrollPgRt;
+				E1 = new TMsgEvent(evCommand, view, cmHScrollPgRt);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		} else {
+			int delta = x - 1 - view.Peer.SbHBegin - wX;
+
+			do {
+				//E1.What = evCommand;
+				//E1.Msg.View = view;
+				//E1.Msg.Command = cmHScrollMove;
+				/*E1.Msg.*/ int Param1 = (E.X - wX - 1 - delta + 1) * view.Peer.sbHtotal / (wW - 2);
+				E1 = new TMsgEvent(evCommand, view, cmHScrollMove, Param1);
+				//	            printf("YPos = %d %d %d \n\x7", E.Mouse.Y, wY, delta);
+				gui.DispatchEvent(frames, view, E1);
+				//E = localDispatch(view);
+				if (scrollBreak(localDispatch(view))) break;
+			} while (true);
+		}
+		E.What = evNone;
 	}
 
 	/**
@@ -426,21 +428,158 @@ public class GUI implements GuiDefs, EventDefs
 		TEvent E;
 		frames.Update();
 		do {
-		    E = ConGetEvent(evMouse | evNotify, -1, 1);
-		    if(0 != (E.What & evNotify))
-		        gui.DispatchEvent(frames, view, E);
+			E = ConGetEvent(evMouse | evNotify, -1, 1);
+			if(0 != (E.What & evNotify))
+				gui.DispatchEvent(frames, view, E);
 		} while(0 != (E.What & evNotify));
 		return E;
 	}
 
-	
+
 	static boolean scrollBreak(TEvent E)
 	{
-	    return (E.What == evMouseUp);
+		return (E.What == evMouseUp);
 	}
 
 	public void RunProgram(int runWait, String string) {
 		Console.RunProgram(runWait,string,frames);
 	}
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	static final int MAX_PIPES = 4;
+	//#define PIPE_BUFLEN 4096
+
+	static class GPipe {
+		//boolean used = false;
+		int id;
+		//int fd;
+		//int pid;
+		boolean stopped = false;
+		Process p;
+		BufferedReader input;
+
+		EModel notify;
+
+		public boolean run(String command) {
+			
+			ProcessBuilder pb = new ProcessBuilder(command); 
+
+		    try {
+				p = pb.start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+
+			input = new BufferedReader(new 
+							InputStreamReader(p.getInputStream()));
+			/*		
+            String line; 
+            while ((line = input.readLine()) != null) { 
+                System.out.println(line); 
+            } 
+        } 
+    } catch (IOException e) { 
+        e.printStackTrace(); 
+    } */
+
+			return true;
+		}
+	}
+
+	static GPipe [] Pipes = new GPipe[MAX_PIPES];
+
+
+	int OpenPipe(String Command, EModel  notify)
+	{
+		int i;
+
+		for (i = 0; i < MAX_PIPES; i++) {
+			if (Pipes[i] == null) {			
+				Pipes[i] = new GPipe();
+				if( !Pipes[i].run(Command) )
+					return -1;
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	int SetPipeView(int id, EModel  notify)
+	{
+		if (id < 0 || id > MAX_PIPES)
+			return -1;
+		
+		if (Pipes[id] == null)
+			return -1;
+
+		Pipes[id].notify = notify;
+		return 0;
+	}
+
+	String ReadPipe(int id)
+	{
+		int rc;
+
+		if (id < 0 || id > MAX_PIPES)
+			return null;
+		
+		if (Pipes[id] == null)
+			return null;
+
+		
+		String s;
+		try {
+			s = Pipes[id].input.readLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//Pipes[id].input.close();
+			return null;
+		}
+		
+		if (s == null) {
+			Pipes[id].stopped = true;
+		}
+
+		return s;
+	}
+
+	int ClosePipe(int id)
+	{
+		if (id < 0 || id > MAX_PIPES)
+			return -1;
+		if (Pipes[id] == null)
+			return -1;
+		
+		int status = -1;
+		try {
+			Pipes[id].input.close();
+			Pipes[id].p.destroy();
+			status = Pipes[id].p.waitFor();
+		} catch (InterruptedException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+			
+		Pipes[id] = null;
+		return status;
+	}
+
+
 }
