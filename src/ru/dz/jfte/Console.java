@@ -342,6 +342,19 @@ public class Console {
 		// TODO Auto-generated method stub
 		//return null;
 	}
+
+	public static boolean isReadonly(String fileName) {
+		// TODO Auto-generated method stub
+		//return false;
+	}
+
+	public static void unlink(String fn) {
+		new File(fn).delete();
+	}
+
+	public static boolean rename(String from, String to) {
+		return new File(from).renameTo(new File(to));
+	}
 	
 	
 	
