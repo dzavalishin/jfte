@@ -1,7 +1,5 @@
 package ru.dz.jfte;
 
-import java.nio.file.Path;
-import java.io.File;
 
 public class Main implements MainConst
 {
@@ -208,14 +206,12 @@ public class Main implements MainConst
 
 	
 	
-	static void main(String [] argv) {
-
-
-
-
+	static void main(String [] argv) 
+	{
 	    if (CmdLoadConfiguration(argv) == 0)
 	        return;
 
+	    Console.start();
 	    //STARTFUNC("main");
 
 	    EGUI g = new EGUI( argv, Config.ScreenSizeX, Config.ScreenSizeY);

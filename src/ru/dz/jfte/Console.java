@@ -17,6 +17,13 @@ public class Console {
 	public static Completer CompletePath = new FileCompleter();
 	static int CursorVisible = 1;
 
+	static JavaConsole jc;
+	
+	public static void start() {
+		jc = new JavaConsole();		
+	}
+
+	
 	static TEvent ReadConsoleEvent() { 
 		// TODO impl me
 		return null;
@@ -34,29 +41,40 @@ public class Console {
 	
 	static int ConClear()
 	{
-		
+		jc.clear();
+		return 1;
 	}
 	
 	static int ConPutBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
+		jc.putBox( X,  Y,  W,  H, Cell);
+		return 0;
 	}
 	
 	
 	static int ConGetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
+		jc.getBox( X,  Y,  W,  H, Cell);
+		return 0;
 	}
 
 	static int ConPutLine(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
+		jc.PutLine( X,  Y,  W,  H, Cell);
+		return 0;
 	}
 
 	static int ConSetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
+		jc.setBox( X,  Y,  W,  H, Cell);
+		return 0;
 	}
 	
 	
 	static int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) /*FOLD00*/
 	{
+		jc.scroll( Way, X,  Y,  W,  H,  /*TAttr*/ Fill,  Count);
+		return 0;
 	}	
 	
 	
@@ -66,10 +84,13 @@ public class Console {
 	
 
 	static int ConQuerySize(int []X, int []Y) { /*FOLD00*/
+		X[0] = jc.getWidth();
+		Y[0] = jc.getHeight();
+		return 1;
 	}
 	
-	static int getWidth() { return width; } 
-	static int getHeigh() { return height; } 
+	static int getWidth() { return jc.getWidth(); } 
+	static int getHeigh() { return jc.getHeight(); } 
 	
 	static int ConSetCursorPos(int X, int Y) { /*FOLD00*/
 	}
@@ -405,6 +426,7 @@ public class Console {
 	public static boolean IsDirectory(String file) {
 		return new File(file).isDirectory();
 	}
+
 	
 	
 	

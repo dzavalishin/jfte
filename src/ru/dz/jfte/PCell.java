@@ -32,17 +32,17 @@ public class PCell extends ArrayPtr<Long>
 		super(new TDrawBuffer(size));
 	}
 
-	static long charAndAttr(int c, int a)
+	public static long charAndAttr(int c, int a)
 	{
 		return c | a << 32;
 	}
 
-	static int getChar(long ca)
+	public static int getChar(long ca)
 	{
 		return (int) (ca & 0xFFFFFFFF);
 	}
 
-	static int getAttr(long ca)
+	public static int getAttr(long ca)
 	{
 		return (int) ((ca>>32) & 0xFFFFFFFF);
 	}
