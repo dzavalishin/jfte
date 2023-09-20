@@ -3895,7 +3895,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (SSBuffer == null) return false;
 		if (Append) {
 			if (Config.SystemClipboard!=0)
-				GetPMClip();
+				ClipData.GetPMClip();
 		} else
 			SSBuffer.Clear();
 			SSBuffer.BlockMode = BlockMode;
@@ -3945,7 +3945,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				break;
 			}
 			if (Config.SystemClipboard!=0)
-				PutPMClip();
+				ClipData.PutPMClip();
 			return true;
 	}
 
@@ -3969,9 +3969,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int L, BL;
 
 		if (Config.SystemClipboard!=0)
-			GetPMClip();
+			ClipData.GetPMClip();
 
-		if (SSBuffer == 0) return false;
+		if (SSBuffer == null) return false;
 		if (SSBuffer.RCount == 0) return false;
 		AutoExtend = 0;
 		BFI(SSBuffer, BFI_TabSize) = BFI(this, BFI_TabSize);
