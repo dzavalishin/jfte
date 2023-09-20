@@ -175,8 +175,8 @@ public class ExChoice extends ExView implements ColorDefs
 
     @Override
     void RepaintStatus() {
-        TDrawBuffer B;
-        int [] W, H;
+        TDrawBuffer B = new TDrawBuffer();
+        int [] W = {0}, H = {0};
         int pos, i;
         int /*TAttr*/ color1, color2;
         
@@ -205,7 +205,7 @@ public class ExChoice extends ExView implements ColorDefs
             if (i == Cur)
                 ConSetCursorPos(pos + 1, H[0] - 1);
             B.MoveChar( pos, W[0], Console.ConGetDrawChar(DCH_V), hcChoice_Background, 1);
-            B.MoveCStr( pos + 1, W[0], SOpt[i], color1, color2, W);
+            B.MoveCStr( pos + 1, W[0], SOpt[i], color1, color2, W[0]);
             pos += PCell.CStrLen(SOpt[i]) + 1;
         }
         ConPutBox(0, H[0] - 1, W[0], 1, B);
