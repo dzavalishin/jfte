@@ -160,12 +160,52 @@ public class Console {
 	    return 0;
 	}
 
+    static char [] chtab = null;
 	public static char ConGetDrawChar(int index) {
 		// TODO ConGetDrawChar
-		return '+';
+		//return '+';
+
+	    if (null==chtab) 
+	        chtab="┌┐└┘─│┬├┤┴┼?·─▒░??".toCharArray();
+	        //chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼?·─▒░??");
+	        //chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼\x1A·─▒░\x1B\x1A");
+
+	    return chtab[index];
+		
 	}
 	
-	
+	// Which characters to get. defaultCharacters if not set, rest filled
+	// with defaultCharacters if too short
+	// List of GUICharacters is freed, only one item remains
+	/*
+	static char []GetGUICharacters( String which, const char []defChars) {
+	    GUICharactersEntry *g, *gg, *found = NULL;
+	    char *s;
+	    unsigned int i;
+
+	    for (g = GUICharacters; g; g=gg) {
+	        gg = g->next;
+	        if (strcmp(g->name, which) == 0) {
+	            if ((i = strlen(g->chars)) < strlen(defChars)) {
+	                s = new char [strlen(defChars) + 1];
+	                assert(s != NULL);
+	                strcpy(s, g->chars);
+	                strcpy(s + i, defChars + i);
+	                delete g->chars;
+	                g->chars = s;
+	            }
+	            if (found) {
+	                free(found->chars); free(found->name); free(found);
+	            }
+	            found = g;
+	        } else {
+	            free(g->name); free(g->chars); free(g);
+	        }
+	    }
+	    GUICharacters = found;
+	    if (found) return found->chars; else return defChars;
+	}
+	*/
 	
 
 	
