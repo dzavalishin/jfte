@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 import java.io.IOException;
 
-public class EView implements GuiDefs, EventDefs, ModeDefs 
+public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs 
 {
     EView Next;        // next view
     EView Prev;        // prev view
@@ -54,7 +54,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if (Model != null)
             return Model.CanQuit();
         else
-            return 1;
+            return true;
     }
 
     void FocusChange(int GetFocus) {
@@ -213,7 +213,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             switch (((TMsgEvent)Event).Command) {
             case cmDroppedFile:
                 {
-                    String file = (String)Event.Msg.Param2;
+                    String file = (String) ((TMsgEvent)Event).Param2;
 
                     if (Console.IsDirectory(file))
                         OpenDir(file);
@@ -337,7 +337,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
                 EBuffer B = (EBuffer )M;
                 if (B.Modified!=0) {
                     SwitchToModel(B);
-                    if (B.Save() == 0) return ExResult.ErFAIL;
+                    if (!B.Save()) return ExResult.ErFAIL;
                 }
             }
             M = M.Next;
@@ -355,12 +355,12 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
             if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return ExResult.ErFAIL;
         }
 
-        if( FName[0].length() == 0 ) return 0;
+        if( FName[0].length() == 0 ) return ExResult.ErFAIL;
 
         if (Console.IsDirectory(FName[0]))
             return OpenDir(FName[0]);
 
-        return Console.MultiFileLoad(0, FName[0], null, this);
+        return Console.MultiFileLoad(0, FName[0], null, this) ? ExResult.ErOK : ExResult.ErFAIL;
     }
 
     ExResult FileOpenInMode(ExState State) {
@@ -370,7 +370,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if ( State.GetStrParam(this, Mode) == 0)
             if (MView.Win.GetStr("Mode", Mode, HIST_SETUP) != 1) return ExResult.ErFAIL;
 
-        if (FindMode(Mode[0]) == 0) {
+        if (EMode.FindMode(Mode[0]) == null) {
             MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid mode '%s'", Mode[0]);
             return ExResult.ErFAIL;
         }
@@ -386,7 +386,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
         if( FName[0].length() == 0 ) return ExResult.ErFAIL;
 
-        return Console.MultiFileLoad(0, FName, Mode, this);
+        return Console.MultiFileLoad(0, FName[0], Mode[0], this) ? ExResult.ErOK : ExResult.ErFAIL;
     }
 
     ExResult SetPrintDevice(ExState State) throws IOException {
@@ -407,10 +407,10 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
 
     ExResult ShowKey(ExState State) {
         String [] buf;
-        KeySel ks;
+        KeySel ks = new KeySel();
 
         ks.Mask = 0;
-        ks.Key = MView.Win.GetChar(0);
+        ks.Key = (int) MView.Win.GetChar(null);
 
         KeyTable.GetKeyName(buf, ks);
         Msg(S_INFO, "Key: '%s' - '%8X'", buf[0], ks.Key);
@@ -480,7 +480,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         Buffer = (EBuffer)M;
 
         if (Buffer.Routines == null) {
-            if (BFS(Buffer, BFS_RoutineRegexp) == 0) {
+            if (EBuffer.BFS(Buffer, BFS_RoutineRegexp) == null) {
                 MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
                 return ExResult.ErFAIL;
             }
@@ -498,7 +498,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         String [] Path = {""};
 
         if (State.GetStrParam(this, Path) == 0)
-            if (GetDefaultDirectory(Model, Path) == 0)
+            if (Console.GetDefaultDirectory(Model, Path) == 0)
                 return ExResult.ErFAIL;
         return OpenDir(Path[0]);
     }
@@ -544,17 +544,17 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if (State.GetStrParam(this, Command) == 0) {
             if (Model.GetContext() == CONTEXT_FILE) {
                 EBuffer B = (EBuffer )Model;
-                if (BFS(B, BFS_CompileCommand) != 0) 
-                	Cmd[0] = BFS(B, BFS_CompileCommand);
+                if (EBuffer.BFS(B, BFS_CompileCommand) != null) 
+                	Cmd[0] = EBuffer.BFS(B, BFS_CompileCommand);
             }
             if (Cmd[0] == null)
                 Cmd[0] = Config.CompileCommand;
 
-            if (MView.Win.GetStr("Compile", Cmd, HIST_COMPILE) == 0) return 0;
+            if (MView.Win.GetStr("Compile", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
 
             Command[0] = Cmd[0];
         } else {
-            if (MView.Win.GetStr("Compile", Command, HIST_COMPILE) == 0) return 0;
+            if (MView.Win.GetStr("Compile", Command, HIST_COMPILE) == 0) return ExResult.ErFAIL;
         }
         return Compile(Command[0]);
     }
@@ -570,8 +570,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         if (State.GetStrParam(this, Command) == 0) {
             if (Model.GetContext() == CONTEXT_FILE) {
                 EBuffer B = (EBuffer )Model;
-                if (BFS(B, BFS_CompileCommand) != 0) 
-                    Command[0] = BFS(B, BFS_CompileCommand);
+                if (EBuffer.BFS(B, BFS_CompileCommand) != null) 
+                    Command[0] = EBuffer.BFS(B, BFS_CompileCommand);
             }
             if (Command[0] == null)
                 Command[0] = Config.CompileCommand;
@@ -657,12 +657,12 @@ public class EView implements GuiDefs, EventDefs, ModeDefs
         {
             pTagFile = "tags";
         }
-        if (ExpandPath(pTagFile, Tag) == -1)
+        if (Console.ExpandPath(pTagFile, Tag) == -1)
             return 0;
         if (State.GetStrParam(this, Tag) == 0)
             if (MView.Win.GetFile("Load tags", Tag, HIST_TAGFILES, GF_OPEN) == 0) return 0;
 
-        if (ExpandPath(Tag, FullTag) == -1)
+        if (Console.ExpandPath(Tag, FullTag) == -1)
             return 0;
 
         if (!Console.FileExists(FullTag)) {

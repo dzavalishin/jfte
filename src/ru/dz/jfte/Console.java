@@ -283,7 +283,7 @@ public class Console {
 	}
 	#endif */
 
-	int FileLoad(int createFlags, String FileName, String Mode, EView View) {
+	boolean FileLoad(int createFlags, String FileName, String Mode, EView View) {
 	    String Name[] = {""};
 	    EBuffer B;
 
@@ -291,23 +291,23 @@ public class Console {
 	    
 	    if (ExpandPath(FileName, Name) == -1) {
 	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FileName);
-	        return 0;
+	        return false;
 	    }
 	    B = FindFile(Name[0]);
 	    if (B) {
 	        if (Mode != null)
 	            B.SetFileName(Name, Mode);
 	        View.SwitchToModel(B);
-	        return 1;
+	        return true;
 	    }
 	    B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
 	    B.SetFileName(Name[0], Mode);
 
 	    View.SwitchToModel(B);
-	    return 1;
+	    return true;
 	}
 
-	int MultiFileLoad(int createFlags, String FileName, String Mode, EView View) {
+	static boolean MultiFileLoad(int createFlags, String FileName, String Mode, EView View) {
 		String  fX[];
 	    int count = 0;
 	    String  FPath[];
@@ -319,7 +319,7 @@ public class Console {
 	    assert(View != null);
 
 	    JustDirectory(FileName, fX);
-	    if (fX[0] == 0) strcpy(fX, ".");
+	    if (fX[0] == null) fX[0] = ".";
 	    JustFileName(FileName, FName);
 	    if (ExpandPath(fX, FPath) == -1) return 0;
 	    Slash(FPath, 1);
@@ -331,13 +331,13 @@ public class Console {
 	    while (rc == 0) {
 	        count++;
 	        if (FileLoad(createFlags, fi.Name(), Mode, View) == 0) {
-	            return 0;
+	            return false;
 	        }
 	        rc = ff.FindNext(fi);
 	    }
 	    if (count == 0)
 	        return FileLoad(createFlags, FileName, Mode, View);
-	    return 1;
+	    return true;
 	}
 
 	public static boolean FileExists(String fileName) {
