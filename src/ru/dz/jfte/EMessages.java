@@ -76,7 +76,7 @@ public class EMessages extends EList implements Closeable
 
 		ErrList[err].Buf = null;
 
-		B = FindFile(ErrList[err].file);
+		B = Console.FindFile(ErrList[err].file);
 		if (B == null)
 			return ;
 
@@ -109,7 +109,7 @@ public class EMessages extends EList implements Closeable
 	void FindFileErrors(EBuffer B) {
 		for (int i = 0; i < ErrCount; i++)
 			if (ErrList[i].Buf == null && ErrList[i].file != null) {
-				if (§(B.FileName, ErrList[i].file) == 0) {
+				if (Console.filecmp(B.FileName, ErrList[i].file) == 0) {
 					AddFileError(B, i);
 				}
 			}
@@ -186,6 +186,10 @@ public class EMessages extends EList implements Closeable
 		UpdateList();
 	}
 
+	void AddError(String file, int line, String msg, String text) {
+		AddError( file,  line,  msg,  text, 0);
+		}
+	
 	void AddError(String file, int line, String msg, String text, int hilit) {
 		Error pe = new Error();
 
@@ -352,7 +356,7 @@ void ShowError(EView V, int err) {
                 String bk = String.format("_MSG.%d", err);
                 ErrList[err].Buf.GotoBookmark(bk);
             } else {
-                if (FileLoad(0, ErrList[err].file, 0, V) == 1) {
+                if (Console.FileLoad(0, ErrList[err].file, null, V)) {
                     V.SwitchToModel(ActiveModel);
                     ((EBuffer)ActiveModel).CenterNearPosR(0, ErrList[err].line - 1);
                 }

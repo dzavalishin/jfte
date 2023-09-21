@@ -731,7 +731,7 @@ public class Console implements ModeDefs
 	public static boolean copyfile(String f, String t) {
 		try {
 			Files.copy(Path.of(f), Path.of(t));
-			return true
+			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -740,4 +740,71 @@ public class Console implements ModeDefs
 	}
 
 
+	public static void ChangeDir(String directory) {
+		// TODO Auto-generated method stub
+		csdnjhnsdjkbsdkj
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	static int TagLoad(String FileName) { /*FOLD00*/
+		return 0;
+		/*
+	    if (TagsAdd(FileName) == 0)
+	        return 0;
+	    ClearTagStack();
+	    if (TagFilesLoaded) {
+	        if (TagsLoad(TagFileCount - 1) == -1) {
+	            return 0;
+	        }
+	        if (SortTags() == -1) {
+	            TagClear();
+	            return 0;
+	        }
+	    }
+	    return 1;
+	    */
+	}
+
+
+	/*
+	private static int LoadTagFiles() { 
+	    int i;
+
+	    assert(TagFilesLoaded == 0);
+	    for (i = 0; i < TagFileCount; i++)
+	        if (TagsLoad(i) == -1) {
+	            TagClear();
+	            return 0;
+	        }
+	    if (SortTags() == -1) {
+	        TagClear();
+	        return 0;
+	    }
+	    TagFilesLoaded = 1;
+	    return 1;
+	} */
+	
+	
+	
+	
+	
+	
+	
+	public static ExResult SysShowHelp(ExState state, int i) {
+		// TODO Auto-generated method stub
+		return ExResult.ErFAIL;
+	}
+
+
+	
 }

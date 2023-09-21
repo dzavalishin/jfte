@@ -194,7 +194,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         case ExTagLoad:             return TagLoad(State);
 		*/
         
-        case ExShowHelp:            return SysShowHelp(State, 0);
+        case ExShowHelp:            return Console.SysShowHelp(State, 0);
         case ExConfigRecompile:     return ConfigRecompile(State);
         case ExRemoveGlobalBookmark:return RemoveGlobalBookmark(State);
         case ExGotoGlobalBookmark:  return GotoGlobalBookmark(State);
@@ -389,7 +389,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         return Console.MultiFileLoad(0, FName[0], Mode[0], this) ? ExResult.ErOK : ExResult.ErFAIL;
     }
 
-    ExResult SetPrintDevice(ExState State) throws IOException {
+    ExResult SetPrintDevice(ExState State)  {
         String [] Dev = {Config.PrintDevice};
 
         if (State.GetStrParam(this, Dev) == 0)
@@ -430,16 +430,16 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             SetMsg(m);
     }
 
-    void SetMsg(String Msg) {
-        if (CurMsg!=null)
-            CurMsg.close();
+    void SetMsg(String Msg) 
+    {
         CurMsg = null;
         if ((Msg!=null) && Msg.length()!=0)
             CurMsg = Msg;
+        
         if ( (CurMsg!=null) && (Msg!=null) && (MView!=null)) {
-            TDrawBuffer B;
+            TDrawBuffer B = new TDrawBuffer();
             char SColor;
-            int [] Cols, Rows;
+            int [] Cols = {0}, Rows = {0};
 
             MView.ConQuerySize(Cols, Rows);
 
@@ -515,7 +515,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             EModel x = Model;
             while (x != null) {
                 if (x.GetContext() == CONTEXT_DIRECTORY) {
-                    if (filecmp(((EDirectory )x).Path, XPath[0]) == 0)
+                    if (Console.filecmp(((EDirectory )x).Path, XPath[0]) == 0)
                     {
                         dir = (EDirectory )x;
                         break;
@@ -652,7 +652,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     
     int TagLoad(ExState State) {
         String Tag[] = {""};
-        String FullTag[];
+        String FullTag[] = {""};
 
         String pTagFile = Main.getenv("TAGFILE");
         if (pTagFile == null)
@@ -672,7 +672,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             return 0;
         }
 
-        return super.TagLoad(FullTag[0]);
+        return Console.TagLoad(FullTag[0]);
     }
     
 
@@ -699,7 +699,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
 
         if (State.GetStrParam(this, name) == 0)
             if (MView.Win.GetStr("Remove Global Bookmark", name, HIST_BOOKMARK) == 0) return ExResult.ErFAIL;
-        if (EMarkIndex.markIndex.remove(name) == 0) {
+        if (EMarkIndex.markIndex.remove(name[0]) == 0) {
             Msg(S_ERROR, "Error removing global bookmark %s.", name);
             return ExResult.ErFAIL;
         }
@@ -711,7 +711,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
 
         if (State.GetStrParam(this, name ) == 0)
             if (MView.Win.GetStr("Goto Global Bookmark", name, HIST_BOOKMARK) == 0) return ExResult.ErFAIL;
-        if (EMarkIndex.markIndex.view(this, name[0]) == 0) {
+        if (!EMarkIndex.markIndex.view(this, name[0])) {
             Msg(S_ERROR, "Error locating global bookmark %s.", name[0]);
             return ExResult.ErFAIL;
         }

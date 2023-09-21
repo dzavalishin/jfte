@@ -644,6 +644,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return CenterPos(Col, Row, tabMode);
 	}
 
+	boolean CenterNearPosR(int Col, int Row) {
+		return CenterNearPosR( Col, Row, 0);
+		}	
+	
 	boolean CenterNearPosR(int Col, int Row, int tabMode) {
 		if (Row >= RCount) Row = RCount - 1;
 		if (Row < 0) Row = 0;
@@ -5126,7 +5130,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				//m = (String )realloc(m, (lm + partLen) + CHAR_TRESHOLD);
 				m.trySetSize((lm + partLen) + CHAR_TRESHOLD);
 				//if (m == null) goto fail;
-				memcpy((m + lm), p, partLen);
+				//memcpy((m + lm), p, partLen);
+				m.copyIn(lm, FileBuffer, partLen);
 				lm += partLen;
 				numChars += partLen;
 
@@ -5181,7 +5186,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				Allocate(RCount!=0 ? (RCount * 2) : 1);
 			if ((LL[RCount++] = new ELine(m.toString())) == null)
 				//goto fail;
-				throw new IOException("line == 0");
+				throw new RuntimeException("line == 0");
 			m = null;
 			RGap = RCount;
 		}
@@ -5378,14 +5383,20 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			FileStatus = null;
 			FileOk = false;
 			//goto fail;
-			throw new IOException("no file?");
+			throw new RuntimeException("no file?");
 		} else {
 			if(Console.isReadonly(FileName))
 				BFI_SET(this, BFI_ReadOnly, 1);
 			else
 				BFI_SET(this, BFI_ReadOnly, 0);
 		}
-		reader.close();
+		
+		try {
+			reader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		FileOk = true;
 		Modified = 0;
