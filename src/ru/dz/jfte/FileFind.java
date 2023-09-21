@@ -3,12 +3,16 @@ package ru.dz.jfte;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.nio.file.PathMatcher;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 public class FileFind //implements Closeable
 {
 	String Directory;
-	String Pattern;
+	//String Pattern;
 	int Flags;
+	PathMatcher matcher = null;
 
 
 	public static final int  ffFAST       =1;  // optimization for UNIX (return name only, NO TYPE CHECK), ignored on OS/2 and NT
@@ -23,13 +27,16 @@ public class FileFind //implements Closeable
 
 	FileFind(String aDirectory, String aPattern, int aFlags) {
 		Directory = Console.Slash(aDirectory, 0);
-		Pattern = aPattern;
+		//Pattern = aPattern;
 		Flags = aFlags;
 
 		File d = new File(Directory);
 		//FilenameFilter filter;
 		//list = d.list(filter);
 		list = d.list();
+		
+		if( null != aPattern)
+			matcher = FileSystems.getDefault().getPathMatcher("glob:" + aPattern);
 	}
 
 	/*
@@ -54,9 +61,15 @@ public class FileFind //implements Closeable
 				if ((Flags & ffHIDDEN)==0)
 					continue;
 
-			if (Pattern != null && Console.fnmatch(Pattern, name, 0) != 0)
-				continue;
+			//if (Pattern != null && FileName.fnmatch(Pattern, name, 0) != 0)
+			//	continue;
 
+			if( matcher!=null)
+			{
+				if(!matcher.matches(Path.of(name)))
+					continue;
+			}
+			
 			String [] fullpath = {""};
 			
 			if(0!= (Flags & ffFULLPATH)) {
@@ -85,7 +98,7 @@ public class FileFind //implements Closeable
 			//printf("ok\n");
 			return ret;
 		}
-		return null;
+		//return null;
 	}
 
 

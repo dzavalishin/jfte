@@ -1,5 +1,6 @@
 package ru.dz.jfte;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,13 +15,14 @@ import java.nio.file.attribute.BasicFileAttributes;
  *
  */
 
-public class Console implements ModeDefs
+public class Console implements ModeDefs, GuiDefs
 {
 
 	public static Completer CompletePath = new FileCompleter();
 	static int CursorVisible = 1;
 
 	static JavaConsole jc;
+	private static boolean MouseVisible;
 
 	public static void start() {
 		jc = new JavaConsole();		
@@ -97,12 +99,12 @@ public class Console implements ModeDefs
 	static int getWidth() { return jc.getWidth(); } 
 	static int getHeigh() { return jc.getHeight(); } 
 
-	static int ConSetCursorPos(int X, int Y) { /*FOLD00*/
+	static void ConSetCursorPos(int X, int Y) { /*FOLD00*/
 		jc.setCursorPos(X,Y);
 	}
 
 
-	static int ConQueryCursorPos(int []X, int []Y) { /*FOLD00*/
+	static void ConQueryCursorPos(int []X, int []Y) { /*FOLD00*/
 		jc.queryCursorPos(X, Y);
 	}
 
@@ -132,27 +134,30 @@ public class Console implements ModeDefs
 	}
 
 	static int ConQueryMousePos(int []X, int []Y) { /*FOLD00*/
-		X[0] = LastMouseX;
-		Y[0] = LastMouseY;
+		Point m = jc.getMousePos();
+		X[0] = m.x;
+		Y[0] = m.y;
 
 		// NT does not have this ? (not needed anyway, but check mouse hiding above).
 		return 0;
 	}
 
 	static int ConShowMouse() { /*FOLD00*/
-		MouseVisible = 1;
-		if (!MousePresent) return -1;
+		MouseVisible = true;
+		//if (!MousePresent) return -1;
+		jc.enableMouse(MouseVisible);
 		return 0;
 	}
 
 	static int ConHideMouse() { /*FOLD00*/
-		MouseVisible = 0;
-		if (!MousePresent) return -1;
+		MouseVisible = false;
+		//if (!MousePresent) return -1;
+		jc.enableMouse(MouseVisible);
 		return 0;
 	}
 
-	static int ConMouseVisible() { /*FOLD00*/
-		return (MouseVisible == 1);
+	static boolean ConMouseVisible() { /*FOLD00*/
+		return MouseVisible;
 	}
 
 	static int ConQueryMouseButtons(int []ButtonCount) { /*FOLD00*/
@@ -218,17 +223,17 @@ public class Console implements ModeDefs
 		if (M==null || Path[0] == null)
 			if (ExpandPath(".", Path) == -1)
 				return 0;
-		SlashDir(Path);
+		Path[0] = Console.SlashDir(Path[0]);
 		return 1;
 	}
 
 	static int SetDefaultDirectory(EModel M) {
-		String [] Path;
+		String [] Path = {""};
 
 		if (GetDefaultDirectory(M, Path) == 0)
 			return 0;
-		if (ChangeDir(Path) == -1)
-			return 0;
+		ChangeDir(Path[0]);
+
 		return 1;
 	}
 
@@ -284,6 +289,7 @@ public class Console implements ModeDefs
 		return ret;
 	}
 
+	private static Object waito = new Object();
 	private static void fillEvent()
 	{
 		// must wait for mult objects, will just poll
@@ -299,10 +305,12 @@ public class Console implements ModeDefs
 			e = pollMouse();
 			if(e != null) break;
 
-			e = pollKeyb();
+			e = jc.pollKeyb();
 			if(e != null) break;
 
 			// TODO poll pipes?
+			
+			waito.wait(10);
 		}
 
 	}
@@ -365,6 +373,32 @@ public class Console implements ModeDefs
 	}
 
 
+static String SlashDir(String Path) 
+{
+    int len = Path.length();
+    
+    if ((len == 2) && Path.charAt(1) == ':')
+        return Path+"/";
+
+    /*
+    if (len > 1) {
+            if (!ISSLASH(Path[len - 1])) {
+                if (stat(Path, &statbuf) == 0) {
+                    if (S_ISDIR(statbuf.st_mode)) {
+                        Path[len] = SLASH;
+                        Path[len+1] = 0;
+                    }
+                }
+            }
+    }
+    */
+    
+    if(IsDirectory(Path))
+    	return Path+"/";
+    
+    return Path;
+}
+
 
 
 
@@ -424,13 +458,13 @@ public class Console implements ModeDefs
 			return false;
 		}
 		B = FindFile(Name[0]);
-		if (B) {
+		if (B != null) {
 			if (Mode != null)
-				B.SetFileName(Name, Mode);
+				B.SetFileName(Name[0], Mode);
 			View.SwitchToModel(B);
 			return true;
 		}
-		B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
+		B = EBuffer.newEBuffer(createFlags, EModel.ActiveModel, Name[0]);
 		B.SetFileName(Name[0], Mode);
 
 		View.SwitchToModel(B);
@@ -438,20 +472,20 @@ public class Console implements ModeDefs
 	}
 
 	static boolean MultiFileLoad(int createFlags, String FileName, String Mode, EView View) {
-		String  fX[];
+		String  fX[] = {""};
 		int count = 0;
-		String  FPath[];
-		String  FName[];
+		String  FPath[] = {""};
+		String  FName[] = {""};
 		FileFind ff;
 		FileInfo fi;
-		int rc;
+		//int rc;
 
 		assert(View != null);
 
 		JustDirectory(FileName, fX);
 		if (fX[0] == null) fX[0] = ".";
 		JustFileName(FileName, FName);
-		if (ExpandPath(fX[0], FPath) == -1) return 0;
+		if (ExpandPath(fX[0], FPath) == -1) return false;
 		FPath[0] = Slash(FPath[0], 1);
 
 		ff = new FileFind(FPath[0], FName[0], FileFind.ffHIDDEN | FileFind.ffFULLPATH);

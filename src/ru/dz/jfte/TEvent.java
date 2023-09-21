@@ -6,6 +6,25 @@ public abstract class TEvent implements EventDefs, KeyDefs
 	GView View = null;
 
 	abstract public TEvent clone();
+	
+	public static TEvent newKeyDownEvent(int code)
+	{
+		return new TKeyEvent(evKeyDown, code);
+	}
+
+	public static TEvent newKeyUpEvent(int code)
+	{
+		return new TKeyEvent(evKeyUp, code);
+	}
+
+	public static TEvent newMouseEvent(int what, int x, int y, int buttons, int count) {
+		TMouseEvent me = new TMouseEvent(what);
+		me.X = x;
+		me.Y = y;
+		me.Buttons = buttons;
+		me.Count = count;
+		return me;
+	}
 
 }
 

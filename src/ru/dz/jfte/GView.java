@@ -77,8 +77,8 @@ public class GView implements Closeable
         return Peer.ConQuerySize(X, Y);
     }
 
-    int ConSetCursorPos(int X, int Y) {
-        return Peer.ConSetCursorPos(X, Y);
+    void ConSetCursorPos(int X, int Y) {
+        Peer.ConSetCursorPos(X, Y);
     }
 
     int ConQueryCursorPos(int []X, int []Y) {

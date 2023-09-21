@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.awt.Point;
+
 import ru.dz.jfte.ui.ConCanvas;
 import ru.dz.jfte.ui.ConData;
 import ru.dz.jfte.ui.ConFrame;
@@ -10,6 +12,8 @@ public class JavaConsole implements GuiDefs, EventDefs
 	ConCanvas cc = new ConCanvas(cd );
 	private ConFrame cf;
 	private boolean cursorVisible = true;
+	Point cursorPos = new Point(0, 0);
+	
 
 	public JavaConsole() {
 		cf = new ConFrame(cc);
@@ -109,6 +113,29 @@ public class JavaConsole implements GuiDefs, EventDefs
 
 	public void setTitle(String string) {
 		cf.setTitle(string);
+	}
+
+	public void setCursorPos(int x, int y) {
+		cursorPos = new Point(x, y);		
+	}
+
+	public void queryCursorPos(int[] x, int[] y) {
+		x[0] = cursorPos.x;
+		y[0] = cursorPos.y;
+	}
+
+	public Point getMousePos() 
+	{ 
+		return cc.mousePos;
+	}
+
+	public void enableMouse(boolean mouseVisible) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public TEvent pollKeyb() {
+		return cc.pollKeyb();
 	}
 	
 }

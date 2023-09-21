@@ -209,24 +209,19 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
     int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId)
     {
-        int rc;
-        ExInput input;
-
-        input = new ExInput(Prompt, Str, Comp, Select, HistId);
-        if (input == null)
-            return 0;
+        ExInput input = new ExInput(Prompt, Str, Comp, Select, HistId);
 
         PushView((ExView )input);
 
-        rc = Execute();
+        int rc = Execute();
 
         PopView();
 
         Repaint();
 
-        if (rc == 1) {
-            Str[0] = input.Line;
-        }
+        if (rc != 0)
+            Str[0] = input.Line.toString();
+
         input.close();
 
         return rc;

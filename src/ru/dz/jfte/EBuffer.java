@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +13,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
 
 import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
@@ -63,8 +72,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	int MatchCount = 0;
 	RxMatchRes MatchRes;
 
-    //int BMCount;
-    Map<String,EBookmark> BMarks = new HashMap<>();
+	//int BMCount;
+	Map<String,EBookmark> BMarks = new HashMap<>();
 
 	///* TODO #ifdef CONFIG_OBJ_ROUTINE
 	RoutineList rlst;
@@ -102,6 +111,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	static String BFS(EBuffer y,int x) { return y.Flags.str[x & 0xFF]; }
 
 	///////////////////////////////////////////////////////////////////////////////
+
+	static EBuffer newEBuffer(int createFlags, EModel ARoot, String AName)
+	{
+		EModel []Root = {ARoot};
+		return new EBuffer(createFlags, Root, AName);
+
+	}
+
 
 	EBuffer(int createFlags, EModel []ARoot, String AName)
 	//:EModel(createFlags, ARoot), TP(0,0), CP(0,0), BB(-1,-1), BE(-1,-1),
@@ -604,8 +621,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean CenterPos(int Col, int Row) {
 		return CenterPos( Col,  Row, 0);
-		}	
-	
+	}	
+
 	boolean CenterPos(int Col, int Row, int tabMode) {
 		assert(Row >= 0 && Row < VCount && Col >= 0);
 
@@ -646,8 +663,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean CenterNearPosR(int Col, int Row) {
 		return CenterNearPosR( Col, Row, 0);
-		}	
-	
+	}	
+
 	boolean CenterNearPosR(int Col, int Row, int tabMode) {
 		if (Row >= RCount) Row = RCount - 1;
 		if (Row < 0) Row = 0;
@@ -2253,7 +2270,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			X = RLine(L);
 
 			LLen = X.getCount();
-			//P = X.Chars;
+			BinaryString P = X.Chars;
 			//int Ppos = 0;
 			Start = 0;
 			End = LLen;
@@ -2292,11 +2309,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 						&&
 						((!osNCase
 								&& ( X.Chars.charAt(C)/*P[C]*/ == Data.charAt(0))
-								&& (memcmp(P + C, Data, Len) == 0))
+								//&& (memcmp(P + C, Data, Len) == 0))
+								&& (P.memcmp( C, Data, Len) == 0))
 								||
 								(osNCase
 										&& (Character.toUpperCase(X.Chars.charAt(C)/*P[C]*/) == Character.toUpperCase(Data.charAt(0)))
-										&& (BitOps.strnicmp(P + C, Data, Len) == 0))
+										//&& (BitOps.strnicmp(P + C, Data, Len) == 0))
+										&& (P.memicmp( C, Data, Len) == 0))
 								) /* && BOL | EOL */
 						)
 				{
@@ -5013,7 +5032,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	}	
 
-	boolean doLoadFrom(BufferedReader reader, String AFileName) {
+	boolean doLoadFrom(BufferedReader reader, String AFileName) throws IOException {
 		//int fd;
 		int len = 0, partLen;
 		long numChars = 0, Lines = 0;
@@ -5021,9 +5040,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int epos;
 		int lm = 0;
 		int lf;
-		
+
 		BinaryString m = new BinaryString();
-		
+
 		//int SaveUndo, SaveReadOnly;
 		boolean first = true;
 		int strip = iBFI(this, BFI_StripChar);
@@ -5143,7 +5162,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 					if (lm == 0)// && m == null)
 						m.trySetSize(CHAR_TRESHOLD);
-					
+
 					/*#if 0
 	                { // support for VIM tabsize commands
 	                    String t = strstr(m,"vi:ts=");
@@ -5158,7 +5177,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					// Grow the line table if required,
 					if (RCount == RAllocated)
 						Allocate(RCount !=0 ? (RCount * 2) : 1);
-							
+
 					LL[RCount++] = new ELine(m.toString());
 					RGap = RCount;
 
@@ -5180,7 +5199,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//	throw new IOException();
 			if (lm == 0)
 				m.trySetSize(CHAR_TRESHOLD);
-			
+
 			// Grow the line table if required,
 			if (RCount == RAllocated)
 				Allocate(RCount!=0 ? (RCount * 2) : 1);
@@ -5390,7 +5409,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			else
 				BFI_SET(this, BFI_ReadOnly, 0);
 		}
-		
+
 		try {
 			reader.close();
 		} catch (IOException e) {
@@ -5415,26 +5434,26 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	private static String MakeBackup(String FileName, String [] NewName) {
-//	    static char NewName[260];
+		//	    static char NewName[260];
 
 		if(FileName.isBlank())
 			return null;
 
-	    NewName[0] = FileName+"~";
+		NewName[0] = FileName+"~";
 
-	    if (!Console.IsSameFile(FileName,NewName[0])) {
-	        if (Console.access(NewName[0],0))                 // Backup already exists?
-	        	Console.unlink(NewName[0]);                         // Then delete the file..
-	        if (!Console.access(FileName, 0))                // Original found?
-	            return NewName[0];
-	        if (Console.copyfile(FileName, NewName[0]))
-	            return NewName[0];
-	    }
-	    
-	    return null;
+		if (!Console.IsSameFile(FileName,NewName[0])) {
+			if (Console.access(NewName[0],0))                 // Backup already exists?
+				Console.unlink(NewName[0]);                         // Then delete the file..
+			if (!Console.access(FileName, 0))                // Original found?
+				return NewName[0];
+			if (Console.copyfile(FileName, NewName[0]))
+				return NewName[0];
+		}
+
+		return null;
 	}
-	
-	
+
+
 	boolean SaveTo(String AFileName) {
 		String [] ABackupName = {""};
 
@@ -5470,7 +5489,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			} else {
 				View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing file, backup restored.");
 			}
-			
+
 			return false;
 		}
 
@@ -5651,28 +5670,28 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		 */
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	int PlaceBookmark(String Name, EPoint P) {
 		BMarks.put(Name, new EBookmark(Name,P));
 		/*
@@ -5693,8 +5712,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    BMarks[BMCount].Name = strdup(Name);
 	    BMarks[BMCount].BM = P;
 	    BMCount++;
-	    */
-	    return 1;
+		 */
+		return 1;
 	}
 
 	int RemoveBookmark(String Name) {
@@ -5710,12 +5729,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            return 1;
 	        }
 	    }
-	    */
+		 */
 		if( null != BMarks.remove(Name))
 			return 1;
-	    
-	    View.MView.Win.Choice(GPC_ERROR, "RemoveBookmark", 1, "O&K", "Bookmark %s not found.", Name);
-	    return 0;
+
+		View.MView.Win.Choice(GPC_ERROR, "RemoveBookmark", 1, "O&K", "Bookmark %s not found.", Name);
+		return 0;
 	}
 
 	EPoint GetBookmark(String Name) {
@@ -5729,7 +5748,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            return 1;
 	        }
 	    return 0;
-	    */
+		 */
 	}
 
 	/*
@@ -5737,7 +5756,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	 * bookmark for line searchForLine. It then returns its name and position
 	 * and index (used for next search) or -1 if none found. Name is pointer
 	 * directly into bookmark structure (not copied!). If searchForLine is -1,
-	 * this function returns any next bookmark -> can be used to enumerate
+	 * this function returns any next bookmark . can be used to enumerate
 	 * bookmarks.
 	 * /
 	int GetBookmarkForLine(int searchFrom, int searchForLine, String &Name, EPoint &P) {
@@ -5749,20 +5768,218 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    return -1;
 	}*/
-	
-	
+
+
 	boolean GotoBookmark(String Name) {
 		EBookmark b = BMarks.get(Name);
 
 		if(b!=null)
-            return CenterNearPosR(b.BM.Col, b.BM.Row, 0);
+			return CenterNearPosR(b.BM.Col, b.BM.Row, 0);
 
 		View.MView.Win.Choice(GPC_ERROR, "GotoBookmark", 1, "O&K", "Bookmark %s not found.", Name);
-	    return false;
+		return false;
 	}
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	static char cr = 13;
+	static char lf = 10;
+
+	/*
+	boolean BlockPrint() {
+		EPoint B, E;
+		int L;
+		int A, Z;
+		ELine LL;
+		//FILE *fp;
+		int bc = 0, lc = 0;
+		int error = 0;
+
+		AutoExtend = false;
+		if (!CheckBlock()) return false;
+		if (RCount == 0) return false;
+		B = BB;
+		E = BE;
+		Msg(S_INFO, "Printing to %s...", PrintDevice);
+
+
+		for (L = B.Row; L <= E.Row; L++) {
+			A = -1;
+			Z = -1;
+			LL = RLine(L);
+			switch (BlockMode) {
+			case bmLine:
+				if (L < E.Row) {
+					A = 0;
+					Z = LL.Count;
+				}
+				break;
+			case bmColumn:
+				if (L < E.Row) {
+					A = CharOffset(LL, B.Col);
+					Z = CharOffset(LL, E.Col);
+				}
+				break;
+			case bmStream:
+				if (B.Row == E.Row) {
+					A = CharOffset(LL, B.Col);
+					Z = CharOffset(LL, E.Col);
+				} else if (L == B.Row) {
+					A = CharOffset(LL, B.Col);
+					Z = LL.Count;
+				} else if (L < E.Row) {
+					A = 0;
+					Z = LL.Count;
+				} else if (L == E.Row) {
+					A = 0;
+					Z = CharOffset(LL, E.Col);
+				}
+				break;
+			}
+			if (A != -1 && Z != -1) {
+				if (A < LL.Count) {
+					if (Z > LL.Count)
+						Z = LL.Count;
+					if (Z > A) {
+						if ((int)(fwrite(LL.Chars + A, 1, Z - A, fp)) != Z - A) {
+							error++;
+							break;
+						} else
+							bc += Z - A;
+					}
+				}
+				if (BFI(this, BFI_AddCR) == 1)
+					if (fwrite(&cr, 1, 1, fp) != 1) {
+						error++;
+						break;
+					} else
+						bc++;
+				if (BFI(this, BFI_AddLF) == 1)
+					if (fwrite(&lf, 1, 1, fp) != 1) {
+						error++;
+						break;
+					} else {
+						bc++;
+						lc++;
+					}
+				if ((lc % 200) == 0)
+					Msg(S_INFO, "Printing, %d lines, %d bytes.", lc, bc);
+
+			}
+		}
+		if (!error) {
+			fwrite("\f\n", 2, 1, fp);
+			fclose(fp);
+			Msg(S_INFO, "Printing %d lines, %d bytes.", lc, bc);
+			return 1;
+		}
+		fclose(fp);
+		Msg(S_INFO, "Failed to write to %s", PrintDevice);
+		return 0;
+	}
+	*/
+
+
+
+	boolean FilePrint() {
+
+		PrintService printService =
+			PrintServiceLookup.lookupDefaultPrintService();
+		
+		if(printService==null)
+		{
+			Msg(S_ERROR, "No print service found");
+			return false;
+		}
+		
+		Msg(S_INFO, "Printing %s to %s...", FileName, printService.getName());
+
+		DocPrintJob job = printService.createPrintJob();
+		DocFlavor docFlavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+
+		StringWriter sw = new StringWriter();
+		boolean rc = doFilePrint(sw);
+
+		Doc doc = new SimpleDoc( sw.toString(), docFlavor, null);
+
+		try {
+			job.print(doc, null);
+		} catch (PrintException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			Msg(S_ERROR, "Error printing %s to %s: %s", FileName, printService.getName(), e.getMessage());
+			return false;
+		}		
+		
+		if(rc)
+			Msg(S_INFO, "Printed %s.", FileName);
+		else
+			Msg(S_ERROR, "Error printing %s to %s.", FileName, printService.getName());
+
+		return rc;
+	}
+
+	boolean doFilePrint(StringWriter sw) {
+		//int l;
+		//FILE *fp;
+		//long ByteCount = 0;
+		//int BChars;
+
+		/*
+	        fp = fopen(PrintDevice, "w");
+	    if (fp == NULL) {
+	        Msg(S_ERROR, "Error printing %s to %s.", FileName, PrintDevice);
+	        return 0;
+	    }*/
+
+		//BChars = 0;
+		for (int l = 0; l < RCount; l++) {
+
+
+			sw.write(RLine(l).Chars.toString());
+			
+			if (BFI(this, BFI_AddCR)) sw.write( cr );
+			/*if (BFI(this, BFI_AddLF))*/ sw.write( lf );
+
+		}
+
+		/*
+	    if (BChars) {
+	        ByteCount += BChars;
+	        Msg(S_INFO, "Printing: %d lines, %d bytes.", l, ByteCount);
+	        //if ((int)(fwrite(FileBuffer, 1, BChars, fp)) != BChars) goto fail;
+	    }
+	    BChars = 0;
+	    //fclose(fp);
+	    return 1;
+	fail:
+	    if (fp != NULL) {
+	            fclose(fp);
+	    }
+	    return 0;
+		 */
+		return true;
+	}
+
+
 
 }
 

@@ -225,6 +225,43 @@ public class BinaryString
 		Arrays.fill(mem, ofs, ofs+count, c );		
 	}
 
+	public int memcmp(int pos, String data, int len) {
+
+		char[] ca = data.toCharArray();
+		
+		for(int i = 0; i < len; i++)
+		{
+			if( i > ca.length ) return 1; // we are greater
+			if( i+pos > mem.length) return -1; // data is greater
+
+			if( ca[i] < mem[i+pos] ) return 1;
+			if( ca[i] > mem[i+pos] ) return -1;
+		}
+
+		return 0;
+	}
+
+	public int memicmp(int pos, String data, int len) {
+
+		char[] ca = data.toCharArray();
+		
+		for(int i = 0; i < len; i++)
+		{
+			if( i > ca.length ) return 1; // we are greater
+			if( i+pos > mem.length) return -1; // data is greater
+
+			char cac = Character.toUpperCase( ca[i] );
+			char mc = Character.toUpperCase( mem[i+pos] );
+			
+			if( cac < mc ) return 1;
+			if( cac > mc ) return -1;
+		}
+
+		return 0;
+	}
+	
+	
+	
 	public void copyIn(int ofs, String data, int count) {
 		char[] ca = data.toCharArray();
 		System.arraycopy(ca, 0, mem, ofs, count);		
@@ -238,6 +275,7 @@ public class BinaryString
 	public ArrayPtr<Character> getPointer() {
 		return new ArrayPtr<Character>(mem);
 	}
+
 
 
 	

@@ -12,6 +12,10 @@ public class RxNode implements RxDefs
 	//};
 
 
+	static RxNode RxCompile(String Regexp) {
+		return null;
+	}
+	/*
 
 	static int RegCount = 0;
 
@@ -117,7 +121,7 @@ public class RxNode implements RxDefs
 	do { \
 		set[(unsigned char)(n) >> 3] |= (unsigned char)(1 << ((unsigned char)(n) & 7)); \
 	} while (0)
-	*/
+	* /
 	
 		static RxNode NewSet(String [] Regexp) {
 		unsigned char set[NNN];
@@ -351,7 +355,7 @@ public class RxNode implements RxDefs
 					return 0;
 				}
 			switch (What) {
-			case '?':    /* BRANCH x NOTHING */
+			case '?':    // BRANCH x NOTHING 
 				New = NewNode(RE_BRANCH | RE_GREEDY | What);
 				No = NewNode(RE_NOTHING);
 				if (!New || !No) return 0;
@@ -713,8 +717,8 @@ public class RxNode implements RxDefs
 			}
 			n = n.fNext;
 		}
-		/* NOTREACHED */
-		assert(1 == 0 /* internal regexp error */);
+		// NOTREACHED 
+		assert(1 == 0 // internal regexp error );
 		return 0;
 	}
 
@@ -954,6 +958,6 @@ public class RxNode implements RxDefs
 		*Dest = dest;
 		return 0;
 	}
-
+	*/
 
 }

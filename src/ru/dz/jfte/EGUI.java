@@ -489,13 +489,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             Console.SetDefaultDirectory(EModel.ActiveModel);
 
         if (State.GetStrParam(EView.ActiveView, Cmd) == 0)
-			try {
+			//try {
 				if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
-			} catch (IOException e) {
+			/*} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return ExResult.ErFAIL;
-			}
+			}*/
         
         gui.RunProgram(RUN_WAIT, Cmd[0]);
         return ExResult.ErOK;
@@ -507,13 +507,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         	Console.SetDefaultDirectory(EModel.ActiveModel);
 
         if (State.GetStrParam(EView.ActiveView, Cmd ) == 0)
-			try {
+			//try {
 				if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) return ExResult.ErFAIL;
-			} catch (IOException e) {
+			/*} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				return ExResult.ErFAIL;
-			}
+			}*/
         gui.RunProgram(RUN_ASYNC, Cmd[0]);
         return ExResult.ErOK;
     }

@@ -121,10 +121,9 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
 	}
     
     
-    int ConSetCursorPos(int X, int Y) {
+    void ConSetCursorPos(int X, int Y) {
         if (Win != null)
-            return Win.ConSetCursorPos(X, Y);
-        return -1;
+            Win.ConSetCursorPos(X, Y);
     }
 
     int ConShowCursor() {
