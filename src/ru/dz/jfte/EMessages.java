@@ -23,6 +23,12 @@ public class EMessages extends EList implements Closeable
 
 	static EMessages CompilerMsgs = null;
 
+	static EMessages newEMessages(int createFlags, EModel ARoot, String ADir, String ACommand) 
+	{
+		EModel []ARootP = {ARoot};
+		return new EMessages(createFlags, ARootP,  ADir,  ACommand);
+	}
+	
 	EMessages(int createFlags, EModel []ARoot, String ADir, String ACommand) 
 	{
 		super(createFlags, ARoot, "Messages");

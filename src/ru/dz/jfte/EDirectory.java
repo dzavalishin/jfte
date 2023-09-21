@@ -2,79 +2,88 @@ package ru.dz.jfte;
 
 import java.util.Arrays;
 
-public class EDirectory extends EList implements EventDefs 
+public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs 
 {
 
 	String Path;
 	FileInfo [] Files = null;
 	int FCount;
 	int SearchLen;
-	char SearchName[];
+	String SearchName;
 	int SearchPos[];
 
 
 
-	
-	
+
+	static EDirectory newEDirectory(int createFlags, EModel ARoot, String aPath) 
+	{
+		EModel []ARootP = {ARoot};
+		return new EDirectory( createFlags, ARootP, aPath);
+	}
+
 	EDirectory(int createFlags, EModel []ARoot, String aPath) 
 	{
 		super(createFlags, ARoot, aPath);
-		
-	    String [] XPath = {""};
 
-	    FCount = 0;
-	    SearchLen = 0;
-	    ExpandPath(aPath, XPath);
-	    Slash(XPath, 1);
-	    Path = XPath;
-	    RescanList();
+		String [] XPath = {""};
+
+		FCount = 0;
+		SearchLen = 0;
+		Console.ExpandPath(aPath, XPath);
+		Path = Console.Slash(XPath[0], 1);
+		RescanList();
 	}
 
 
 	EEventMap GetEventMap() {
-	    return EEventMap.FindEventMap("DIRECTORY");
+		return EEventMap.FindEventMap("DIRECTORY");
 	}
 
 	void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
-	    //char s[1024];
+		//char s[1024];
 
-	    B.MoveCh( ' ', color, Width);
-	    if (Files && Line >= 0 && Line < FCount) {
-	        int Year, Mon, Day, Hour, Min, Sec;
-	        tm t;
-	        time_t tim;
+		B.MoveCh( ' ', color, Width);
+		if (Files!=null && Line >= 0 && Line < FCount) 
+		{
+			/*
+			int Year, Mon, Day, Hour, Min, Sec;
+			tm t;
+			time_t tim;
 
-	        tim = Files[Line].MTime();
-	        t = localtime(tim);
+			tim = Files[Line].MTime();
+			t = localtime(tim);
 
-	        if (t) {
-	            Year = t.tm_year + 1900;
-	            Mon = t.tm_mon + 1;
-	            Day = t.tm_mday;
-	            Hour = t.tm_hour;
-	            Min = t.tm_min;
-	            Sec = t.tm_sec;
-	        } else {
-	            Year = Mon = Day = Hour = Min = Sec = 0;
-	        }
+			if (t) {
+				Year = t.tm_year + 1900;
+				Mon = t.tm_mon + 1;
+				Day = t.tm_mday;
+				Hour = t.tm_hour;
+				Min = t.tm_min;
+				Sec = t.tm_sec;
+			} else {
+				Year = Mon = Day = Hour = Min = Sec = 0;
+			}
 
-	        String s = String.format(
-	                " %04d/%02d/%02d %02d:%02d:%02d %8ld ",
-	                Year, Mon, Day, Hour, Min, Sec,
-	                Files[Line].Size());
+			String s = String.format(
+					" %04d/%02d/%02d %02d:%02d:%02d %8ld ",
+					Year, Mon, Day, Hour, Min, Sec,
+					Files[Line].Size());
+			*/
+	        Date modifiedDate = new Date(Files[Line].MTime());
+	        String s = modifiedDate.toString() + " " + Files[Line].Size()
 
+			s += Files[Line].name;
 
-	        s += Files[Line].Name();
-	        
-	        s += (Files[Line].Type() == fiDIRECTORY)? SLASH : ' ';
+			//s += Files[Line].isDir() ? SLASH : ' ';
+			s += Files[Line].isDir() ? '/' : ' ';
 
-	        if (Col < s.length())
-	            B.MoveStr( 0, Width, s + Col, color, Width);
-	    }
+			if (Col < s.length())
+				B.MoveStr( 0, Width, s + Col, color, Width);
+		}
 	}
 
 	boolean IsHilited(int Line) {
-	    return (Line >= 0 && Line < FCount) ? Files[Line].Type() == fiDIRECTORY : 0;
+		return (Line >= 0 && Line < FCount) ? Files[Line].isDir() : false;
 	}
 
 	/*
@@ -92,409 +101,406 @@ public class EDirectory extends EList implements EventDefs
 	}*/
 
 	void RescanList() {
-	    String Dir;
-	    String Name;
-	    int DirCount = 0;
-	    int SizeCount = 0;
-	    FileFind ff;
-	    FileInfo fi;
-	    int rc;
+		String [] Dir = {""};
+		String [] Name = {""};
+		int DirCount = 0;
+		int SizeCount = 0;
+		FileFind ff;
+		FileInfo fi;
+		int rc;
 
-        FreeList();
+		FreeList();
 
-	    Count = 0;
-	    FCount = 0;
-	    if (JustDirectory(Path, Dir) != 0) return;
-	    JustFileName(Path, Name);
+		Count = 0;
+		FCount = 0;
+		if (Console.JustDirectory(Path, Dir) != 0) return;
+		Console.JustFileName(Path, Name);
 
-	    ff = new FileFind(Dir, "*", ffDIRECTORY | ffHIDDEN);
-	    if (ff == 0)
-	        return ;
+		ff = new FileFind(Dir[0], "*", ffDIRECTORY | ffHIDDEN);
+		if (ff == 0)
+			return ;
 
-	    rc = ff.FindFirst(fi);
-	    while (rc == 0) {
-	        assert(fi != null);
-	        if (strcmp(fi.Name(), ".") != 0) {
-	            //Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
-	        	Files = Arrays.copyOf(Files, (FCount | 255) + 1);
-	            if (Files == null)
-	            {
-	                return;
-	            }
+		rc = ff.FindFirst(fi);
+		while (rc == 0) {
+			assert(fi != null);
+			if (!fi.Name().equals(".")) {
+				//Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
+				Files = Arrays.copyOf(Files, (FCount | 255) + 1);
 
-	            Files[FCount] = fi;
+				Files[FCount] = fi;
 
-	            SizeCount += Files[FCount].Size();
-	            if (fi.Type() == fiDIRECTORY && (strcmp(fi.Name(), "..") != 0))
-	                DirCount++;
-	            Count++;
-	            FCount++;
-	        }
-	        
-	        rc = ff.FindNext(fi);
-	    }
-	    //delete ff;
+				SizeCount += Files[FCount].Size();
+				if (fi.isDir() && !fi.Name().equals(".."))
+					DirCount++;
+				Count++;
+				FCount++;
+			}
 
-	    {
+			rc = ff.FindNext(fi);
+		}
+		//delete ff;
 
-	        String CTitle = String.format("%d files%c%d dirs%c%d bytes%c%-200.200s",
-	                FCount, Console.ConGetDrawChar(DCH_V),
-	                DirCount, Console.ConGetDrawChar(DCH_V),
-	                SizeCount, Console.ConGetDrawChar(DCH_V),
-	                Dir);
-	        SetTitle(CTitle);
-	    }
-	    // TODO qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);
-	    NeedsRedraw = 1;
+		{
+
+			String CTitle = String.format("%d files%c%d dirs%c%d bytes%c%-200.200s",
+					FCount, Console.ConGetDrawChar(DCH_V),
+					DirCount, Console.ConGetDrawChar(DCH_V),
+					SizeCount, Console.ConGetDrawChar(DCH_V),
+					Dir);
+			SetTitle(CTitle);
+		}
+		// TODO qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);
+		NeedsRedraw = 1;
 	}
 
 	void FreeList() {
-	    Files = null;
-	    FCount = 0;
+		Files = null;
+		FCount = 0;
 	}
 
-	int isDir(int No) {
-	    String FilePath[];
+	boolean isDir(int No) {
+		String FilePath[] = {""};
 
-	    JustDirectory(Path, FilePath);
-	    Slash(FilePath, 1);
-	    FilePath += Files[No].Name();
-	    return IsDirectory(FilePath);
+		Console.JustDirectory(Path, FilePath);
+		FilePath[0] = Console.Slash(FilePath[0], 1);
+		FilePath[0] += Files[No].name;
+		return Console.IsDirectory(FilePath[0]);
 	}
 
 	ExResult ExecCommand(ExCommands Command, ExState State) {
-	    switch (Command) {
-	    case ExActivateInOtherWindow:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        if (Files != null && Row >= 0 && Row < FCount) {
-	            if (isDir(Row)) {
-	            } else {
-	                return FmLoad(Files[Row].Name(), View.Next);
-	            }
-	        }
-	        return ExResult.ErFAIL;
+		switch (Command) {
+		case ExActivateInOtherWindow:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			if (Files != null && Row >= 0 && Row < FCount) {
+				if (isDir(Row)) {
+				} else {
+					return FmLoad(Files[Row].name, View.Next);
+				}
+			}
+			return ExResult.ErFAIL;
 
-	    case ExRescan:
-	        if (RescanDir() == 0)
-	            return ExResult.ErFAIL;
-	        return ExResult.ErOK;
+		case ExRescan:
+			if (RescanDir() == ExResult.ErFAIL)
+				return ExResult.ErFAIL;
+			return ExResult.ErOK;
 
-	    case ExDirGoUp:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        FmChDir(SDOT SDOT);
-	        return ExResult.ErOK;
+		case ExDirGoUp:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			// TODO FmChDir(SDOT SDOT);
+			FmChDir("..");
+			return ExResult.ErOK;
 
-	    case ExDirGoDown:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        if (Files && Row >= 0 && Row < FCount) {
-	            if (isDir(Row)) {
-	                FmChDir(Files[Row].Name());
-	                return ExResult.ErOK;
-	            }
-	        }
-	        return ExResult.ErFAIL;
+		case ExDirGoDown:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			if (Files!=null && Row >= 0 && Row < FCount) {
+				if (isDir(Row)) {
+					FmChDir(Files[Row].Name());
+					return ExResult.ErOK;
+				}
+			}
+			return ExResult.ErFAIL;
 
-	    case ExDirGoto:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        return ChangeDir(State);
+		case ExDirGoto:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			return ChangeDir(State);
 
-	    case ExDirGoRoot:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        FmChDir(SSLASH);
-	        return ExResult.ErOK;
+		case ExDirGoRoot:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			//FmChDir(SSLASH);
+			FmChDir("/");
+			return ExResult.ErOK;
 
-	    case ExDirSearchCancel:
-	        // Kill search when moving
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        return ExResult.ErOK;
+		case ExDirSearchCancel:
+			// Kill search when moving
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			return ExResult.ErOK;
 
-	    case ExDirSearchNext:
-	        // Find next matching file, search is case in-sensitive while sorting is sensitive
-	        if (SearchLen) {
-	            for (int i = Row + 1; i < FCount; i++) {
-	                if (strnicmp(SearchName, Files[i].Name(), SearchLen) == 0) {
-	                    Row = i;
-	                    break;
-	                }
-	            }
-	        }
-	        return ExResult.ErOK;
+		case ExDirSearchNext:
+			// Find next matching file, search is case in-sensitive while sorting is sensitive
+			if (SearchLen!=0) {
+				for (int i = Row + 1; i < FCount; i++) {
+					if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+						Row = i;
+						break;
+					}
+				}
+			}
+			return ExResult.ErOK;
 
-	    case ExDirSearchPrev:
-	        // Find prev matching file, search is case in-sensitive while sorting is sensitive
-	        if (SearchLen) {
-	            for (int i = Row - 1; i >= 0; i--) {
-	                if (strnicmp(SearchName, Files[i].Name(), SearchLen) == 0) {
-	                    Row = i;
-	                    break;
-	                }
-	            }
-	        }
-	        return ExResult.ErOK;
+		case ExDirSearchPrev:
+			// Find prev matching file, search is case in-sensitive while sorting is sensitive
+			if (SearchLen!=0) {
+				for (int i = Row - 1; i >= 0; i--) 
+				{
+					if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+						Row = i;
+						break;
+					}
+				}
+			}
+			return ExResult.ErOK;
 
-	    case ExDeleteFile:
-	        SearchLen = 0;
-	        Msg(S_INFO, "");
-	        return FmRmDir(Files[Row].Name());
-	    }
-	    return EList::ExecCommand(Command, State);
+		case ExDeleteFile:
+			SearchLen = 0;
+			Msg(S_INFO, "");
+			return FmRmDir(Files[Row].Name());
+		}
+		return super.ExecCommand(Command, State);
 	}
 
 	int Activate(int No) {
-	    SearchLen = 0;
-	    Msg(S_INFO, "");
-	    if (Files && No >= 0 && No < FCount) {
-	        if (isDir(No)) {
-	            FmChDir(Files[No].Name());
-	            return 0;
-	        } else {
-	            return FmLoad(Files[No].Name(), View);
-	        }
-	    }
-	    return 1;
+		SearchLen = 0;
+		Msg(S_INFO, "");
+		if (Files!=null && No >= 0 && No < FCount) {
+			if (isDir(No)) {
+				FmChDir(Files[No].Name());
+				return 0;
+			} else {
+				return FmLoad(Files[No].Name(), View) == ExResult.ErOK ? 1 : 0;
+			}
+		}
+		return 1;
 	}
 
 	void HandleEvent(TEvent Event) {
-	    STARTFUNC("HandleEvent");
-	    int resetSearch = 0;
-	    super.HandleEvent(Event);
-	    switch (Event.What) {
-	    case evKeyUp:
-	        resetSearch = 0;
-	        break;
-	    case evKeyDown:
-	        LOG << "Key Code: " << kbCode(Event.Key.Code) << ENDLINE;
-	        resetSearch = 1;
-	        switch (kbCode(Event.Key.Code)) {
-	        case kbBackSp:
-	            LOG << "Got backspace" << ENDLINE;
-	            resetSearch = 0;
-	            if (SearchLen > 0) {
-	                SearchName[--SearchLen] = 0;
-	                Row = SearchPos[SearchLen];
-	                Msg(S_INFO, "Search: [%s]", SearchName);
-	            } else
-	                Msg(S_INFO, "");
-	            break;
-	        case kbEsc:
-	            Msg(S_INFO, "");
-	            break;
-	        default:
-	            resetSearch = 0; // moved here - its better for user
-	            // otherwice there is no way to find files like i_ascii
-	            if (isAscii(Event.Key.Code) && (SearchLen < MAXISEARCH)) {
-	                char Ch = (char) Event.Key.Code;
-	                int Found;
+		//STARTFUNC("HandleEvent");
+		int resetSearch = 0;
+		super.HandleEvent(Event);
+		switch (Event.What) {
+		case evKeyUp:
+			resetSearch = 0;
+			break;
+		case evKeyDown:
+			//LOG << "Key Code: " << kbCode(Event.Key.Code) << ENDLINE;
+			resetSearch = 1;
+			TKeyEvent ke = (TKeyEvent) Event;
+			switch (KeyDefs.kbCode(ke.Code)) {
+			case kbBackSp:
+				//LOG << "Got backspace" << ENDLINE;
+				resetSearch = 0;
+				if (SearchLen > 0) {
+					//SearchName[--SearchLen] = 0;
+					SearchName = SearchName.substring(0,--SearchLen);
+					Row = SearchPos[SearchLen];
+					Msg(S_INFO, "Search: [%s]", SearchName);
+				} else
+					Msg(S_INFO, "");
+				break;
+			case kbEsc:
+				Msg(S_INFO, "");
+				break;
+			default:
+				resetSearch = 0; // moved here - its better for user
+				// otherwice there is no way to find files like i_ascii
+				if (KeyDefs.isAscii(ke.Code) && (SearchLen < BufferView.MAXISEARCH)) {
+					char Ch = (char) ke.Code;
+					int Found;
 
-	                LOG << " . " << BinChar(Ch) << ENDLINE;
+					//LOG << " . " << BinChar(Ch) << ENDLINE;
 
-	                SearchPos[SearchLen] = Row;
-	                SearchName[SearchLen] = Ch;
-	                SearchName[++SearchLen] = 0;
-	                Found = 0;
-	                LOG << "Comparing " << SearchName << ENDLINE;
-	                for (int i = Row; i < FCount; i++) {
-	                    LOG << "  to . " << Files[i].Name() << ENDLINE;
-	                    if (strnicmp(SearchName, Files[i].Name(), SearchLen) == 0) {
-	                        Row = i;
-	                        Found = 1;
-	                        break;
-	                    }
-	                }
-	                if (Found == 0)
-	                    SearchName[--SearchLen] = 0;
-	                Msg(S_INFO, "Search: [%s]", SearchName);
-	            }
-	            break;
-	        }
-	    }
-	    if (resetSearch) {
-	        SearchLen = 0;
-	    }
-	    LOG << "SearchLen = " << SearchLen << ENDLINE;
+					SearchPos[SearchLen] = Row;
+					SearchName += Ch;
+					//SearchName[++SearchLen] = 0;
+					Found = 0;
+					//LOG << "Comparing " << SearchName << ENDLINE;
+					for (int i = Row; i < FCount; i++) {
+						//LOG << "  to . " << Files[i].Name() << ENDLINE;
+						if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+							Row = i;
+							Found = 1;
+							break;
+						}
+					}
+					if (Found == 0)
+						SearchName = SearchName.substring(0,--SearchLen);
+					Msg(S_INFO, "Search: [%s]", SearchName);
+				}
+				break;
+			}
+		}
+		if (resetSearch!=0) {
+			SearchLen = 0;
+		}
+		//LOG << "SearchLen = " << SearchLen << ENDLINE;
 	}
 
-	int RescanDir() {
-	    String CName = "";
+	ExResult RescanDir() {
+		String CName = "";
 
-	    if (Row >= 0 && Row < FCount)
-	        strcpy(CName, Files[Row].Name());
-	    Row = 0;
-	    RescanList();
-	    if (CName[0] != 0) {
-	        for (int i = 0; i < FCount; i++) {
-	            if (filecmp(Files[i].Name(), CName) == 0)
-	            {
-	                Row = i;
-	                break;
-	            }
-	        }
-	    }
-	    return 1;
+		if (Row >= 0 && Row < FCount)
+			CName = Files[Row].Name();
+		Row = 0;
+		RescanList();
+		if (!CName.isBlank()) {
+			for (int i = 0; i < FCount; i++) {
+				if (filecmp(Files[i].Name(), CName) == 0)
+				{
+					Row = i;
+					break;
+				}
+			}
+		}
+		return ExResult.ErOK;
 	}
 
 	int FmChDir(String Name) {
-	    String Dir;
-	    String CName = "";
+		String [] Dir = {""};
+		String [] CName = {""};
 
-	    if (strcmp(Name, SSLASH) == 0) {
-	        JustRoot(Path, Dir);
-	    } else if (strcmp(Name, SDOT SDOT) == 0) {
-	        Slash(Path, 0);
-	        JustFileName(Path, CName);
-	        JustDirectory(Path, Dir);
-	    } else {
-	        JustDirectory(Path, Dir);
-	        Slash(Dir, 1);
-	        strcat(Dir, Name);
-	    }
-	    Slash(Dir, 1);
-	    free(Path);
-	    Path = strdup(Dir);
-	    Row = 0;
-	    RescanList();
-	    if (CName[0] != 0) {
-	        for (int i = 0; i < FCount; i++) {
-	            if (filecmp(Files[i].Name(), CName) == 0)
-	            {
-	                Row = i;
-	                break;
-	            }
-	        }
-	    }
-	    UpdateTitle();
-	    return 1;
+		//if (strcmp(Name, SSLASH) == 0) {
+		if (Name.equals("/")) {
+			Console.JustRoot(Path, Dir);
+		} else if (Name.equals("..")) {
+			Path = Console.Slash(Path, 0);
+			Console.JustFileName(Path, CName);
+			Console.JustDirectory(Path, Dir);
+		} else {
+			Console.JustDirectory(Path, Dir);
+			Dir[0] = Console.Slash(Dir[0], 1);
+			Dir[0] += Name;
+		}
+		Dir[0] = Console.Slash(Dir[0], 1);
+
+		Path = Dir[0];
+		Row = 0;
+		RescanList();
+		if (!CName[0].isBlank()) {
+			for (int i = 0; i < FCount; i++) {
+				if (filecmp(Files[i].Name(), CName) == 0)
+				{
+					Row = i;
+					break;
+				}
+			}
+		}
+		UpdateTitle();
+		return 1;
 	}
 
-	int FmRmDir(String Name)
+	ExResult FmRmDir(String Name)
 	{
-		String FilePath = Path;
-	    Slash(FilePath, 1);
-	    FilePath += Name;
+		String FilePath = Console.Slash(Path, 1);
+		FilePath += Name;
 
-	    int choice =
-	        View.MView.Win.Choice(GPC_CONFIRM,
-	                                 "Remove File",
-	                                 2, "O&K", "&Cancel",
-	                                 "Remove %s?", Name);
+		int choice =
+				View.MView.Win.Choice(GPC_CONFIRM,
+						"Remove File",
+						2, "O&K", "&Cancel",
+						"Remove %s?", Name);
 
-	    if (choice == 0)
-	    {
-	        if (unlink(FilePath) == 0)
-	        {
-	            // put the cursor to the previous row
-	            --Row;
+		if (choice == 0)
+		{
+			if (Console.unlink(FilePath) == 0)
+			{
+				// put the cursor to the previous row
+				--Row;
 
-	            // There has to be a more efficient way of doing this ...
-	            return RescanDir();
-	        }
-	        else
-	        {
-	            Msg(S_INFO, "Failed to remove %s", Name);
-	            return 0;
-	        }
-	    }
-	    else
-	    {
-	        Msg(S_INFO, "Cancelled");
-	        return 0;
-	    }
+				// There has to be a more efficient way of doing this ...
+				return RescanDir();
+			}
+			else
+			{
+				Msg(S_INFO, "Failed to remove %s", Name);
+				return ExResult.ErFAIL;
+			}
+		}
+		else
+		{
+			Msg(S_INFO, "Cancelled");
+			return ExResult.ErFAIL;
+		}
 	}
 
-	int FmLoad(String Name, EView XView) {
-		String FilePath;
+	ExResult FmLoad(String Name, EView XView) {
+		String [] FilePath = {""};
 
-	    JustDirectory(Path, FilePath);
-	    Slash(FilePath, 1);
-	    strcat(FilePath, Name);
-	    return FileLoad(0, FilePath, NULL, XView);
+		Console.JustDirectory(Path, FilePath);
+		FilePath[0] = Console.Slash(FilePath[0], 1);
+		FilePath[0] += Name;
+		return FileLoad(0, FilePath, null, XView);
 	}
 
 	String GetName() {
-		String AName = Path;
-	    Slash(AName, 0);
-	    return AName;
+		//String AName = Path;
+		//Slash(AName, 0);
+		return Console.Slash(Path, 0);
 	}
 
-	void GetPath() {
-		String APath = Path;
-	    Slash(APath, 0);
-	    return APath;
+	String GetPath() {
+		//String APath = Path;
+		//Slash(APath, 0);
+		return Console.Slash(Path, 0);
 	}
 
 	void GetInfo(String AInfo, int MaxLen) {
-		String buf[] = {0};
-		String winTitle[] = {0};
+		String buf[] = {""};
+		String winTitle[] = {""};
 
-	    JustFileName(Path, buf);
-	    if (buf[0] == '\0') // if there is no filename, try the directory name.
-	        JustLastDirectory(Path, buf);
+		Console.JustFileName(Path, buf);
+		if (buf[0].isBlank()) // if there is no filename, try the directory name.
+			Console.JustLastDirectory(Path, buf);
 
-	    if (buf[0] != 0) // if there is a file/dir name, stick it in here.
-	    {
-	        strncat(winTitle, buf, sizeof(winTitle) - 1 - strlen(winTitle));
-	        strncat(winTitle, "/ - ", sizeof(winTitle) - 1 - strlen(winTitle));
-	    }
-	    strncat(winTitle, Path, sizeof(winTitle) - 1 - strlen(winTitle));
-	    winTitle[sizeof(winTitle) - 1] = 0;
+		if (!buf[0].isBlank()) // if there is a file/dir name, stick it in here.
+		{
+			winTitle[0] += buf;
+			winTitle[0] += "/ - ";
+		}
+		winTitle[0] += Path;
 
-	    sprintf(AInfo,
-	            "%2d %04d/%03d %-150s",
-	            ModelNo,
-	            Row + 1, FCount,
-	            winTitle);
-	/*    sprintf(AInfo,
+		AInfo = String.format(
+				"%2d %04d/%03d %-150s",
+				ModelNo,
+				Row + 1, FCount,
+				winTitle);
+		/*    sprintf(AInfo,
 	            "%2d %04d/%03d %-150s",
 	            ModelNo,
 	            Row + 1, FCount,
 	            Path);*/
 	}
 
-	void GetTitle(String ATitle, int MaxLen, String ASTitle, int /*SMaxLen*/) {
+	void GetTitle(String [] ATitle, String [] ASTitle) {
 
-	    strncpy(ATitle, Path, MaxLen - 1);
-	    ATitle[MaxLen - 1] = 0;
+		ATitle[0] = Path;
 
-	    {
-	        char P[MAXPATH];
-	        strcpy(P, Path);
-	        Slash(P, 0);
 
-	        JustDirectory(P, ASTitle);
-	        Slash(ASTitle, 1);
-	    }
+		String sp = Console.Slash(Path, 0);
+
+		Console.JustDirectory(sp, ASTitle);
+		ASTitle[0] = Console.Slash(ASTitle[0], 1);
+
 	}
 
-	int ChangeDir(ExState State) {
-	    char Dir[MAXPATH];
-	    char Dir2[MAXPATH];
+	ExResult ChangeDir(ExState State) {
+		String Dir[] = {null};
+		String Dir2[] = {null};
 
-	    if (State.GetStrParam(View, Dir, sizeof(Dir)) == 0) {
-	        strcpy(Dir, Path);
-	        if (View.MView.Win.GetStr("Set directory", sizeof(Dir), Dir, HIST_PATH) == 0)
-	            return 0;
-	    }
-	    if (ExpandPath(Dir, Dir2) == -1)
-	        return 0;
-	
-	    // is this needed for other systems as well ?
-	    //Slash(Dir2, 1);
-	
-	    Path = Dir2;
-	    Row = -1;
-	    UpdateTitle();
-	    return RescanDir();
+		if (State.GetStrParam(View, Dir) == 0) {
+			Dir[0] = Path;
+			if (View.MView.Win.GetStr("Set directory", Dir, HIST_PATH) == 0)
+				return ExResult.ErFAIL;
+		}
+		if (Console.ExpandPath(Dir[0], Dir2) == -1)
+			return ExResult.ErFAIL;
+
+		// is this needed for other systems as well ?
+		//Slash(Dir2, 1);
+
+		Path = Dir2[0];
+		Row = -1;
+		UpdateTitle();
+		return RescanDir();
 	}
 
 	int GetContext() { return CONTEXT_DIRECTORY; }
 	String FormatLine(int Line) { return null; };
 	boolean CanActivate(int Line) { return true; }
-	
+
 
 }

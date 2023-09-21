@@ -113,7 +113,15 @@ public class GUI implements GuiDefs, EventDefs
 
 
 	static TEvent NextEvent = null;
-	void ProcessEvent() throws IOException {
+	void ProcessEvent()  {
+		try {
+			doProcessEvent();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	void doProcessEvent() throws IOException  {
 		TEvent E;
 
 		E = NextEvent.clone();
@@ -250,12 +258,7 @@ public class GUI implements GuiDefs, EventDefs
 		if (Start(fArgv) == 0) {
 			doLoop = true;
 			while (doLoop)
-				try {
 					ProcessEvent();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			Stop();
 			return 0;
 		}

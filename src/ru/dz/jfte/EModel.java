@@ -188,9 +188,8 @@ public class EModel implements ModeDefs, Closeable
 	}
 
 	@Override
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		
+	public void close()  {
+		// empty		
 	}
 
 }

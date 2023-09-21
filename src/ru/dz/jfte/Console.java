@@ -2,6 +2,7 @@ package ru.dz.jfte;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
 /**
@@ -18,12 +19,12 @@ public class Console {
 	static int CursorVisible = 1;
 
 	static JavaConsole jc;
-	
+
 	public static void start() {
 		jc = new JavaConsole();		
 	}
 
-	
+
 	static TEvent ReadConsoleEvent() { 
 		// TODO impl me
 		return null;
@@ -33,27 +34,27 @@ public class Console {
 		// ignore size here - not really used
 		return 0;
 	}
-	
+
 	static int ConDone()
 	{
 		//jc.close();
 		return 0;
 	}
-	
-	
+
+
 	static int ConClear()
 	{
 		jc.clear();
 		return 1;
 	}
-	
+
 	static int ConPutBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
 		jc.putBox( X,  Y,  W,  H, Cell);
 		return 0;
 	}
-	
-	
+
+
 	static int ConGetBox(int X, int Y, int W, int H, PCell Cell) /*FOLD00*/
 	{
 		jc.getBox( X,  Y,  W,  H, Cell);
@@ -71,174 +72,174 @@ public class Console {
 		jc.setBox( X,  Y,  W,  H, Cell);
 		return 0;
 	}
-	
-	
+
+
 	static int ConScroll(int Way, int X, int Y, int W, int H, int /*TAttr*/ Fill, int Count) /*FOLD00*/
 	{
 		jc.scroll( Way, X,  Y,  W,  H,  /*TAttr*/ Fill,  Count);
 		return 0;
 	}	
-	
-	
+
+
 	static int ConSetSize(int X, int Y) { /*FOLD00*/
-	    return -1;
+		return -1;
 	}
-	
+
 
 	static int ConQuerySize(int []X, int []Y) { /*FOLD00*/
 		X[0] = jc.getWidth();
 		Y[0] = jc.getHeight();
 		return 1;
 	}
-	
+
 	static int getWidth() { return jc.getWidth(); } 
 	static int getHeigh() { return jc.getHeight(); } 
-	
+
 	static int ConSetCursorPos(int X, int Y) { /*FOLD00*/
 		jc.setCursorPos(X,Y);
 	}
-			
-	
+
+
 	static int ConQueryCursorPos(int []X, int []Y) { /*FOLD00*/
 		jc.queryCursorPos(X, Y);
 	}
 
-	
+
 	static int ConShowCursor() { /*FOLD00*/
-	    CursorVisible = 1;
-	    jc.drawCursor(1);
-	    return 0;
+		CursorVisible = 1;
+		jc.drawCursor(1);
+		return 0;
 	}
 
 	static int ConHideCursor() { /*FOLD00*/
-	    CursorVisible = 0;
-	    jc.drawCursor(0);
-	    return 0;
+		CursorVisible = 0;
+		jc.drawCursor(0);
+		return 0;
 	}
 
 	static int ConCursorVisible() { /*FOLD00*/
-	    return CursorVisible;
+		return CursorVisible;
 	}
 
 	static int ConSetCursorSize(int Start, int End) { /*FOLD00*/
-	    return -1;
+		return -1;
 	}
 
 	static int ConSetMousePos(int X, int Y) { /*FOLD00*/
-	    return -1;
+		return -1;
 	}
 
 	static int ConQueryMousePos(int []X, int []Y) { /*FOLD00*/
-	    X[0] = LastMouseX;
-	    Y[0] = LastMouseY;
+		X[0] = LastMouseX;
+		Y[0] = LastMouseY;
 
-	    // NT does not have this ? (not needed anyway, but check mouse hiding above).
-	    return 0;
+		// NT does not have this ? (not needed anyway, but check mouse hiding above).
+		return 0;
 	}
 
 	static int ConShowMouse() { /*FOLD00*/
-	    MouseVisible = 1;
-	    if (!MousePresent) return -1;
-	    return 0;
+		MouseVisible = 1;
+		if (!MousePresent) return -1;
+		return 0;
 	}
 
 	static int ConHideMouse() { /*FOLD00*/
-	    MouseVisible = 0;
-	    if (!MousePresent) return -1;
-	    return 0;
+		MouseVisible = 0;
+		if (!MousePresent) return -1;
+		return 0;
 	}
 
 	static int ConMouseVisible() { /*FOLD00*/
-	    return (MouseVisible == 1);
+		return (MouseVisible == 1);
 	}
 
 	static int ConQueryMouseButtons(int []ButtonCount) { /*FOLD00*/
-	    return 0;
+		return 0;
 	}
 
 	static int ConFlush() { /*FOLD00*/
-	    return 0;
+		return 0;
 	}
 
-    static char [] chtab = null;
+	static char [] chtab = null;
 	public static char ConGetDrawChar(int index) {
 		// TODO ConGetDrawChar
 		//return '+';
 
-	    if (null==chtab) 
-	        chtab="┌┐└┘─│┬├┤┴┼?·─▒░??".toCharArray();
-	        //chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼?·─▒░??");
-	        //chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼\x1A·─▒░\x1B\x1A");
+		if (null==chtab) 
+			chtab="┌┐└┘─│┬├┤┴┼?·─▒░??".toCharArray();
+		//chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼?·─▒░??");
+		//chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼\x1A·─▒░\x1B\x1A");
 
-	    return chtab[index];
-		
+		return chtab[index];
+
 	}
-	
+
 	// Which characters to get. defaultCharacters if not set, rest filled
 	// with defaultCharacters if too short
 	// List of GUICharacters is freed, only one item remains
 	/*
 	static char []GetGUICharacters( String which, const char []defChars) {
 	    GUICharactersEntry *g, *gg, *found = NULL;
-	    char *s;
+	    String s;
 	    unsigned int i;
 
 	    for (g = GUICharacters; g; g=gg) {
-	        gg = g->next;
-	        if (strcmp(g->name, which) == 0) {
-	            if ((i = strlen(g->chars)) < strlen(defChars)) {
+	        gg = g.next;
+	        if (strcmp(g.name, which) == 0) {
+	            if ((i = strlen(g.chars)) < strlen(defChars)) {
 	                s = new char [strlen(defChars) + 1];
 	                assert(s != NULL);
-	                strcpy(s, g->chars);
+	                strcpy(s, g.chars);
 	                strcpy(s + i, defChars + i);
-	                delete g->chars;
-	                g->chars = s;
+	                delete g.chars;
+	                g.chars = s;
 	            }
 	            if (found) {
-	                free(found->chars); free(found->name); free(found);
+	                free(found.chars); free(found.name); free(found);
 	            }
 	            found = g;
 	        } else {
-	            free(g->name); free(g->chars); free(g);
+	            free(g.name); free(g.chars); free(g);
 	        }
 	    }
 	    GUICharacters = found;
-	    if (found) return found->chars; else return defChars;
+	    if (found) return found.chars; else return defChars;
 	}
-	*/
-	
+	 */
 
-	
+
+
 	static int GetDefaultDirectory(EModel M, String [] Path) {
-	    if (M!=null) 
-	        Path[0] = M.GetPath();
-	    if (M==null || Path[0] == null)
-	        if (ExpandPath(".", Path) == -1)
-	            return 0;
-	    SlashDir(Path);
-	    return 1;
+		if (M!=null) 
+			Path[0] = M.GetPath();
+		if (M==null || Path[0] == null)
+			if (ExpandPath(".", Path) == -1)
+				return 0;
+		SlashDir(Path);
+		return 1;
 	}
 
 	static int SetDefaultDirectory(EModel M) {
-	    String [] Path;
-	    
-	    if (GetDefaultDirectory(M, Path) == 0)
-	        return 0;
-	    if (ChangeDir(Path) == -1)
-	        return 0;
-	    return 1;
+		String [] Path;
+
+		if (GetDefaultDirectory(M, Path) == 0)
+			return 0;
+		if (ChangeDir(Path) == -1)
+			return 0;
+		return 1;
 	}
 
-	
-	
-	
-	
+
+
+
+
 	private static String tt = "", stt = "";
 	public static void ConSetTitle(String title, String sTitle) {
 
 		tt = title;
 		stt = sTitle;
-		
+
 		// TODO see orig code
 		jc.setTitle("jFTE - "+title+" - "+sTitle);
 	}
@@ -249,38 +250,38 @@ public class Console {
 		return 0;
 	}
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	static TEvent EventBuf = null;
 	static int ConPutEvent(TEvent Event) { /*FOLD00*/
-	    EventBuf = Event;
-	    return 0;
+		EventBuf = Event;
+		return 0;
 	}
 
-	
-	
+
+
 	private static TEvent e = null;
 
 	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) 
 	{
 		// TODO pipe events?
 		//return null;
-		
+
 		while(e == null)
 			fillEvent();
-		
+
 		TEvent ret = e;
-		
+
 		if(delete) 
 			e = null;
-		
+
 		return ret;
 	}
-	
+
 	private static void fillEvent()
 	{
 		// must wait for mult objects, will just poll
@@ -292,32 +293,32 @@ public class Console {
 				EventBuf = null;
 				break;
 			}
-			
+
 			e = pollMouse();
 			if(e != null) break;
 
 			e = pollKeyb();
 			if(e != null) break;
-			
+
 			// TODO poll pipes?
 		}
-		
-	}
-	
-	static int ConGrabEvents(int /*TEventMask*/ EventMask) { /*FOLD00*/
-	    return 0;
+
 	}
 
-	
-	
-	
-	
-	
-	
+	static int ConGrabEvents(int /*TEventMask*/ EventMask) { /*FOLD00*/
+		return 0;
+	}
+
+
+
+
+
+
+
 
 	static void DieError(int rc, String msg, Object... p) {
 		System.err.printf(msg,p);
-	    System.exit(rc);
+		System.exit(rc);
 	}
 
 	/**
@@ -342,57 +343,57 @@ public class Console {
 	 * @return
 	 */
 	static String Slash(String Path, int Add) {
-	    int len = Path.length();
+		int len = Path.length();
 
-	    if (Add!=0) {
-	        if ((len == 0) || !ISSLASH(Path.charAt(len - 1)))
-	            Path += '/';
-	    } else {
-	        if ((len > 1)
-	//#if PATHTYPE == PT_DOSISH
-	            && ((len > 3) || (Path.charAt(1) != ':'))
-	//#endif
-	           ) {
-	            if (ISSLASH(Path.charAt(len - 1))) {
-	                Path = Path.substring(len - 1);
-	            }
-	        }
-	    }
-	    return Path;
+		if (Add!=0) {
+			if ((len == 0) || !ISSLASH(Path.charAt(len - 1)))
+				Path += '/';
+		} else {
+			if ((len > 1)
+					//#if PATHTYPE == PT_DOSISH
+					&& ((len > 3) || (Path.charAt(1) != ':'))
+					//#endif
+					) {
+				if (ISSLASH(Path.charAt(len - 1))) {
+					Path = Path.substring(len - 1);
+				}
+			}
+		}
+		return Path;
 	}
 
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	EBuffer FindFile(String FileName) {
-	    EModel M;
-	    EBuffer B;
-	    
-	    M = EModel.ActiveModel;
-	    while (M!=null) {
-	        if (M.GetContext() == CONTEXT_FILE) {
-	            B = (EBuffer )M;
-	            if (filecmp(B.FileName, FileName) == 0) { return B; }
-	        }
-	        M = M.Next;
-	        if (M == EModel.ActiveModel) break;
-	    }
-	    return null;
+		EModel M;
+		EBuffer B;
+
+		M = EModel.ActiveModel;
+		while (M!=null) {
+			if (M.GetContext() == CONTEXT_FILE) {
+				B = (EBuffer )M;
+				if (filecmp(B.FileName, FileName) == 0) { return B; }
+			}
+			M = M.Next;
+			if (M == EModel.ActiveModel) break;
+		}
+		return null;
 	}
 
 	/*#if 0
@@ -411,60 +412,60 @@ public class Console {
 	#endif */
 
 	boolean FileLoad(int createFlags, String FileName, String Mode, EView View) {
-	    String Name[] = {""};
-	    EBuffer B;
+		String Name[] = {""};
+		EBuffer B;
 
-	    assert(View != null);
-	    
-	    if (ExpandPath(FileName, Name) == -1) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FileName);
-	        return false;
-	    }
-	    B = FindFile(Name[0]);
-	    if (B) {
-	        if (Mode != null)
-	            B.SetFileName(Name, Mode);
-	        View.SwitchToModel(B);
-	        return true;
-	    }
-	    B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
-	    B.SetFileName(Name[0], Mode);
+		assert(View != null);
 
-	    View.SwitchToModel(B);
-	    return true;
+		if (ExpandPath(FileName, Name) == -1) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FileName);
+			return false;
+		}
+		B = FindFile(Name[0]);
+		if (B) {
+			if (Mode != null)
+				B.SetFileName(Name, Mode);
+			View.SwitchToModel(B);
+			return true;
+		}
+		B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
+		B.SetFileName(Name[0], Mode);
+
+		View.SwitchToModel(B);
+		return true;
 	}
 
 	static boolean MultiFileLoad(int createFlags, String FileName, String Mode, EView View) {
 		String  fX[];
-	    int count = 0;
-	    String  FPath[];
-	    String  FName[];
-	    FileFind ff;
-	    FileInfo fi;
-	    int rc;
+		int count = 0;
+		String  FPath[];
+		String  FName[];
+		FileFind ff;
+		FileInfo fi;
+		int rc;
 
-	    assert(View != null);
+		assert(View != null);
 
-	    JustDirectory(FileName, fX);
-	    if (fX[0] == null) fX[0] = ".";
-	    JustFileName(FileName, FName);
-	    if (ExpandPath(fX, FPath) == -1) return 0;
-	    Slash(FPath, 1);
+		JustDirectory(FileName, fX);
+		if (fX[0] == null) fX[0] = ".";
+		JustFileName(FileName, FName);
+		if (ExpandPath(fX, FPath) == -1) return 0;
+		Slash(FPath, 1);
 
-	    ff = new FileFind(FPath, FName, ffHIDDEN | ffFULLPATH);
-	    if (ff == 0)
-	        return 0;
-	    rc = ff.FindFirst(fi);
-	    while (rc == 0) {
-	        count++;
-	        if (FileLoad(createFlags, fi.Name(), Mode, View) == 0) {
-	            return false;
-	        }
-	        rc = ff.FindNext(fi);
-	    }
-	    if (count == 0)
-	        return FileLoad(createFlags, FileName, Mode, View);
-	    return true;
+		ff = new FileFind(FPath, FName, ffHIDDEN | ffFULLPATH);
+		if (ff == 0)
+			return 0;
+		rc = ff.FindFirst(fi);
+		while (rc == 0) {
+			count++;
+			if (FileLoad(createFlags, fi.Name(), Mode, View) == 0) {
+				return false;
+			}
+			rc = ff.FindNext(fi);
+		}
+		if (count == 0)
+			return FileLoad(createFlags, FileName, Mode, View);
+		return true;
 	}
 
 	public static boolean FileExists(String fileName) {
@@ -482,8 +483,8 @@ public class Console {
 		//return false;
 	}
 
-	public static void unlink(String fn) {
-		new File(fn).delete();
+	public static int unlink(String fn) {
+		return (new File(fn).delete()) ? 0 : -1;
 	}
 
 	public static boolean rename(String from, String to) {
@@ -491,49 +492,219 @@ public class Console {
 	}
 
 	public static int RunProgram(int runWait, String Command, GFrame frames) {
-		    int [] W = {0}, H = {0}, W1 = {0}, H1 = {0};
+		int [] W = {0}, H = {0}, W1 = {0}, H1 = {0};
 
-		    ConQuerySize(W, H);
-		    ConHideMouse();
-		    // TODO ConSuspend();
+		ConQuerySize(W, H);
+		ConHideMouse();
+		// TODO ConSuspend();
 
-		    // TODO unix
-		    if (Command == null)      // empty string = shell
-		        Command = System.getenv( "COMSPEC" );
+		// TODO unix
+		if (Command == null)      // empty string = shell
+			Command = System.getenv( "COMSPEC" );
 
-		    //int rc = System.system(Command);
-		    
-		    
-		    int rc = 0;
-		    if(runWait!=0)
-				try {
-				    Process p = Runtime.getRuntime().exec(Command);
-					rc = p.waitFor();
-				} catch (InterruptedException | IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					rc = -1;
-				}
-		    
-		    // TODO ConContinue();
-		    ConShowMouse();
-		    ConQuerySize(W1, H1);
+		//int rc = System.system(Command);
 
-		    if (W != W1 || H != H1) {
-		        frames.Resize(W1[0], H1[0]);
-		    }
-		    frames.Repaint();
-		    
-		    return rc;
-		
+
+		int rc = 0;
+		if(runWait!=0)
+			try {
+				Process p = Runtime.getRuntime().exec(Command);
+				rc = p.waitFor();
+			} catch (InterruptedException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				rc = -1;
+			}
+
+		// TODO ConContinue();
+		ConShowMouse();
+		ConQuerySize(W1, H1);
+
+		if (W != W1 || H != H1) {
+			frames.Resize(W1[0], H1[0]);
+		}
+		frames.Repaint();
+
+		return rc;
+
 	}
 
 	public static boolean IsDirectory(String file) {
 		return new File(file).isDirectory();
 	}
 
-	
-	
-	
-	
+
+	public static int ExpandPath(String Path, String[] Expand) {		
+		Expand[0] = new File(Path).getAbsolutePath();
+		return 0;
+		/*
+		String Name;
+
+		if (Path.isBlank()) {
+			Expand[0] = null;
+			return 0;
+		}
+		
+		#if PATHTYPE == PT_DOSISH
+				int slashed = 0;
+
+		strcpy(Name, Path);
+		if (Name[0] != 0)
+			slashed = ISSLASH(Name[strlen(Name)-1]);
+		Slash(Name, 0);
+
+			//puts(Name);
+		if (Name[0] && Name[1] == ':' && Name[2] == 0) { // '?:'
+			int drive = Name[0];
+
+			strcpy(Expand, Name);
+			Expand[2] = '\\';
+			Expand[3] = 0;
+
+			drive = (int)(toupper(Name[0]) - 'A' + 1);
+
+			if (GetDiskCurDir(drive, Expand + 3) == -1)
+				return -1;
+		} else {
+
+				if (_fullpath(Expand, Name, MAXPATH) == NULL) return -1;
+
+		}
+
+
+		if (slashed)
+			SlashDir(Expand);
+		//puts(Expand);
+		return 0;
+		#endif
+		
+		#if PATHTYPE == PT_UNIXISH
+		char Name2[MAXPATH];
+		String path, *p;
+
+		strcpy(Name, Path);
+		switch (Name[0]) {
+		case SLASH:
+			break;
+		case '~':
+			if (Name[1] == SLASH || Name[1] == 0) {
+				path = Name + 1;
+				strncpy(Name2, getenv("HOME"), sizeof(Name2) - 1);
+				Name2[sizeof(Name2) - 1] = 0;
+			} else {
+				struct passwd *pwd;
+
+				p = Name;
+				p++;
+				while (*p && (*p != SLASH)) p++;
+				if (*p == SLASH) {
+					path = p + 1;
+					*p = 0;
+				} else {
+					path = p;
+				}
+				pwd = getpwnam(Name + 1);
+				if (pwd == NULL)
+					return -1;
+				strcpy(Name2, pwd.pw_dir);
+			}
+			if (path[0] != SLASH)
+				Slash(Name2, 1);
+			strcat(Name2, path);
+			strcpy(Name, Name2);
+			break;
+		default:
+			if (getcwd(Name, MAXPATH) == NULL) return -1;
+			Slash(Name, 1);
+			strcat(Name, Path);
+			break;
+		}
+		return RemoveDots(Name, Expand);
+		#endif
+		*/
+	}
+
+
+
+	int IsSameFile(String Path1, String Path2) 
+	{
+		/*
+	    String  p1[] = {null}, p2[] = {null};
+
+	    if (ExpandPath(Path1, p1) == -1) return -1;
+	    if (ExpandPath(Path2, p2) == -1) return -1;
+	    if (filecmp(p1, p2) == 0) return 1;
+	    */
+		Path p1 = Path.of(Path1).toAbsolutePath();
+		Path p2 = Path.of(Path1).toAbsolutePath();
+		return p1.equals(p2) ? 1 : 0;
+	    //return 0;
+	}
+
+	static int JustDirectory(String path, String[] Dir) {
+		Path p = Path.of(path);
+		Dir[0] = p.getParent().toString();
+		/*
+		String p;
+
+	    if (ExpandPath(Path, Dir) == -1)
+	        strcpy(Dir, Path);
+	    p = SepRChr(Dir);
+	    if (p) { p[1] = 0; }
+	    else Dir[0] = 0;
+	    */
+	    return 0;
+	}
+
+	static int JustLastDirectory(String path, String [] Dir) 	
+	{
+		Path p = Path.of(path);
+		if(p.getNameCount() < 2)
+			Dir[0] = "";
+		else
+			Dir[0] = p.getName(p.getNameCount()-2).toString();
+		
+		/*
+	    int lastSlash = strlen(Path);
+	    while (lastSlash > 0 && !ISSEP(Path[lastSlash])) lastSlash--;
+
+	    int secondLastSlash = lastSlash;
+	    while (secondLastSlash > 0 && !ISSEP(Path[secondLastSlash - 1])) secondLastSlash--;
+
+	    strncpy(Dir, Path + secondLastSlash, lastSlash - secondLastSlash);
+	    Dir[lastSlash - secondLastSlash] = 0;
+
+	    */
+	    return 0;
+	}
+
+	static int JustFileName(String path, String [] Name) 
+	{
+		Path p = Path.of(path);
+		Name[0] = p.getFileName().toString();
+		/*
+		int len = strlen(Path);
+
+	    while (len > 0 && !ISSEP(Path[len - 1])) len--;
+	    strcpy(Name, Path + len);
+	    */
+	    return 0;
+	}
+
+	static int JustRoot(String path, String [] Root) {
+		Path p = Path.of(path);
+		Root[0] = p.getRoot().toString();
+		/*
+	#if PATHTYPE == PT_UNIXISH
+	    strcpy(Root, SSLASH);
+	#else
+	    strncpy(Root, Path, 3);
+	    Root[3] = 0;
+	#endif
+		*/
+	    return 0;
+	}
+
+
+
 }

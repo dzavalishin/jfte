@@ -144,7 +144,7 @@ public class GView implements Closeable
         Result = NewResult;
     }
 
-    int Execute() throws IOException {
+    int Execute() {
         int SaveRc = Result;
         int NewResult;
         boolean didFocus = false;

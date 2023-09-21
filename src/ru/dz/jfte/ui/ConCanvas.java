@@ -14,8 +14,8 @@ public class ConCanvas extends JPanel {
 
 	private ConData cd;
 
-	public ConCanvas(ConData cd) 
-	{
+	public ConCanvas(ConData cd) {
+
 		this.cd = cd;
 
 		addMouseMotionListener(
@@ -27,7 +27,6 @@ public class ConCanvas extends JPanel {
 						//repaint();
 					}
 				} );
-		
 		setMinimumSize(new Dimension(cd.getWidth(), cd.getHeight()));
 	}
 

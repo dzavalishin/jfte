@@ -85,7 +85,7 @@ public class Main implements MainConst
 	    return 0;
 	}
 
-	private static String getenv(String string) {		
+	static String getenv(String string) {		
 		return System.getenv(string);
 	}
 

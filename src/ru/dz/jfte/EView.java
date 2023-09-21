@@ -313,7 +313,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         if (State.GetIntParam(this, No) == 0) {
             String [] str = {""};
 
-            if (MView.Win.GetStr("Obj.Number", str, 0) == 0) return 0;
+            if (MView.Win.GetStr("Obj.Number", str, 0) == 0) return ExResult.ErFAIL;
             No[0] = Integer.parseInt(str[0]);
         }
         M = Model;
@@ -527,7 +527,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             }
         }
         if (dir == null)
-            dir = new EDirectory(0, EModel.ActiveModel, XPath);
+            dir = EDirectory.newEDirectory(0, EModel.ActiveModel, XPath);
         SelectModel(dir);
         return ExResult.ErOK;
     }
@@ -538,7 +538,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         String [] Cmd     = {""};
         String [] Command = {""};
 
-        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running) {
             Msg(S_INFO, "Already running...");
             return ExResult.ErFAIL;
         }
@@ -564,7 +564,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     ExResult RunCompiler(ExState State) {
         String [] Command = {""};
 
-        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running) {
             Msg(S_INFO, "Already running...");
             return ExResult.ErFAIL;
         }
@@ -593,7 +593,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             if (Console.GetDefaultDirectory(Model, Dir) == 0)
                 return ExResult.ErFAIL;
 
-            msgs = new EMessages(0, EModel.ActiveModel, Dir[0], Command);
+            msgs = EMessages.newEMessages(0, EModel.ActiveModel, Dir[0], Command);
         }
         SwitchToModel(msgs);
         return ExResult.ErOK;
@@ -638,7 +638,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
 
     ExResult ClearMessages() {
-        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running!=0) {
+        if (EMessages.CompilerMsgs != null && EMessages.CompilerMsgs.Running) {
             Msg(S_INFO, "Running...");
             return ExResult.ErFAIL;
         }
@@ -667,7 +667,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         if (Console.ExpandPath(Tag, FullTag) == -1)
             return 0;
 
-        if (!Console.FileExists(FullTag)) {
+        if (!Console.FileExists(FullTag[0])) {
             Msg(S_INFO, "Tag file '%s' not found.", FullTag);
             return 0;
         }

@@ -9,7 +9,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
     protected ExView Next;
 
 	@Override
-	public void close() throws IOException {
+	public void close()  {
 		// TODO Auto-generated method stub
 		
 	}

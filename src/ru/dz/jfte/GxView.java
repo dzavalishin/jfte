@@ -191,7 +191,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    int GetStr(String Prompt, String []Str, int HistId) throws IOException {
+    int GetStr(String Prompt, String []Str, int HistId) {
         if (0 != (GFrame.HaveGUIDialogs & GUIDLG_PROMPT) && 0 != Config.GUIDialogs) {
             return DLGGetStr(this, Prompt, Str, HistId, 0);
         } else {
@@ -199,14 +199,16 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    int GetFile(String Prompt, String []Str, int HistId, int Flags) throws IOException {
+    int GetFile(String Prompt, String []Str, int HistId, int Flags)
+    {
         if ( 0 != (GFrame.HaveGUIDialogs & GUIDLG_FILE) && 0 != Config.GUIDialogs)
             return DLGGetFile(this, Prompt, Str, Flags);
         else
             return ReadStr(Prompt, Str, Console.CompletePath, Config.SelectPathname, HistId);
     }
 
-    int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId) throws IOException {
+    int ReadStr(String Prompt, String []Str, Completer Comp, int Select, int HistId)
+    {
         int rc;
         ExInput input;
 
@@ -232,8 +234,6 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
     int Choice(int Flags, String Title, int NSel, String ... choices /*, format, args */)  {
 
-		try {
-
         if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) != 0 && Config.GUIDialogs != 0) {
             return DLGPickChoice(this, Title, NSel, choices, Flags);
         } else {
@@ -248,14 +248,9 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
             return rc;
         }
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return -1; // TODO check callers check it
-		}
     }
 
-    long /*TKeyCode*/ GetChar(String Prompt) throws IOException {
+    long /*TKeyCode*/ GetChar(String Prompt) {
         int rc;
         long /*TKeyCode*/K = 0;
 
