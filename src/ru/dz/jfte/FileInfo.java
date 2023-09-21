@@ -32,8 +32,7 @@ public class FileInfo {
 	long MTime() { return mtime; }
 
 	public boolean isDir() {
-		// TODO Auto-generated method stub
-		//return false;
+		return 0 != (type & fiDIRECTORY);
 	}
 
 

@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.util.Arrays;
+import java.util.Date;
 
 public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs 
 {
@@ -70,7 +71,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 					Files[Line].Size());
 			*/
 	        Date modifiedDate = new Date(Files[Line].MTime());
-	        String s = modifiedDate.toString() + " " + Files[Line].Size()
+	        String s = modifiedDate.toString() + " " + Files[Line].Size();
 
 			s += Files[Line].name;
 
@@ -107,7 +108,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		int SizeCount = 0;
 		FileFind ff;
 		FileInfo fi;
-		int rc;
+		//int rc;
 
 		FreeList();
 
@@ -116,12 +117,9 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		if (Console.JustDirectory(Path, Dir) != 0) return;
 		Console.JustFileName(Path, Name);
 
-		ff = new FileFind(Dir[0], "*", ffDIRECTORY | ffHIDDEN);
-		if (ff == 0)
-			return ;
+		ff = new FileFind(Dir[0], "*", FileFind.ffDIRECTORY | FileFind.ffHIDDEN);
 
-		rc = ff.FindFirst(fi);
-		while (rc == 0) {
+		while ((fi = ff.FindNext()) != null) {
 			assert(fi != null);
 			if (!fi.Name().equals(".")) {
 				//Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
@@ -135,8 +133,6 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 				Count++;
 				FCount++;
 			}
-
-			rc = ff.FindNext(fi);
 		}
 		//delete ff;
 
@@ -339,7 +335,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		RescanList();
 		if (!CName.isBlank()) {
 			for (int i = 0; i < FCount; i++) {
-				if (filecmp(Files[i].Name(), CName) == 0)
+				if (Console.filecmp(Files[i].Name(), CName) == 0)
 				{
 					Row = i;
 					break;
@@ -372,7 +368,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		RescanList();
 		if (!CName[0].isBlank()) {
 			for (int i = 0; i < FCount; i++) {
-				if (filecmp(Files[i].Name(), CName) == 0)
+				if (Console.filecmp(Files[i].Name(), CName[0]) == 0)
 				{
 					Row = i;
 					break;
@@ -423,7 +419,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		Console.JustDirectory(Path, FilePath);
 		FilePath[0] = Console.Slash(FilePath[0], 1);
 		FilePath[0] += Name;
-		return FileLoad(0, FilePath, null, XView);
+		return Console.FileLoad(0, FilePath[0], null, XView) ? ExResult.ErOK : ExResult.ErFAIL;
 	}
 
 	String GetName() {

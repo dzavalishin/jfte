@@ -2,6 +2,7 @@ package ru.dz.jfte;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -13,7 +14,8 @@ import java.nio.file.attribute.BasicFileAttributes;
  *
  */
 
-public class Console {
+public class Console implements ModeDefs
+{
 
 	public static Completer CompletePath = new FileCompleter();
 	static int CursorVisible = 1;
@@ -380,7 +382,7 @@ public class Console {
 
 
 
-	EBuffer FindFile(String FileName) {
+	static EBuffer FindFile(String FileName) {
 		EModel M;
 		EBuffer B;
 
@@ -411,7 +413,7 @@ public class Console {
 	}
 	#endif */
 
-	boolean FileLoad(int createFlags, String FileName, String Mode, EView View) {
+	static boolean FileLoad(int createFlags, String FileName, String Mode, EView View) {
 		String Name[] = {""};
 		EBuffer B;
 
@@ -452,19 +454,18 @@ public class Console {
 		if (ExpandPath(fX, FPath) == -1) return 0;
 		Slash(FPath, 1);
 
-		ff = new FileFind(FPath, FName, ffHIDDEN | ffFULLPATH);
-		if (ff == 0)
-			return 0;
-		rc = ff.FindFirst(fi);
-		while (rc == 0) {
+		ff = new FileFind(FPath, FName, FileFind.ffHIDDEN | FileFind.ffFULLPATH);
+
+		while((fi = ff.FindNext()) != null) {
 			count++;
-			if (FileLoad(createFlags, fi.Name(), Mode, View) == 0) {
+			if (!FileLoad(createFlags, fi.Name(), Mode, View)) {
 				return false;
 			}
-			rc = ff.FindNext(fi);
 		}
+		
 		if (count == 0)
 			return FileLoad(createFlags, FileName, Mode, View);
+		
 		return true;
 	}
 
@@ -626,7 +627,7 @@ public class Console {
 
 
 
-	int IsSameFile(String Path1, String Path2) 
+	static boolean IsSameFile(String Path1, String Path2) 
 	{
 		/*
 	    String  p1[] = {null}, p2[] = {null};
@@ -637,7 +638,7 @@ public class Console {
 	    */
 		Path p1 = Path.of(Path1).toAbsolutePath();
 		Path p2 = Path.of(Path1).toAbsolutePath();
-		return p1.equals(p2) ? 1 : 0;
+		return p1.equals(p2);
 	    //return 0;
 	}
 
@@ -705,6 +706,29 @@ public class Console {
 	    return 0;
 	}
 
+	static int JoinDirFile(String [] Dest, String Dir, String Name) {
+	    Dest[0] = Dir;
+	    Dest[0] = Slash(Dest[0], 1);
+	    Dest[0] += Name;
+	    return 0;
+	}
+
+
+	public static int filecmp(String f1, String f2) {
+		return new File(f1).equals(new File(f2)) ? 0 : 1;
+	}
+
+
+	public static boolean copyfile(String f, String t) {
+		try {
+			Files.copy(Path.of(f), Path.of(t));
+			return true
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 
 }

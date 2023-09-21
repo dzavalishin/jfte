@@ -39,17 +39,14 @@ public class FileFind //implements Closeable
 		// TODO close
 	}*/
 
-	int FindFirst(FileInfo []fi) {
-		return FindNext(fi);
-	}
+	FileInfo FindNext() {
 
-	int FindNext(FileInfo []fi) {
+		FileInfo ret = null;
 
-		fi[0] = null;
 		while(true)
 		{
 			if(current >= list.length)
-				return -1;
+				return null;
 
 			String name = list[current++];
 
@@ -57,36 +54,38 @@ public class FileFind //implements Closeable
 				if ((Flags & ffHIDDEN)==0)
 					continue;
 
-			if (Pattern != null && fnmatch(Pattern, name, 0) != 0)
+			if (Pattern != null && Console.fnmatch(Pattern, name, 0) != 0)
 				continue;
 
+			String [] fullpath = {""};
+			
 			if(0!= (Flags & ffFULLPATH)) {
-				JoinDirFile(fullpath, Directory, name);
-				name = fullpath;
+				Console.JoinDirFile(fullpath, Directory, name);
+				name = fullpath[0];
 			}
 
 			if(0!=  (Flags & ffFAST)) {
-				fi[0] = new FileInfo(name, FileInfo.fiUNKNOWN, 0, 0);
+				ret = new FileInfo(name, FileInfo.fiUNKNOWN, 0, 0);
 			} else {
 				// stat st;
 
 				if(0== (Flags & ffFULLPATH)) // need it now
-					JoinDirFile(fullpath, Directory, name);
+					Console.JoinDirFile(fullpath, Directory, name);
 
-				File st = new File(fullpath);
+				File st = new File(fullpath[0]);
 
 				if( (0 == (Flags & ffDIRECTORY)) && st.isDirectory())
 					continue;
 
-				fi[0] = new FileInfo(name,
+				ret = new FileInfo(name,
 						st.isDirectory() ? FileInfo.fiDIRECTORY : FileInfo.fiFILE,
 						st.length(),
 						st.lastModified());
 			}
 			//printf("ok\n");
-			return 0;
+			return ret;
 		}
-		return -1;
+		return null;
 	}
 
 

@@ -506,7 +506,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
 
     ExResult OpenDir(String Path) {
-        String XPath;
+        String [] XPath = {""};
         EDirectory dir = null;
 
         if (Console.ExpandPath(Path, XPath) == -1)
@@ -515,7 +515,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             EModel x = Model;
             while (x != null) {
                 if (x.GetContext() == CONTEXT_DIRECTORY) {
-                    if (filecmp(((EDirectory )x).Path, XPath) == 0)
+                    if (filecmp(((EDirectory )x).Path, XPath[0]) == 0)
                     {
                         dir = (EDirectory )x;
                         break;
@@ -527,7 +527,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             }
         }
         if (dir == null)
-            dir = EDirectory.newEDirectory(0, EModel.ActiveModel, XPath);
+            dir = EDirectory.newEDirectory(0, EModel.ActiveModel, XPath[0]);
         SelectModel(dir);
         return ExResult.ErOK;
     }
@@ -664,7 +664,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         if (State.GetStrParam(this, Tag) == 0)
             if (MView.Win.GetFile("Load tags", Tag, HIST_TAGFILES, GF_OPEN) == 0) return 0;
 
-        if (Console.ExpandPath(Tag, FullTag) == -1)
+        if (Console.ExpandPath(Tag[0], FullTag) == -1)
             return 0;
 
         if (!Console.FileExists(FullTag[0])) {
@@ -672,7 +672,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             return 0;
         }
 
-        return super.TagLoad(FullTag);
+        return super.TagLoad(FullTag[0]);
     }
     
 
@@ -684,8 +684,10 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
 
         String command = "cfte "+Config.ConfigSourcePath+" ";
     //#ifdef UNIX
-        if (ExpandPath("~/.fterc", command + strlen(command)) != 0)
+        String [] exp = {""};
+        if (Console.ExpandPath("~/.fterc", exp) != 0)
             return ExResult.ErFAIL;
+        command += exp[0];
     /*TODO #else
         strcat(command, ConfigFileName);
     #endif */
@@ -696,8 +698,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     	 String [] name = {""};
 
         if (State.GetStrParam(this, name) == 0)
-            if (MView.Win.GetStr("Remove Global Bookmark", name, HIST_BOOKMARK) == 0) return 0;
-        if (markIndex.remove(name) == 0) {
+            if (MView.Win.GetStr("Remove Global Bookmark", name, HIST_BOOKMARK) == 0) return ExResult.ErFAIL;
+        if (EMarkIndex.markIndex.remove(name) == 0) {
             Msg(S_ERROR, "Error removing global bookmark %s.", name);
             return ExResult.ErFAIL;
         }
@@ -708,8 +710,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         String [] name = {""};
 
         if (State.GetStrParam(this, name ) == 0)
-            if (MView.Win.GetStr("Goto Global Bookmark", name, HIST_BOOKMARK) == 0) return 0;
-        if (markIndex.view(this, name[0]) == 0) {
+            if (MView.Win.GetStr("Goto Global Bookmark", name, HIST_BOOKMARK) == 0) return ExResult.ErFAIL;
+        if (EMarkIndex.markIndex.view(this, name[0]) == 0) {
             Msg(S_ERROR, "Error locating global bookmark %s.", name[0]);
             return ExResult.ErFAIL;
         }
@@ -717,7 +719,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
     
     ExResult PopGlobalBookmark() {
-        if (markIndex.popMark(this) == 0) {
+        if (EMarkIndex.markIndex.popMark(this) == 0) {
             Msg(S_INFO, "Bookmark stack empty.");
             return ExResult.ErFAIL;
         }

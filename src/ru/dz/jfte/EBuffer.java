@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
@@ -61,10 +63,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	int MatchCount = 0;
 	RxMatchRes MatchRes;
 
-	/* TODO /* TODO #ifdef CONFIG_BOOKMARKS
-    int BMCount;
-    EBookmark *BMarks;
-#endif */
+    //int BMCount;
+    Map<String,EBookmark> BMarks = new HashMap<>();
 
 	///* TODO #ifdef CONFIG_OBJ_ROUTINE
 	RoutineList rlst;
@@ -4981,12 +4981,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	//char FileBuffer[RWBUFSIZE];
 
+	static Charset charset = Charset.forName("ASCII");
+
 	boolean LoadFrom(String AFileName) {
 
 		int SaveUndo = iBFI(this, BFI_Undo);
 		int SaveReadOnly = iBFI(this, BFI_ReadOnly);
 
-		try(BufferedReader reader = Files.newBufferedReader(AFileName, charset)) {
+		try(BufferedReader reader = Files.newBufferedReader(Path.of(AFileName), charset)) {
 
 			boolean rc = doLoadFrom(reader, AFileName);
 			BFI_SET(this, BFI_Undo, SaveUndo);
@@ -5002,8 +5004,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Loading = false;
 			Draw(0, -1);
 			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error loading %s.", AFileName);
-			return false;
-
 			return false;
 		}
 
@@ -5411,12 +5411,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	    NewName[0] = FileName+"~";
 
-	    if (!Console.IsSameFile(FileName,NewName)) {
+	    if (!Console.IsSameFile(FileName,NewName[0])) {
 	        if (Console.access(NewName[0],0))                 // Backup already exists?
 	        	Console.unlink(NewName[0]);                         // Then delete the file..
 	        if (!Console.access(FileName, 0))                // Original found?
 	            return NewName[0];
-	        if (Console.copyfile(FileName, NewName) == 0)
+	        if (Console.copyfile(FileName, NewName[0]))
 	            return NewName[0];
 	    }
 	    
@@ -5428,7 +5428,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		String [] ABackupName = {""};
 
 		Msg(S_INFO, "Backing up %s...", AFileName);
-		if (MakeBackup(AFileName, ABackupName[0]) == 0) {
+		if (MakeBackup(AFileName, ABackupName) == null) {
 			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Could not create backup file.");
 			return false;
 		}
@@ -5459,7 +5459,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			} else {
 				View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing file, backup restored.");
 			}
-
+			
+			return false;
 		}
 
 	}
@@ -5639,6 +5640,118 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		 */
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	int PlaceBookmark(String Name, EPoint P) {
+		BMarks.put(Name, new EBookmark(Name,P));
+		/*
+	    int i;
+	    EBookmark *p;
+
+	    assert(P.Row >= 0 && P.Row < RCount && P.Col >= 0);
+
+	    for (i = 0; i < BMCount; i++) {
+	        if (strcmp(Name, BMarks[i].Name) == 0) {
+	            BMarks[i].BM = P;
+	            return 1;
+	        }
+	    }
+	    p = (EBookmark *) realloc(BMarks, sizeof (EBookmark) * (1 + BMCount));
+	    if (p == 0) return 0;
+	    BMarks = p;
+	    BMarks[BMCount].Name = strdup(Name);
+	    BMarks[BMCount].BM = P;
+	    BMCount++;
+	    */
+	    return 1;
+	}
+
+	int RemoveBookmark(String Name) {
+		/*
+	    int i;
+
+	    for (i = 0; i < BMCount; i++) {
+	        if (strcmp(Name, BMarks[i].Name) == 0) {
+	            free(BMarks[i].Name);
+	            memmove(BMarks + i, BMarks + i + 1, sizeof(EBookmark) * (BMCount - i - 1));
+	            BMCount--;
+	            BMarks = (EBookmark *) realloc(BMarks, sizeof (EBookmark) * BMCount);
+	            return 1;
+	        }
+	    }
+	    */
+		if( null != BMarks.remove(Name))
+			return 1;
+	    
+	    View.MView.Win.Choice(GPC_ERROR, "RemoveBookmark", 1, "O&K", "Bookmark %s not found.", Name);
+	    return 0;
+	}
+
+	EPoint GetBookmark(String Name) {
+		EBookmark b = BMarks.get(Name);
+		if(b != null) return b.BM;
+		return null;
+		/*
+	    for (int i = 0; i < BMCount; i++)
+	        if (strcmp(Name, BMarks[i].Name) == 0) {
+	            P = BMarks[i].BM;
+	            return 1;
+	        }
+	    return 0;
+	    */
+	}
+
+	/*
+	 * Searches bookmark list starting at given index (searchFrom) for next
+	 * bookmark for line searchForLine. It then returns its name and position
+	 * and index (used for next search) or -1 if none found. Name is pointer
+	 * directly into bookmark structure (not copied!). If searchForLine is -1,
+	 * this function returns any next bookmark -> can be used to enumerate
+	 * bookmarks.
+	 * /
+	int GetBookmarkForLine(int searchFrom, int searchForLine, String &Name, EPoint &P) {
+	    for (int i = searchFrom; i < BMCount; i++)
+	        if (searchForLine==-1||BMarks[i].BM.Row==searchForLine) {
+	            Name = BMarks[i].Name;
+	            P = BMarks[i].BM;
+	            return i+1;
+	        }
+	    return -1;
+	}*/
+	
+	
+	boolean GotoBookmark(String Name) {
+		EBookmark b = BMarks.get(Name);
+
+		if(b!=null)
+            return CenterNearPosR(b.BM.Col, b.BM.Row, 0);
+
+		View.MView.Win.Choice(GPC_ERROR, "GotoBookmark", 1, "O&K", "Bookmark %s not found.", Name);
+	    return false;
+	}
+	
+	
+	
 
 }
 
