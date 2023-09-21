@@ -6,6 +6,10 @@ public class FileInfo {
 	long mtime;
 	int type;
 
+	public static final int fiUNKNOWN   = 0;
+	public static final int fiFILE      = 1;
+	public static final int fiDIRECTORY = 2;
+
 
 	FileInfo(String Name, int Type, long Size, long MTime) {
 		name = Name;
