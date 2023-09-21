@@ -141,6 +141,31 @@ public class PCell extends ArrayPtr<Long>
 		}
 	} 
 
+	public void MoveStr(int Pos, int Width, ArrayPtr<Character> cp, int Attr, int MaxCount) {
+		PCell p = new PCell(this);
+
+		if (Pos < 0) {
+			MaxCount += Pos;
+			cp.shift(-Pos); // TODO check out of range
+			Pos = 0; 
+		}
+		
+		if (Pos >= Width) return;
+		if (Pos + MaxCount > Width) MaxCount = Width - Pos;
+		if (MaxCount <= 0) return;
+
+		p.shift(Pos);
+		int chpos = 0;
+		for (; MaxCount > 0 && (chpos < cp.length()); MaxCount--) 
+		{
+			//*p++ = (unsigned char) Ch.charAt(chpos++);
+			//*p++ = (unsigned char) Attr;
+			long set = charAndAttr(cp.r(chpos++), Attr);
+			p.wpp(set);
+
+		}
+	}
+
 	/*
 	void MoveCStr(PCell B, int Pos, int Width, const char* Ch, int   A0, int A1, int MaxCount) {
 		//unsigned char *p = (unsigned char *) B;

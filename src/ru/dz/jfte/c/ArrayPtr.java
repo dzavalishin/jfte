@@ -153,6 +153,9 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 
 	public ItemType[] getMem() 		{		return mem;		}
 
+	public int length() 			{ return mem.length; }
+
+
 	// --------------------------------------------------------------
 	// Setters
 	// --------------------------------------------------------------

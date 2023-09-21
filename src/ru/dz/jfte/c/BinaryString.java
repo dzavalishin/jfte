@@ -230,9 +230,15 @@ public class BinaryString
 		System.arraycopy(ca, 0, mem, ofs, count);		
 	}
 
+	public void copyIn(int toPos, BinaryString src, int srcPos, int len) {
+		System.arraycopy(src, srcPos, mem, toPos, len);		
+		
+	}
+	
 	public ArrayPtr<Character> getPointer() {
 		return new ArrayPtr<Character>(mem);
 	}
+
 
 	
 }

@@ -451,10 +451,10 @@ public class Console implements ModeDefs
 		JustDirectory(FileName, fX);
 		if (fX[0] == null) fX[0] = ".";
 		JustFileName(FileName, FName);
-		if (ExpandPath(fX, FPath) == -1) return 0;
-		Slash(FPath, 1);
+		if (ExpandPath(fX[0], FPath) == -1) return 0;
+		FPath[0] = Slash(FPath[0], 1);
 
-		ff = new FileFind(FPath, FName, FileFind.ffHIDDEN | FileFind.ffFULLPATH);
+		ff = new FileFind(FPath[0], FName[0], FileFind.ffHIDDEN | FileFind.ffFULLPATH);
 
 		while((fi = ff.FindNext()) != null) {
 			count++;
@@ -477,11 +477,20 @@ public class Console implements ModeDefs
 	public static BasicFileAttributes stat(String fileName) {
 		// TODO Auto-generated method stub
 		//return null;
+		Path p = Path.of(fileName);
+		BasicFileAttributes attrs;
+		try {
+			attrs = Files.readAttributes(p, BasicFileAttributes.class);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		return attrs; 		
 	}
 
 	public static boolean isReadonly(String fileName) {
-		// TODO Auto-generated method stub
-		//return false;
+		return !new File(fileName).canWrite();
 	}
 
 	public static int unlink(String fn) {

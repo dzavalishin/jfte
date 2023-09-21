@@ -50,7 +50,7 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
             Win.Parent.SelectNext(0);
     }
 
-    void EndExec(int NewResult) throws IOException {
+    void EndExec(int NewResult)  {
         if (Win.Result == -2) { // hack
             Win.EndExec(NewResult);
         } else {

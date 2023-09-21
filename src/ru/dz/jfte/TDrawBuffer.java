@@ -1,5 +1,6 @@
 package ru.dz.jfte;
 
+
 public class TDrawBuffer extends PCell 
 {
 	static final int ConMaxCols = 500;
@@ -12,5 +13,7 @@ public class TDrawBuffer extends PCell
 	public TDrawBuffer(int size) {
 		super(new Long [size]);
 	}
+
+
 	
 }

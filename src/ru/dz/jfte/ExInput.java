@@ -1,9 +1,13 @@
 package ru.dz.jfte;
 
+import ru.dz.jfte.c.ArrayPtr;
+import ru.dz.jfte.c.BinaryString;
+
 public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs 
 {
     String Prompt;
-    String Line;
+    //String Line;
+    BinaryString Line = new BinaryString();
     String MatchStr;
     String CurStr;
     int Pos;
@@ -29,14 +33,17 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
         Comp = AComp;
         SelStart = SelEnd = 0;
         Prompt = APrompt;
-        Line = "";
+        //Line = "";
         MatchStr = "";
         CurStr = "";
-        if (Line != null) {
-            Line = ALine[0];
+
+        // TODO where do we copy back?
+            //Line = ALine[0];
+            Line = new BinaryString(ALine[0]);
             Pos = Line.length();
             LPos = 0;
-        }
+
+        
         if (Select != 0)
             SelEnd = Pos;
         TabCount = 0;
@@ -99,7 +106,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbBackSp | kfCtrl | kfShift:
                 SelStart = SelEnd = 0; 
                 Pos = 0;
-                Line = "";
+                Line.trySetSize(0);
                 TabCount = 0;
                 break;
             case kbBackSp | kfCtrl:
@@ -111,7 +118,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                         
                         if (Pos > 0) do {
                             Pos--;
-                            memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                            //memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                            int len = Line.length() - Pos;
+                            Line.memmove(Pos, Pos+1, len);
                             if (Pos == 0) break;
                             Ch = Line.charAt(Pos - 1);
                         } while (Pos > 0 && Ch != '\\' && Ch != '/' && Ch != '.' && KeyDefs.isalnum(Ch));
@@ -124,7 +133,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbBackSp:
             case kbBackSp | kfShift:
                 if (SelStart < SelEnd) {
-                    memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    //memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    int len = Line.length() - SelEnd + 1;
+                    Line.memmove(SelStart, SelEnd, len);
                     Pos = SelStart;
                     SelStart = SelEnd = 0;
                     break;
@@ -132,32 +143,44 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                 if (Pos <= 0) break;
                 Pos--;
                 if (Pos < Line.length())
-                    memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                {
+                    //memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                	int len = Line.length() - Pos;
+                	Line.memmove(Pos, Pos+1, len);
+                }
                 TabCount = 0;
                 Event.What = evNone;
                 break;
             case kbDel:
                 if (SelStart < SelEnd) {
-                    memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    //memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    int len = Line.length() - SelEnd + 1;
+                    Line.memmove(SelStart, SelEnd, len);
                     Pos = SelStart;
                     SelStart = SelEnd = 0;
                     break;
                 }
                 if (Pos < Line.length())
-                    memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                {
+                    //memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
+                	int len = Line.length() - Pos;
+                	Line.memmove(Pos, Pos+1, len);
+                }
                 TabCount = 0;
                 Event.What = evNone;
                 break;
             case kbDel | kfCtrl:
                 if (SelStart < SelEnd) {
-                    memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    //memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                    int len = Line.length() - SelEnd + 1;
+                    Line.memmove(SelStart, SelEnd, len);
                     Pos = SelStart;
                     SelStart = SelEnd = 0;
                     break;
                 }
                 SelStart = SelEnd = 0;
                 //Line[Pos] = 0;
-                Line = Line.substring(0,Pos);
+                Line = new BinaryString( Line.substring(0,Pos) );
                 TabCount = 0;
                 Event.What = evNone;
                 break;
@@ -173,15 +196,21 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     if (EBuffer.SSBuffer.RCount == 0) break;
 
                     if (SelStart < SelEnd) {
-                        memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                        //memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                        int mlen = Line.length() - SelEnd + 1;
+                        Line.memmove(SelStart, SelEnd, mlen);
                         Pos = SelStart;
                         SelStart = SelEnd = 0;
                     }
 
                     len = EBuffer.SSBuffer.LineChars(0);
                     if (Line.length() + len < MaxLen) {
-                        memmove(Line + Pos + len, Line + Pos, strlen(Line + Pos) + 1);
-                        memcpy(Line + Pos, EBuffer.SSBuffer.RLine(0).Chars, len);
+                        //memmove(Line + Pos + len, Line + Pos, strlen(Line + Pos) + 1);
+                        //memcpy(Line + Pos, EBuffer.SSBuffer.RLine(0).Chars, len);
+                        int mlen = Line.length() - Pos + 1;
+                        BinaryString src = EBuffer.SSBuffer.RLine(0).Chars;
+                        Line.memmove(Pos+len, Pos, mlen);
+                        Line.copyIn( Pos, src, 0, len );
                         TabCount = 0;
                         Event.What = evNone;
                         Pos += len;
@@ -191,7 +220,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
             case kbUp:
                 SelStart = SelEnd = 0;
                 if (CurItem == 0) 
-                    CurStr = new String(Line);
+                    CurStr = Line.toString();
                 CurItem += 2;
             case kbDown:
                 SelStart = SelEnd = 0;
@@ -222,11 +251,11 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
                     TabCount++;
                     if (TabCount < 1) TabCount = 1;
                     if ((TabCount == 1) && (KeyDefs.kbCode(((TKeyEvent)Event).Code) == kbTab)) {
-                        MatchStr = new String(Line);
+                        MatchStr = Line.toString();
                     }
                     n = Comp.complete(MatchStr, Str2, TabCount);
                     if ((n > 0) && (TabCount <= n)) {
-                        Line = new String(Str2[0]);
+                        Line = new BinaryString(Str2[0]);
                         Pos = Line.length();
                     } else if (TabCount > n) TabCount = n;
                     //free(Str2);
@@ -244,12 +273,19 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 
                     if( 0 != (Ch = ((TKeyEvent)Event).GetChar()) && (Line.length() < MaxLen)) {
                         if (SelStart < SelEnd) {
-                            memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                            //memmove(Line + SelStart, Line + SelEnd, strlen(Line + SelEnd) + 1);
+                            int len = Line.length() - SelEnd + 1;
+                            Line.memmove(SelStart, SelEnd, len);
                             Pos = SelStart;
                             SelStart = SelEnd = 0;
                         }
-                        memmove(Line + Pos + 1, Line + Pos, strlen(Line + Pos) + 1);
-                        Line[Pos++] = Ch;
+                        //memmove(Line + Pos + 1, Line + Pos, strlen(Line + Pos) + 1);
+                        //Line[Pos++] = Ch;
+                        
+                        int mlen = Line.length() - Pos + 1;
+                        Line.memmove(Pos+1, Pos, mlen);
+                        Line.copyIn(Pos++, ""+Ch, 1);
+                        
                         TabCount = 0;
                         Event.What = evNone;
                     }
@@ -296,7 +332,13 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
         B.MoveChar( 0, W[0], ' ', hcEntry_Field, W[0]);
         B.MoveStr( 0, W[0], Prompt, hcEntry_Prompt, FPos);
         B.MoveChar( FPos - 2, W[0], ':', hcEntry_Prompt, 1);
-        B.MoveStr( FPos, W[0], Line + LPos, hcEntry_Field, FLen);
+        
+        //B.MoveStr( FPos, W[0], Line + LPos, hcEntry_Field, FLen);
+        
+        ArrayPtr<Character> lp = Line.getPointer();
+        lp.shift(LPos);
+        B.MoveStr( FPos, W[0], lp, hcEntry_Field, FLen);
+        
         B.MoveAttr( FPos + SelStart - LPos, W[0], hcEntry_Selection, SelEnd - SelStart);
         ConSetCursorPos(FPos + Pos - LPos, H[0] - 1);
         ConPutBox(0, H[0] - 1, W[0], 1, B);
