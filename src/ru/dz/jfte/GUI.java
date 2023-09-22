@@ -503,11 +503,39 @@ public class GUI implements GuiDefs, EventDefs
 
 			return true;
 		}
+
+		public TEvent checkPipe() {
+			try {
+				if( input.ready() )
+				{
+					return TEvent.newNotifyPipeEvent(id,notify);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
 	}
 
 	static GPipe [] Pipes = new GPipe[MAX_PIPES];
 
 
+	/**
+	 * Poor man's multithreading?
+	 * 
+	 * @return true if some pipe has data to read
+	 */
+	public static TEvent checkPipeData()
+	{
+		TEvent ret = null;
+		for(GPipe p : Pipes)
+			if(p != null && (ret = p.checkPipe()) != null)
+				return ret;
+		
+		return null;
+	}
+	
 	int OpenPipe(String Command, EModel  notify)
 	{
 		int i;

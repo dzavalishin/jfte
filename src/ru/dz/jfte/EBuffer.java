@@ -203,6 +203,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		#endif 
 	} */
 
+    @Override
 	void DeleteRelated() {
 		/* /* TODO #ifdef CONFIG_OBJ_ROUTINE
 		if (Routines) {
@@ -1278,12 +1279,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	boolean AllocVis(int ACount) {
-		//int []V;
-
-		//V = (int []) realloc(VV, sizeof(int) * (ACount + 1));
-		//if (V == 0 && ACount != 0) return 0;
 		VAllocated = ACount;
-		//VV = V;
 		VV = Arrays.copyOf(VV, ACount);
 		return true;
 	}

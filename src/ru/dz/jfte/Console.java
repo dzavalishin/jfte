@@ -302,15 +302,25 @@ public class Console implements ModeDefs, GuiDefs
 				break;
 			}
 
-			e = pollMouse();
-			if(e != null) break;
+			//e = pollMouse();
+			//if(e != null) break;
 
+			// does mouse too
 			e = jc.pollKeyb();
 			if(e != null) break;
 
-			// TODO poll pipes?
 			
-			waito.wait(10);
+
+			// poll pipes?
+			if( (e = GUI.checkPipeData()) != null)
+				break;
+			
+			try {
+				waito.wait(10);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 
 	}

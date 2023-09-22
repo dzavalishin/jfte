@@ -36,10 +36,12 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	}
 
 
+    @Override
 	EEventMap GetEventMap() {
 		return EEventMap.FindEventMap("DIRECTORY");
 	}
 
+    @Override
 	void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
 		//char s[1024];
 
@@ -83,6 +85,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		}
 	}
 
+    @Override
 	boolean IsHilited(int Line) {
 		return (Line >= 0 && Line < FCount) ? Files[Line].isDir() : false;
 	}
@@ -101,6 +104,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	    return filecmp(A.Name(), B.Name());
 	}*/
 
+    @Override
 	void RescanList() {
 		String [] Dir = {""};
 		String [] Name = {""};
@@ -149,6 +153,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		NeedsRedraw = 1;
 	}
 
+    @Override
 	void FreeList() {
 		Files = null;
 		FCount = 0;
@@ -163,6 +168,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		return Console.IsDirectory(FilePath[0]);
 	}
 
+    @Override
 	ExResult ExecCommand(ExCommands Command, ExState State) {
 		switch (Command) {
 		case ExActivateInOtherWindow:
@@ -250,6 +256,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		return super.ExecCommand(Command, State);
 	}
 
+    @Override
 	int Activate(int No) {
 		SearchLen = 0;
 		Msg(S_INFO, "");
@@ -264,6 +271,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		return 1;
 	}
 
+    @Override
 	void HandleEvent(TEvent Event) {
 		//STARTFUNC("HandleEvent");
 		int resetSearch = 0;
@@ -422,12 +430,14 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		return Console.FileLoad(0, FilePath[0], null, XView) ? ExResult.ErOK : ExResult.ErFAIL;
 	}
 
+    @Override
 	String GetName() {
 		//String AName = Path;
 		//Slash(AName, 0);
 		return Console.Slash(Path, 0);
 	}
 
+    @Override
 	String GetPath() {
 		//String APath = Path;
 		//Slash(APath, 0);
@@ -461,6 +471,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	            Path);*/
 	}
 
+    @Override
 	void GetTitle(String [] ATitle, String [] ASTitle) {
 
 		ATitle[0] = Path;
@@ -494,8 +505,13 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		return RescanDir();
 	}
 
+    @Override
 	int GetContext() { return CONTEXT_DIRECTORY; }
+
+	@Override
 	String FormatLine(int Line) { return null; };
+	
+    @Override
 	boolean CanActivate(int Line) { return true; }
 
 

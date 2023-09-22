@@ -8,7 +8,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     EView Prev;        // prev view
     ExModelView MView; // model view controller
     EModel Model;       // model for this view
-    EView NextView;    // next view for model
+    //EView NextView;    // next view for model
     EViewPort Port;
     String CurMsg;
 
@@ -25,7 +25,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
             Prev = Next = this;
         ActiveView = this;
         Model = AModel;
-        NextView = null;
+        //NextView = null;
         Port = null;
         MView = null;
         CurMsg = null;
@@ -626,6 +626,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
     }
 
     ExResult ViewModeMap(ExState State) {
+    	/* TODO ViewModeMap
         if (TheEventMapView != null)
             TheEventMapView.ViewMap(GetEventMap());
         else
@@ -635,6 +636,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         else
             return ExResult.ErFAIL;
         return ExResult.ErOK;
+        */
+    	return ExResult.ErFAIL;
     }
 
     ExResult ClearMessages() {

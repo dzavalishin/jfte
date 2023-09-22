@@ -26,6 +26,15 @@ public abstract class TEvent implements EventDefs, KeyDefs
 		return me;
 	}
 
+	public static TEvent newNotifyPipeEvent(int pipeId, EModel model)
+	{
+		TMsgEvent e = new TMsgEvent(evNotify);
+		e.Command = cmPipeRead;
+		e.Param1 = pipeId;
+		e.Model = model;
+		return e;
+	}
+
 }
 
 class TEmptyEvent extends TEvent {

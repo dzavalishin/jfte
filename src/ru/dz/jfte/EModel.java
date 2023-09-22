@@ -2,6 +2,8 @@ package ru.dz.jfte;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EModel implements ModeDefs, Closeable 
 {
@@ -9,6 +11,7 @@ public class EModel implements ModeDefs, Closeable
 	EModel Next;    // next model
 	EModel Prev;    // prev model
 	EView View;     // active view of model
+	List<EView> views = new ArrayList<>();
 
 	int ModelNo;
 
@@ -92,8 +95,9 @@ public class EModel implements ModeDefs, Closeable
 
 	void AddView(EView V) {
 		RemoveView(V);
-		if (V!=null) 
-			V.NextView = View;
+		//if (V!=null) 			V.NextView = View;
+		if( V!=null )
+			views.add(0,V);
 		View = V;
 	}
 
@@ -110,6 +114,8 @@ public class EModel implements ModeDefs, Closeable
            X = (&(*X).NextView);
        }
 		 */
+		if( V!=null )
+			views.remove(V);
 	}
 
 	void SelectView(EView V) {
@@ -164,15 +170,18 @@ public class EModel implements ModeDefs, Closeable
 	void UpdateTitle() {
 		String Title[] = {null}; //fte: ";
 		String STitle[] = {null}; //"fte: ";
-		EView V;
+		//EView V;
 
 		GetTitle(Title,STitle);
 
+		/*
 		V = View;
 		while (V != null) {
 			V.MView.Win.UpdateTitle(Title[0], STitle[0]);
 			V = V.NextView;
-		}
+		}*/
+		for( EView v : views )
+			v.MView.Win.UpdateTitle(Title[0], STitle[0]);
 	}
 
 	int GetStrVar(int var, String [] str) {

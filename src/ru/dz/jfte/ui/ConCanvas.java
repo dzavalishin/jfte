@@ -1,5 +1,6 @@
 package ru.dz.jfte.ui;
 
+import java.awt.AWTEvent;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -15,9 +16,11 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import ru.dz.jfte.EventDefs;
 import ru.dz.jfte.TEvent;
 
-public class ConCanvas extends JPanel {
+public class ConCanvas extends JPanel implements EventDefs
+{
 
 	private static final int MAX_EVENTS = 50;
 
@@ -27,8 +30,8 @@ public class ConCanvas extends JPanel {
 	private List<MouseEvent> melist = new ArrayList<>(10);
 	
 
-	public ConCanvas(ConData cd) {
-
+	public ConCanvas(ConData cd) 
+	{
 		this.cd = cd;
 
 		addMouseMotionListener(
@@ -40,27 +43,25 @@ public class ConCanvas extends JPanel {
 					{
 						//repaint();
 						mousePos = e.getPoint();
+						queueEvent(e);
 					}
 					
 					public void mouseMoved(MouseEvent e) {
 						mousePos = e.getPoint();
-						
+						queueEvent(e);						
 					};
 					
 				} );
 
-		addMouseListener(new MouseListener() {
-			
+		addMouseListener(new MouseListener() {			
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				queueEvent(e);
 			}
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
+				queueEvent(e);				
 			}
 			
 			@Override
@@ -77,7 +78,7 @@ public class ConCanvas extends JPanel {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				queueEvent(e);
+				//queueEvent(e);
 			}
 		});
 		
@@ -156,8 +157,16 @@ public class ConCanvas extends JPanel {
 			
 			buttons = e.getButton()+1;
 			
-			return TEvent.newMouseEvent(what, x, y, buttons, count);
+			what = 0;
 			
+			// TODO evMouseAuto - what's that?
+			if(e.getID() == MouseEvent.MOUSE_PRESSED) what = evMouseDown;
+			if(e.getID() == MouseEvent.MOUSE_RELEASED) what = evMouseUp;
+			if(e.getID() == MouseEvent.MOUSE_MOVED) what = evMouseMove;
+			if(e.getID() == MouseEvent.MOUSE_DRAGGED) what = evMouseMove;
+			
+			if(what != 0)
+				return TEvent.newMouseEvent(what, x, y, buttons, count);			
 		}
 		
 		return null;

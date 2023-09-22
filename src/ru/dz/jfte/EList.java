@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-public class EList extends EModel
+public abstract class EList extends EModel
 {
     String Title = "";
     int Row, LeftCol, TopRow, Count;
@@ -43,7 +43,7 @@ public class EList extends EModel
             View.MView.RepaintStatus();
     }
         
-
+    @Override
     ExResult ExecCommand(ExCommands Command, ExState State) {
         int W = 1;
         int H = 1;
@@ -89,14 +89,20 @@ public class EList extends EModel
         return super.ExecCommand(Command, State);
     }
 
+    @Override
     EEventMap GetEventMap() {
         return EEventMap.FindEventMap("LIST");
     }
 
-    void HandleEvent(TEvent Event) {
+    @Override
+    void HandleEvent(TEvent Event)
+    {
+    	// Empty
     }
-
-    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
+    
+    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width)
+    {
+    	// Empty
     }
 
     String FormatLine(int Line) {
@@ -153,7 +159,9 @@ public class EList extends EModel
         }
     }
 
+    @Override
     int GetContext() { return CONTEXT_LIST; };
+
     int BeginMacro() { return 1; }
     boolean CanActivate(int Line) { return true; }
     int Activate(int No) { return 0; }

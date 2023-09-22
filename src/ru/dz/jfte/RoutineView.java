@@ -26,10 +26,12 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
     };
 
 
+    @Override
     EEventMap GetEventMap() {
         return EEventMap.FindEventMap("ROUTINES");
     }
 
+    @Override
     ExResult ExecCommand(ExCommands Command, ExState State) {
         switch (Command) {
         case ExRescan:
@@ -51,6 +53,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
         return super.ExecCommand(Command, State);
     }
         
+    @Override
     void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
         if (Buffer.RLine(Buffer.rlst.Lines[Line]).getCount() > Col) {
             String str = PCell.UnTabStr( Buffer.RLine(Buffer.rlst.Lines[Line]).Chars.toString() );
@@ -61,6 +64,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
         }
     }
 
+    @Override
     String FormatLine(int Line) {
         //char *p = 0;
         ELine L = Buffer.RLine(Buffer.rlst.Lines[Line]);
@@ -73,6 +77,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
         return L.toString();
     }
 
+    @Override
     int Activate(int No) {
         if (No < Buffer.rlst.Count) {
             View.SwitchToModel(Buffer);
@@ -82,16 +87,19 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
         return 0;
     }
 
+    @Override
     void RescanList() {
         Buffer.ScanForRoutines();
         UpdateList();
         NeedsRedraw = 1;
     }
 
+    @Override
     void UpdateList() {
         Count = Buffer.rlst.Count;
     }
 
+    @Override
     int GetContext() {
         return CONTEXT_ROUTINES;
     }
@@ -106,6 +114,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
         return String.format( "%2d %04d/%03d Routines (%s)", ModelNo, Row + 1, Count, Buffer.FileName);
     }
 
+    @Override
     void GetTitle(String [] ATitle, String [] ASTitle) {
         ATitle[0] = String.format( "Routines: %s", Buffer.FileName );
         ASTitle[0] = "Routines";

@@ -35,23 +35,27 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         return EEventMap.FindEventMap("BUFFERS");
     }
 
+    @Override
     int GetContext() {
         return CONTEXT_BUFFERS; 
     }
 
+    @Override
     void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
         if (Line < BCount)
             if (Col < BList[Line].length())
                 B.MoveStr( 0, Width, BList[Line] + Col, color, Width);
     }
 
+    @Override
     String FormatLine(int Line) {
         return BList[Line];
     }
 
+    @Override
     void UpdateList() {
         EModel B = ActiveModel;
-        int No;
+        //int No;
         //char s[512] = "";
         
         BList = null;
@@ -64,7 +68,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         //BList = (char **) malloc(sizeof(char *) * BCount);
         BList = new String[BCount];
         B = ActiveModel;
-        No = 0;
+        int No = 0;
         while (B!=null) {
             String s =B.GetInfo();
             BList[No++] = s;
@@ -237,6 +241,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         return -1;
     }
 
+    @Override
     int Activate(int No) {
         CancelSearch();
         EModel B = GetBufferById(No);
