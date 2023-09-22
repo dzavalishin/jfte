@@ -31,7 +31,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
     ExResult ExecCommand(GxView view, ExCommands Command, ExState State) throws IOException 
     {
-    	/* TODO 
+    	/* TODO ExecMacro
         if(0 != (Command & CMD_EXT))
             return ExecMacro(view, Command & ~CMD_EXT);
 		*/
@@ -649,7 +649,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             }
             return Console.FileExists(DesktopFileName[0]);
 
-            /* TODO
+            /* TODO findDesktop
         case 1:
         case 2:
             //** Try curdir, then it's owner(s)..
@@ -757,101 +757,112 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
     ExResult CmdLoadFiles(String [] argv) 
     {
-        int QuoteNext = 0;
-        int QuoteAll = 0;
-        int GotoLine = 0;
+        boolean QuoteNext = false;
+        boolean QuoteAll = false;
+        boolean GotoLine = false;
         int LineNum = 1;
         int ColNum = 1;
-        int ModeOverride = 0;
-        //char Mode[32];
+        boolean ModeOverride = false;
+        String Mode = null;
         int LCount = 0;
-        int ReadOnly = 0;
+        boolean ReadOnly = false;
 
-        /* TODO
-        for (int Arg = 1; Arg < argv.length; Arg++) {
-            if (!QuoteAll && !QuoteNext && (argv[Arg][0] == '-')) {
-                if (argv[Arg][1] == '-') {
-                    if (strncmp(argv[Arg], "--debug", 7) != 0)
-                        QuoteAll = 1;
-                } else if (argv[Arg][1] == '!') {
+        for (int Arg = 1; Arg < argv.length; Arg++) 
+        {
+            if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) 
+            {
+            	char aa1 = argv[Arg].charAt(1);
+            	
+                if (aa1 == '-') {
+                    //if (strncmp(argv[Arg], "--debug", 7) != 0) QuoteAll = true;
+                	if( !argv[Arg].substring(0, 7).equals("--debug") )
+                		QuoteAll = true;
+                } else if (aa1 == '!') {
                     // handled before
-                } else if (argv[Arg][1] == 'c' || argv[Arg][1] == 'C') {
+                } else if (aa1 == 'c' || aa1 == 'C') {
                     // ^
-                } else if (argv[Arg][1] == 'D' || argv[Arg][1] == 'd') {
+                } else if (aa1 == 'D' || aa1 == 'd') {
                     // ^
-                } else if (argv[Arg][1] == 'H') {
+                } else if (aa1 == 'H') {
                     // ^
-                } else if (argv[Arg][1] == '+') {
-                    QuoteNext = 1;
-                } else if (argv[Arg][1] == '#' || argv[Arg][1] == 'l') {
+                } else if (aa1 == '+') {
+                    QuoteNext = true;
+                } else if (aa1 == '#' || aa1 == 'l') {
                     LineNum = 1;
                     ColNum = 1;
+                    String[] sp = argv[Arg].substring(2).split(",");
+                    GotoLine = true;
+                    LineNum = Integer.parseInt(sp[0]);
+                    if( sp.length > 1 )
+                    	ColNum = Integer.parseInt(sp[1]);
+                    /*
                     if (strchr(argv[Arg], ',')) {
-                        GotoLine = (2 == sscanf(argv[Arg] + 2, "%d,%d", &LineNum, &ColNum));
+                        GotoLine = (2 == sscanf(argv[Arg] + 2, "%d,%d", LineNum, ColNum));
                     } else {
-                        GotoLine = (1 == sscanf(argv[Arg] + 2, "%d", &LineNum));
-                    }
+                        GotoLine = (1 == sscanf(argv[Arg] + 2, "%d", LineNum));
+                    }*/
                     //                printf("Gotoline = %d, line = %d, col = %d\n", GotoLine, LineNum, ColNum);
-                } else if (argv[Arg][1] == 'r') {
-                    ReadOnly = 1;
-                } else if (argv[Arg][1] == 'm') {
-                    if (argv[Arg][2] == 0) {
-                        ModeOverride = 0;
+                } else if (aa1 == 'r') {
+                    ReadOnly = true;
+                } else if (aa1 == 'm') {
+                    if (argv[Arg].length() == 2) {
+                        ModeOverride = false;
                     } else {
-                        ModeOverride = 1;
-                        strcpy(Mode, argv[Arg] + 2);
+                        ModeOverride = true;
+                        Mode = argv[Arg].substring(2);
                     }
-                } else if (argv[Arg][1] == 'T') {
-                    TagsAdd(argv[Arg] + 2);
-                } else if (argv[Arg][1] == 't') {
-                    TagGoto(EView.ActiveView, argv[Arg] + 2);
+                } else if (aa1 == 'T') {
+                    // TODO TagsAdd(argv[Arg] + 2);
+                } else if (aa1 == 't') {
+                	// TODO TagGoto(EView.ActiveView, argv[Arg] + 2);
                 } else {
-                    DieError(2, "Invalid command line option %s", argv[Arg]);
-                    return 0;
+                    Console.DieError(2, "Invalid command line option %s", argv[Arg]);
+                    return ExResult.ErFAIL;
                 }
             } else {
-                char Path[MAXPATH];
+                String [] Path = {null};
 
-                QuoteNext = 0;
-                if (ExpandPath(argv[Arg], Path) == 0 && IsDirectory(Path)) {
-                    EModel m = new EDirectory(cfAppend, EModel.ActiveModel, Path);
-                    assert(EModel.ActiveModel != 0 && m != 0);
+                QuoteNext = false;
+                if (Console.ExpandPath(argv[Arg], Path) == 0 && Console.IsDirectory(Path[0])) {
+                    EModel m = EDirectory.newEDirectory(EModel.cfAppend, EModel.ActiveModel, Path[0]);
+                    assert(EModel.ActiveModel != null && m != null);
                 } else {
                     if (LCount != 0)
-                        suspendLoads = 1;
-                    if (MultiFileLoad(cfAppend, argv[Arg],
-                                      ModeOverride ? Mode : 0,
-                                      EView.ActiveView) == 0) {
-                        suspendLoads = 0;
-                        return 0;
+                    	EBuffer.suspendLoads = 1;
+                    if (!Console.MultiFileLoad(EModel.cfAppend, argv[Arg],
+                                      ModeOverride ? Mode : null,
+                                      EView.ActiveView)) {
+                    	EBuffer.suspendLoads = 0;
+                        return ExResult.ErFAIL;
                     }
-                    suspendLoads = 0;
+                    EBuffer.suspendLoads = 0;
 
                     if (GotoLine) {
-                        if (((EBuffer *)EModel.ActiveModel).Loaded == 0)
-                            ((EBuffer *)EModel.ActiveModel).Load();
+                        if (!((EBuffer )EModel.ActiveModel).Loaded)
+                            ((EBuffer )EModel.ActiveModel).Load();
                         if (GotoLine) {
-                            GotoLine = 0;
-                            ((EBuffer *)EModel.ActiveModel).SetNearPosR(ColNum - 1, LineNum - 1);
+                            GotoLine = false;
+                            ((EBuffer)EModel.ActiveModel).SetNearPosR(ColNum - 1, LineNum - 1);
                         } else {
-                            int r, c;
+                            int [] r = {0}, c = {0};
 
-                            if (RetrieveFPos(((EBuffer)EModel.ActiveModel).FileName, r, c) == 1)
-                                ((EBuffer)EModel.ActiveModel).SetNearPosR(c, r);
+                            if (FPosHistory.RetrieveFPos(((EBuffer)EModel.ActiveModel).FileName, r, c))
+                                ((EBuffer)EModel.ActiveModel).SetNearPosR(c[0], r[0]);
                         }
                         //EView.ActiveView.SelectModel(EModel.ActiveModel);
                     }
                     if (ReadOnly) {
-                        ReadOnly = 0;
-                        BFI(((EBuffer)EModel.ActiveModel), BFI_ReadOnly) = 1;
+                        ReadOnly = false;
+                        EBuffer b = (EBuffer)EModel.ActiveModel; 
+                        b.BFI_SET(b, BFI_ReadOnly, 1);
                     }
                 }
-                suspendLoads = 1;
+                EBuffer.suspendLoads = 1;
                 EView.ActiveView.SelectModel(EModel.ActiveModel.Next);
-                suspendLoads = 0;
+                EBuffer.suspendLoads = 0;
                 LCount++;
             }
-        } */
+        } 
         
         EModel P = EModel.ActiveModel;
         while (LCount-- > 0)

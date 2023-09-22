@@ -103,7 +103,7 @@ public class EMessages extends EList implements Closeable
 		if (P.Row < 0)
 			P.Row = 0;
 
-		if (B.PlaceBookmark(bk, P) == 1)
+		if (B.PlaceBookmark(bk, P))
 			ErrList[err].Buf = B;
 	}
 

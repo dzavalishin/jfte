@@ -784,9 +784,11 @@ static String SlashDir(String Path)
 	}
 
 
-	public static void ChangeDir(String directory) {
-		// TODO Auto-generated method stub
-		csdnjhnsdjkbsdkj
+	public static void ChangeDir(String directory) 
+	{
+		//File dir = new File(directory).getAbsoluteFile();
+		//System.setProperty("user.dir", dir.toString());
+		// TODO ChangeDir
 	}
 
 

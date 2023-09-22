@@ -52,7 +52,7 @@ public class EMark implements Closeable
 	    if (Point.Row < 0)
 	        Point.Row = 0;
 
-	    if (aBuffer.PlaceBookmark(Name, Point) == 1) {
+	    if (aBuffer.PlaceBookmark(Name, Point)) {
 	        Buffer = aBuffer;
 	        return 1;
 	    }
@@ -68,7 +68,7 @@ public class EMark implements Closeable
 	    if ((Point=Buffer.GetBookmark(Name)) == null)
 	        return 0;
 
-	    if (Buffer.RemoveBookmark(Name) == 0)
+	    if (!Buffer.RemoveBookmark(Name))
 	        return 0;
 	    
 	    Buffer = null;

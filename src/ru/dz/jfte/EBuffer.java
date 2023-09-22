@@ -704,8 +704,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		VLine = RToV(Row);
 		assert(VLine != -1);
 
-		/* TODO
-		if (FindFold(Row) != -1) {
+		/* TODO if (FindFold(Row) != -1) {
 			if (FoldDestroy(Row) == false) return false;
 		} */
 
@@ -2123,7 +2122,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean GetHilitWord(int len, String str, int /*ChColor*/ []clr, int IgnCase) {
 		//String p;
 
-		/* TODO
+		/* TODO GetHilitWord
 		if (Mode == null || Mode.fColorize == 0)
 			return false;
 
@@ -2369,7 +2368,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	//#ifdef CONFIG_OBJ_ROUTINE
 	boolean ScanForRoutines() {
-		return false; // TODO 
+		return false; // TODO ScanForRoutines
 
 		/*
 	    RxNode regx;
@@ -5576,7 +5575,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			L = RLine(l);
 			int foldlen = 0;
 			int blen = 0;
-			/* TODO
+			/* TODO FindFold
 	        f = FindFold(l);
 
 	        foldlen = 0;
