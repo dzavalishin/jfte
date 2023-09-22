@@ -34,6 +34,9 @@ public class ConCanvas extends JPanel implements EventDefs
 	{
 		this.cd = cd;
 
+		//setSize(1000, 800);
+
+		
 		addMouseMotionListener(
 				new MouseMotionAdapter(){
 
@@ -103,7 +106,11 @@ public class ConCanvas extends JPanel implements EventDefs
 			}
 		});
 		
-		setMinimumSize(new Dimension(cd.getWidth(), cd.getHeight()));
+		Dimension d = new Dimension(cd.getWidth(), cd.getHeight());
+		
+		setMinimumSize(d);
+		setPreferredSize(d);
+		setSize(d);
 	}
 
 	@Override

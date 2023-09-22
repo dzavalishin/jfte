@@ -767,7 +767,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         int LCount = 0;
         boolean ReadOnly = false;
 
-        for (int Arg = 1; Arg < argv.length; Arg++) 
+        for (int Arg = 0; Arg < argv.length; Arg++) 
         {
             if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) 
             {

@@ -6,18 +6,29 @@ import java.util.Arrays;
 
 import ru.dz.jfte.PCell;
 
-public class ConData {
-	int xSize = 80;
-	int ySize = 25;
-	
+public class ConData 
+{
 	static int xCell = 20;
 	static int yCell = 30;
+	
+	int xSize = 80;
+	int ySize = 25;
 	
 	int colors[][] = new int[xSize][ySize];
 	char chars[][] = new char[xSize][ySize];
 	
-	public void paint(Graphics2D g) {
-
+	public ConData() {
+		for( int x = 0; x < xSize; x++ )
+		{
+			putc(x, 2, 'a', 0x22);
+			putc(x, 4, 'b', 0x22);
+		}
+	}
+	
+	public void paint(Graphics2D g) 
+	{
+		//g.setFont(g.getFont().deriveFont(30));
+		
 		for( int y = 0; y < ySize; y++ )
 			for( int x = 0; x < xSize; x++ )
 			{
@@ -33,6 +44,10 @@ public class ConData {
 				
 				g.setColor(fg);				
 				g.drawString(""+ch, x*xCell, y*yCell);
+				
+				g.setColor(Color.darkGray); // TODO test
+				g.drawRect(x*xCell, y*yCell, xCell, yCell);
+				//g.drawLine(x, y, x, y);
 			}
 	}
 	

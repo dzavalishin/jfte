@@ -698,8 +698,11 @@ static String SlashDir(String Path)
 	}
 
 	static int JustDirectory(String path, String[] Dir) {
-		Path p = Path.of(path);
-		Dir[0] = p.getParent().toString();
+		Path p = Path.of(path).getParent();
+		if(p == null)
+			Dir[0] = null;
+		else
+			Dir[0] = p.toString();
 		/*
 		String p;
 
