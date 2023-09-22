@@ -432,7 +432,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean UpdateMarker(int Type, int Row, int Col, int Rows, int Cols) {
 		EPoint OldBB = BB, OldBE = BE;
-		EView V;
+		//EView V;
 
 		UpdateMark(SavedPos, Type, Row, Col, Rows, Cols);
 		UpdateMark(PrevPos, Type, Row, Col, Rows, Cols);
@@ -440,8 +440,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		UpdateMark(BB, Type, Row, Col, Rows, Cols);
 		UpdateMark(BE, Type, Row, Col, Rows, Cols);
 
-		V = View;
-		while (V != null) {
+		//V = View;
+		//while (V != null) 
+		for(EView V : views)
+		{
 			if (V.Model != this)
 				assert(1 == 0);
 			if (V != View) {
@@ -452,7 +454,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				GetViewVPort(V).TP.Col = M.Col;
 				UpdateMark(GetViewVPort(V).CP, Type, Row, Col, Rows, Cols);
 			}
-			V = V.NextView;
+			//V = V.NextView;
 		}
 
 		/* TODO #ifdef CONFIG_OBJ_ROUTINE
@@ -1806,7 +1808,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	void Redraw() {
 		//int HilitX;
-		EView V;
+		//EView V;
 		EEditPort W;
 		int Row;
 		TDrawBuffer dB = new TDrawBuffer();
@@ -1827,8 +1829,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (CP.Row < 0) CP.Row = 0;
 
 		CheckBlock();
-		V = View; /* check some window data */
-		if (V==null) {
+		//V = View; /* check some window data */
+		//if (V==null) 
+		if (View==null) 
+		{
 			MinRedraw = MaxRedraw = -1;
 			RedrawToEos = 0;
 			return;
@@ -1836,7 +1840,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (View == null|| View.MView == null || View.MView.Win == null)
 			return ;
 
-		for ( ; V != null; V = V.NextView) {
+		//for ( ; V != null; V = V.NextView) 
+		for ( EView V : views ) 
+		{
 			//        printf("Checking\x7\n");
 			if (V.Model != this)
 				assert(1 == 0);
@@ -2079,8 +2085,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		//    puts("xxx\x7");
 		//printf("\nRowA = %d, RowZ = %d", RowA, RowZ);
 
-		V = View;
-		while (V!=null) {
+		//V = View;
+		//while (V!=null) 
+		for( EView V : views )
+		{
 			if (V.Model != this)
 				assert(1 == 0);
 
@@ -2098,7 +2106,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 						RowZ++;
 				}
 			}
-			V = V.NextView;
+			//V = V.NextView;
 		}
 		MinRedraw = MaxRedraw = -1;
 		RedrawToEos = 0;

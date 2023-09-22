@@ -7,7 +7,7 @@ import java.util.List;
 
 public class EModel implements ModeDefs, Closeable 
 {
-	EModel [] Root;   // root ptr of this list
+	private EModel [] Root;   // root ptr of this list
 	EModel Next;    // next model
 	EModel Prev;    // prev model
 	EView View;     // active view of model
@@ -73,25 +73,25 @@ public class EModel implements ModeDefs, Closeable
 		ModelNo = GetNewModelID(this);
 	}
 
-	/* TODO destr
-   ~EModel() {
-       EModel *D = this;
+	@Override
+	public void close() {
+		EModel D = this;
 
-       while (D) {
-           D.NotifyDelete(this);
-           D = D.Next;
-           if (D == this)
-               break;
-       }
+		while (D != null) {
+			D.NotifyDelete(this);
+			D = D.Next;
+			if (D == this)
+				break;
+		}
 
-       if (Next != this) {
-           Prev.Next = Next;
-           Next.Prev = Prev;
-           if (Root[0] == this)
-               Root[0] = Next;
-       } else
-           Root[0] = 0;
-   } */
+		if (Next != this) {
+			Prev.Next = Next;
+			Next.Prev = Prev;
+			if (Root[0] == this)
+				Root[0] = Next;
+		} else
+			Root[0] = null;
+	}
 
 	void AddView(EView V) {
 		RemoveView(V);
@@ -196,9 +196,5 @@ public class EModel implements ModeDefs, Closeable
 		return 0;
 	}
 
-	@Override
-	public void close()  {
-		// empty		
-	}
 
 }

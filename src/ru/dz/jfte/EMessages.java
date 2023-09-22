@@ -28,7 +28,7 @@ public class EMessages extends EList implements Closeable
 		EModel []ARootP = {ARoot};
 		return new EMessages(createFlags, ARootP,  ADir,  ACommand);
 	}
-	
+
 	EMessages(int createFlags, EModel []ARoot, String ADir, String ACommand) 
 	{
 		super(createFlags, ARoot, "Messages");
@@ -45,9 +45,10 @@ public class EMessages extends EList implements Closeable
 	}
 
 	@Override
-    int GetContext() { return CONTEXT_MESSAGES; }
+	int GetContext() { return CONTEXT_MESSAGES; }
 
 
+	@Override
 	void NotifyDelete(EModel Deleting) {
 		for (int i = 0; i < ErrCount; i++) {
 			if (ErrList[i].Buf == Deleting) {
@@ -143,10 +144,12 @@ public class EMessages extends EList implements Closeable
 		return 0;
 	}
 
+	@Override
 	EEventMap GetEventMap() {
 		return EEventMap.FindEventMap("MESSAGES");
 	}
 
+	@Override
 	ExResult ExecCommand(ExCommands Command, ExState State) {
 		switch (Command) {
 		case ExChildClose:
@@ -188,8 +191,8 @@ public class EMessages extends EList implements Closeable
 
 	void AddError(String file, int line, String msg, String text) {
 		AddError( file,  line,  msg,  text, 0);
-		}
-	
+	}
+
 	void AddError(String file, int line, String msg, String text, int hilit) {
 		Error pe = new Error();
 
@@ -235,10 +238,10 @@ public class EMessages extends EList implements Closeable
 			// got line
 			Line[0] = p;
 			return 1;
-			
+
 		}
 		return 0;
-		
+
 		/*
 		//fprintf(stderr, "GetLine: %d\n", Running);
 
@@ -260,7 +263,7 @@ public class EMessages extends EList implements Closeable
 		//fprintf(stderr, "GetLine: Data %d\n", l);
 		p = (String )memchr(MsgBuf + BufPos, '\n', l);
 		if (p) {
-			*p = 0;
+		 *p = 0;
 			strcpy(Line, MsgBuf + BufPos);
 			l = strlen(Line);
 			if (l > 0 && Line[l - 1] == '\r')
@@ -288,7 +291,7 @@ public class EMessages extends EList implements Closeable
 		BufPos = 0;
 		//fprintf(stderr, "GetLine: Got Line\n");
 		return 1;
-		*/
+		 */
 	}
 
 
@@ -338,37 +341,37 @@ public class EMessages extends EList implements Closeable
 	}
 
 
-	
-	
-	
-	
 
-void ShowError(EView V, int err) {
-    if (err >= 0 && err < ErrCount) {
-        if (null == ErrList[err].file) {
-            // should check if relative path
-            // possibly scan for (gnumake) directory info in output
-            if (ErrList[err].Buf != null) {
-                //char bk[16];
 
-                V.SwitchToModel(ErrList[err].Buf);
 
-                String bk = String.format("_MSG.%d", err);
-                ErrList[err].Buf.GotoBookmark(bk);
-            } else {
-                if (Console.FileLoad(0, ErrList[err].file, null, V)) {
-                    V.SwitchToModel(ActiveModel);
-                    ((EBuffer)ActiveModel).CenterNearPosR(0, ErrList[err].line - 1);
-                }
-            }
-            if (ErrList[err].msg != null)
-                V.Msg(S_INFO, "%s", ErrList[err].msg);
-            else
-                V.Msg(S_INFO, "%s", ErrList[err].text);
-        }
-    }
-}
-	
+
+
+	void ShowError(EView V, int err) {
+		if (err >= 0 && err < ErrCount) {
+			if (null == ErrList[err].file) {
+				// should check if relative path
+				// possibly scan for (gnumake) directory info in output
+				if (ErrList[err].Buf != null) {
+					//char bk[16];
+
+					V.SwitchToModel(ErrList[err].Buf);
+
+					String bk = String.format("_MSG.%d", err);
+					ErrList[err].Buf.GotoBookmark(bk);
+				} else {
+					if (Console.FileLoad(0, ErrList[err].file, null, V)) {
+						V.SwitchToModel(ActiveModel);
+						((EBuffer)ActiveModel).CenterNearPosR(0, ErrList[err].line - 1);
+					}
+				}
+				if (ErrList[err].msg != null)
+					V.Msg(S_INFO, "%s", ErrList[err].msg);
+				else
+					V.Msg(S_INFO, "%s", ErrList[err].text);
+			}
+		}
+	}
+
 
 }
 
