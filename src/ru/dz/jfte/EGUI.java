@@ -12,6 +12,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     static final int  RUN_ASYNC = 1;
     
     static int LastEventChar = -1;
+    static String [] DesktopFileName = {""};
 
     
     EGUI(String [] argv, int XSize, int YSize)
@@ -42,11 +43,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             case ExFileCloseAll:            return FileCloseAll(View, State);
             case ExExitEditor:              return ExitEditor(View);
             case ExIncrementalSearch:
-    //#ifdef CONFIG_I_SEARCH
-    //            return View.MView.Win.IncrementalSearch(View);
-    //#else
-                return ExResult.ErFAIL;
-    //#endif
+                return View.MView.Win.IncrementalSearch(View) == 0 
+                	? ExResult.ErFAIL : ExResult.ErOK;
             }
         }
         switch (Command) {
@@ -551,14 +549,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     }
 
     ExResult DesktopSaveAs(ExState State, GxView view) {
-    	/* TODO
-        if (State.GetStrParam(0, DesktopFileName) == 0)
+        if (State.GetStrParam(null, DesktopFileName) == 0)
             if (view.GetFile("Save Desktop", DesktopFileName, HIST_PATH, GF_SAVEAS) == 0)
                 return ExResult.ErFAIL;
 
-        if (DesktopFileName[0] != 0)
-            return SaveDesktop(DesktopFileName);
-        */
+        if (!DesktopFileName[0].isBlank())
+            return SaveDesktop(DesktopFileName[0]);
+
         return ExResult.ErFAIL;
     }
 
@@ -685,15 +682,15 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             }
         }
     }
+	*/
 
-    /* TODO
-    void DoLoadDesktopOnEntry(char **argv) {
-        if (DesktopFileName[0] == 0)
+    void DoLoadDesktopOnEntry(String []argv) {
+        if (DesktopFileName[0].isBlank())
             findDesktop(argv);
 
-        if (DesktopFileName[0] != 0) {
-            if (IsDirectory(DesktopFileName)) {
-                Slash(DesktopFileName, 1);
+        if (!DesktopFileName[0].isBlank()) {
+            if (Console.IsDirectory(DesktopFileName)) {
+                Console.Slash(DesktopFileName, 1);
                 strcat(DesktopFileName, DESKTOP_NAME);
             }
 
@@ -701,7 +698,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 LoadDesktop(DesktopFileName);
         }
     }
-    //#endif */
+
 
     void EditorInit() 
     {

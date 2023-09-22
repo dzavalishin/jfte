@@ -265,8 +265,8 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return K;
     }
 
-    int IncrementalSearch(EView View) throws IOException {
-        int rc;
+    int IncrementalSearch(EView View) throws IOException 
+    {
         ExISearch search;
         EBuffer B = null;
 
@@ -277,10 +277,8 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
 
         search = new ExISearch(B);
 
-        //if (search == 0)            return 0;
-
         PushView(search);
-        rc = Execute();
+        int rc = Execute();
         PopView();
         Repaint();
 
