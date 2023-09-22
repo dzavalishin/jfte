@@ -10,8 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.print.Doc;
@@ -176,32 +178,31 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		Modified = 0;
 	}
 
-	/* TODO
-	~EBuffer() {
-		/* TODO #ifdef CONFIG_HISTORY
-		if (FileName != 0 && Loaded) {
-			UpdateFPos(FileName, VToR(CP.Row), CP.Col);
-			/* TODO #ifdef CONFIG_BOOKMARKS
-			if (BFI (this,BFI_SaveBookmarks)==3) StoreBookmarks(this);
-			#endif 
+
+	@Override
+	public void close() 
+	{
+
+		if (FileName != null && Loaded) {
+			FPosHistory.UpdateFPos(FileName, VToR(CP.Row), CP.Col);
+
+			if (iBFI (this,BFI_SaveBookmarks)==3) 
+				FPosHistory.StoreBookmarks(this);
+
 		}
-		#endif 
-		if (FileName && Loaded)
-			markIndex.storeForBuffer(this);
+
+		if (FileName != null && Loaded)
+			EMarkIndex.markIndex.storeForBuffer(this);
 
 		Clear();
 
-		/* TODO #ifdef CONFIG_BOOKMARKS
-		if (BMCount != 0) {
-			BMarks = 0;
-			BMCount = 0;
-		}
-		#endif */
+
+
 	/* TODO #ifdef CONFIG_OBJ_ROUTINE
 		rlst.Lines = 0;
 		DeleteRelated();
-		#endif 
-	} */
+		#endif */
+	} 
 
     @Override
 	void DeleteRelated() {
@@ -1775,23 +1776,30 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				else
 					B.MoveAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
 			}
-			/* TODO #ifdef CONFIG_BOOKMARKS
-	        if (BFI(this, BFI_ShowBookmarks)) {
-	            int i = 0;
-	            String Name;
-	            EPoint P;
-	            while ((i = GetBookmarkForLine(i, Row, Name, P)) != -1) {
-	                if (strncmp(Name, "_BMK", 4) == 0) {
+
+	        if (BFI(this, BFI_ShowBookmarks)) 
+	        {
+	            //int i = 0;
+	            //String Name;
+	            //EPoint P;
+	            
+	            List<EBookmark> ret = GetBookmarksForLine(Row);
+	            
+	            //while ((i = GetBookmarkForLine(i, Row, Name, P)) != -1) 
+	            for( EBookmark b : ret )
+	            {
+	            	if( b.Name.substring(0,4).equals("_BMK"))
+	                {
 	                    // User bookmark, hilite line
 	                    if (BFI(this, BFI_SeeThruSel))
-	                        MoveBgAttr(B, 0, W, hcPlain_Bookmark, W);
+	                        B.MoveBgAttr( 0, W, hcPlain_Bookmark, W);
 	                    else
-	                        MoveAttr(B, 0, W, hcPlain_Bookmark, W);
+	                        B.MoveAttr( 0, W, hcPlain_Bookmark, W);
 	                    break;
 	                }
 	            }
 	        }
-	#endif */
+
 			if (Match.Row != -1 && Match.Col != -1) {
 				if (Row == Match.Row) {
 					if(BFI(this, BFI_SeeThruSel))
@@ -5696,7 +5704,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	int PlaceBookmark(String Name, EPoint P) {
+	boolean PlaceBookmark(String Name, EPoint P) {
 		BMarks.put(Name, new EBookmark(Name,P));
 		/*
 	    int i;
@@ -5717,10 +5725,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    BMarks[BMCount].BM = P;
 	    BMCount++;
 		 */
-		return 1;
+		return true;
 	}
 
-	int RemoveBookmark(String Name) {
+	boolean RemoveBookmark(String Name) {
 		/*
 	    int i;
 
@@ -5735,10 +5743,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    }
 		 */
 		if( null != BMarks.remove(Name))
-			return 1;
+			return true;
 
 		View.MView.Win.Choice(GPC_ERROR, "RemoveBookmark", 1, "O&K", "Bookmark %s not found.", Name);
-		return 0;
+		return false;
 	}
 
 	EPoint GetBookmark(String Name) {
@@ -5755,23 +5763,23 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		 */
 	}
 
-	/*
-	 * Searches bookmark list starting at given index (searchFrom) for next
-	 * bookmark for line searchForLine. It then returns its name and position
-	 * and index (used for next search) or -1 if none found. Name is pointer
-	 * directly into bookmark structure (not copied!). If searchForLine is -1,
-	 * this function returns any next bookmark . can be used to enumerate
-	 * bookmarks.
-	 * /
-	int GetBookmarkForLine(int searchFrom, int searchForLine, String &Name, EPoint &P) {
-	    for (int i = searchFrom; i < BMCount; i++)
-	        if (searchForLine==-1||BMarks[i].BM.Row==searchForLine) {
-	            Name = BMarks[i].Name;
-	            P = BMarks[i].BM;
-	            return i+1;
-	        }
-	    return -1;
-	}*/
+
+	List<EBookmark> GetBookmarksForLine(int searchForLine) 
+	{
+		List<EBookmark> ret = new ArrayList<>();
+
+	    for( EBookmark bm : BMarks.values() )	
+	    {
+	        if (searchForLine==-1||bm.BM.Row==searchForLine) 
+	        	ret.add(bm);
+	        /*{
+	            Name[0] = bm.Name;
+	            P[0] = bm.BM;
+	            return true;
+	        }*/
+	    }
+	    return ret;
+	}
 
 
 	boolean GotoBookmark(String Name) {
@@ -5984,6 +5992,149 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	boolean PlaceUserBookmark( String n,EPoint P) {
+	    String name = "_BMK"+n;
+	    boolean result;
+	    EPoint prev;
+
+	    if ((prev=GetBookmark(name))==null) {
+	        prev.Row=-1;prev.Col=-1;
+	    }
+	    
+	    result=PlaceBookmark(name, P);
+	    
+	    if (result) {
+	        if (BFI (this,BFI_ShowBookmarks)) {
+	            FullRedraw ();
+	        }
+	        if(iBFI(this,BFI_SaveBookmarks)==1||iBFI(this,BFI_SaveBookmarks)==2) {
+	            if (!Modify ()) return result;   // Never try to save to read-only
+	/* TODO #ifdef CONFIG_UNDOREDO
+	            if (BFI(this, BFI_Undo)) {
+	                if (PushULong(prev.Row) == 0) return 0;
+	                if (PushULong(prev.Col) == 0) return 0;
+	                if (PushUData((void *)n,strlen (n)+1) == 0) return 0;
+	                if (PushULong(strlen (n)+1) == 0) return 0;
+	                if (PushUChar(ucPlaceUserBookmark) == 0) return 0;
+	            }
+	#endif */
+	        }
+	    }
+	    return result;
+	}
+
+	boolean RemoveUserBookmark( String n) {
+	    String name  = "_BMK"+n;
+	    boolean result;
+	    EPoint p;
+
+	    p = GetBookmark(name);       // p is valid only if remove is successful
+	    result=RemoveBookmark(name);
+	    if (result) {
+	        if (BFI (this,BFI_ShowBookmarks)) {
+	            FullRedraw ();
+	        }
+	        if (iBFI (this,BFI_SaveBookmarks)==1||iBFI (this,BFI_SaveBookmarks)==2) {
+	            if (!Modify ()) return result;   // Never try to save to read-only
+	/* #ifdef CONFIG_UNDOREDO
+	            if (PushULong(p.Row) == 0) return 0;
+	            if (PushULong(p.Col) == 0) return 0;
+	            if (PushUData((void *)n,strlen (n)+1) == 0) return 0;
+	            if (PushULong(strlen (n)+1) == 0) return 0;
+	            if (PushUChar(ucRemoveUserBookmark) == 0) return 0;
+	#endif */
+	        }
+	    }
+	    return result;
+	}
+
+	boolean GotoUserBookmark( String n) {
+	    return GotoBookmark("_BMK"+n);
+	}
+
+	List<EBookmark> GetUserBookmarkForLine(int searchFrom, int searchForLine, String [] Name, EPoint [] P) 
+	{
+		List<EBookmark> ret = new ArrayList<>();
+		
+	    for(EBookmark b : GetBookmarksForLine(searchForLine)) 
+	    {
+
+	        if(b.Name.substring(0, 4).equals("_BMK"))
+	        	ret.add(b);
+	    }
+	    
+	    return ret;
+	}
+
+	boolean PlaceBookmark(ExState State) {
+	    String [] name = {""};
+	    EPoint P = CP;
+
+	    P.Row = VToR(P.Row);
+
+	    if (State.GetStrParam(View, name ) == 0)
+	        if (View.MView.Win.GetStr("Place Bookmark", name, HIST_BOOKMARK) == 0) return false;
+	    return PlaceUserBookmark(name[0], P);
+	}
+
+	boolean RemoveBookmark(ExState State) {
+	    String [] name = {""};
+
+	    if (State.GetStrParam(View, name) == 0)
+	        if (View.MView.Win.GetStr("Remove Bookmark", name, HIST_BOOKMARK) == 0) return false;
+	    return RemoveUserBookmark(name[0]);
+	}
+
+	boolean GotoBookmark(ExState State) {
+	    String [] name = {""};
+
+	    if (State.GetStrParam(View, name) == 0)
+	        if (View.MView.Win.GetStr("Goto Bookmark", name, HIST_BOOKMARK) == 0) return false;
+	    return GotoUserBookmark(name[0]);
+	}
+
+
+	boolean PlaceGlobalBookmark(ExState State) {
+	    String [] name = {""};
+	    EPoint P = CP;
+
+	    P.Row = VToR(P.Row);
+
+	    if (State.GetStrParam(View, name) == 0)
+	        if (View.MView.Win.GetStr("Place Global Bookmark", name, HIST_BOOKMARK) == 0) return false;
+	    if (EMarkIndex.markIndex.insert(name[0], this, P) == null) {
+	        Msg(S_ERROR, "Error placing global bookmark %s.", name[0]);
+	    }
+	    return true;
+	}
+
+	boolean PushGlobalBookmark() {
+	    EPoint P = CP;
+
+	    P.Row = VToR(P.Row);
+	    EMark m = EMarkIndex.markIndex.pushMark(this, P);
+	    if (m != null)
+	         Msg(S_INFO, "Placed bookmark %s", m.getName());
+	    return m != null;
+	}
+	
+	
+	
 
 }
 
