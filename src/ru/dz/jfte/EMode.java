@@ -71,7 +71,7 @@ public class EMode {
     
     static EMode GetModeForName(String FileName)     
     {
-    	/*
+    	/* TODO
         //    char ext[10];
         //    char *p;
         int l, i;
@@ -119,11 +119,11 @@ public class EMode {
 
 		*/
 
-    	return 
-    	
-        m = Modes;
-        while (m && m->fNext) m = m->fNext;
-        return m;
+        //m = Modes;
+        //while (m && m->fNext) m = m->fNext;
+        //return m;
+        
+        return Modes[Modes.length-1];
     }
 
     
