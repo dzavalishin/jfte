@@ -127,7 +127,10 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 			assert(fi != null);
 			if (!fi.Name().equals(".")) {
 				//Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
-				Files = Arrays.copyOf(Files, (FCount | 255) + 1);
+				if(null == Files)
+					Files = new FileInfo[(FCount | 255) + 1];
+				else
+					Files = Arrays.copyOf(Files, (FCount | 255) + 1);
 
 				Files[FCount] = fi;
 

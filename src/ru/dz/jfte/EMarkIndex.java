@@ -40,7 +40,10 @@ public class EMarkIndex {
 	    if (newMarks == 0)
 	        return 0;
 	    marks = newMarks; */
-	    marks = Arrays.copyOf(marks, marks.length + 1);
+	    if( null == marks )
+	    	marks = new EMark[1];
+	    else
+	    	marks = Arrays.copyOf(marks, marks.length + 1);
 
 	    EMark m = new EMark(aName, aFileName, aPoint, aBuffer);
 

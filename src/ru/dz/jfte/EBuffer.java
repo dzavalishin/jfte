@@ -156,7 +156,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		Allocate(0);
 		AllocVis(0);
 		Mode = EMode.GetModeForName("");
-		Flags = (Mode.Flags);
+		Flags = Mode.Flags;
 		// was BFI(this, BFI_Undo) = 0;
 		BFI_SET(this, BFI_Undo,  0);
 		// was BFI(
@@ -1282,7 +1282,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean AllocVis(int ACount) {
 		VAllocated = ACount;
-		VV = Arrays.copyOf(VV, ACount);
+		if(VV==null)
+			VV = new int[ACount];
+		else
+			VV = Arrays.copyOf(VV, ACount);
 		return true;
 	}
 

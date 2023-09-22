@@ -316,7 +316,9 @@ public class Console implements ModeDefs, GuiDefs
 				break;
 			
 			try {
+				synchronized (waito){
 				waito.wait(10);
+				}
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

@@ -25,7 +25,7 @@ public class HMachine {
         assert(state.length > 0);
         
         if(trans == null )
-        	trans = new HTrans[0];
+        	trans = new HTrans[1];
         else
         	trans = Arrays.copyOf(trans, trans.length + 1);
         

@@ -112,7 +112,7 @@ public class GUI implements GuiDefs, EventDefs
 	}
 
 
-	static TEvent NextEvent = null;
+	static TEvent NextEvent = new TEmptyEvent();
 	void ProcessEvent()  {
 		try {
 			doProcessEvent();
@@ -122,7 +122,7 @@ public class GUI implements GuiDefs, EventDefs
 		}
 	}
 	void doProcessEvent() throws IOException  {
-		TEvent E;
+		TEvent E = NextEvent;
 
 		E = NextEvent.clone();
 

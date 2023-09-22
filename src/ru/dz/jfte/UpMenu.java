@@ -10,7 +10,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 	int vert;
 	int x, y, w, h;
 
-	static mMenu [] Menus = null;
+	static mMenu [] Menus = new mMenu [0];
 	static int MenuCount = 0;
 
 

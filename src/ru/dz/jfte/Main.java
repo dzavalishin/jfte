@@ -207,9 +207,7 @@ public class Main implements MainConst
 	    return 1;
 	}
 
-	
-	
-	static void main(String [] argv) 
+	public static void main(String[] argv)  
 	{
 	    if (CmdLoadConfiguration(argv) == 0)
 	        return;
@@ -222,11 +220,6 @@ public class Main implements MainConst
 	        Console.DieError(1, "Failed to initialize display\n");
 
 	    GUI.gui.Run();
-
-
-
-
-
 	}
 	
 	

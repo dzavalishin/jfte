@@ -16,8 +16,12 @@ public class EMode {
     String filename;
 
     
-    static EMode [] Modes;
+    static EMode [] Modes = new EMode [1];
     
+    static {
+    	// TODO Modes
+    	Modes[0] = new EMode(null, null, null);
+    }
     
     EMode(EMode aMode, EEventMap Map, String aName) {
         fName = aName;
@@ -123,6 +127,9 @@ public class EMode {
         //while (m && m->fNext) m = m->fNext;
         //return m;
         
+    	if(Modes == null || Modes.length == 0)
+    		return null;
+    	
         return Modes[Modes.length-1];
     }
 

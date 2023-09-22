@@ -175,7 +175,11 @@ public class EMessages extends EList implements Closeable
 	{
 		ErrCount++;
 		//ErrList = (Error **) realloc(ErrList, sizeof(void *) * ErrCount);
-		ErrList = Arrays.copyOf(ErrList, ErrCount);
+		if(null == ErrList)
+			ErrList = new Error[1];
+		else
+			ErrList = Arrays.copyOf(ErrList, ErrCount);
+		
 		ErrList[ErrCount - 1] = p;
 		ErrList[ErrCount - 1].Buf = null;
 		FindErrorFile(ErrCount - 1);
