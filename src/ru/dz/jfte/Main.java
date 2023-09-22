@@ -1,9 +1,12 @@
 package ru.dz.jfte;
 
+import java.nio.charset.Charset;
 
 public class Main implements MainConst
 {
 	static String ConfigFileName = null;
+
+	public static final Charset charset = Charset.forName("US-ASCII"); // TODO ASCII?
 
 	static void Usage() {
 	    System.out.print(usage);

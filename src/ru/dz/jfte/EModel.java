@@ -24,7 +24,7 @@ public class EModel implements ModeDefs, Closeable
 	static EModel ActiveModel = null;
 	String msgbuftmp = "";
 
-	EModel FindModelID(EModel Model, int ID) {
+	static EModel FindModelID(EModel Model, int ID) {
 		EModel M = Model;
 		int No = ID;
 

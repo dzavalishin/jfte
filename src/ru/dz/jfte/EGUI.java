@@ -1,6 +1,11 @@
 package ru.dz.jfte;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs 
 {
@@ -554,7 +559,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 return ExResult.ErFAIL;
 
         if (!DesktopFileName[0].isBlank())
-            return SaveDesktop(DesktopFileName[0]);
+            return ExResult.ofBool(SaveDesktop(DesktopFileName[0]));
 
         return ExResult.ErFAIL;
     }
@@ -625,49 +630,50 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
      *  
      *  This is called if the desktop is not spec'd on the command line.
      */
-    /*
-    //#ifdef CONFIG_DESKTOP
-    int findDesktop(String argv[]) {
-        switch (LoadDesktopMode) {
+    boolean findDesktop(String argv[]) 
+    {
+        switch (Config.LoadDesktopMode) {
         default:
             //** 0: try curdir then "homedir"..
             //         fprintf(stderr, "ld: Mode 0\n");
-            if (FileExists(DESKTOP_NAME))
-                ExpandPath(DESKTOP_NAME, DesktopFileName);
+            if (Console.FileExists(DESKTOP_NAME))
+            	Console.ExpandPath(DESKTOP_NAME, DesktopFileName);
             else {
                 //** Use homedir,
     //#ifdef UNIX
     //            ExpandPath("~/" DESKTOP_NAME, DesktopFileName);
     //#else
-                JustDirectory(argv[0], DesktopFileName);
-                strcat(DesktopFileName, DESKTOP_NAME);
+            	Console.JustDirectory(argv[0], DesktopFileName);
+                DesktopFileName [0] += DESKTOP_NAME;
     //#endif
             }
-            return FileExists(DesktopFileName);
+            return Console.FileExists(DesktopFileName[0]);
 
+            /* TODO
         case 1:
         case 2:
             //** Try curdir, then it's owner(s)..
-            ExpandPath(".", DesktopFileName);
+        	Console.ExpandPath(".", DesktopFileName);
             //fprintf(stderr, "ld: Mode 1 (start at %s)\n", DesktopFileName);
 
             for (;;) {
                 //** Try current location,
-                char *pe = DesktopFileName + strlen(DesktopFileName);
-                Slash(DesktopFileName, 1);      // Add appropriate slash
-                strcat(DesktopFileName, DESKTOP_NAME);
+                String pe = new String(DesktopFileName[0]);
+                DesktopFileName[0] = Console.Slash(DesktopFileName[0], 1);      // Add appropriate slash
+                DesktopFileName[0] += DESKTOP_NAME;
 
                 //fprintf(stderr, "ld: Mode 1 (trying %s)\n", DesktopFileName);
-                if (FileExists(DesktopFileName)) {
+                if (Console.FileExists(DesktopFileName[0])) {
                     //fprintf(stderr, "ld: Mode 1 (using %s)\n", DesktopFileName);
-                    return 1;
+                    return true;
                 }
 
                 //** Not found. Remove added stuff, then go level UP,
-                *pe = 0;
+                //*pe = 0;
+                DesktopFileName[0] = pe;
 
                 // Remove the current part,
-                char *p = SepRChr(DesktopFileName);
+                String p = SepRChr(DesktopFileName);
 
                 if (p == NULL) {
                     //** No desktop! Set default name in current directory,
@@ -679,23 +685,23 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                     return 0;                   // NOT found!!
                 }
                 *p = 0;                         // Truncate name at last
-            }
+            } */
         }
     }
-	*/
+
 
     void DoLoadDesktopOnEntry(String []argv) {
         if (DesktopFileName[0].isBlank())
             findDesktop(argv);
 
         if (!DesktopFileName[0].isBlank()) {
-            if (Console.IsDirectory(DesktopFileName)) {
-                Console.Slash(DesktopFileName, 1);
-                strcat(DesktopFileName, DESKTOP_NAME);
+            if (Console.IsDirectory(DesktopFileName[0])) {
+            	DesktopFileName[0] = Console.Slash(DesktopFileName[0], 1);
+                DesktopFileName[0] += DESKTOP_NAME;
             }
 
-            if (LoadDesktopOnEntry && FileExists(DesktopFileName))
-                LoadDesktop(DesktopFileName);
+            if (Config.LoadDesktopOnEntry && Console.FileExists(DesktopFileName[0]))
+                LoadDesktop(DesktopFileName[0]);
         }
     }
 
@@ -706,7 +712,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     	EBuffer.SSBuffer = new EBuffer(0, ssm, "Scrap");
         //SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
         //assert(SSBuffer != null);
-    	EBuffer.BFI_SET(EBuffer.SSBuffer, BFI_Undo, 0); // disable undo for clipboard
+    	EBuffer.SSBuffer.BFI_SET(EBuffer.SSBuffer, BFI_Undo, 0); // disable undo for clipboard
         EModel.ActiveModel = null;
     }
 
@@ -902,6 +908,164 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
 
         super.Stop();
+    }
+
+    
+    
+    
+    boolean SaveDesktop(String FileName) 
+    {
+		try (BufferedWriter writer = Files.newBufferedWriter(Path.of(FileName), Main.charset)) 
+		{
+			return doSaveDesktop(writer);
+		} catch (IOException x) {
+			System.err.format("Writing to %s IOException: %s%n", FileName, x);
+			//View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to write block to %s", AFileName);
+			new File(FileName).delete();
+			return false;
+		}
+    	
+    }
+    
+    
+    private static final String DESKTOP_VER = "FTE Desktop 2\n";
+    
+    boolean doSaveDesktop(BufferedWriter w) throws IOException 
+    {        
+        w.write(DESKTOP_VER);
+        
+        EModel M = EModel.ActiveModel;
+        while (M != null) {
+            switch(M.GetContext()) {
+            case CONTEXT_FILE:
+
+                // TODO if (M != CvsLogView)
+                {
+                    EBuffer B = (EBuffer )M;
+                    w.write( String.format("F|%d|%s\n", B.ModelNo, B.FileName) );
+                }
+                break;
+            case CONTEXT_DIRECTORY:
+                {
+                    EDirectory D = (EDirectory )M;
+                    w.write( String.format( "D|%d|%s\n", D.ModelNo, D.Path) );
+                }
+                break;
+            }
+            M = M.Next;
+            if (M == EModel.ActiveModel)
+                break;
+        }
+
+        // TODO TagsSave(fp);
+        EMarkIndex.markIndex.saveToDesktop(w);
+        
+        w.close();
+        
+        return true;
+    }
+
+    boolean LoadDesktop(String FileName) 
+    {
+		try (BufferedReader r = Files.newBufferedReader(Path.of(FileName), Main.charset)) 
+		{
+			return doLoadDesktop(r);
+		} catch (IOException x) {
+			System.err.format("Reading %s IOException: %s%n", FileName, x);
+			//View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to write block to %s", AFileName);
+			return false;
+		}
+    	
+    }
+
+    boolean doLoadDesktop(BufferedReader r) throws IOException 
+    {
+        //char line[512];
+        //String p, []e;
+        int FLCount = 0;
+
+        // TODO TagClear();
+        
+        String line = r.readLine();
+        
+        if (line == null || !line.equals(DESKTOP_VER))
+            return false;
+
+        while ( (line = r.readLine()) != null) 
+        {
+        	char c0 = line.charAt(0);
+        	char c1 = line.charAt(1);
+        	
+            if ((c0 == 'D' || c0 == 'F') && c1 == '|') {
+                int ModelNo = -1;
+                int p = 2;
+                if (Character.isDigit(line.charAt(2))) {
+                    ModelNo = Integer.parseInt(line.substring(2));
+                    while (Character.isDigit(line.charAt(p))) p++;
+                    if (line.charAt(p) == '|')
+                        p++;
+                }
+
+                if (c0 == 'F') { // file
+                    if (FLCount > 0)
+                    	EBuffer.suspendLoads = 1;
+                    if (Console.FileLoad(0, line.substring(p), null, EView.ActiveView))
+                        FLCount++;
+                    EBuffer.suspendLoads  = 0;
+
+                } else if (c0 == 'D') { // directory
+                    EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, line.substring(p));
+                    assert(EModel.ActiveModel != null && m != null);
+                }
+
+                if (EModel.ActiveModel != null) {
+                    if (ModelNo != -1) {
+                        if (EModel.FindModelID(EModel.ActiveModel, ModelNo) == null)
+                        	EModel.ActiveModel.ModelNo = ModelNo;
+                    }
+
+                    if (EModel.ActiveModel != EModel.ActiveModel.Next) {
+                    	EBuffer.suspendLoads = 1;
+                        EView.ActiveView.SelectModel(EModel.ActiveModel.Next);
+                        EBuffer.suspendLoads  = 0;
+                    }
+                }
+            } else {
+
+                if (c0 == 'T' && c1 == '|') { // tag file
+                    // TODO TagsAdd(line + 2);
+                } /* TODO else if (c0 == 'M' && c1 == '|') { // mark
+                    String name;
+                    String file;
+                    EPoint P;
+                    //long l;
+                    String e;
+
+                    int p = 2;
+                    P.Row = strtol(p, &e, 10);
+                    if (*e != '|')
+                        break;
+                    p = e + 1;
+                    P.Col = strtol(p, &e, 10);
+                    if (*e != '|')
+                        break;
+                    p = e + 1;
+                    name = p;
+                    while (*p && *p != '|')
+                        p++;
+                    if (*p == '|')
+                        *p++ = 0;
+                    else
+                        break;
+                    file = p;
+                    
+                    markIndex.insert(name, file, P);
+                } */
+            }
+        }
+        
+        r.close();
+        return true;
     }
     
 }

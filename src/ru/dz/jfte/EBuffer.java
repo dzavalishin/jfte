@@ -103,7 +103,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	final static int   ccToggle   =2;
 
 	static SearchReplaceOptions LSearch;
-	static int suspendLoads;
+	static int suspendLoads = 0;
 	static EBuffer SSBuffer = null; // scrap buffer (clipboard)
 
 
