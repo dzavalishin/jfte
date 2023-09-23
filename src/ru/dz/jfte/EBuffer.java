@@ -5456,9 +5456,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		NewName[0] = FileName+"~";
 
 		if (!Console.IsSameFile(FileName,NewName[0])) {
-			if (Console.access(NewName[0],0))                 // Backup already exists?
+			if (Console.FileExists(NewName[0]))                 // Backup already exists?
 				Console.unlink(NewName[0]);                         // Then delete the file..
-			if (!Console.access(FileName, 0))                // Original found?
+			if (!Console.FileExists(FileName))                // Original found?
 				return NewName[0];
 			if (Console.copyfile(FileName, NewName[0]))
 				return NewName[0];

@@ -364,7 +364,7 @@ public class Console implements ModeDefs, GuiDefs
 	 * @param Add if not - remove final separator
 	 * @return
 	 */
-	static String Slash(String Path, int Add) {
+	public static String Slash(String Path, int Add) {
 		int len = Path.length();
 
 		if (Add!=0) {
@@ -697,7 +697,7 @@ static String SlashDir(String Path)
 	    //return 0;
 	}
 
-	static int JustDirectory(String path, String[] Dir) {
+	public static int JustDirectory(String path, String[] Dir) {
 		Path p = Path.of(path).getParent();
 		if(p == null)
 			Dir[0] = null;

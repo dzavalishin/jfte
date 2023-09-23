@@ -1,8 +1,19 @@
 package ru.dz.jfte.config;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+import ru.dz.jfte.ConfigDefs;
+import ru.dz.jfte.Console;
+import ru.dz.jfte.Main;
+import ru.dz.jfte.MainConst;
 import ru.dz.jfte.c.ByteArrayPtr;
 
-public class ConfigCompiler implements ConfigCompilerDefs 
+public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs 
 {
 
 	public ConfigCompiler() {
@@ -16,14 +27,12 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    String Name;
 	} 
 
-	unsigned int CMacros = 0;
-	ExMacro []Macros = 0;
 
 	//FILE *output = 0;
 	int lntotal = 0;
 	long offset = -1;
 	long pos = 0;
-	String XTarget = "";
+	String [] XTarget = {""};
 	String StartDir = "";
 
 
@@ -56,8 +65,8 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	//int LoadFile(String WhereName, String CfgName, int Level = 1);
 	
 	void PutObject(CurPos cp, int xtag, int xlen, Object obj) {
-	    unsigned char tag = (unsigned char)xtag;
-	    unsigned short len = (unsigned short)xlen;
+	    char tag = (char)xtag;
+	    int len = xlen;
 	    unsigned char l[2];
 
 	    l[0] = len & 0xFF;
@@ -84,7 +93,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	}
 
 	void PutNumber(CurPos cp, int xtag, long num) {
-	    unsigned long l = num;
+	    long l = num;
 	    unsigned char b[4];
 
 	    b[0] = (unsigned char)(l & 0xFF);
@@ -95,45 +104,94 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	}
 
 	public static void main(String []argv) {
-	    char Source[MAXPATH];
-	    char Target[MAXPATH];
+	    String Source;
+	    String Target;
 	    String p = argv[1];
-	    int n = 1;
+	    int n = 0;
+	    int argc = argv.length;
 
-	    fprintf(stderr, PROG_CFTE " " VERSION "\n" COPYRIGHT "\n");
+	    System.err.printf( "cfte " + MainConst.VERSION + "\n" + MainConst.COPYRIGHT + "\n");
 	    if (argc < 2 || argc > 4) {
-	        fprintf(stderr, "Usage: " PROG_CFTE " [-o<offset>] "
-	#ifndef UNIX
-	                "config/"
-	#endif
+	    	System.err.printf( "Usage: cfte [-o<offset>] " +
 	                "main.fte [fte-new.cnf]\n");
-	        exit(1);
+	        System.exit(1);
 	    }
 
-	    DefineWord("OS_JAVA");
+	    ConfigCompiler cc = new ConfigCompiler();
+	    
+	    cc.DefineWord("OS_JAVA");
 
-	    if (strncmp(p, "-o", 2) == 0) {
+	    /* TODO	    if (strncmp(p, "-o", 2) == 0) {
 	        p += 2;
 	        offset = atol(p);
 	        n++;
 	    }
 	    if (n == 1 && argc == 4) {
-	        fprintf(stderr, "Invalid option '%s'\n", argv[1]);
-	        exit(1);
-	    }
-	    strcpy(Source, argv[n++]);
-	    strcpy(Target, "fte-new.cnf");
+	    	System.err.printf( "Invalid option '%s'\n", argv[1]);
+	        System.exit(1);
+	    } */
+	    Source = argv[n++];
+	    Target = "fte-new.cnf";
 	    if (n < argc)
-	        strcpy(Target, argv[n++]);
+	        Target = argv[n++];
 
-	    JustDirectory(Target, XTarget);
-	    Slash(XTarget, 1);
-	    sprintf(XTarget + strlen(XTarget), "cfte%ld.tmp", (long)getpid());
-	    output = fopen(XTarget, "wb");
-	    if (output == 0) {
-	        fprintf(stderr, "Cannot create '%s', errno=%d!\n", XTarget, errno);
+	    cc.compile(Source,Target);
+	}
+
+
+	private void compile(String Source, String Target) 
+	{
+	    Console.JustDirectory(Target, XTarget);
+	    XTarget[0] = Console.Slash(XTarget[0], 1);
+	    XTarget[0] += String.format( "cfte%ld.tmp", 33 );// TODO (long)getpid());
+	    
+		try(BufferedWriter output = Files.newBufferedWriter(Path.of(XTarget[0]), Main.charset)) 
+		{
+			writeOutput();
+			output.close();
+
+
+		    if (Console.FileExists(Target) &&  Console.unlink(Target) != 0) {
+		    	System.err.printf( "Remove of '%s' failed, result left in %s\n",
+		                Target, XTarget);
+		        System.exit(1);
+		    }
+
+		    if (!Console.rename(XTarget[0], Target)) {
+		    	System.err.printf( "Rename of '%s' to '%s' failed\n",
+		                XTarget, Target );
+		        System.exit(1);
+		    }
+
+		    System.out.printf( "\nDone.\n");
+			
+			return ;
+
+		}
+		catch(IOException e)
+		{
+		    System.err.printf( "Cannot create '%s',Exception %s", XTarget[0], e);
 	        cleanup(1);
-	    }
+
+			/*
+			Console.unlink(AFileName);
+			if (!Console.rename(ABackupName[0], AFileName)) {
+				View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error renaming backup file to original!");
+			} else {
+				View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error writing file, backup restored.");
+			}
+
+			return false;
+			*/
+		}
+
+	}
+	
+	void writeOutput()
+	{
+		
+		
+	    
 
 	    unsigned char b[4];
 
@@ -157,7 +215,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    }
 	    pos = 2 * 4;
 
-	    fprintf(stderr, "Compiling to '%s'\n", Target);
+	    System.out.printf( "Compiling to '%s'\n", Target);
 	    /*{
 	        char PrevDir[MAXPATH];
 	        sprintf(PrevDir, "%s/..", Target);
@@ -203,101 +261,98 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    b[3] = (unsigned char)((l >> 24) & 0xFF);
 	    fseek(output, 0, SEEK_SET);
 	    fwrite(b, 4, 1, output);
-	    fclose(output);
-
-	    if (unlink(Target) != 0 && errno != ENOENT) {
-	        fprintf(stderr, "Remove of '%s' failed, result left in %s, errno=%d\n",
-	                Target, XTarget, errno);
-	        exit(1);
-	    }
-
-	    if (rename(XTarget, Target) != 0) {
-	        fprintf(stderr, "Rename of '%s' to '%s' failed, errno=%d\n",
-	                XTarget, Target, errno);
-	        exit(1);
-	    }
-
-	    fprintf(stderr, "\nDone.\n");
 	    return 0;
 	}
 
 
 	int Lookup(OrdLookup [] where, String what) {
-	    int i;
 
-	    for (i = 0; where[i].Name != 0; i++) {
-	        if (strcmp(what, where[i].Name) == 0)
-	            return where[i].num;
+	    for (OrdLookup w : where) {
+	        if (what.equals(w.Name))
+	            return w.num;
 	    }
 //	    fprintf(stderr, "\nBad name: %s (i = %d)\n", what, i);
 	    return -1;
 	}
 
 
-	typedef char Word[64];
+	//typedef char Word[64];
 
 
-	String *words = 0;
-	unsigned int wordCount = 0;
+	//String []words = null;
+	Map<String,Integer> words = new HashMap<>();
+	int wordCount = 0;
 
-	int DefinedWord(String w) {
+	boolean DefinedWord(String w) {
+		return words.get(w) != null;
+		/*
 	    if (words == 0 || wordCount == 0)
 	        return 0;
-	    for (unsigned int i = 0; i < wordCount; i++)
+	    for (int i = 0; i < wordCount; i++)
 	        if (strcmp(w, words[i]) == 0)
 	            return 1;
 	    return 0;
+	    */
 	}
 
 	void DefineWord(String w) {
+		words.put(w, wordCount++);
+		/*
 	    if (!w || !w[0])
 	        return ;
 	    if (!DefinedWord(w)) {
 	        words = (String *)realloc(words, sizeof (String ) * (wordCount + 1));
 	        assert(words != 0);
-	        words[wordCount] = strdup(w);
+	        words[wordCount] = w;
 	        assert(words[wordCount] != 0);
 	        wordCount++;
-	    }
+	    }*/
 	}
 
+	/*
 	int colorCount;
 	struct _color {
 	    String colorName;
 	    String colorValue;
 	} *colors;
+	*/
+	Map<String,String> colors = new HashMap<String, String>();
 
-	int DefineColor(String name, String value) {
+	void DefineColor(String name, String value) {
+		colors.put(name, value);
+		/*
 	    if (!name || !value)
 	        return 0;
 	    colors = (struct _color *)realloc(colors, sizeof (struct _color) * (colorCount + 1));
 	    assert(colors != 0);
-	    colors[colorCount].colorName = strdup(name);
-	    colors[colorCount].colorValue = strdup(value);
+	    colors[colorCount].colorName = name);
+	    colors[colorCount].colorValue = value);
 	    assert(colors != NULL);
 	    assert(colors[colorCount].colorName != 0);
 	    assert(colors[colorCount].colorValue != 0);
 	    colorCount++;
-	    return 1;
+	    return 1; */
 	}
 
 	String DefinedColor(String name) {
+		return colors.get(name);
+		/*
 	    if (colors == 0 || colorCount == 0)
 	        return 0;
 	    for (int i = 0; i < colorCount; i++)
 	        if (strcmp(name, colors[i].colorName) == 0)
 	            return colors[i].colorValue;
-	    return 0;
+	    return 0; */
 	}
 
 	String GetColor(CurPos cp, String name) {
 	    String c;
-	    static char color[4];
+	    //static char color[4];
 
 	    // add support for fore:back and remove it from fte itself
 	    if ((c = strchr(name, ' ')) != NULL) {
 	    } else if ((c = strchr(name, ':')) != NULL) {
-	        char clr[4];
+	        //char clr[4];
 	        *c++ = 0;
 	        clr[0] = GetColor(cp, name)[0];
 	        clr[1] = ' ';
@@ -487,7 +542,8 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    case P_QUEST:
 	    case P_VARIABLE:
 	    case P_DOT:
-	        cp.c++;
+	        //cp.c++;
+	        cp.c.shift(1);
 	        break;
 	    }
 	}
@@ -563,8 +619,15 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    return neg ? -value : value;
 	}
 
-	int CmdNum(String Cmd) {
-	    unsigned int i;
+	int CmdNum(String Cmd) 
+	{
+		for( CmdDef c : Command_Table )
+		{
+			if( c.Name.equals(Cmd) )
+				return c.CmdId;
+		}
+		/*
+	    int i;
 
 	    for (i = 0;
 	         i < sizeof(Command_Table) / sizeof(Command_Table[0]);
@@ -574,14 +637,20 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    for (i = 0; i < CMacros; i++)
 	        if (Macros[i].Name && (strcmp(Cmd, Macros[i].Name)) == 0)
 	            return i | CMD_EXT;
+	    */
+		System.err.println("Command not found: "+Cmd);
 	    return 0; // Nop
 	}
 
+	
+	//int CMacros = 0;
+	ExMacro []Macros = null;
+	
 	int NewCommand(String Name) {
 	    if (Name == 0)
 	        Name = "";
 	    Macros = (ExMacro ) realloc(Macros, sizeof(ExMacro) * (1 + CMacros));
-	    Macros[CMacros].Name = strdup(Name);
+	    Macros[CMacros].Name = Name);
 	    CMacros++;
 	    return CMacros - 1;
 	}
@@ -589,7 +658,8 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	int ParseCommands(CurPos cp, String Name) {
 	    //if (!Name)
 	    //    return 0;
-	    Word cmd;
+	    //Word cmd;
+	    String cmd;
 	    int p;
 	    long Cmd = NewCommand(Name) | CMD_EXT;
 
@@ -599,7 +669,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    PutNumber(cp, CF_INT, Cmd);
 	    GetOp(cp, P_OPENBRACE);
 	    cnt = 1;
-	    while (1) {
+	    while (true) {
 	        p = Parse(cp);
 	        if (p == P_CLOSEBRACE) break;
 	        if (p == P_EOF) Fail(cp, "Unexpected EOF");
@@ -636,7 +706,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	        } else if (p == P_VARIABLE) {
 	            GetOp(cp, P_VARIABLE);
 	            if (Parse(cp) != P_WORD) Fail(cp, "Syntax error (variable name expected)");
-	            Word w;
+	            String w;
 	            if (GetWord(cp, w) != 0) Fail(cp, "Syntax error (bad variable name)");
 	            long var = Lookup(CfgVar, w);
 	            if (var == -1) Fail(cp, "Unrecognised variable");
@@ -674,7 +744,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	                    PutString(cp, CF_SUB, Name);
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
 	                    GetOp(cp, P_OPENBRACE);
-	                    if (ParseCommands(cp, strdup(Name ? Name : "")) == -1)
+	                    if (ParseCommands(cp, Name != null ? Name : "") == -1)
 	                        Fail(cp, "Parse failed");
 	                    PutNull(cp, CF_END);
 	                }
@@ -898,7 +968,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	                            PutNull(cp, CF_COLOR);
 
 	                            while (1) {
-	                                String sname, *svalue;
+	                                String sname, svalue;
 	                                long cidx;
 
 	                                if (Parse(cp) == P_CLOSEBRACE) break;
@@ -932,7 +1002,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 
 	                        case K_KEYWORD: // mode::keyword
 	                            {
-	                                String colorstr, *kname;
+	                                String colorstr, kname;
 	                                //int color;
 
 	                                if (Parse(cp) != P_STRING) Fail(cp, "String expected");
@@ -990,7 +1060,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	                        case K_HTRANS:
 	                            {
 	                                long next_state;
-	                                String opts, *match;
+	                                String opts, match;
 	                                long match_opts;
 	                                String cname;
 	                                long cidx;
@@ -1430,19 +1500,19 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	}
 
 	int LoadFile(String WhereName, String CfgName, int Level) {
-	    int fd, rc;
-	    String buffer = 0;
-	    struct stat statbuf;
+	    int rc;
+	    //String buffer = 0;
+	    //struct stat statbuf;
 	    CurPos cp;
-	    char last[MAXPATH];
-	    char Cfg[MAXPATH];
+	    String [] last = {null};
+	    String Cfg;
 
 	    //fprintf(stderr, "Loading file %s %s\n", WhereName, CfgName);
 
-	    JustDirectory(WhereName, last);
+	    Console.JustDirectory(WhereName, last);
 
-	    if (IsFullPath(CfgName)) {
-	        strcpy(Cfg, CfgName);
+	    if (Console.IsFullPath(CfgName)) {
+	        Cfg[0] = CfgName;
 	    } else {
 	        // here we will try relative to a number of places.
 	        // 1. User's .fte directory.
@@ -1454,7 +1524,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	        // followed by a system standard to override anything.
 
 	        // #'s 1 and 2 are unix-only.
-	#ifdef UNIX
+	/* #ifdef UNIX
 	        // 1. User's .fte directory.
 	        char tmp[MAXPATH];
 	        sprintf(tmp, "~/.fte/%s", CfgName);
@@ -1487,14 +1557,15 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	                }
 	            }
 	        }
-	#else // UNIX
-	        SlashDir(last);
-	        strcat(last, CfgName);
-	        ExpandPath(last, Cfg);
-	#endif // UNIX
+	#else // UNIX */
+	        last[0] = Console.SlashDir(last[0]);
+	        last[0] += CfgName;
+	        Console.ExpandPath(last, Cfg);
+	//#endif // UNIX
 	    }
 	    // puts(Cfg);
 
+	    /*
 	    //fprintf(stderr, "Loading file %s\n", Cfg);
 	    if ((fd = open(Cfg, O_RDONLY | O_BINARY)) == -1) {
 	        fprintf(stderr, "Cannot open '%s', errno=%d\n", Cfg, errno);
@@ -1516,10 +1587,24 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	        return -1;
 	    }
 	    close(fd);
+		*/
 
-	    cp.sz = statbuf.st_size;
-	    cp.a = cp.c = buffer;
-	    cp.z = cp.a + cp.sz;
+		byte[] allCfg = null;
+		try {
+			allCfg = Files.readAllBytes(Path.of(Cfg));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+
+			Console.DieError(1, "Error in %s exception %s\n", Cfg, e1.toString());
+			return false;
+		}
+	    
+	    
+	    cp.sz = allCfg.length;
+	    //cp.a = cp.c = buffer;
+	    //cp.z = cp.a + cp.sz;
+	    cp.c = new ByteArrayPtr(allCfg);
 	    cp.line = 1;
 	    cp.name = Cfg;
 
@@ -1531,7 +1616,7 @@ public class ConfigCompiler implements ConfigCompilerDefs
 	    if (rc == -1) {
 	        Fail(cp, "Parse failed");
 	    }
-	    free(buffer);
+	    //free(buffer);
 	    return rc;
 	}
 	
