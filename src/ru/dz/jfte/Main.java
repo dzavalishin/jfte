@@ -94,83 +94,86 @@ public class Main implements MainConst
 
 	
 	static int CmdLoadConfiguration(String [] argv) {
-		/* TODO CmdLoadConfiguration
-	    int ign = 0;
-	    int QuoteAll = 0, QuoteNext = 0;
-	    int haveConfig = 0;
+		//* TODO CmdLoadConfiguration
+	    boolean ign = false;
+	    boolean QuoteAll = false, QuoteNext = false;
+	    boolean haveConfig = false;
+	    
 	    int Arg;
 	    int argc = argv.length;
 
-	    for (Arg = 1; Arg < argc; Arg++) {
-	        if (!QuoteAll && !QuoteNext && (argv[Arg][0] == '-')) {
-	            if (argv[Arg][1] == '-') {
-	                if (strcmp(argv[Arg], "--help") == 0) {
+	    for (Arg = 0; Arg < argc; Arg++) 
+	    {
+	    	char aa1 = argv[Arg].charAt(1);
+	    	
+	        if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
+	            if (aa1 == '-') {
+	                if (argv[Arg].equals("--help")) {
 	                    Usage();
 	                    return 0;
 	                }
-	                int debug_clean = strcmp(argv[Arg], "--debugclean") == 0;
-	                if (debug_clean || strcmp(argv[Arg], "--debug") == 0) {
-	#ifndef FTE_NO_LOGGING
-	                    char path[MAXPATH];
-	#ifdef UNIX
+	                boolean debug_clean = argv[Arg].equals("--debugclean");
+	                if (debug_clean || argv[Arg].equals("--debug")) {
+	                    String [] path = {""};
+	/*#ifdef UNIX
 	                    ExpandPath("~/.fte", path);
-	#else
-	                    JustDirectory(argv[0], path);
-	#endif
-	                    Slash(path,1);
-	                    strcat(path, "fte.log");
-	                    if (debug_clean) unlink(path);
+	#else */
+	                    // TODO JustDirectory(argv[0], path);
+	                    Console.ExpandPath(".", path);
+	//#endif
+						path[0] = Console.Slash(path[0],1);
+	                    path[0] += "fte.log";
+	                    if (debug_clean) Console.unlink(path[0]);
 
-	                    globalLog.SetLogFile(path);
-	                    printf("Trace Log in: %s\n", path);
-	#else
-	                    printf("--debug, --debugclean disabled\n");
-	#endif
+	                    // TODO globalLog.SetLogFile(path);
+	                    //printf("Trace Log in: %s\n", path);
 	                }
 	                else
-	                    QuoteAll = 1;
-	            } else if (argv[Arg][1] == '!') {
-	                ign = 1;
-	            } else if (argv[Arg][1] == '+') {
-	                QuoteNext = 1;
-	            } else if (argv[Arg][1] == '?' || argv[Arg][1] == 'h') {
+	                    QuoteAll = true;
+	            } else if (aa1 == '!') {
+	                ign = true;
+	            } else if (aa1 == '+') {
+	                QuoteNext = true;
+	            } else if (aa1 == '?' || aa1 == 'h') {
 	                Usage();
 	                return 0;
-	            } else if (argv[Arg][1] == 'c' || argv[Arg][1] == 'C') {
-	                if (argv[Arg][2])
+	            } else if (aa1 == 'c' || aa1 == 'C') {
+	                /* TODO config file if (argv[Arg][2])
 	                {
-	                    ExpandPath(argv[Arg] + 2, ConfigFileName);
-	                    haveConfig = 1;
+	                    Console.ExpandPath(argv[Arg] + 2, ConfigFileName);
+	                    haveConfig = true;
 	                }
-	                else
-	                    ign = 1;
+	                else */
+	                    ign = true;
 	            }
 	        }
 	    }
-	    if (!haveConfig && GetConfigFileName(argc, argv, ConfigFileName) == 0) {
+	    // TODO if (!haveConfig && GetConfigFileName(argc, argv, ConfigFileName) == 0) 
 	        // should we default to internal
-	#ifdef DEFAULT_INTERNAL_CONFIG
-	       ign = 1;
-	#endif
-	    }
+	       ign = true;
+	    
 
 	    if (ign) {
 	        if (UseDefaultConfig() == -1)
 	            Console.DieError(1, "Error in internal configuration??? FATAL!");
 	    } else {
-	        if (LoadConfig(argc, argv, ConfigFileName) == -1)
+	        /* TODO if (LoadConfig(argc, argv, ConfigFileName) == -1)
 	            Console.DieError(1,
 	                     "Failed to load configuration file '%s'.\n"
 	                     "Use '-C' option.", ConfigFileName);
+	                    */
 	    }
-	    for (Arg = 1; Arg < argc; Arg++) {
-	        if (!QuoteAll && !QuoteNext && (argv[Arg][0] == '-')) {
-	            if (argv[Arg][1] == '-' && argv[Arg][2] == '\0') {
-	                QuoteAll = 1;
-	            } else if (argv[Arg][1] == '+') {
-	                QuoteNext = 1;
-	#ifdef CONFIG_DESKTOP
-	            } else if (argv[Arg][1] == 'D') {
+	    for (Arg = 0; Arg < argc; Arg++) 
+	    {
+	    	char aa1 = argv[Arg].charAt(1);
+	    	
+	        if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
+	            if (aa1 == '-' && argv[Arg].length() == 2) {
+	                QuoteAll = true;
+	            } else if (aa1 == '+') {
+	                QuoteNext = true;
+	/* TODO #ifdef CONFIG_DESKTOP
+	            } else if (aa1 == 'D') {
 	                ExpandPath(argv[Arg] + 2, DesktopFileName);
 	                if (IsDirectory(DesktopFileName)) {
 	                    Slash(DesktopFileName, 1);
@@ -182,28 +185,28 @@ public class Main implements MainConst
 	                } else {
 	                    LoadDesktopOnEntry = 1;
 	                }
-	#endif
-	#ifdef CONFIG_HISTORY
-	            } else if (argv[Arg][1] == 'H') {
+	#endif */
+	/* TODO #ifdef CONFIG_HISTORY
+	            } else if (aa1 == 'H') {
 	                strcpy(HistoryFileName, argv[Arg] + 2);
 	                if (HistoryFileName[0] == 0) {
 	                    KeepHistory = 0;
 	                } else {
 	                    KeepHistory = 1;
 	                }
-	#endif
+	#endif */
 	            }
 	        } else {
-	            if (LoadDesktopOnEntry == 2) {
-	                LoadDesktopOnEntry = 0;
-	                SaveDesktopOnExit = 0;
-	                DesktopFileName[0] = 0;
+	            if (Config.LoadDesktopOnEntry == 2) {
+	            	Config.LoadDesktopOnEntry = 0;
+	            	Config.SaveDesktopOnExit = false;
+	            	EGUI.DesktopFileName[0] = "";
 	            }
 	        }
 	    }
-	    if (LoadDesktopOnEntry == 2)
-	        LoadDesktopOnEntry = 1;
-	    */
+	    if (Config.LoadDesktopOnEntry == 2)
+	    	Config.LoadDesktopOnEntry = 1;
+	    //*/
 	    return 1;
 	}
 

@@ -697,7 +697,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 DesktopFileName[0] += DESKTOP_NAME;
             }
 
-            if (Config.LoadDesktopOnEntry && Console.FileExists(DesktopFileName[0]))
+            if (Config.LoadDesktopOnEntry != 0 && Console.FileExists(DesktopFileName[0]))
                 LoadDesktop(DesktopFileName[0]);
         }
     }
