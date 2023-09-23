@@ -48,4 +48,9 @@ public interface GuiDefs {
 	static final String DESKTOP_NAME = ".fte-desktop";
 	
 	
+	
+	static final int  SUBMENU_NORMAL      = -1;
+	static final int  SUBMENU_CONDITIONAL = -2;
+	
+	
 }

@@ -174,9 +174,9 @@ public class Console implements ModeDefs, GuiDefs
 		//return '+';
 
 		if (null==chtab) 
-			chtab="┌┐└┘─│┬├┤┴┼?·─▒░??".toCharArray();
-		//chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼?·─▒░??");
-		//chtab=GetGUICharacters ("WindowsNT","┌┐└┘─│┬├┤┴┼\x1A·─▒░\x1B\x1A");
+			chtab="в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??".toCharArray();
+		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??");
+		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј\x1AВ·в”Ђв–’в–‘\x1B\x1A");
 
 		return chtab[index];
 
@@ -349,7 +349,7 @@ public class Console implements ModeDefs, GuiDefs
 	 * @param mode
 	 * @return true if file exists
 	 */
-	public static boolean access(String fileName, int mode) {
+	public static boolean fileExist(String fileName, int mode) {
 		File f = new File(fileName);
 		return f.isFile();
 	}

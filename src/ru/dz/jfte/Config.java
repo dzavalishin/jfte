@@ -1,12 +1,13 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.ByteArrayPtr;
 
-public class Config implements ConfigDefs 
+public class Config implements ConfigDefs, ModeDefs, GuiDefs 
 {
 	static int SystemClipboard = 0;
 	static int ScreenSizeX = -1, ScreenSizeY = -1;
@@ -89,18 +90,29 @@ public class Config implements ConfigDefs
 
 
 
-	boolean LoadConfig(String CfgFileName) {
+	static boolean LoadConfig(String CfgFileName)  
+	{
 		//STARTFUNC("LoadConfig");
 		//LOG << "Config file: " << CfgFileName << ENDLINE;
 
-		byte [] allCfg = Files.readAllBytes(Path.of(CfgFileName));
+		byte[] allCfg = null;
+		try {
+			allCfg = Files.readAllBytes(Path.of(CfgFileName));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+
+			Console.DieError(1, "Error in %s exception %s\n", CfgFileName, e1.toString());
+			return false;
+		}
 
 		long ln = (allCfg[3] << 24) + (allCfg[2] << 16) + (allCfg[1] << 8) + allCfg[0];
 
+		/* TODO cnf sig
 		if (ln != CONFIG_ID) {
 			Console.DieError(0, "Bad .CNF signature");
 			return false;
-		}
+		} */
 
 		ln = (allCfg[4+3] << 24) + (allCfg[4+2] << 16) + (allCfg[4+1] << 8) + allCfg[4+0];
 
@@ -119,10 +131,19 @@ public class Config implements ConfigDefs
 		//cp.z = cp.a + cp.sz;
 		cp.line = 1;
 
-		boolean rc = ReadConfigFile(cp);
+		boolean rc;
+		try {
+			rc = ReadConfigFile(cp);
+		} catch (ConfigFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+			Console.DieError(1, "Error in %s exception %s\n", CfgFileName, e.toString());
+			return false;
+		}
 
 		if (!rc) {
-			Console.DieError(1, "Error %s offset %d\n", CfgFileName, cp.c - cp.a);
+			Console.DieError(1, "Error %s offset %d\n", CfgFileName, cp.c.getPos());
 			return false;
 		}
 
@@ -147,7 +168,7 @@ public class Config implements ConfigDefs
 
 
 
-	boolean ReadConfigFile(CurPos cp) {
+	static boolean ReadConfigFile(CurPos cp) throws ConfigFormatException {
 		Obj obj;
 		//short len;
 
@@ -190,11 +211,12 @@ public class Config implements ConfigDefs
 				String MapName = GetCharStr(cp, obj.len);
 				String UpMap = null;
 
-				if ((obj = GetObj(cp, obj.len)) != CF_PARENT) return false;
-				if (len > 0)
-					if ((UpMap = GetCharStr(cp, len)) == null) return false;
+				obj = GetObj(cp);
+				if (obj.type != CF_PARENT) return false;
+				if (obj.len > 0)
+					if ((UpMap = GetCharStr(cp, obj.len)) == null) return false;
 
-				// add new mode
+				/* TODO / add new mode
 				if ((EventMap = FindEventMap(MapName)) == 0) {
 					EEventMap OrgMap = 0;
 
@@ -206,6 +228,7 @@ public class Config implements ConfigDefs
 						EventMap.Parent = FindEventMap(UpMap);
 				}
 				if (ReadEventMap(cp, EventMap, MapName) == -1) return false;
+				*/
 			}
 			break;
 
@@ -215,7 +238,8 @@ public class Config implements ConfigDefs
 				String ModeName = GetCharStr(cp, obj.len);
 				String UpMode = null;
 
-				if ((obj = GetObj(cp, obj.len)) != CF_PARENT) return false;
+				obj = GetObj(cp);
+				if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
 					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
@@ -235,13 +259,14 @@ public class Config implements ConfigDefs
 
 			case CF_MODE:
 			{
-				EMode Mode = 0;
+				EMode Mode = null;
 				String ModeName = GetCharStr(cp, obj.len);
-				String UpMode = 0;
+				String UpMode = null;
 
-				if ((obj = GetObj(cp, obj.len)) != CF_PARENT) return false;
+				obj = GetObj(cp);
+				if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
-					if ((UpMode = GetCharStr(cp, obj.len)) == 0) return false;
+					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 				/* TODO / add new mode
 				if ((Mode = FindMode(ModeName)) == 0) {
@@ -284,13 +309,108 @@ public class Config implements ConfigDefs
 				return true;
 				
 			default:
-				return false;
+				System.err.printf("unk obj type %d\n", obj.type);
+				cp.c.shift(obj.len);
+				break;
+				//return false;
 			}
 		}
 		return false;
 	}
 
 
+	
+	
+	static int ReadObject(CurPos cp, String ObjName) throws ConfigFormatException 
+	{
+	    Obj obj;
+
+		while(true) 
+		{
+			obj = GetObj(cp);
+			if( obj.type == 0xFF)
+				break;
+					
+					
+			switch (obj.type) {
+
+			case CF_COLOR:
+	            if (ReadColors(cp, ObjName) == -1) return -1;
+	            break;
+
+	        case CF_COMPRX:
+	            {
+	                long file, line, msg;
+	                String regexp;
+
+	                //if (GetObj(cp, len) != CF_INT) return -1;
+	                GetAssertObj(cp, CF_INT);
+	                file =GetNum(cp);
+	                //if (GetObj(cp, len) != CF_INT) return -1;
+	                GetAssertObj(cp, CF_INT);
+	                line = GetNum(cp);
+	                //if (GetObj(cp, len) != CF_INT) return -1;
+	                GetAssertObj(cp, CF_INT);
+	                msg = GetNum(cp);
+	                //if (GetObj(cp, len) != CF_REGEXP) return -1;
+	                obj = GetAssertObj(cp, CF_REGEXP);
+	                if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+
+	                // TODO if (AddCRegexp(file, line, msg, regexp) == 0) return -1;
+	            }
+	            break;
+
+	        case CF_CVSIGNRX:
+	            {
+	                String regexp;
+
+	                //if (GetObj(cp, len) != CF_REGEXP) return -1;
+	                obj = GetAssertObj(cp, CF_REGEXP);
+	                if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+
+	                // TODO if (AddCvsIgnoreRegexp(regexp) == 0) return -1;
+	            }
+	            break;
+	
+	        case CF_SETVAR:
+	            {
+	                long what = GetNum(cp);
+
+	                obj = GetObj(cp);
+	                switch (obj.type) {
+	                case CF_STRING:
+	                    {
+	                        if (obj.len == 0) return -1;
+	                        String val = GetCharStr(cp, obj.len);
+	                        if (SetGlobalString((int)what, val) != 0) return -1;
+	                    }
+	                    break;
+	                case CF_INT:
+	                    {
+	                        long num;
+
+	                        num = GetNum(cp);
+	                        if (SetGlobalNumber((int)what, (int) num) != 0) return -1;
+	                    }
+	                    break;
+	                default:
+	                    return -1;
+	                }
+	            }
+	            break;
+	        case CF_END:
+	            return 0;
+	        default:
+				System.err.printf("unk obj type %d in ReadObject\n", obj.type);
+				cp.c.shift(obj.len);
+				break;
+	            /// TODO return -1;
+	        }
+	    }
+	    return -1;
+	}
+	
+	
 
 
 
@@ -347,7 +467,15 @@ public class Config implements ConfigDefs
 		return ret;
 	}
 
-	String GetCharStr(CurPos cp, int len) {
+	static Obj GetAssertObj(CurPos cp, int type) throws ConfigFormatException
+	{
+		Obj o = GetObj(cp);
+		if( o.type != type )
+			throw new ConfigFormatException("type is not "+type+" at "+cp.c.getPos());
+		return o;
+	}
+	
+	static String GetCharStr(CurPos cp, int len) {
 		//STARTFUNC("GetCharStr");
 		// // LOG << "Length: " << len << ENDLINE;
 
@@ -356,7 +484,7 @@ public class Config implements ConfigDefs
 	    if (cp.c + len > cp.z)
 	    {
 	        // LOG << "End of config file in GetCharStr" << ENDLINE;
-	        ENDFUNCRC(0);
+	        return 0;
 	    }
 	    cp.c += len;
 	    ENDFUNCRC(p);
@@ -364,7 +492,7 @@ public class Config implements ConfigDefs
 		return cp.c.getLenAsString(len);
 	}
 
-	long GetNum(CurPos cp) {
+	static long GetNum(CurPos cp) {
 		int n0 = cp.c.urpp();
 		int n1 = cp.c.urpp();
 		int n2 = cp.c.urpp();
@@ -375,26 +503,26 @@ public class Config implements ConfigDefs
 				(n1 << 8) +
 				n0;
 
-		if ((n[3] > 127))
-			num = num | (~0xFFFFFFFFUL);
+		if ((n3 > 127))
+			num = num | (~0xFFFFFFFFL);
 
 		return num;
 	}
 
-	int ReadCommands(CurPos cp, String Name) {
+	static int ReadCommands(CurPos cp, String Name) {
 		//STARTFUNC("ReadCommands");
 		// LOG << "Name = " << Name << ENDLINE;
 
 		Obj obj;
-		int len;
-		long Cmd = NewCommand(Name);
+		long Cmd = -1; // TODO NewCommand(Name);
 		long cmdno;
 
-		if (GetObj(cp, len) != CF_INT) ENDFUNCRC(-1);
-		if (GetNum(cp, cmdno) == 0) ENDFUNCRC(-1);
+		obj = GetObj(cp);
+		if ( obj.type != CF_INT) return -1;
+		cmdno = GetNum(cp);
 		if (cmdno != (Cmd | CMD_EXT)) {
-			fprintf(stderr, "Bad Command map %s . %ld != %ld\n", Name, Cmd, cmdno);
-			ENDFUNCRC(-1);
+			System.err.printf("Bad Command map %s . %d != %d\n", Name, Cmd, cmdno);
+			// TODO return -1;
 		}
 
 		while(true) 
@@ -403,7 +531,7 @@ public class Config implements ConfigDefs
 			if(obj.type == 0xFF)
 				break;
 
-			switch (obj) {
+			switch (obj.type) {
 			case CF_COMMAND:
 			{
 				//              String s;
@@ -412,64 +540,69 @@ public class Config implements ConfigDefs
 				long cmd;
 
 				//                if ((s = GetCharStr(cp, len)) == 0) return -1;
-				if (GetNum(cp, cmd) == 0) ENDFUNCRC(-1);
-				if (GetObj(cp, len) != CF_INT) ENDFUNCRC(-1);
-				if (GetNum(cp, cnt) == 0) ENDFUNCRC(-1);
-				if (GetObj(cp, len) != CF_INT) ENDFUNCRC(-1);
-				if (GetNum(cp, ign) == 0) ENDFUNCRC(-1);
+				cmd = GetNum(cp);
+				obj = GetObj(cp); 
+				if (obj.type != CF_INT) return -1;
+				cnt = GetNum(cp);
+				obj = GetObj(cp); 
+				if (obj.type != CF_INT) return -1;
+				ign = GetNum(cp);
 
 				//                if (cmd != CmdNum(s)) {
 				//                    fprintf(stderr, "Bad Command Id: %s . %d\n", s, cmd);
 				//                    return -1;
 				//                }
 
+				/* TODO AddCommand
 				if (AddCommand(Cmd, cmd, cnt, ign) == 0) {
-					if (Name == 0 || strcmp(Name, "xx") != 0) {
-						fprintf(stderr, "Bad Command Id: %ld\n", cmd);
-						ENDFUNCRC(-1);
+					if (Name == null || !Name.equals("xx")) {
+						System.err.printf("Bad Command Id: %ld\n", cmd);
+						return -1;
 					}
 				}
+				*/
 			}
 			break;
 			case CF_STRING:
 			{
-				String s = GetCharStr(cp, len);
-
-				//if (s == 0) ENDFUNCRC(-1);
-				if (AddString(Cmd, s) == 0) ENDFUNCRC(-1);
+				String s = GetCharStr(cp, obj.len);
+				// TODO if (AddString(Cmd, s) == 0) return -1;
 			}
 			break;
 			case CF_INT:
 			{
 				long num = GetNum(cp);
-				if (AddNumber(Cmd, num) == 0) ENDFUNCRC(-1);
+				// TODO if (AddNumber(Cmd, num) == 0) return -1;
 			}
 			break;
 			case CF_VARIABLE:
 			{
 				long num = GetNum(cp);
 
-				if (AddVariable(Cmd, num) == 0) ENDFUNCRC(-1);
+				// TODO if (AddVariable(Cmd, num) == 0) return -1;
 			}
 			break;
 			case CF_CONCAT:
-				if (AddConcat(Cmd) == 0) ENDFUNCRC(-1);
+				// TODO if (AddConcat(Cmd) == 0) return -1;
 				break;
 			case CF_END:
-				ENDFUNCRC(Cmd);
+				return (int) Cmd;
 			default:
-				ENDFUNCRC(-1);
+				System.err.printf("unk obj type %d in ReadCommands\n", obj.type);
+				cp.c.shift(obj.len);
+				break;
+				// TODO return -1;
 			}
 		}
-		ENDFUNCRC(-1);
+		return -1;
 	}
 
-	int ReadMenu(CurPos cp, String MenuName) {
+	static int ReadMenu(CurPos cp, String MenuName) {
 		Obj obj;
 
 		int menu = -1, item = -1;
 
-		menu = NewMenu(MenuName);
+		menu = UpMenu.NewMenu(MenuName);
 
 		while(true) 
 		{
@@ -477,54 +610,60 @@ public class Config implements ConfigDefs
 			if(obj.type == 0xFF)
 				break;
 
-			switch (obj) {
+			switch (obj.type) {
 			case CF_ITEM:
 			{
-				if (len == 0) {
-					item = NewItem(menu, 0);
+				if (obj.len == 0) {
+					item = UpMenu.NewItem(menu, null);
 				} else {
-					String s = GetCharStr(cp, len);
+					String s = GetCharStr(cp, obj.len);
 					int Cmd;
-					if (s == 0) return -1;
-					item = NewItem(menu, s);
-					if ((obj = GetObj(cp, len)) != CF_MENUSUB) return -1;
-					if ((Cmd = ReadCommands(cp, 0)) == -1) return -1;
-					Menus[menu].Items[item].Cmd = Cmd + 65536;
+					if (s == null) return -1;
+					item = UpMenu.NewItem(menu, s);
+					obj = GetObj(cp);
+					if (obj.type != CF_MENUSUB) return -1;
+					if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+					UpMenu.Menus[menu].Items[item].Cmd = Cmd + 65536;
 				}
 			}
 			break;
 			case CF_SUBMENU:
 			{
-				String s = GetCharStr(cp, len);
+				String s = GetCharStr(cp, obj.len);
 				String w;
 
-				if ((obj = GetObj(cp, len)) != CF_STRING) return -1;
-				if ((w = GetCharStr(cp, len)) == 0) return -1;
-				item = NewSubMenu(menu, s, GetMenuId(w), SUBMENU_NORMAL);
+				obj = GetObj(cp);
+				if (obj.type != CF_STRING) return -1;
+				if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_NORMAL);
 			}
 			break;
 
 			case CF_SUBMENUCOND:
 			{
-				String s = GetCharStr(cp, len);
+				String s = GetCharStr(cp, obj.len);
 				String w;
 
-				if ((obj = GetObj(cp, len)) != CF_STRING) return -1;
-				if ((w = GetCharStr(cp, len)) == 0) return -1;
-				item = NewSubMenu(menu, s, GetMenuId(w), SUBMENU_CONDITIONAL);
+				obj = GetObj(cp);
+				if (obj.type != CF_STRING) return -1;
+				if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_CONDITIONAL);
 			}
 			break;
 
 			case CF_END:
 				return 0;
 			default:
-				return -1;
+				System.err.printf("unk obj type %d in ReadMenu\n", obj.type);
+				cp.c.shift(obj.len);
+				break;
+				// TODO return -1;
 			}
 		}
 		return -1;
 	}
 
-	int ReadColors(CurPos cp, String ObjName) {
+	static int ReadColors(CurPos cp, String ObjName) {
 		Obj obj;
 
 		while(true) 
@@ -533,25 +672,29 @@ public class Config implements ConfigDefs
 			if(obj.type == 0xFF)
 				break;
 
-			switch (obj) {
+			switch (obj.type) {
 			case CF_STRING:
 			{
 				///char cl[30];
-				String sname = GetCharStr(cp, len);
+				String sname = GetCharStr(cp, obj.len);
 				String svalue;
-				if (sname == 0) return -1;
-				if ((obj = GetObj(cp, len)) != CF_STRING) return -1;
-				if ((svalue = GetCharStr(cp, len)) == 0) return -1;
-				strcpy(cl, ObjName);
-				strcat(cl, ".");
-				strcat(cl, sname);
-				if (SetColor(cl, svalue) == 0) return -1;
+				if (sname == null) return -1;
+				
+				obj = GetObj(cp);
+				if (obj.type != CF_STRING) return -1;
+				if ((svalue = GetCharStr(cp, obj.len)) == null) return -1;
+				String cl = ObjName+"."+sname;
+				// TODO if (SetColor(cl, svalue) == 0) return -1;
 			}
 			break;
 			case CF_END:
 				return 0;
+
 			default:
-				return -1;
+				System.err.printf("unk obj type %d in ReadColors\n", obj.type);
+				cp.c.shift(obj.len);
+				break;
+				// TODO return -1;
 			}
 		}
 		return -1;
@@ -569,6 +712,110 @@ public class Config implements ConfigDefs
 
 
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	static int SetGlobalNumber(int what, int number) {
+	    //LOG << "What: " << what << " Number: " << number << ENDLINE;
+
+		boolean b = ofInt(number);
+		
+	    switch (what) {
+
+	    /*
+	    case FLAG_C_Indent:          C_Indent = number; break;
+	    case FLAG_C_BraceOfs:        C_BraceOfs = number; break;
+	    case FLAG_C_CaseOfs:         C_CaseOfs = number; break;
+	    case FLAG_C_CaseDelta:       C_CaseDelta = number; break;
+	    case FLAG_C_ClassOfs:        C_ClassOfs = number; break;
+	    case FLAG_C_ClassDelta:      C_ClassDelta = number; break;
+	    case FLAG_C_ColonOfs:        C_ColonOfs = number; break;
+	    case FLAG_C_CommentOfs:      C_CommentOfs = number; break;
+	    case FLAG_C_CommentDelta:    C_CommentDelta = number; break;
+	    case FLAG_C_FirstLevelIndent: C_FirstLevelIndent = number; break;
+	    case FLAG_C_FirstLevelWidth: C_FirstLevelWidth = number; break;
+	    case FLAG_C_Continuation:    C_Continuation = number; break;
+	    case FLAG_C_ParenDelta:      C_ParenDelta = number; break;
+	    case FLAG_FunctionUsesContinuation: FunctionUsesContinuation = number; break;
+
+	    case FLAG_REXX_Indent:       REXX_Base_Indent = number; break;
+	    case FLAG_REXX_Do_Offset:    REXX_Do_Offset = number; break;
+		*/
+	    case FLAG_ScreenSizeX:       ScreenSizeX = number; break;
+	    case FLAG_ScreenSizeY:       ScreenSizeY = number; break;
+	    case FLAG_CursorInsertStart: CursorInsSize[0] = number; break;
+	    case FLAG_CursorInsertEnd:   CursorInsSize[1] = number; break;
+	    case FLAG_CursorOverStart:   CursorOverSize[0] = number; break;
+	    case FLAG_CursorOverEnd:     CursorOverSize[1] = number; break;
+	    case FLAG_SysClipboard:      SystemClipboard = number; break;
+	    case FLAG_OpenAfterClose:    OpenAfterClose = number; break;
+	    // case FLAG_ShowVScroll:       ShowVScroll = number; break; 
+	    //case FLAG_ShowHScroll:       ShowHScroll = number; break;
+	    case FLAG_ScrollBarWidth:    ScrollBarWidth = number; break;
+	    case FLAG_SelectPathname:    SelectPathname = number; break;
+	    //case FLAG_ShowMenuBar:       ShowMenuBar = number; break;
+	    //case FLAG_ShowToolBar:       ShowToolBar = number; break;
+	    case FLAG_KeepHistory:       KeepHistory = number; break;
+	    case FLAG_LoadDesktopOnEntry: LoadDesktopOnEntry = number; break;
+	    case FLAG_SaveDesktopOnExit: SaveDesktopOnExit = b; break;
+	    case FLAG_KeepMessages:      KeepMessages = number; break;
+	    case FLAG_ScrollBorderX:     ScrollBorderX = number; break;
+	    case FLAG_ScrollBorderY:     ScrollBorderY = number; break;
+	    case FLAG_ScrollJumpX:       ScrollJumpX = number; break;
+	    case FLAG_ScrollJumpY:       ScrollJumpY = number; break;
+	    case FLAG_GUIDialogs:        GUIDialogs = number; break;
+	    case FLAG_PMDisableAccel:    PMDisableAccel = number; break;
+	    case FLAG_SevenBit:          SevenBit = number; break;
+	    case FLAG_WeirdScroll:       WeirdScroll = b; break;
+	    case FLAG_LoadDesktopMode:   LoadDesktopMode = number; break;
+	    case FLAG_IgnoreBufferList:  IgnoreBufferList = b; break;
+	    case FLAG_ReassignModelIds:  ReassignModelIds = number; break;
+	    default:
+	        System.err.printf("Unknown global number: %d\n", what);
+		    return 0;
+	        //return -1;
+	    }
+	    return 0;
+	}
+
+	public static boolean ofInt(int v) { return v != 0; }
+	
+	static int SetGlobalString(int what, String string) {
+	    //LOG << "What: " << what << " String: " << string << ENDLINE;
+
+	    switch (what) {
+	    case FLAG_DefaultModeName: DefaultModeName = string; break;
+	    // TODO case FLAG_CompletionFilter: if ((CompletionFilter = RxCompile(string)) == NULL) return -1; break;
+	    case FLAG_PrintDevice: PrintDevice = string; break;
+	    case FLAG_CompileCommand: CompileCommand = string; break;
+	    case FLAG_WindowFont: WindowFont = string; break;
+	    case FLAG_HelpCommand: HelpCommand = string; break;
+	    // TODO case FLAG_GUICharacters: AppendGUICharacters (string); break;
+	    case FLAG_CvsCommand: CvsCommand = string; break;
+	    case FLAG_CvsLogMode: CvsLogMode = string; break;
+	    default:
+	    	System.err.printf("Unknown global string: %d = '%s'\n", what, string);
+		    return 0;
+	        //return -1;
+	    }
+	    return 0;
+	}
+	
 
 
 }

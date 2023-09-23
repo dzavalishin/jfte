@@ -9,7 +9,7 @@ public class Main implements MainConst
 	public static final Charset charset = Charset.forName("US-ASCII"); // TODO ASCII?
 
 	static void Usage() {
-	    System.out.print(usage);
+		System.out.print(usage);
 	}
 
 	/*
@@ -32,52 +32,53 @@ public class Main implements MainConst
 	        sps = p;
 	    return sps;
 	}
-	*/
+	 */
 
 
 
 	static int GetConfigFileName(String [] argv, String [] ConfigFileName) {
-	    String CfgName = "";
+		String CfgName = "";
 
-	    if (ConfigFileName[0] == null) {
-	/*#if defined(UNIX)
+		if (ConfigFileName[0] == null) {
+			/*#if defined(UNIX)
 	        // ? use ./.fterc if by current user ?
 	        ExpandPath("~/.fterc", CfgName);
 	#elif defined(OS2) || defined(NT) */
-	        String home = "";
-	        String ph;
-	//#if defined(OS2)
-	        ph = getenv("HOME");
-	        if (ph!=null) home = ph;
-	//#endif
-	//#if defined(NT)
-	        ph = getenv("HOMEDRIVE");
-	        if (ph!=null) home = ph;
-	        ph = getenv("HOMEPATH");
-	        if (ph!=null) home += ph;
-	//#endif
-	        if (!home.isBlank()) {
-	            CfgName = home;
-	            Console.Slash(CfgName, 1);
-	            CfgName += "fte.cnf";
-	        }
+			String home = "";
+			String ph;
+			//#if defined(OS2)
+			ph = getenv("HOME");
+			if (ph!=null) home = ph;
+			//#endif
+			//#if defined(NT)
+			ph = getenv("HOMEDRIVE");
+			if (ph!=null) home = ph;
+			ph = getenv("HOMEPATH");
+			if (ph!=null) home += ph;
+			//#endif
+			if (!home.isBlank()) {
+				CfgName = home;
+				CfgName = Console.Slash(CfgName, 1);
+				CfgName += "fte.cnf";
+			}
 
-	        if (!home.isBlank() || Console.access(CfgName, 0)) {
-	            CfgName = argv[0];
-	            //strcpy(findPathExt(CfgName), ".cnf");
-	            //Path p = Path.of(CfgName);
-	            //File f = new File(CfgName);
-	            // TODO ext
-	            CfgName += ".cnf";
-	        }
-	
+			if (!home.isBlank() || !Console.fileExist(CfgName, 0)) {
+				//CfgName = argv[0];
+				//strcpy(findPathExt(CfgName), ".cnf");
+				//Path p = Path.of(CfgName);
+				//File f = new File(CfgName);
+				// TODO ext
+				//CfgName += ".cnf";
+				CfgName = "fte.cnf";
+			}
 
-	        ConfigFileName[0] = CfgName;
-	    }
-	    if (!Console.access(ConfigFileName[0], 0))
-	        return 1;
 
-	/* #if defined(UNIX)
+			ConfigFileName[0] = CfgName;
+		}
+		if (!Console.fileExist(ConfigFileName[0], 0))
+			return 1;
+
+		/* #if defined(UNIX)
 	    for (unsigned int i = 0; i < sizeof(Unix_RCPaths)/sizeof(Unix_RCPaths[0]); i++) {
 	        if (access(Unix_RCPaths[i], 0) == 0) {
 	            strcpy(ConfigFileName, Unix_RCPaths[i]);
@@ -85,94 +86,99 @@ public class Main implements MainConst
 	        }
 	    }
 	#endif */
-	    return 0;
+		return 0;
 	}
 
 	static String getenv(String string) {		
 		return System.getenv(string);
 	}
 
-	
+
 	static int CmdLoadConfiguration(String [] argv) {
 		//* TODO CmdLoadConfiguration
-	    boolean ign = false;
-	    boolean QuoteAll = false, QuoteNext = false;
-	    boolean haveConfig = false;
-	    
-	    int Arg;
-	    int argc = argv.length;
+		boolean ign = false;
+		boolean QuoteAll = false, QuoteNext = false;
+		boolean haveConfig = false;
 
-	    for (Arg = 0; Arg < argc; Arg++) 
-	    {
-	    	char aa1 = argv[Arg].charAt(1);
-	    	
-	        if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
-	            if (aa1 == '-') {
-	                if (argv[Arg].equals("--help")) {
-	                    Usage();
-	                    return 0;
-	                }
-	                boolean debug_clean = argv[Arg].equals("--debugclean");
-	                if (debug_clean || argv[Arg].equals("--debug")) {
-	                    String [] path = {""};
-	/*#ifdef UNIX
+		int Arg;
+		int argc = argv.length;
+
+		for (Arg = 0; Arg < argc; Arg++) 
+		{
+			char aa1 = argv[Arg].charAt(1);
+
+			if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
+				if (aa1 == '-') {
+					if (argv[Arg].equals("--help")) {
+						Usage();
+						return 0;
+					}
+					boolean debug_clean = argv[Arg].equals("--debugclean");
+					if (debug_clean || argv[Arg].equals("--debug")) {
+						String [] path = {""};
+						/*#ifdef UNIX
 	                    ExpandPath("~/.fte", path);
 	#else */
-	                    // TODO JustDirectory(argv[0], path);
-	                    Console.ExpandPath(".", path);
-	//#endif
+						// TODO JustDirectory(argv[0], path);
+						Console.ExpandPath(".", path);
+						//#endif
 						path[0] = Console.Slash(path[0],1);
-	                    path[0] += "fte.log";
-	                    if (debug_clean) Console.unlink(path[0]);
+						path[0] += "fte.log";
+						if (debug_clean) Console.unlink(path[0]);
 
-	                    // TODO globalLog.SetLogFile(path);
-	                    //printf("Trace Log in: %s\n", path);
-	                }
-	                else
-	                    QuoteAll = true;
-	            } else if (aa1 == '!') {
-	                ign = true;
-	            } else if (aa1 == '+') {
-	                QuoteNext = true;
-	            } else if (aa1 == '?' || aa1 == 'h') {
-	                Usage();
-	                return 0;
-	            } else if (aa1 == 'c' || aa1 == 'C') {
-	                /* TODO config file if (argv[Arg][2])
+						// TODO globalLog.SetLogFile(path);
+						//printf("Trace Log in: %s\n", path);
+					}
+					else
+						QuoteAll = true;
+				} else if (aa1 == '!') {
+					ign = true;
+				} else if (aa1 == '+') {
+					QuoteNext = true;
+				} else if (aa1 == '?' || aa1 == 'h') {
+					Usage();
+					return 0;
+				} else if (aa1 == 'c' || aa1 == 'C') {
+					/* TODO config file if (argv[Arg][2])
 	                {
 	                    Console.ExpandPath(argv[Arg] + 2, ConfigFileName);
 	                    haveConfig = true;
 	                }
 	                else */
-	                    ign = true;
-	            }
-	        }
-	    }
-	    // TODO if (!haveConfig && GetConfigFileName(argc, argv, ConfigFileName) == 0) 
-	        // should we default to internal
-	       ign = true;
-	    
+					ign = true;
+				}
+			}
+		}
 
-	    if (ign) {
+		if (!haveConfig)
+		{
+			String [] cfn = {null};
+			if (GetConfigFileName(argv, cfn) == 0) 
+				// should we default to internal
+				ign = true;
+			ConfigFileName = cfn[0];
+		}
+
+		/*if (ign) {
 	        if (UseDefaultConfig() == -1)
 	            Console.DieError(1, "Error in internal configuration??? FATAL!");
-	    } else {
-	        /* TODO if (LoadConfig(argc, argv, ConfigFileName) == -1)
-	            Console.DieError(1,
-	                     "Failed to load configuration file '%s'.\n"
-	                     "Use '-C' option.", ConfigFileName);
-	                    */
+	    } else */{
+	    	if (!Config.LoadConfig(ConfigFileName))
+	    		Console.DieError(1,
+	    				"Failed to load configuration file '%s'.\n"+
+	    						"Use '-C' option.", ConfigFileName);
+
 	    }
 	    for (Arg = 0; Arg < argc; Arg++) 
 	    {
 	    	char aa1 = argv[Arg].charAt(1);
-	    	
-	        if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
-	            if (aa1 == '-' && argv[Arg].length() == 2) {
-	                QuoteAll = true;
-	            } else if (aa1 == '+') {
-	                QuoteNext = true;
-	/* TODO #ifdef CONFIG_DESKTOP
+
+	    	if (!QuoteAll && !QuoteNext && (argv[Arg].charAt(0) == '-')) {
+	    		if (aa1 == '-' && argv[Arg].length() == 2) {
+	    			QuoteAll = true;
+	    		} else if (aa1 == '+') {
+	    			QuoteNext = true;
+	    			/* TODO #ifdef CONFIG_DESKTOP
 	            } else if (aa1 == 'D') {
 	                ExpandPath(argv[Arg] + 2, DesktopFileName);
 	                if (IsDirectory(DesktopFileName)) {
@@ -186,7 +192,7 @@ public class Main implements MainConst
 	                    LoadDesktopOnEntry = 1;
 	                }
 	#endif */
-	/* TODO #ifdef CONFIG_HISTORY
+	    			/* TODO #ifdef CONFIG_HISTORY
 	            } else if (aa1 == 'H') {
 	                strcpy(HistoryFileName, argv[Arg] + 2);
 	                if (HistoryFileName[0] == 0) {
@@ -195,14 +201,14 @@ public class Main implements MainConst
 	                    KeepHistory = 1;
 	                }
 	#endif */
-	            }
-	        } else {
-	            if (Config.LoadDesktopOnEntry == 2) {
-	            	Config.LoadDesktopOnEntry = 0;
-	            	Config.SaveDesktopOnExit = false;
-	            	EGUI.DesktopFileName[0] = "";
-	            }
-	        }
+	    		}
+	    	} else {
+	    		if (Config.LoadDesktopOnEntry == 2) {
+	    			Config.LoadDesktopOnEntry = 0;
+	    			Config.SaveDesktopOnExit = false;
+	    			EGUI.DesktopFileName[0] = "";
+	    		}
+	    	}
 	    }
 	    if (Config.LoadDesktopOnEntry == 2)
 	    	Config.LoadDesktopOnEntry = 1;
@@ -212,18 +218,18 @@ public class Main implements MainConst
 
 	public static void main(String[] argv)  
 	{
-	    if (CmdLoadConfiguration(argv) == 0)
-	        return;
+		if (CmdLoadConfiguration(argv) == 0)
+			return;
 
-	    Console.start();
-	    //STARTFUNC("main");
+		Console.start();
+		//STARTFUNC("main");
 
-	    EGUI g = new EGUI( argv, Config.ScreenSizeX, Config.ScreenSizeY);
-	    if (GUI.gui == null || g == null)
-	        Console.DieError(1, "Failed to initialize display\n");
+		EGUI g = new EGUI( argv, Config.ScreenSizeX, Config.ScreenSizeY);
+		if (GUI.gui == null || g == null)
+			Console.DieError(1, "Failed to initialize display\n");
 
-	    GUI.gui.Run();
+		GUI.gui.Run();
 	}
-	
-	
+
+
 }
