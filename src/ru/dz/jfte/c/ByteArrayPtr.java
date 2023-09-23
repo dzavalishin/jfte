@@ -209,6 +209,12 @@ public class ByteArrayPtr implements IArrayPtr
 	public String getRestAsString() {		
 		return new String(mem, displ, mem.length-displ);
 	}
+
+	public String getLenAsString(int len) {
+		String s = new String(mem, displ, len);
+		displ += len;
+		return s;
+	}
 	
 	
 	
