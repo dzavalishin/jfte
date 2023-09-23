@@ -22,6 +22,7 @@ public class GUI implements GuiDefs, EventDefs
 			//    frames = frame.Next;
 
 			//frames.Activate();
+			frame.close();
 		}
 	}
 
@@ -96,18 +97,20 @@ public class GUI implements GuiDefs, EventDefs
 		return 1;
 	}
 
-	ExResult ShowEntryScreen() { /*FOLD00
+	ExResult ShowEntryScreen() { 
+		/*
 	    TEvent E;
 
-	    ConHideMouse();
-	    RestoreScreen();
+	    Console.ConHideMouse();
+	    Console.RestoreScreen();
 	    SetConsoleActiveScreenBuffer(ConOut);
-	    do { gui.ConGetEvent(evKeyDown, &E, -1, 1, 0); } while (E.What != evKeyDown);
+	    do { E = gui.ConGetEvent(evKeyDown, -1, 1, null); } while (E.What != evKeyDown);
 	    SetConsoleActiveScreenBuffer(OurConOut);
-	    ConShowMouse();
-	    if (frames)
+	    Console.ConShowMouse();
+	    */
+	    if (frames != null)
 	        frames.Repaint();
-	 */
+	 
 		return ExResult.ErOK;
 	}
 

@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
-public class GFrame implements EventDefs 
+import java.io.Closeable;
+
+public class GFrame implements Closeable, EventDefs 
 {
     GFrame Prev, Next;
     GView Top, Active;
@@ -30,23 +32,21 @@ public class GFrame implements EventDefs
 	    Peer = new GFramePeer(this, XSize, YSize);
 	}
 
-	/* TODO ~GFrame() {
-	    if (Peer) {
-	        delete Peer;
-	        Peer = 0;
-	    }
+	@Override
+	public void close() {
+	    //if (Peer != null)
+	    Peer = null;
+	    
 	    if (Next == this) {
-	        frames = 0;
+	    	GUI.frames = null;
 //	        printf("No more frames\x7\x7\n");
 	    } else {
 	        Next.Prev = Prev;
 	        Prev.Next = Next;
-	        frames = Next;
+	        GUI.frames = Next;
 	    }
-	    Next = Prev = 0;
-	    if (Menu)
-		free(Menu);
-	} */
+	    Next = Prev = null;
+	}
 
 	int ConSetTitle(String Title, String STitle) {
 	    return Peer.ConSetTitle(Title, STitle);

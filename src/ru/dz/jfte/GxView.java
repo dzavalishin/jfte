@@ -21,7 +21,8 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         Top = Bottom = null;
     }
 
-    public void close() throws IOException {
+    @Override
+    public void close() {
         if (Top != null) {
             ExView V;
 

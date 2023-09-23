@@ -28,11 +28,11 @@ public class GView implements Closeable
             Parent.AddView(this);
     }
 
-    /* TODO ~GView() {
-        if (Parent)
+    @Override
+    public void close() {
+        if (Parent!= null)
             Parent.RemoveView(this);
-        delete Peer;
-    } */
+    }
 
     int ConClear() {
         int [] W = {0}, H = {0};
@@ -179,13 +179,6 @@ public class GView implements Closeable
         Repaint();
     }
 
-	@Override
-	public void close() throws IOException
-	{
-		// TODO Auto-generated method stub
-		
-	}
-    
     
     
     

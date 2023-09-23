@@ -12,6 +12,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     EKeyMap ActiveMap;
     EKeyMap OverrideMap;
     String CharMap = null;
+	private EFrame eFrame; // dz added for GC not to kill
 
     static final int  RUN_WAIT = 0;
     static final int  RUN_ASYNC = 1;
@@ -71,12 +72,12 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         case ExWinZoom:                 return WinZoom(view);
         case ExWinResize:               return WinResize(State, view);
         case ExDesktopSaveAs:           return DesktopSaveAs(State, view);
-        /*
+        
         case ExDesktopSave:
-            if (DesktopFileName[0] != 0)
-                return SaveDesktop(DesktopFileName);
-            return 0;
-         */
+            if (!DesktopFileName[0].isBlank())
+                return ExResult.ofBool( SaveDesktop(DesktopFileName[0]) );
+            return ExResult.ErFAIL;
+        
         case ExChangeKeys:
             {
                 String[] kmaps = {null};
@@ -322,19 +323,17 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
             View.DeleteModel(View.Model);
 
-    /* TODO #ifdef CONFIG_OBJ_DIRECTORY
-            if (EModel.ActiveModel == 0 && CreateNew) {
-                EView *V = EView.ActiveView;
-                EModel *m = new EDirectory(0, &EModel.ActiveModel, Path);
-                assert(m != 0);
+            if (EModel.ActiveModel == null && CreateNew!=0) {
+                EView V = EView.ActiveView;
+                EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, Path[0]);
+                assert(m != null);
 
                 do {
                     V = V.Next;
                     V.SelectModel(EModel.ActiveModel);
                 } while (V != EView.ActiveView);
-                return 0;
+                return ExResult.ErFAIL;
             }
-    #endif */
 
             if (EModel.ActiveModel == null) {
                 StopLoop();
@@ -449,20 +448,18 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 break;
         }
 
-    /* TODO #ifdef CONFIG_DESKTOP
-        if (SaveDesktopOnExit && DesktopFileName[0] != 0)
-            SaveDesktop(DesktopFileName);
-        else if (LoadDesktopMode == 2) {       // Ask about saving?
-            GxView* gx = View.MView.Win;
+        if (Config.SaveDesktopOnExit && !DesktopFileName[0].isBlank())
+            SaveDesktop(DesktopFileName[0]);
+        else if (Config.LoadDesktopMode == 2) {       // Ask about saving?
+            GxView gx = View.MView.Win;
 
             if (gx.GetStr("Save desktop As",
-                           sizeof(DesktopFileName), DesktopFileName,
+                           DesktopFileName,
                            HIST_DEFAULT) != 0)
             {
-                SaveDesktop(DesktopFileName);
+                SaveDesktop(DesktopFileName[0]);
             }
         }
-    #endif */
 
         while (EModel.ActiveModel!=null) {
             if (View.Model.GetContext() == CONTEXT_ROUTINES)  // Never delete Routine models directly
@@ -571,7 +568,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         if (0==multiFrame() && frames!=null)
             return ExResult.ErFAIL;
 
-        new EFrame(Config.ScreenSizeX, Config.ScreenSizeY);
+        eFrame = new EFrame(Config.ScreenSizeX, Config.ScreenSizeY);
         assert(frames != null);
 
         //frames.SetMenu("Main"); //??
@@ -895,20 +892,19 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         if (CmdLoadFiles(argv) == ExResult.ErFAIL)
             return 3;
 
-        /* TODO
-        if (EModel.ActiveModel == 0) {
-    #ifdef CONFIG_OBJ_DIRECTORY
-            char Path[MAXPATH];
+        if (EModel.ActiveModel == null) {
+   // #ifdef CONFIG_OBJ_DIRECTORY
+            String [] Path = {""};
 
-            GetDefaultDirectory(0, Path, sizeof(Path));
-            EModel *m = new EDirectory(0, &EModel.ActiveModel, Path);
-            assert(EModel.ActiveModel != 0 && m != 0);
+            Console.GetDefaultDirectory(null, Path);
+            EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, Path[0]);
+            assert(EModel.ActiveModel != null && m != null);
             EView.ActiveView.SwitchToModel(EModel.ActiveModel);
-    #else
+    /*#else
             Usage();
             return 1;
-    #endif
-        } */
+    #endif */
+        } //*/
         return 0;
     }
 

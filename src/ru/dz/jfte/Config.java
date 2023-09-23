@@ -19,7 +19,7 @@ public class Config
 	static String CompileCommand = "make";
 	static int KeepHistory = 0;
 	static boolean LoadDesktopOnEntry = false;
-	static int SaveDesktopOnExit = 0;
+	static boolean SaveDesktopOnExit = false;
 	static String WindowFont = "";
 	static int KeepMessages = 0;
 	static int ScrollBorderX = 0;
