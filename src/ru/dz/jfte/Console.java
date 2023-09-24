@@ -385,7 +385,7 @@ public class Console implements ModeDefs, GuiDefs
 	}
 
 
-static String SlashDir(String Path) 
+public static String SlashDir(String Path) 
 {
     int len = Path.length();
     
