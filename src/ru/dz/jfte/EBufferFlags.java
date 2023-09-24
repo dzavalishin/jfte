@@ -112,26 +112,6 @@ public class EBufferFlags implements ModeDefs
 		}
 	}
 
-	/*
-	static void SetWordChars(char *w, const char *s) {
-		const char *p;
-		memset((void *)w, 0, 32);
-
-		p = s;
-		while (p && *p) {
-			if (*p == '\\') {
-				p++;
-				if (*p == 0) return;
-			} else if (p[1] == '-') {
-				if (p[2] == 0) return ;
-				for (int i = p[0]; i < p[2]; i++)
-					WSETBIT(w, i, 1);
-				p += 2;
-			}
-			WSETBIT(w, *p, 1);
-			p++;
-		}
-	}*/
 
 };
 

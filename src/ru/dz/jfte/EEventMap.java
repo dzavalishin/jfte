@@ -10,7 +10,7 @@ public class EEventMap implements ModeDefs
 	EEventMap Parent;
 	String Name;
 
-	EKeyMap KeyMap;
+	EKeyMap [] KeyMap;
 
 	// TODO 100
 	String [] Menu = new String[100]; // main + local    
