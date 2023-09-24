@@ -215,8 +215,36 @@ public class ByteArrayPtr implements IArrayPtr
 		displ += len;
 		return s;
 	}
+
+	// --------------------------------------------------------------
+	// Search
+	// --------------------------------------------------------------
+
+	public ByteArrayPtr indexOf(byte c) {
+		for( int i = displ; i < mem.length; i++)
+			if( mem[i] == c)
+				return new ByteArrayPtr(this, i);
+		return null;
+	}
 	
 	
+	// --------------------------------------------------------------
+	// Convertors
+	// --------------------------------------------------------------
 	
-	
+	public static byte [] CharArrayToByte( char [] ca)
+	{
+		byte [] ret = new byte[ca.length];
+		
+		for(int i = 0; i < ca.length; i++)
+		{
+			char c = ca[i];
+			if( ( ((int)c) & 0xFFFF ) > 0xFF )
+				throw new RuntimeException("CharArrayToByte char > 0xFF");
+				
+			ret[i] = (byte) c;
+		}
+		
+		return ret;
+	}
 }

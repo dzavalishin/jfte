@@ -2,7 +2,7 @@ package ru.dz.jfte;
 
 public class EKey extends KeyMapper implements KeyDefs 
 {
-    KeySel fKey;
+    KeySel fKey = new KeySel();
     int Cmd;
     //EKeyMap fKeyMap;
     EKey fNext;

@@ -55,7 +55,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		//String a;
 		//String c;
 		//String z;
-		ByteArrayPtr a;
+		//ByteArrayPtr a;
 		ByteArrayPtr c; // cur ptr
 		//ByteArrayPtr z; // endpos?
 		int line;
@@ -101,7 +101,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		System.out.print("Loading config "+CfgFileName+" cwd "+cwd+"\n");
 		
 		byte[] allCfg = null;
-		try {
+		try {	
 			allCfg = Files.readAllBytes(Path.of(CfgFileName));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -111,29 +111,31 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			return false;
 		}
 
-		long ln = (allCfg[3] << 24) + (allCfg[2] << 16) + (allCfg[1] << 8) + allCfg[0];
-
-		//* TODO cnf sig
-		if (ln != CONFIG_ID) {
-			Console.DieError(0, "Bad .CNF signature %x, expext %x", ln, CONFIG_ID);
-			return false;
-		} //*/
-
-		ln = (allCfg[4+3] << 24) + (allCfg[4+2] << 16) + (allCfg[4+1] << 8) + allCfg[4+0];
-
-		/* TODO if (ln != VERNUM) {
-	    	Console.DieError(0, "Bad .CNF version.");
-	        return false;
-	    } */
-
 		CurPos cp = new CurPos();
 
 		cp.name = CfgFileName;
 		cp.sz = allCfg.length;
-		cp.a = new ByteArrayPtr(allCfg);
-		//cp.c = cp.a + 2 * 4;
-		cp.c = new ByteArrayPtr( cp.a, 2 * 4 ); 
-		//cp.z = cp.a + cp.sz;
+
+		cp.c = new ByteArrayPtr( allCfg, 0 ); 
+		cp.line = 1;
+		
+		
+		int ln = GetNum(cp);
+
+		if (ln != CONFIG_ID) {
+			Console.DieError(0, "Bad .CNF signature %x, expext %x", ln, CONFIG_ID);
+			return false;
+		}
+
+		ln = GetNum(cp);
+
+		if (ln != MainConst.VERNUM) {
+	    	Console.DieError(0, "Bad .CNF version.");
+	        return false;
+	    }
+
+
+		cp.c = new ByteArrayPtr( allCfg, 2 * 4 ); 
 		cp.line = 1;
 
 		boolean rc;
@@ -214,7 +216,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				EEventMap EventMap = null;
 				String MapName = GetCharStr(cp, obj.len);
-				String UpMap = null;
+				String UpMap = "";
 
 				obj = GetObj(cp);
 				if (obj.type != CF_PARENT) return false;
@@ -1405,14 +1407,17 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    }
 
 	    //d = p = Key;
-	    ArrayPtr<Character> d = new ArrayPtr<>(ArrayPtr.toCharacterArray(Key)); 
+	    //ArrayPtr<Character> d = new ArrayPtr<>(ArrayPtr.toCharacterArray(Key)); 
+	    ByteArrayPtr d = new ByteArrayPtr(ByteArrayPtr.CharArrayToByte(Key)); 
 	    
 	    while (d.hasCurrent()) {
 	        // parse key combination
-	    	ArrayPtr<Character> p = new ArrayPtr<>(d);
+	    	//ArrayPtr<Character> p = new ArrayPtr<>(d);
+	    	ByteArrayPtr p = new ByteArrayPtr(d);
 	    	
 	        //d = strchr(p, '_');
-	        d = p.indexOf('_');
+	        d = p.indexOf((byte)'_');
+	        
 	        if ( d != null) {
 	            if (d.r(1) == 0 || d.r(1) == '_')
 	                d.inc();
@@ -1420,14 +1425,14 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	            if (!d.hasCurrent())
 	                d = null;
 	            else {
-	                d.wpp((char)0);
+	                d.wpp((byte)0);
 	            }
 	        }
 
 	        // if lastkey
 
 	        if (d == null) {
-	            k = new EKey(p.toString());
+	            k = new EKey(p.getRestAsString());
 	            if (pmap.KeyMap != null) {
 	                pmap.KeyMap.AddKey(k);
 	            } else {
@@ -1443,17 +1448,17 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	            if (pmap.KeyMap == null) { // first key in mode, create map
 	                //                printf("new map key = %s, parent %d\n", p, parent);
-	                k = new EKey(p.toString(), null);
+	                k = new EKey(p.getRestAsString(), null);
 	            	pmap.KeyMap = new EKeyMap();
 	                pmap.KeyMap.fParent = parent;
 	                pmap.KeyMap.AddKey(k);
 	            } else {
 	                KeySel ks = new KeySel();
 
-	                KeyDefs.ParseKey(p.toString(), ks);
+	                KeyDefs.ParseKey(p.getRestAsString(), ks);
 	                if ((k = pmap.KeyMap.FindKey(ks.Key)) == null) { // check if key exists
 	                    // add it if not
-	                    k = new EKey(p.toString(), null);
+	                    k = new EKey(p.getRestAsString(), null);
 	                    pmap.KeyMap.AddKey(k);
 	                }
 	            }
@@ -1468,7 +1473,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                KeySel ks = new KeySel();
 	                EKey pk;
 
-	                KeyDefs.ParseKey(p.toString(), ks);
+	                KeyDefs.ParseKey(p.getRestAsString(), ks);
 	                if ((pk = pm.FindKey(ks.Key)) != null) { // if key exists, find parent of it
 	                    parent = pk.KeyMap;
 	                    //                    printf("Key found %d\n", parent);

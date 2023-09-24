@@ -117,11 +117,11 @@ public interface KeyDefs {
 	    //unsigned char *p = (unsigned char *)Key;
 	    ByteArrayPtr p = new ByteArrayPtr(Key.getBytes());
 	    long /*TKeyCode*/ KeyFlags = 0;
-	    int i;
+	    //int i;
 
 	    ks.Mask = 0;
 	    ks.Key = 0;
-	    while (p.r(0) != 0 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
+	    while (p.hasBytesLeft() >= 2 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
 	        if (p.r(1) == '-') {
 	            switch (p.r(0)) {
 	            case 'A': ks.Mask |= kfAlt; break;
