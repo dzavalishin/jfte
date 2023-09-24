@@ -94,6 +94,18 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 		return r;
 	}
 
+	
+	// --------------------------------------------------------------
+	// Search
+	// --------------------------------------------------------------
+
+	public ArrayPtr<ItemType> indexOf(ItemType c) {
+		for( int i = displ; i < mem.length; i++)
+			if( mem[i].equals(c))
+				return new ArrayPtr<ItemType>(this, i);
+		return null;
+	}
+
 
 
 	// --------------------------------------------------------------
@@ -123,10 +135,19 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 			ia[i] = iia[i];
 		return ia;
 	}
+
 	public static Long[] toLongArray(long[] li) {
 		return Arrays.stream(li).mapToObj( (lv) -> Long.valueOf(lv) ).toArray(Long[]::new);
 	}
 
+	public static Character[] toCharacterArray(char[] cca) {
+		//return Arrays.stream(li).mapToObj( (lv) -> Character.valueOf(lv) ).toArray(Character[]::new);
+		Character[] ia = new Character[cca.length];
+		for( int i = 0; i < cca.length; i++)
+			ia[i] = cca[i];
+		return ia;
+	}
+	
 	// --------------------------------------------------------------
 	// Move position
 	// --------------------------------------------------------------
@@ -178,6 +199,7 @@ public class ArrayPtr<ItemType> implements IArrayPtr
 
 		return displ >= from.displ && displ <= to.displ;
 	}
+
 
 
 

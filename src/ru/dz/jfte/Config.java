@@ -1258,47 +1258,50 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	{
 	    EKeyMap []map = aMap.KeyMap, pm, parent = null;
 	    EKey k;
-	    char [] Key  = new char[256];
-	    String p, d;
+	    char [] Key  = aKey.toCharArray();// new char[256];
+	    //String p, d;
 	    EEventMap xm = aMap;
 
 	    // printf("Setting key %s\n", Key);
-	    strcpy(Key, aKey);
+	    //strcpy(Key, aKey);
 
 	    // if mode has parent, get parent keymap
-	    while (xm && xm.Parent && (parent == 0)) {
+	    while (xm != null && xm.Parent != null && (parent == null)) {
 	        parent = xm.Parent.KeyMap;
 	        //        printf("%s : %s : %d\n", xm.fName, xm.fParent.fName, parent);
 	        xm = xm.Parent;
 	    }
 
-	    d = p = Key;
-	    while (d) {
+	    //d = p = Key;
+	    ArrayPtr<Character> d = new ArrayPtr<>(ArrayPtr.toCharacterArray(Key)); 
+	    
+	    while (d.hasCurrent()) {
 	        // parse key combination
-	        p = d;
-	        d = strchr(p, '_');
-	        if (d) {
-	            if (d[1] == 0 || d[1] == '_')
-	                d++;
+	    	ArrayPtr<Character> p = new ArrayPtr<>(d);
+	    	
+	        //d = strchr(p, '_');
+	        d = p.indexOf('_');
+	        if ( d != null) {
+	            if (d.r(1) == 0 || d.r(1) == '_')
+	                d.inc();
 
-	            if (*d == 0)
-	                d = 0;
+	            if (!d.hasCurrent())
+	                d = null;
 	            else {
-	                *d = 0;
-	                d++;
+	                d.wpp((char)0);
 	            }
 	        }
 
 	        // if lastkey
 
-	        if (d == 0) {
+	        if (d == null) {
 	            k = new EKey(p);
 	            if (*map) {
-	                (*map).AddKey(k);
+	                map[0].AddKey(k);
 	            } else {
 	                *map = new EKeyMap();
-	                (*map).fParent = parent;
-	                (*map).AddKey(k);
+	                map[0].fParent = parent;
+	                map[0].AddKey(k);
 	            }
 	            return k;
 
@@ -1309,16 +1312,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                //                printf("new map key = %s, parent %d\n", p, parent);
 	                k = new EKey(p, 0);
 	                *map = new EKeyMap();
-	                (*map).fParent = parent;
-	                (*map).AddKey(k);
+	                map[0].fParent = parent;
+	                map[0].AddKey(k);
 	            } else {
 	                KeySel ks;
 
 	                ParseKey(p, ks);
-	                if ((k = (*map).FindKey(ks.Key)) == 0) { // check if key exists
+	                if ((k = map[0].FindKey(ks.Key)) == 0) { // check if key exists
 	                    // add it if not
 	                    k = new EKey(p, 0);
-	                    (*map).AddKey(k);
+	                    map[0].AddKey(k);
 	                }
 	            }
 	            map = &k.fKeyMap; // set current map to key's map
