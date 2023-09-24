@@ -399,7 +399,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 
 	    // add support for fore:back and remove it from fte itself
 
-		if( name.indexOf(' ') > 0 ) name = splitBy( cp, name, ' ');
+		if( name.indexOf(' ') > 0 ) ; //do nothing // name = splitBy( cp, name, ' ');
 	    else if( name.indexOf(':') > 0 ) name = splitBy( cp, name, ':');
 	    
 	    /*
@@ -734,6 +734,11 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        if (Macros[i].Name && (strcmp(Cmd, Macros[i].Name)) == 0)
 	            return i | CMD_EXT;
 	    */
+		
+		for( int i = 0; i < Macros.size(); i++)
+			if(Macros.get(i).equals(Cmd))
+	            return i | CMD_EXT;
+		
 		System.err.println("Command not found: "+Cmd);
 	    return 0; // Nop
 	}
