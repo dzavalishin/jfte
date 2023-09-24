@@ -4,13 +4,13 @@ import java.util.Arrays;
 
 import ru.dz.jfte.c.BitOps;
 
-public class EEventMap implements ModeDefs  
+public class EEventMap extends KeyMapper implements ModeDefs  
 {
 	EEventMap Next;
 	EEventMap Parent;
 	String Name;
 
-	EKeyMap [] KeyMap;
+	//EKeyMap KeyMap;
 
 	// TODO 100
 	String [] Menu = new String[100]; // main + local    

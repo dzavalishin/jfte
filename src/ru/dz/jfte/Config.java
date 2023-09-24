@@ -1020,7 +1020,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					//assert(newTrans.match != NULL);
 					SetWordChars(newTrans.match, match);
 				} else {
-					newTrans.match = match;
+					newTrans.match = match.toCharArray();
 					//newTrans.matchLen = strlen(match);
 				}
 
@@ -1061,7 +1061,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				if (wordChars != null && !wordChars.isBlank()) {
 					//Colorize.hm.LastState().wordChars = (String )malloc(256/8);
 					//assert(Colorize.hm.LastState().wordChars != NULL);
-					SetWordChars(Colorize.hm.LastState().wordChars, wordChars);
+					SetWordChars(Colorize.hm.LastState().wordChars.toCharArray(), wordChars);
 				}
 			}
 			break;
@@ -1256,7 +1256,10 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	
 	static EKey SetKey(EEventMap aMap, String aKey) 
 	{
-	    EKeyMap []map = aMap.KeyMap, pm, parent = null;
+	    //EKeyMap map = aMap.KeyMap;
+		KeyMapper pmap = aMap;
+	    		
+	    EKeyMap pm, parent = null;
 	    EKey k;
 	    char [] Key  = aKey.toCharArray();// new char[256];
 	    //String p, d;
@@ -1295,48 +1298,50 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	        // if lastkey
 
 	        if (d == null) {
-	            k = new EKey(p);
-	            if (*map) {
-	                map[0].AddKey(k);
+	            k = new EKey(p.toString());
+	            if (pmap.KeyMap != null) {
+	                pmap.KeyMap.AddKey(k);
 	            } else {
-	                *map = new EKeyMap();
-	                map[0].fParent = parent;
-	                map[0].AddKey(k);
+	            	aMap.KeyMap = new EKeyMap();
+	                pmap.KeyMap = aMap.KeyMap;
+	                pmap.KeyMap.fParent = parent;
+	                pmap.KeyMap.AddKey(k);
 	            }
 	            return k;
 
 	        } else {
 	            // if introductory key
 
-	            if (*map == 0) { // first key in mode, create map
+	            if (pmap.KeyMap == null) { // first key in mode, create map
 	                //                printf("new map key = %s, parent %d\n", p, parent);
-	                k = new EKey(p, 0);
-	                *map = new EKeyMap();
-	                map[0].fParent = parent;
-	                map[0].AddKey(k);
+	                k = new EKey(p.toString(), null);
+	            	pmap.KeyMap = new EKeyMap();
+	                pmap.KeyMap.fParent = parent;
+	                pmap.KeyMap.AddKey(k);
 	            } else {
 	                KeySel ks;
 
-	                ParseKey(p, ks);
-	                if ((k = map[0].FindKey(ks.Key)) == 0) { // check if key exists
+	                KeyDefs.ParseKey(p.toString(), ks);
+	                if ((k = pmap.KeyMap.FindKey(ks.Key)) == null) { // check if key exists
 	                    // add it if not
-	                    k = new EKey(p, 0);
-	                    map[0].AddKey(k);
+	                    k = new EKey(p.toString(), null);
+	                    pmap.KeyMap.AddKey(k);
 	                }
 	            }
-	            map = &k.fKeyMap; // set current map to key's map
+	            //map = &k.fKeyMap; // set current map to key's map
+	            pmap = k;
 
 	            // get parent keymap
 	            pm = parent;
-	            parent = 0;
+	            parent = null;
 	            //            printf("Searching %s\n", p);
-	            while (pm) { // while exists
+	            while (pm != null) { // while exists
 	                KeySel ks;
 	                EKey pk;
 
-	                ParseKey(p, ks);
-	                if ((pk = pm.FindKey(ks.Key)) != 0) { // if key exists, find parent of it
-	                    parent = pk.fKeyMap;
+	                KeyDefs.ParseKey(p.toString(), ks);
+	                if ((pk = pm.FindKey(ks.Key)) != null) { // if key exists, find parent of it
+	                    parent = pk.KeyMap;
 	                    //                    printf("Key found %d\n", parent);
 	                    break;
 	                }
@@ -1344,7 +1349,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	            }
 	        }
 	    }
-	    return 0;
+
+	    return null;
 	}
 	
 	

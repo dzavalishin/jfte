@@ -1,7 +1,7 @@
 package ru.dz.jfte;
 
 public class HTrans {
-    String match;
+    char[] match;
     //int matchLen;
     long matchFlags;
     int nextState;

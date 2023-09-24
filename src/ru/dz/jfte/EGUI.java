@@ -198,7 +198,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                         return ;
                     } else {
                         SetMap(null, /* & */key.fKey);
-                        // TODO ExecMacro(view, key.Cmd);
+                        ExecMacro(view, key.Cmd);
                         Event.What = evNone;
                         return ;
                     }

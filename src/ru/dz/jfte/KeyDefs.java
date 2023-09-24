@@ -1,5 +1,8 @@
 package ru.dz.jfte;
 
+import ru.dz.jfte.c.ByteArrayPtr;
+import ru.dz.jfte.struct.KeyDef;
+
 public interface KeyDefs {
 
 
@@ -73,4 +76,138 @@ public interface KeyDefs {
 	static public final int kbBreak      = (kfSpecial | 0x404);
 
 
+	
+	static KeyDef KeyList[] = {
+		    new KeyDef( "Esc", kbEsc ),
+		    new KeyDef( "Tab", kbTab ),
+		    new KeyDef( "Space", kbSpace ),
+		    new KeyDef( "Enter", kbEnter ),
+		    new KeyDef( "BackSp", kbBackSp ),
+		    new KeyDef( "F1", kbF1 ),
+		    new KeyDef( "F2", kbF2 ),
+		    new KeyDef( "F3", kbF3 ),
+		    new KeyDef( "F4", kbF4 ),
+		    new KeyDef( "F5", kbF5 ),
+		    new KeyDef( "F6", kbF6 ),
+		    new KeyDef( "F7", kbF7 ),
+		    new KeyDef( "F8", kbF8 ),
+		    new KeyDef( "F9", kbF9 ),
+		    new KeyDef( "F10", kbF10 ),
+		    new KeyDef( "F11", kbF11 ),
+		    new KeyDef( "F12", kbF12 ),
+		    new KeyDef( "Left", kbLeft ),
+		    new KeyDef( "Right", kbRight ),
+		    new KeyDef( "Up", kbUp ),
+		    new KeyDef( "Down", kbDown ),
+		    new KeyDef( "Home", kbHome ),
+		    new KeyDef( "End", kbEnd ),
+		    new KeyDef( "PgUp", kbPgUp ),
+		    new KeyDef( "PgDn", kbPgDn ),
+		    new KeyDef( "Ins", kbIns ),
+		    new KeyDef( "Del", kbDel ),
+		    new KeyDef( "Center", kbCenter ),
+		    new KeyDef( "Break", kbBreak ),
+		    new KeyDef( "Pause", kbPause ),
+		    new KeyDef( "PrtScr", kbPrtScr ),
+		    new KeyDef( "SysReq", kbSysReq ),
+		};
+
+	
+	static int ParseKey(String Key, KeySel ks) {
+	    //unsigned char *p = (unsigned char *)Key;
+	    ByteArrayPtr p = new ByteArrayPtr(Key.getBytes());
+	    long /*TKeyCode*/ KeyFlags = 0;
+	    int i;
+
+	    ks.Mask = 0;
+	    ks.Key = 0;
+	    while (p.r(0) != 0 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
+	        if (p.r(1) == '-') {
+	            switch (p.r(0)) {
+	            case 'A': ks.Mask |= kfAlt; break;
+	            case 'C': ks.Mask |= kfCtrl; break;
+	            case 'S': ks.Mask |= kfShift; break;
+	            case 'G': ks.Mask |= kfGray; break;
+	            case 'X': ks.Mask |= kfSpecial; break;
+	            }
+	        } else if (p.r(1) == '+') {
+	            switch (p.r(0)) {
+	            case 'A': KeyFlags |= kfAlt; break;
+	            case 'C': KeyFlags |= kfCtrl; break;
+	            case 'S': KeyFlags |= kfShift; break;
+	            case 'G': KeyFlags |= kfGray; break;
+	            case 'X': KeyFlags |= kfSpecial; break;
+	            }
+	        }
+	        //p += 2;
+	        p.shift(2);
+	    }
+	    
+	    /*for (i = 0; i < int(sizeof(KeyList)/sizeof(KeyList[0])); i++)
+	    {
+	        if (strcmp((char *)p, KeyList[i].Name) == 0) {
+	            ks.Key = KeyList[i].Key;
+	            break;
+	        }
+	    }*/
+	    
+	    for( KeyDef km : KeyList )
+	    {
+	    	String ps = p.getRestAsString();
+	    	if( km.getName().equals(ps) )
+	    	{
+	            ks.Key = km.getKey();
+	            break;
+	    	}
+	    }
+	    
+	    
+	    if (ks.Key == 0)
+	        ks.Key = p.r(0);
+	    if (0 !=(KeyFlags & kfCtrl) && 0==(KeyFlags & kfSpecial)) 
+	    {
+	        if (ks.Key < 256) {
+	            if (ks.Key < 32)
+	                ks.Key += 64;
+	            else
+	                ks.Key = Character.toUpperCase(ks.Key);
+	        }
+	    }
+	    ks.Key |= KeyFlags;
+	    return 0;
+	}
+
+	static int GetKeyName(String []Key, KeySel ks) {
+	    Key[0] = "";
+
+	    if(0 != (ks.Key  & kfAlt))   Key[0] += "A+";
+	    if(0 != (ks.Mask & kfAlt))   Key[0] += "A-";
+	    if(0 != (ks.Key  & kfCtrl))  Key[0] += "C+";
+	    if(0 != (ks.Mask & kfCtrl))  Key[0] += "C-";
+	    if(0 != (ks.Key  & kfGray))  Key[0] += "G+";
+	    if(0 != (ks.Mask & kfGray))  Key[0] += "G-";
+	    if(0 != (ks.Key  & kfShift)) Key[0] += "S+";
+	    if(0 != (ks.Mask & kfShift)) Key[0] += "S-";
+
+	    if (KeyDefs.keyCode(ks.Key) < 256) {
+
+	        char c = (char)(ks.Key & 0xFF);
+
+	        //if (ks.Key & kfCtrl)
+	        //    if (c[0] < ' ')
+	        //        c[0] += '@';
+	        if (c == 32)
+	            Key[0] += "Space";
+	        else
+	            Key[0] += ""+c;
+	    } else {
+	        for (KeyDef k : KeyList)
+	            if (k.getKey() == KeyDefs.keyCode(ks.Key)) {
+	            	Key[0] += k.getName();
+	                break;
+	            }
+	    }
+	    return 0;
+	}
+	
 }
