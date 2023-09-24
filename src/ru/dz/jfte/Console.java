@@ -857,5 +857,10 @@ public static String SlashDir(String Path)
 	}
 
 
+	public static boolean IsFullPath(String name) {
+		return new File(name).isAbsolute();
+	}
+
+
 	
 }

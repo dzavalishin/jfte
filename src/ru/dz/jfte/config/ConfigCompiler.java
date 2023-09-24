@@ -48,7 +48,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    //String a;
 	    //String c;
 	    //String z;
-	    ByteArrayPtr a, c;
+	    ByteArrayPtr c;
 	    int line;
 	    String name; // filename
 	}
@@ -218,7 +218,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 		output.write( (char)((l >> 24) & 0xFF) );		
 	}
 	
-	void writeOutput(String Source)
+	void writeOutput(String Source) throws IOException
 	{
 		
 		
@@ -266,7 +266,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    StartDir[0] = Console.Slash(StartDir[0], 1);
 
 	    {
-	        CurPos cp;
+	        CurPos cp = new CurPos();
 	        String [] FSource = {""};
 
 	        if (Console.ExpandPath(Source, FSource) != 0) {
@@ -275,9 +275,9 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        }
 
 	        cp.sz = 0;
-	        cp.c = 0;
-	        cp.a = cp.c = 0;
-	        cp.z = cp.a + cp.sz;
+	        cp.c = null;
+	        //cp.a = cp.c = 0;
+	        //cp.z = cp.a + cp.sz;
 	        cp.line = 0;
 	        cp.name = "<cfte-start>";
 
@@ -1601,11 +1601,10 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    }
 	}
 
-	boolean LoadFile(String WhereName, String CfgName, int Level) {
+	boolean LoadFile(String WhereName, String CfgName, int Level) throws IOException {
 	    int rc;
 	    //String buffer = 0;
 	    //struct stat statbuf;
-	    CurPos cp;
 	    String [] last = {null};
 	    String [] Cfg = {null};
 
@@ -1702,6 +1701,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 			return false;
 		}
 	    
+	    CurPos cp = new CurPos();
 	    
 	    cp.sz = allCfg.length;
 	    //cp.a = cp.c = buffer;
