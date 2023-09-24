@@ -7,7 +7,8 @@ public class CommandType {
     //short ign;
     int ign = 0;
 
-    long num = 0;
+    //long num = 0;
+    int num = 0;
     String string = null;
 
 

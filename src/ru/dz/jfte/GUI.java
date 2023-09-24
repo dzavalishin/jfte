@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class GUI implements GuiDefs, EventDefs 
+public abstract class GUI implements GuiDefs, EventDefs 
 {
 	String []fArgv;
 	boolean doLoop = false;
@@ -83,8 +83,13 @@ public class GUI implements GuiDefs, EventDefs
 
 	    ::ConDone();
 	    gui = 0;
-	} */
+	} 
+	 * @throws IOException */
 
+	
+    abstract ExResult ExecCommand(GxView view, ExCommands Command, ExState State) throws IOException; 
+	
+	
 	int ConSuspend() { /*FOLD00
 	    RestoreScreen();
 	    return ::ConSuspend(); */

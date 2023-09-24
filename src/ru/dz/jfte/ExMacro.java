@@ -74,7 +74,7 @@ public class ExMacro {
         return 1;
     }
 
-	static int AddNumber(int no, long number) {
+	static int AddNumber(int no, int number) {
     	/*
         Macros[no].cmds = (CommandType *)realloc(Macros[no].cmds, sizeof(CommandType) * (Macros[no].Count + 1));
         Macros[no].cmds[Macros[no].Count].type = CT_NUMBER;

@@ -412,7 +412,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs
         ks.Mask = 0;
         ks.Key = (int) MView.Win.GetChar(null);
 
-        KeyTable.GetKeyName(buf, ks);
+        KeyDefs.GetKeyName(buf, ks);
         Msg(S_INFO, "Key: '%s' - '%8X'", buf[0], ks.Key);
         return ExResult.ErOK;
     }

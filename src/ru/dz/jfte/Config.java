@@ -1,8 +1,10 @@
 package ru.dz.jfte;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.ByteArrayPtr;
@@ -95,6 +97,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		//STARTFUNC("LoadConfig");
 		//LOG << "Config file: " << CfgFileName << ENDLINE;
 
+		String cwd = new File(".").getAbsolutePath();
+		System.out.print("Loading config "+CfgFileName+" cwd "+cwd+"\n");
+		
 		byte[] allCfg = null;
 		try {
 			allCfg = Files.readAllBytes(Path.of(CfgFileName));
@@ -110,7 +115,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		//* TODO cnf sig
 		if (ln != CONFIG_ID) {
-			Console.DieError(0, "Bad .CNF signature");
+			Console.DieError(0, "Bad .CNF signature %x, expext %x", ln, CONFIG_ID);
 			return false;
 		} //*/
 
@@ -573,7 +578,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			break;
 			case CF_INT:
 			{
-				long num = GetNum(cp);
+				int num = GetNum(cp);
 				if (ExMacro.AddNumber(Cmd, num) == 0) return -1;
 			}
 			break;
@@ -946,12 +951,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				int Col;
 				int ColBg, ColFg;
 
-				if (sscanf(colorstr, "%1X %1X", ColFg, ColBg) != 2)
-					return 0;
+				//if (sscanf(colorstr, "%1X %1X", ColFg, ColBg) != 2)					return 0;
 
+				String[] ss = colorstr.split(" ");
+				if(ss.length != 2)
+					return 0;
+				
+				ColFg = Integer.parseInt(ss[0], 16);
+				ColBg = Integer.parseInt(ss[1], 16);
+				
 				Col = ColFg | (ColBg << 4);
 
-				int color = ChColor(Col);
+				int color = Col; // ChColor(Col);
 				if (ReadKeywords(cp, Colorize.Keywords, color) == -1) return -1;
 			}
 			break;
@@ -972,9 +983,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				int color = GetNum(cp);
 
-				HState newState;
-
-				newState.InitState();
+				HState newState = new HState();
 
 				newState.color = color;
 
@@ -985,7 +994,6 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 			case CF_HTRANS:
 			{
-				HTrans newTrans;
 				//long nextState;
 				//long matchFlags;
 				String match;
@@ -1006,7 +1014,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				if ((match = GetCharStr(cp, obj.len)) == null)
 					return -1;
 
-				newTrans.InitTrans();
+				HTrans newTrans = new HTrans();
 
 				newTrans.matchFlags = matchFlags;
 				newTrans.nextState = nextState;
@@ -1069,28 +1077,31 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			case CF_HWORDS:
 			{
 				String colorstr;
-				int color;
+				if ((colorstr = GetCharStr(cp, obj.len)) == null) return -1;
 
-				if ((colorstr = GetCharStr(cp, len)) == null) return -1;
-
-				color = hcPlain_Keyword;
+				int color = hcPlain_Keyword;
 
 				if (!colorstr.equals("-")) {
 					String Value = colorstr;
-					int Col;
+					int [] Col = {0};
 
 					if (Value.charAt(0) == '-') {
-						Value++;
-						if (sscanf(Value, "%1X", Col) != 1) return -1;
-						Col |= (hcPlain_Background & 0xF0);
-					} else if (Value[1] == '-') {
-						if (sscanf(Value, "%1X", Col) != 1) return -1;
-						Col <<= 4;
-						Col |= (hcPlain_Background & 0x0F);
+						//Value++;
+						//Value = Value.substring(1);
+						
+						//if (sscanf(Value, "%1X", Col) != 1) return -1;
+						if(!getHex(Value.substring(1, 1), Col)) return -1;
+						Col[0] |= (hcPlain_Background & 0xF0);
+					} else if (Value.charAt(1) == '-') {
+						//if (sscanf(Value, "%1X", Col) != 1) return -1;
+						if(!getHex(Value.substring(0, 1), Col)) return -1;
+						Col[0] <<= 4;
+						Col[0] |= (hcPlain_Background & 0x0F);
 					} else {
-						if (sscanf(Value, "%2X", Col) != 1) return -1;
+						//if (sscanf(Value, "%2X", Col) != 1) return -1;
+						if(!getHex(Value.substring(0, 2), Col)) return -1;
 					}
-					color = Col;
+					color = Col[0];
 				}
 				if (ReadKeywords(cp, Colorize.hm.LastState().keywords, color) == -1) return -1;
 			}
@@ -1105,7 +1116,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				case CF_STRING:
 				{
 					String val = GetCharStr(cp, obj.len);
-					if (len == 0) return -1;
+					if (obj.len == 0) return -1;
 					if (SetColorizeString(Colorize, what, val) != 0) return -1;
 				}
 				break;
@@ -1131,6 +1142,34 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		return -1;
 	}
 	//#endif
+
+	private boolean getHex(String value, int[] col) {
+		try { 
+		col[0] = Integer.parseInt(value,16);
+		}
+		catch (NumberFormatException  e) {
+			return false;
+		}
+		return true;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	int ReadMode(CurPos cp, EMode Mode, String  ModeName) {
 		Obj obj;
@@ -1177,7 +1216,84 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		return -1;
 	}
 
+	int ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) {
+	    Obj obj;
 
+		while (true) 
+		{
+			obj = GetObj(cp);
+			if(obj.type == 0xFF) break;
+			
+			switch (obj.type) {
+	        case CF_INT:
+	            {
+	                String svalue;
+
+	                int cidx = GetNum(cp);
+	                
+	    			obj = GetObj(cp);
+	                if (obj.type != CF_STRING)               return -1;
+	                if ((svalue = GetCharStr(cp, obj.len)) == null)
+	                    return -1;
+	                
+	                if (Colorize.SetColor(cidx, svalue) == 0)
+	                    return -1;
+	            }
+	            break;
+	        case CF_END:
+	            return 0;
+	        default:
+	            return -1;
+	        }
+	    }
+	    return -1;
+	}
+
+	
+	
+	int ReadKeywords(CurPos cp, ColorKeywords keywords, int color) {
+	    Obj obj;
+
+		while (true) 
+		{
+			obj = GetObj(cp);
+			if(obj.type == 0xFF) break;
+			
+			switch (obj.type) {
+	        case CF_STRING:
+	            {
+	                String kname = GetCharStr(cp, obj.len);
+	                if (kname == null) return -1;
+	                if (AddKeyword(keywords, (char) color, kname) != 1) return -1;
+	            }
+	            break;
+	        case CF_END:
+	            return 0;
+	        default:
+	            return -1;
+	        }
+	    }
+	    return -1;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 	
@@ -1204,7 +1320,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	        if (j == BFI_EventMap) {
 	            mode.fEventMap = EEventMap.FindEventMap(string);
 	        } else if (j == BFI_IndentMode) {
-	            mode.Flags.num[j] = GetIndentMode(string);
+	            mode.Flags.num[j] = 0; // TODO GetIndentMode(string);
 	        } else if (j == BFS_WordChars) {
 	            SetWordChars(mode.Flags.WordChars, string);
 	        } else if (j == BFS_CapitalChars) {
@@ -1250,6 +1366,19 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 	
 
+	static int SetEventString(EEventMap Map, int what, String string) {
+	    //STARTFUNC("SetEventString");
+	    //LOG << "What: " << what << " String: " << string << ENDLINE;
+	    switch (what) {
+	    case EM_MainMenu:
+	    case EM_LocalMenu:
+	        Map.SetMenu(what, string);
+	        break;
+	    default:
+	    	return -1;
+	    }
+	    return 0;
+	}
 	
 	
 	
@@ -1319,7 +1448,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                pmap.KeyMap.fParent = parent;
 	                pmap.KeyMap.AddKey(k);
 	            } else {
-	                KeySel ks;
+	                KeySel ks = new KeySel();
 
 	                KeyDefs.ParseKey(p.toString(), ks);
 	                if ((k = pmap.KeyMap.FindKey(ks.Key)) == null) { // check if key exists
@@ -1336,7 +1465,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	            parent = null;
 	            //            printf("Searching %s\n", p);
 	            while (pm != null) { // while exists
-	                KeySel ks;
+	                KeySel ks = new KeySel();
 	                EKey pk;
 
 	                KeyDefs.ParseKey(p.toString(), ks);
@@ -1354,6 +1483,75 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 	
 	
+
+	
+	int SetColorizeString(EColorize Colorize, int what, String string) {
+	    //STARTFUNC("SetColorizeString");
+	    //LOG << "What: " << what << " String: " << string << ENDLINE;
+	    switch (what) {
+	    case COL_SyntaxParser:
+	        Colorize.SyntaxParser = GetHilitMode(string);
+	        break;
+	    default:
+	        return -1;
+	    }
+	    return (0);
+	}
+	
+	
+	int GetHilitMode(String Str) {
+		/*/ TODO HilitModes
+	    for (int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
+	        if (strcmp(Str, HilitModes[i].Name) == 0)
+	            return HilitModes[i].Num;
+	    */
+	    return HILIT_PLAIN;
+	}
+	
+	
+	
+	/**
+	 * 
+	 * Looks like tab.key[len] contains all keywords with length = len,
+	 * each one is [word][1 byte color]
+	 * 
+	 * @param tab
+	 * @param color
+	 * @param keyword
+	 * @return
+	 */
+	int AddKeyword(ColorKeywords tab, char color, String keyword) {
+	    int len = keyword.length();
+	    byte[] kwb = keyword.getBytes();
+	    
+	    if (len < 1 || len >= CK_MAXLEN) return 0;
+
+	    if(tab.key[len] != null) {
+	        int lx = tab.key.length;
+	        
+	        //String key = (String )realloc(tab.key[len], lx + len + 1 + 1);
+
+	        tab.key[len] = Arrays.copyOf(tab.key[len], lx + len + 1 + 1);
+
+	        //strcpy(tab.key[len] + lx, keyword);
+	        System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
+	        
+	        tab.key[len][lx + len] = (byte)color;
+	        tab.key[len][lx + len + 1] = 0;
+	    } else {
+	        //tab.key[len] = (String )malloc(len + 2);
+	        tab.key[len] = new byte[len + 2];
+
+	        //strcpy(tab.key[len], keyword);
+	        System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
+
+	        tab.key[len][len] = (byte)color;
+	        tab.key[len][len + 1] = 0;
+	    }
+	    tab.count[len]++;
+	    tab.TotalCount++;
+	    return 1;
+	}
 	
 	
 }

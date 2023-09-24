@@ -27,15 +27,17 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         ActiveMap = null;
         OverrideMap = null;
         CharMap = "";
+		gui = this;
     }
 
 
+    @Override
     ExResult ExecCommand(GxView view, ExCommands Command, ExState State) throws IOException 
     {
-    	/* TODO ExecMacro
-        if(0 != (Command & CMD_EXT))
-            return ExecMacro(view, Command & ~CMD_EXT);
-		*/
+    	
+        if(0 != (Command.ordinal() & CMD_EXT))
+            return ExecMacro(view, Command.ordinal() & ~CMD_EXT);
+		
     	
         if (Command == ExCommands.ExFail)
             return ExResult.ErFAIL;
@@ -96,44 +98,56 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         return view.ExecCommand(Command, State);
     }
 
-    /*
-    int BeginMacro(GxView view) {
+
+    static int BeginMacro(GxView view) {
         view.BeginMacro();
         return 1;
     }
 
    
-    int ExecMacro(GxView view, int Macro) {
-        int i, j;
+    static ExResult ExecMacro(GxView view, int Macro) {
+        //int i, j;
         ExMacro m;
-        ExState State;
 
         if (Macro == -1)
-            return ErFAIL;
+            return ExResult.ErFAIL;
 
         if (BeginMacro(view) == -1)
-            return ErFAIL;
+            return ExResult.ErFAIL;
 
+        ExState State = new ExState();
         State.Macro = Macro;
         State.Pos = 0;
-        m = &Macros[State.Macro];
-        for (; State.Pos < m.Count; State.Pos++) {
-            i = State.Pos;
-            if (m.cmds[i].type != CT_COMMAND ||
-                m.cmds[i].u.num == ExNop)
+
+        //m = ExMacro.Macros[State.Macro];
+        m = ExMacro.Macros.get(State.Macro);
+        
+        for (; State.Pos < m.cmds.size(); State.Pos++)
+        {
+            int i = State.Pos;
+            CommandType mc = m.cmds.get(i);
+            
+            if (mc.type != CommandType.CT_COMMAND ||
+                mc.num == ExCommands.ExNop.ordinal())
                 continue;
 
-            for (j = 0; j < m.cmds[i].repeat; j++) {
+            for (int j = 0; j < mc.repeat; j++) {
                 State.Pos = i + 1;
-                if (ExecCommand(view, m.cmds[i].u.num, State) == 0 && !m.cmds[i].ign)
-                {
-                    return ErFAIL;
-                }
+                try {
+					if (gui.ExecCommand(view, ExCommands.byOrdinal(mc.num), State) == ExResult.ErFAIL && 0 == mc.ign)
+					{
+					    return ExResult.ErFAIL;
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				    return ExResult.ErFAIL;
+				}
             }
             State.Pos = i;
         }
-        return ErOK;
-    } */
+        return ExResult.ErOK;
+    }
 
     void SetMsg(String Msg) {
         String CharMap = "";
@@ -163,7 +177,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             SetMsg(null);
         } else {
             if (ks != null) {
-                KeyTable.GetKeyName(key, ks);
+                KeyDefs.GetKeyName(key, ks);
                 SetMsg(key[0]);
             }
         }
@@ -192,13 +206,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 map = OverrideMap;
             while (map!=null) {
                 if ((key = map.FindKey(Event.Code)) != null) {
-                    if (key.fKeyMap!=null) {
-                        SetMap(key.fKeyMap, key.fKey);
+                    if (key.KeyMap!=null) {
+                        SetMap(key.KeyMap, key.fKey);
                         Event.What = evNone;
                         return ;
                     } else {
                         SetMap(null, /* & */key.fKey);
-                        ExecMacro(view, key.Cmd);
+                        EGUI.ExecMacro(view, key.Cmd);
                         Event.What = evNone;
                         return ;
                     }
@@ -215,8 +229,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         while (EventMap!=null) {
             if (map!=null) {
                 if ((key = map.FindKey(Event.Code)) != null) {
-                    if (key.fKeyMap != null) {
-                        SetMap(key.fKeyMap, key.fKey);
+                    if (key.KeyMap != null) {
+                        SetMap(key.KeyMap, key.fKey);
                         Event.What = evNone;
                         return ;
                     } else {
@@ -254,6 +268,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         }
     }
 
+    @Override
     void DispatchEvent(GFrame frame, GView view, TEvent Event) throws IOException {
         GxView xview = (GxView) view;
 

@@ -1,6 +1,9 @@
 package ru.dz.jfte;
 
-public class HState {
+import ru.dz.jfte.c.ByteArrayPtr;
+
+public class HState implements ModeDefs, ColorDefs 
+{
     int transCount = 0;
     int firstTrans = 0;
     int color = 0;
@@ -13,8 +16,8 @@ public class HState {
     int nextKwdNoCharState = -1;
 
     
+	/*
     void InitState() {
-    	/*
         memset((void *)&keywords, 0, sizeof(keywords));
         firstTrans = 0;
         transCount = 0;
@@ -24,34 +27,50 @@ public class HState {
         nextKwdMatchedState = -1;
         nextKwdNotMatchedState = -1;
         nextKwdNoCharState = -1;
-        */
     }
+        */
 
-    int GetHilitWord(int len, char *str, ChColor &clr) 
+    int GetHilitWord(int len, String str, /*ChColor*/ int [] clr) 
     {
-        char *p;
+        //byte [] p;
 
         if (len >= CK_MAXLEN || len < 1)
             return 0;
 
-        p = keywords.key[len];
-        if (options & STATE_NOCASE) {
-            while (p && *p) {
-                if (strnicmp(p, str, len) == 0) {
-                    clr = p[len];
+        if( keywords.key[len] == null )
+            return 0;
+
+        ByteArrayPtr p = new ByteArrayPtr(keywords.key[len]);
+        
+        if(0 != (options & STATE_NOCASE) ) 
+        {
+            while (p.hasCurrent()) 
+            {
+            	String pw = p.getLenAsString(len);
+            	
+                if (str.equalsIgnoreCase(pw)) {
+                    clr[0] = p.ur(len);
                     return 1;
                 }
-                p += len + 1;
+                
+                p.shift( len + 1 );
             }
-        } else {
-            while (p && *p) {
-                if (memcmp(p, str, len) == 0) {
-                    clr = p[len];
+        } 
+        else 
+        {
+            while (p.hasCurrent()) 
+            {
+            	String pw = p.getLenAsString(len);
+
+            	if (str.equals(pw)) {
+                    clr[0] = p.ur(len);
                     return 1;
                 }
-                p += len + 1;
+            	
+                p.shift( len + 1 );
             }
         }
+        
         return 0;
     }
     
