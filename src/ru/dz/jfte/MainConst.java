@@ -43,4 +43,7 @@ public interface MainConst
 	    "/usr/X11R6/lib/X11/fte/system.fterc",
 	};
 	
+	// TODO ver 
+	public static final long VERNUM = 0x00490401L; 
+	
 }

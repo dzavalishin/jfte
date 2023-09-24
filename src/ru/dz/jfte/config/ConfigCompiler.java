@@ -1,6 +1,8 @@
 package ru.dz.jfte.config;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,12 +30,15 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	} 
 
 
+	//BufferedWriter output;
+	BufferedOutputStream output;
+
 	//FILE *output = 0;
 	int lntotal = 0;
 	long offset = -1;
 	long pos = 0;
 	String [] XTarget = {""};
-	String StartDir = "";
+	String [] StartDir ={""};
 
 
 	class CurPos {
@@ -46,13 +51,14 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    String name; // filename
 	}
 
+	/*
 	void cleanup(int xerrno) {
 	    if (output)
 	        fclose(output);
 	    if (XTarget[0] != 0)
 	        unlink(XTarget);
 	    System.exit(xerrno);
-	}
+	}*/
 
 	void Fail(CurPos cp, String fmt, String... s) {
 
@@ -64,14 +70,21 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 
 	//int LoadFile(String WhereName, String CfgName, int Level = 1);
 	
-	void PutObject(CurPos cp, int xtag, int xlen, Object obj) {
-	    char tag = (char)xtag;
-	    int len = xlen;
-	    unsigned char l[2];
+	void PutObject(CurPos cp, int tag, int len, byte []  obj) throws IOException {
+	    //char tag = (char)xtag;
+	    //int len = xlen;
+	    //unsigned char l[2];
 
-	    l[0] = len & 0xFF;
-	    l[1] = (len >> 8) & 0xFF;
+	    int l0 = len & 0xFF;
+	    int l1 = (len >> 8) & 0xFF;
 
+	    output.write(tag);
+	    
+	    output.write(l0);
+	    output.write(l1);
+	    
+	    output.write(obj);
+	    /*
 	    if (fwrite(&tag, 1, 1, output) != 1 ||
 	        fwrite(l, 2, 1, output) != 1 ||
 	        fwrite(obj, 1, len, output) != len)
@@ -81,15 +94,16 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    pos += 1 + 2 + len;
 	    if (offset != -1 && pos >= offset) {
 	        Fail(cp, "Error location found at %ld", pos);
-	    }
+	    }*/
+	    pos += 1 + 2 + len;
 	}
 
-	void PutNull(CurPos cp, int xtag) {
-	    PutObject(cp, xtag, 0, 0);
+	void PutNull(CurPos cp, int xtag) throws IOException {
+	    PutObject(cp, xtag, 0, null);
 	}
 
-	void PutString(CurPos cp, int xtag, String str) {
-	    PutObject(cp, xtag, slen(str), str);
+	void PutString(CurPos cp, int xtag, String str) throws IOException {
+	    PutObject(cp, xtag, slen(str), str.getBytes());
 	}
 
 	void PutNumber(CurPos cp, int xtag, long num) {
@@ -145,8 +159,12 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    XTarget[0] = Console.Slash(XTarget[0], 1);
 	    XTarget[0] += String.format( "cfte%ld.tmp", 33 );// TODO (long)getpid());
 	    
-		try(BufferedWriter output = Files.newBufferedWriter(Path.of(XTarget[0]), Main.charset)) 
+		//try(BufferedWriter o = Files.newBufferedWriter(Path.of(XTarget[0]), Main.charset))
+	    try(BufferedOutputStream o = new BufferedOutputStream(new FileOutputStream(XTarget[0]));)
 		{
+			output = o;
+		    System.out.printf( "Compiling to '%s'\n", Target);
+
 			writeOutput();
 			output.close();
 
@@ -171,7 +189,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 		catch(IOException e)
 		{
 		    System.err.printf( "Cannot create '%s',Exception %s", XTarget[0], e);
-	        cleanup(1);
+	        //cleanup(1);
+	        Console.unlink(XTarget[0]);
 
 			/*
 			Console.unlink(AFileName);
@@ -187,12 +206,21 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 
 	}
 	
+	
+	void writeInt(long l) throws IOException
+	{
+		output.write( (char)(l & 0xFF) );
+		output.write( (char)((l >> 8) & 0xFF) );
+		output.write( (char)((l >> 16) & 0xFF) );
+		output.write( (char)((l >> 24) & 0xFF) );		
+	}
+	
 	void writeOutput()
 	{
 		
 		
 	    
-
+		/*
 	    unsigned char b[4];
 
 	    b[0] = b[1] = b[2] = b[3] = 0;
@@ -201,7 +229,11 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        fprintf(stderr, "Disk full!");
 	        cleanup(1);
 	    }
+	    */
+		writeInt(CONFIG_ID);
+		writeInt(MainConst.VERNUM);
 
+		/*
 	    unsigned long l = VERNUM;
 
 	    b[0] = (unsigned char)(l & 0xFF);
@@ -213,9 +245,9 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        fprintf(stderr, "Disk full!");
 	        cleanup(1);
 	    }
+	    */
 	    pos = 2 * 4;
 
-	    System.out.printf( "Compiling to '%s'\n", Target);
 	    /*{
 	        char PrevDir[MAXPATH];
 	        sprintf(PrevDir, "%s/..", Target);
@@ -223,16 +255,16 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        Slash(StartDir, 1);
 	    }*/
 
-	    ExpandPath("."
+	    Console.ExpandPath("."
 	/*#ifdef UNIX
 	               "."
 	#endif */
 	               , StartDir);
-	    StartDir = Slash(StartDir, 1);
+	    StartDir[0] = Console.Slash(StartDir[0], 1);
 
 	    {
 	        CurPos cp;
-	        char FSource[MAXPATH];
+	        String [] FSource = {""};
 
 	        if (ExpandPath(Source, FSource) != 0) {
 	            fprintf(stderr, "Could not expand path %s\n", Source);
@@ -254,6 +286,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        cleanup(1);
 	    }
 
+	    /*
 	    l = CONFIG_ID;
 	    b[0] = (unsigned char)(l & 0xFF);
 	    b[1] = (unsigned char)((l >> 8) & 0xFF);
@@ -262,6 +295,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    fseek(output, 0, SEEK_SET);
 	    fwrite(b, 4, 1, output);
 	    return 0;
+	    */
 	}
 
 
