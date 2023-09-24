@@ -18,10 +18,13 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		int pos = 2;
 		int i, len;
 
-		for (i = 0; i < Menus[id].Count; i++) {
+		for (i = 0; i < Menus[id].Items.size(); i++) {
 			if (i == cur) return pos;
-			if (Menus[id].Items[i].Name!=null) {
-				len = PCell.CStrLen(Menus[id].Items[i].Name);
+			
+			String s = Menus[id].Items.get(i).Name;
+			
+			if (s!=null) {
+				len = PCell.CStrLen(s);
 				pos += len + 2;
 			} else
 				pos++;
@@ -33,9 +36,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		int pos = 1;
 		int i, len;
 
-		for (i = 0; i < Menus[id].Count; i++) {
-			if (Menus[id].Items[i].Name!=null) {
-				len = PCell.CStrLen(Menus[id].Items[i].Name);
+		for (i = 0; i < Menus[id].Items.size(); i++) 
+		{
+			String s = Menus[id].Items.get(i).Name;
+			if (s!=null) {
+				len = PCell.CStrLen(s);
 				if (X >= pos && X <= pos + len + 1) return i;
 				pos += len + 2;
 			} else 
@@ -53,7 +58,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 		B.MoveChar(0, Cols, ' ', hcMenu_Background, Cols);
 		if (id != -1) {
-			for (i = 0; i < Menus[id].Count; i++) {
+			for (i = 0; i < Menus[id].Items.size(); i++) {
 				if (i == active) {
 					color1 = hcMenu_ActiveItem;
 					color2 = hcMenu_ActiveChar;
@@ -62,10 +67,12 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					color2 = hcMenu_NormalChar;
 				}
 
-				if (Menus[id].Items[i].Name!=null) {
-					len = PCell.CStrLen(Menus[id].Items[i].Name);
+				String name = Menus[id].Items.get(i).Name;
+
+				if (name!=null) {
+					len = PCell.CStrLen(name);
 					B.MoveChar( pos, Cols, ' ', color1, len + 2);
-					B.MoveCStr( pos + 1, Cols, Menus[id].Items[i].Name, color1, color2, len);
+					B.MoveCStr( pos + 1, Cols, name, color1, color2, len);
 					pos += len + 2;
 				} else {
 					B.MoveChar( pos, Cols, Console.ConGetDrawChar(DCH_V), hcMenu_Background, 1);
@@ -78,8 +85,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 	}
 
 	static int GetVPosItem(int id, int w, int X, int Y) {
-		if (Y <= 0 || Y > Menus[id].Count) return -1;
-		if (Menus[id].Items[Y - 1].Name == null) return -1;
+		if (Y <= 0 || Y > Menus[id].Items.size()) return -1;
+		if (Menus[id].Items.get(Y - 1).Name == null) return -1;
 		if (X <= 0 || X >= w - 1) return -1;
 		return Y - 1;
 	}
@@ -88,11 +95,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		int xsize = 0;
 		int len;
 
-		Y[0] = Menus[id].Count;
+		Y[0] = Menus[id].Items.size();
 		for (int i = 0; i < Y[0]; i++) {
 			len = 0;
-			if (Menus[id].Items[i].Name!=null)
-				len = PCell.CStrLen(Menus[id].Items[i].Name);
+			if (Menus[id].Items.get(i).Name!=null)
+				len = PCell.CStrLen(Menus[id].Items.get(i).Name);
 			if (len > xsize)
 				xsize = len;
 		}
@@ -123,7 +130,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		B.MoveCh( Console.ConGetDrawChar(DCH_C1), hcMenu_Background, 1);
 		new PCell(B,w - 1).MoveCh(/*B + w - 1,*/ Console.ConGetDrawChar(DCH_C2), hcMenu_Background, 1);
 		Console.ConPutBox(x, y, w, 1, B);
-		for (int i = 0; i < Menus[id].Count; i++) {
+		for (int i = 0; i < Menus[id].Items.size(); i++) {
 			if (i == active) {
 				color1 = hcMenu_ActiveItem;
 				color2 = hcMenu_ActiveChar;
@@ -131,12 +138,12 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				color1 = hcMenu_NormalItem;
 				color2 = hcMenu_NormalChar;
 			}
-			if (Menus[id].Items[i].Name!=null) {
+			if (Menus[id].Items.get(i).Name!=null) {
 				//String name;
 				//char *arg = 0;
 				int len2 = 0;
 
-				String mname = Menus[id].Items[i].Name;
+				String mname = Menus[id].Items.get(i).Name;
 				int tabPos = mname.indexOf('\t');
 				/*
 				arg = strchr(name, '\t');
@@ -152,11 +159,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				B.MoveCh( Console.ConGetDrawChar(DCH_V), hcMenu_Background, 1);
 				new PCell( B, w - 1).MoveCh( /*B + w - 1,*/ Console.ConGetDrawChar(DCH_V), hcMenu_Background, 1);
 
-				B.MoveCStr( 2, len + 2, Menus[id].Items[i].Name, color1, color2, len);
+				B.MoveCStr( 2, len + 2, Menus[id].Items.get(i).Name, color1, color2, len);
 				if (!arg.isEmpty())
 					B.MoveCStr( w - len2 - 2, w + 4, arg, color1, color2, len2);
 
-				if (Menus[id].Items[i].SubMenu != -1) {
+				if (Menus[id].Items.get(i).SubMenu != -1) {
 					new PCell( B, w - 2).MoveCh(/*B + w - 2,*/ Console.ConGetDrawChar(DCH_RPTR), color1, 1);
 				}
 			} else {
@@ -169,7 +176,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		B.MoveChar( 0, w, Console.ConGetDrawChar(DCH_H), hcMenu_Background, w);
 		B.MoveCh( Console.ConGetDrawChar(DCH_C3), hcMenu_Background, 1);
 		new PCell( B, w - 1).MoveCh(/*B + w - 1,*/ Console.ConGetDrawChar(DCH_C4), hcMenu_Background, 1);
-		Console.ConPutBox(x, y + Menus[id].Count + 1, w, 1, B);
+		Console.ConPutBox(x, y + Menus[id].Items.size() + 1, w, 1, B);
 		return 1;
 	}
 
@@ -255,9 +262,9 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			DrawVMenu(x, y, id, cur);
 			if (dovert) {
 				if (cur != -1) {
-					if (Menus[id].Items[cur].SubMenu != -1) {
+					if (Menus[id].Items.get(cur).SubMenu != -1) {
 						rx = ExecVertMenu(x + w - 1, y + cur,
-								Menus[id].Items[cur].SubMenu, E, here);
+								Menus[id].Items.get(cur).SubMenu, E, here);
 						if (rx == 1) {
 							abort = 1;
 							continue;
@@ -287,15 +294,15 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			case evKeyDown:
 				switch (KeyDefs.kbCode(((TKeyEvent)E).Code)) {
 				case kbPgDn:
-				case kbEnd: cur = Menus[id].Count;
+				case kbEnd: cur = Menus[id].Items.size();
 				case kbUp: 
 				{
 					int xx = cur;
 
 					do {
 						cur--;
-						if (cur < 0) cur = Menus[id].Count - 1;
-					} while (cur != xx && Menus[id].Items[cur].Name == null);
+						if (cur < 0) cur = Menus[id].Items.size() - 1;
+					} while (cur != xx && Menus[id].Items.get(cur).Name == null);
 				}
 				break;
 				case kbPgUp:
@@ -305,20 +312,20 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					int xx = cur;
 					do {
 						cur++;
-						if (cur >= Menus[id].Count) cur = 0;
-					} while (cur != xx && Menus[id].Items[cur].Name == null);
+						if (cur >= Menus[id].Items.size()) cur = 0;
+					} while (cur != xx && Menus[id].Items.get(cur).Name == null);
 				}
 				break;
 				case kbEsc: abort = -1; break;
 				case kbEnter:
 					if (cur != -1) {
-						if (Menus[id].Items[cur].SubMenu < 0) {
+						if (Menus[id].Items.get(cur).SubMenu < 0) {
 							//TMsgEvent ne = new TMsgEvent(evCommand);
 							//E.What = evCommand;
 							//ne.View = GUI.frames.Active;
-							//ne.Command = Menus[id].Items[cur].Cmd;
+							//ne.Command = Menus[id].Items.get(cur).Cmd;
 							//E = ne;
-							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 							abort = 1;
 						} else {
 							dovert = true;
@@ -337,17 +344,17 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 						cc = Character.toUpperCase((char)(((TKeyEvent)E).Code & 0xFF));
 
-						for (i = 0; i < Menus[id].Count; i++) {
-							if (Menus[id].Items[i].Name!=null) 
+						for (i = 0; i < Menus[id].Items.size(); i++) {
+							if (Menus[id].Items.get(i).Name!=null) 
 							{
-								int amppos = Menus[id].Items[i].Name.indexOf('&');
-								char ch = Menus[id].Items[i].Name.charAt(amppos+1);
+								int amppos = Menus[id].Items.get(i).Name.indexOf('&');
+								char ch = Menus[id].Items.get(i).Name.charAt(amppos+1);
 								if(Character.toUpperCase(ch) == cc )
 								{
 									cur = i;
 									if (cur != -1) {
-										if (Menus[id].Items[cur].SubMenu == -1) {
-											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+										if (Menus[id].Items.get(cur).SubMenu == -1) {
+											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 											abort = 1;
 										} else {
 											dovert = true;
@@ -356,22 +363,22 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									break;
 								}								
 								/*
-								char []o = strchr(Menus[id].Items[i].Name, '&');
+								char []o = strchr(Menus[id].Items.get(i).Name, '&');
 								if (o)
 									if (Character.toUpperCase(o[1]) == cc) {
 										cur = i;
 										if (cur != -1) {
-											if (Menus[id].Items[cur].SubMenu == -1) {
+											if (Menus[id].Items.get(cur).SubMenu == -1) {
 												//E.What = evCommand;
 												//E.Msg.View = GUI.frames.Active;
-												//E.Msg.Command = Menus[id].Items[cur].Cmd;
+												//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
 												//TMsgEvent ne = new TMsgEvent(evCommand);
 												//ne.View = GUI.frames.Active;
-												//ne.Command = Menus[id].Items[cur].Cmd;
+												//ne.Command = Menus[id].Items.get(cur).Cmd;
 												//E = ne;
 
-												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 												abort = 1;
 											} else {
 												dovert = true;
@@ -425,11 +432,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 										if (p.vert!=0) {
 											int i = GetVPosItem(p.id, p.w, mE.X - p.x, mE.Y - p.y);
 											if (i != -1)
-												if (Menus[p.id].Items[i].SubMenu == id) break;
+												if (Menus[p.id].Items.get(i).SubMenu == id) break;
 										} else {
 											int i = GetHPosItem(p.id, mE.X);
 											if (i != -1)
-												if (Menus[p.id].Items[i].SubMenu == id) break;
+												if (Menus[p.id].Items.get(i).SubMenu == id) break;
 										}
 										first = 0;
 									}
@@ -467,11 +474,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							if (p.vert!=0) {
 								int i = GetVPosItem(p.id, p.w, mE.X - p.x, mE.Y - p.y);
 								if (i != -1)
-									if (Menus[p.id].Items[i].SubMenu == id) break;
+									if (Menus[p.id].Items.get(i).SubMenu == id) break;
 							} else {
 								int i = GetHPosItem(p.id, mE.X);
 								if (i != -1)
-									if (Menus[p.id].Items[i].SubMenu == id) break;
+									if (Menus[p.id].Items.get(i).SubMenu == id) break;
 							}
 							abort = -1;
 						}
@@ -484,14 +491,14 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						abort = -3;
 					}
 				} else {
-					if (Menus[id].Items[cur].Name != null &&
-							Menus[id].Items[cur].SubMenu == -1)
+					if (Menus[id].Items.get(cur).Name != null &&
+							Menus[id].Items.get(cur).SubMenu == -1)
 					{
 						//E.What = evCommand;
 						//E.Msg.View = GUI.frames.Active;
-						//E.Msg.Command = Menus[id].Items[cur].Cmd;
-						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items[cur].Cmd);
-						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+						//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
+						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items.get(cur).Cmd);
+						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 						abort = 1;
 					}
 				}
@@ -536,13 +543,13 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		if (sub != 0) {
 			int i;
 
-			for (i = 0; i < Menus[id].Count; i++) {
-				if (Menus[id].Items[i].Name!=null) 
+			for (i = 0; i < Menus[id].Items.size(); i++) {
+				if (Menus[id].Items.get(i).Name!=null) 
 				{
-					int amppos = Menus[id].Items[i].Name.indexOf('&');
+					int amppos = Menus[id].Items.get(i).Name.indexOf('&');
 					if(amppos >= 0)
 					{
-						char c = Menus[id].Items[i].Name.charAt(amppos+1);
+						char c = Menus[id].Items.get(i).Name.charAt(amppos+1);
 						if( Character.toUpperCase(c) == Character.toUpperCase(sub) )
 						{
 							cur = i;
@@ -550,7 +557,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						}
 					}
 					/*
-					char []o = strchr(Menus[id].Items[i].Name, '&');
+					char []o = strchr(Menus[id].Items.get(i).Name, '&');
 					if (o)
 						if (Character.toUpperCase(o[1]) == Character.toUpperCase(sub)) {
 							cur = i;
@@ -571,9 +578,9 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 			DrawHMenu(0, 0, id, cur);
 			if (dovert!=0) {
 				if (cur != -1) {
-					if (Menus[id].Items[cur].SubMenu != -1) {
+					if (Menus[id].Items.get(cur).SubMenu != -1) {
 						rx = ExecVertMenu(GetHOfsItem(id, cur) - 2, 1,
-								Menus[id].Items[cur].SubMenu, E, top);
+								Menus[id].Items.get(cur).SubMenu, E, top);
 						if (rx == 1) {
 							abort = 1;
 							continue;
@@ -598,15 +605,15 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				break;
 			case evKeyDown:
 				switch (KeyDefs.kbCode(((TKeyEvent)E).Code)) {
-				case kbEnd: cur = Menus[id].Count;
+				case kbEnd: cur = Menus[id].Items.size();
 				case kbLeft:
 					dovert = 1;
 					{
 						int x = cur;
 						do {
 							cur--;
-							if (cur < 0) cur = Menus[id].Count - 1;
-						} while (cur != x && Menus[id].Items[cur].Name == null);
+							if (cur < 0) cur = Menus[id].Items.size() - 1;
+						} while (cur != x && Menus[id].Items.get(cur).Name == null);
 					}
 					break;
 				case kbHome: cur = -1;
@@ -616,19 +623,19 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						int x = cur;
 						do {
 							cur++;
-							if (cur >= Menus[id].Count) cur = 0;
-						} while (cur != x && Menus[id].Items[cur].Name == null);
+							if (cur >= Menus[id].Items.size()) cur = 0;
+						} while (cur != x && Menus[id].Items.get(cur).Name == null);
 					}
 					break;
 				case kbEsc: abort = -1; dovert = 0; break;
 				case kbEnter:
 					if (cur != -1) {
-						if (Menus[id].Items[cur].SubMenu == -1) {
+						if (Menus[id].Items.get(cur).SubMenu == -1) {
 							//E.What = evCommand;
 							//E.Msg.View = GUI.frames.Active;
-							//E.Msg.Command = Menus[id].Items[cur].Cmd;
+							//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
-							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 							
 							abort = 1;
 						} else {
@@ -643,17 +650,17 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 						cc = Character.toUpperCase((char)(((TKeyEvent)E).Code & 0xFF));
 
-						for (i = 0; i < Menus[id].Count; i++) {
-							if (Menus[id].Items[i].Name != null) 
+						for (i = 0; i < Menus[id].Items.size(); i++) {
+							if (Menus[id].Items.get(i).Name != null) 
 							{
-								int amppos = Menus[id].Items[i].Name.indexOf('&');
-								char c = Menus[id].Items[i].Name.charAt(amppos+1);
+								int amppos = Menus[id].Items.get(i).Name.indexOf('&');
+								char c = Menus[id].Items.get(i).Name.charAt(amppos+1);
 								if(Character.toUpperCase(c) == cc )
 								{
 									cur = i;
 									if (cur != -1) {
-										if (Menus[id].Items[cur].SubMenu == -1) {
-											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+										if (Menus[id].Items.get(cur).SubMenu == -1) {
+											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 											abort = 1;
 										} else {
 											dovert = 1;
@@ -663,17 +670,17 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 								}
 								
 								/*
-								char []o = strchr(Menus[id].Items[i].Name, '&');
+								char []o = strchr(Menus[id].Items.get(i).Name, '&');
 								if (o)
 									if (Character.toUpperCase(o[1]) == cc) {
 										cur = i;
 										if (cur != -1) {
-											if (Menus[id].Items[cur].SubMenu == -1) {
+											if (Menus[id].Items.get(cur).SubMenu == -1) {
 												//E.What = evCommand;
 												//E.Msg.View = GUI.frames.Active;
-												//E.Msg.Command = Menus[id].Items[cur].Cmd;
+												//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
-												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 
 												abort = 1;
 											} else {
@@ -729,20 +736,20 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				if (cur == -1)
 					abort = -1;
 				else {
-					if (Menus[id].Items[cur].Name != null &&
-							Menus[id].Items[cur].SubMenu == -1) 
+					if (Menus[id].Items.get(cur).Name != null &&
+							Menus[id].Items.get(cur).SubMenu == -1) 
 					{
 						/*
 						TMsgEvent me = new TMsgEvent(evCommand);
 						//E.What = evCommand;
 						//E.Msg.View = GUI.frames.Active;
-						//E.Msg.Command = Menus[id].Items[cur].Cmd;
+						//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 						me.View = GUI.frames.Active;
-						me.Command = Menus[id].Items[cur].Cmd;
+						me.Command = Menus[id].Items.get(cur).Cmd;
 
 						E = me;
 						 */
-						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items[cur].Cmd);
+						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 
 						abort = 1;
 					}
@@ -774,9 +781,11 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 		int n = MenuCount;
 
+		Menus[n] = new mMenu();
+		
 		Menus[n].Name = Name;
-		Menus[n].Count = 0;
-		Menus[n].Items = null;
+		//Menus[n].Count = 0;
+		//Menus[n].Items = null;
 
 		MenuCount++;
 		return n;
@@ -789,15 +798,27 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		//Menus[menu].Items = (mItem *) realloc(Menus[menu].Items,				sizeof(mItem) * (Menus[menu].Count + 1));
 		Menus = Arrays.copyOf(Menus, MenuCount + 1);
 
-		int n = Menus[menu].Count;
+		//int n = Menus[menu].Count;
 
+		//if( Menus[menu].Items[n] == null ) 
+		mItem i = new mItem();
+				
+		i.SubMenu = -1;
+		i.Name = Name;
+		i.Arg = null;
+		i.Cmd = -1;
+		
+		/*
 		Menus[menu].Items[n].SubMenu = -1;
 		Menus[menu].Items[n].Name = Name;
 		Menus[menu].Items[n].Arg = null;
 		Menus[menu].Items[n].Cmd = -1;
-
-		Menus[menu].Count++;
-		return n;
+		*/
+		
+		Menus[menu].Items.add(i);
+		
+		//Menus[menu].Count++;
+		return Menus[menu].Items.size() - 1;//n;
 	}
 
 	static int NewSubMenu(int menu, String Name, int submenu, int Type) {
@@ -805,14 +826,16 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 		//Menus[menu].Items = (mItem *) realloc(Menus[menu].Items,				sizeof(mItem) * (Menus[menu].Count + 1));
 		Menus = Arrays.copyOf(Menus, MenuCount + 1);
-		int n = Menus[menu].Count;
+		int n = Menus[menu].Items.size();
 
-		Menus[menu].Items[n].SubMenu = submenu;
-		Menus[menu].Items[n].Name = Name;
-		Menus[menu].Items[n].Arg = null;
-		Menus[menu].Items[n].Cmd = Type;
+		mItem i = new mItem();
+		
+		i.SubMenu = submenu;
+		i.Name = Name;
+		i.Arg = null;
+		i.Cmd = Type;
 
-		Menus[menu].Count++;
+		Menus[menu].Items.add(i);
 		return n;
 	}
 

@@ -492,19 +492,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs
 		return cp.c.getLenAsString(len);
 	}
 
-	static long GetNum(CurPos cp) {
+	static int GetNum(CurPos cp) {
 		int n0 = cp.c.urpp();
 		int n1 = cp.c.urpp();
 		int n2 = cp.c.urpp();
 		int n3 = cp.c.urpp();
-		long num =
+		int num =
 				(n3 << 24) +
 				(n2 << 16) +
 				(n1 << 8) +
 				n0;
 
-		if ((n3 > 127))
-			num = num | (~0xFFFFFFFFL);
+		//if ((n3 > 127))			num = num | (~0xFFFFFFFFL);
 
 		return num;
 	}
@@ -513,18 +512,20 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs
 		//STARTFUNC("ReadCommands");
 		// LOG << "Name = " << Name << ENDLINE;
 
-		Obj obj;
-		long Cmd = -1; // TODO NewCommand(Name);
-		long cmdno;
+		//long Cmd = ExMacro.NewCommand(Name);
 
-		obj = GetObj(cp);
+		Obj obj = GetObj(cp);
 		if ( obj.type != CF_INT) return -1;
-		cmdno = GetNum(cp);
-		if (cmdno != (Cmd | CMD_EXT)) {
-			System.err.printf("Bad Command map %s . %d != %d\n", Name, Cmd, cmdno);
-			// TODO return -1;
-		}
-
+		
+		int cmdno = GetNum(cp);
+		/*if (cmdno != (Cmd | CMD_EXT)) {
+			System.err.printf("Bad Command map '%s' -> %d != %d\n", Name, Cmd | CMD_EXT, cmdno);
+			return -1;
+		}*/
+		
+		int Cmd = cmdno;
+		ExMacro.NewCommand(Name, Cmd);
+		
 		while(true) 
 		{
 			obj = GetObj(cp); 
@@ -535,18 +536,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs
 			case CF_COMMAND:
 			{
 				//              String s;
-				long cnt;
-				long ign;
-				long cmd;
+				//int cnt;
+				//long ign;
+				//long cmd;
 
 				//                if ((s = GetCharStr(cp, len)) == 0) return -1;
-				cmd = GetNum(cp);
+				int cmd = GetNum(cp);
 				obj = GetObj(cp); 
 				if (obj.type != CF_INT) return -1;
-				cnt = GetNum(cp);
+				int cnt = GetNum(cp);
 				obj = GetObj(cp); 
 				if (obj.type != CF_INT) return -1;
-				ign = GetNum(cp);
+				int ign = GetNum(cp);
 
 				//                if (cmd != CmdNum(s)) {
 				//                    fprintf(stderr, "Bad Command Id: %s . %d\n", s, cmd);
@@ -561,29 +562,30 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs
 					}
 				}
 				*/
+				ExMacro.AddCommand(Cmd, cmd, cnt, ign);
 			}
 			break;
 			case CF_STRING:
 			{
 				String s = GetCharStr(cp, obj.len);
-				// TODO if (AddString(Cmd, s) == 0) return -1;
+				if (ExMacro.AddString(Cmd, s) == 0) return -1;
 			}
 			break;
 			case CF_INT:
 			{
 				long num = GetNum(cp);
-				// TODO if (AddNumber(Cmd, num) == 0) return -1;
+				if (ExMacro.AddNumber(Cmd, num) == 0) return -1;
 			}
 			break;
 			case CF_VARIABLE:
 			{
-				long num = GetNum(cp);
+				int num = GetNum(cp);
 
-				// TODO if (AddVariable(Cmd, num) == 0) return -1;
+				if (ExMacro.AddVariable(Cmd, num) == 0) return -1;
 			}
 			break;
 			case CF_CONCAT:
-				// TODO if (AddConcat(Cmd) == 0) return -1;
+				if (ExMacro.AddConcat(Cmd) == 0) return -1;
 				break;
 			case CF_END:
 				return (int) Cmd;
@@ -623,7 +625,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs
 					obj = GetObj(cp);
 					if (obj.type != CF_MENUSUB) return -1;
 					if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
-					UpMenu.Menus[menu].Items[item].Cmd = Cmd + 65536;
+					UpMenu.Menus[menu].Items.get(item).Cmd = Cmd + 65536;
 				}
 			}
 			break;

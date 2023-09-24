@@ -1,12 +1,14 @@
 package ru.dz.jfte;
 
 public class CommandType {
-    int type;
-    short repeat;
-    short ign;
+    int type = -1;
+    //short repeat;
+    int repeat = 0;
+    //short ign;
+    int ign = 0;
 
-    long num;
-    String string;
+    long num = 0;
+    String string = null;
 
 
     static final int CT_COMMAND  = 0;
