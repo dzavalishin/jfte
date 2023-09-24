@@ -338,7 +338,7 @@ public class Console implements ModeDefs, GuiDefs
 
 
 
-	static void DieError(int rc, String msg, Object... p) {
+	public static void DieError(int rc, String msg, Object... p) {
 		System.err.printf(msg,p);
 		System.exit(rc);
 	}

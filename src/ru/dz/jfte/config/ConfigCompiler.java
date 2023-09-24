@@ -62,9 +62,9 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    System.exit(xerrno);
 	}*/
 
-	void Fail(CurPos cp, String fmt, String... s) {
+	void Fail(CurPos cp, String fmt, Object... s) {
 
-		String b = String.format(fmt, (Object [])s);
+		String b = String.format(fmt, s);
 		
 	    System.err.printf("%s:%d: Error: %s\n", cp.name, cp.line, b);
 	    System.exit(1);
@@ -123,7 +123,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	public static void main(String []argv) {
 	    String Source;
 	    String Target;
-	    String p = argv[1];
+	    //String p = argv[1];
 	    int n = 0;
 	    int argc = argv.length;
 
@@ -284,7 +284,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        PutString(cp, CF_STRING, FSource[0]);
 	    }
 
-	    if (LoadFile(StartDir[0], Source, 0) != 0) {
+	    if (!LoadFile(StartDir[0], Source, 0)) {
 	    	//System.err.printf( "\nCompile failed\n");
 	        //cleanup(1);
 	    	throw new IOException("Compile failed");
@@ -501,7 +501,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	            break;
 	        case '%':
 	            cp.c.shift(1);
-	            if ( isKeyWord( cp, "define(") {
+	            if ( isKeyWord( cp, "define(") ) {
 
 	                while (cp.c.hasCurrent() && cp.c.ur(0) != ')') {
 	                    String w = GetWord(cp);
@@ -521,7 +521,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    GetWord(cp, w);
 	                    UndefWord(w);
 	                }*/
-	            } else if (isKeyWord( cp, "if(") {
+	            } else if (isKeyWord( cp, "if(") ) {
 	               // Word w;
 	                int wasWord = 0;
 
@@ -534,8 +534,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    String w = GetWord(cp);
 	                    if (DefinedWord(w))
 	                        wasWord = 1;
-	                    if (neg)
-	                        wasWord = wasWord ? 0 : 1;
+	                    if (neg!=0)
+	                        wasWord = wasWord != 0 ? 0 : 1;
 	                    /*if (wasWord)
 	                        printf("yes '%s'\n", w);
 	                    else
@@ -547,7 +547,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                        cp.c.shift(1);
 	                }
 	                cp.c.shift(1);
-	                if (!wasWord) {
+	                if (0==wasWord) {
 	                    int nest = 1;
 	                    while (cp.c.hasCurrent()) {
 	                        if (cp.c.ur(0) == '\n') {
@@ -665,18 +665,18 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                case 'a': cp.c.w(0,  (byte) 0x07); break;
 	                case 'x':
 	                    cp.c.shift(1);
-	                    if (!cp.c.hasCurrent()) return 0;
+	                    if (!cp.c.hasCurrent()) return null;
 	                    if (cp.c.ur(0) >= '0' && cp.c.ur(0) <= '9') n = cp.c.ur(0) - '0';
 	                    else if (cp.c.ur(0) >='a' && cp.c.ur(0) <= 'f') n = cp.c.ur(0) - 'a' + 10;
 	                    else if (cp.c.ur(0) >='A' && cp.c.ur(0) <= 'F') n = cp.c.ur(0) - 'A' + 10;
-	                    else return 0;
+	                    else return null;
 	                    cp.c.shift(1);
-	                    if (cp.c == cp.z) cp.c--;
+	                    if (!cp.c.hasCurrent()) cp.c.shift(-1); // cp.c--;
 	                    else if (cp.c.ur(0) >= '0' && cp.c.ur(0) <= '9') n = n * 16 + cp.c.ur(0) - '0';
 	                    else if (cp.c.ur(0) >= 'a' && cp.c.ur(0) <= 'f') n = n * 16 + cp.c.ur(0) - 'a' + 10;
 	                    else if (cp.c.ur(0) >= 'A' && cp.c.ur(0) <= 'F') n = n * 16 + cp.c.ur(0) - 'A' + 10;
-	                    else cp.c--;
-	                    cp.c.w(0,  n);
+	                    else cp.c.shift(-1); //cp.c--;
+	                    cp.c.w(0,  (byte) n);
 	                    break;
 	                }
 	            }
@@ -710,7 +710,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        value = value * 10 + (cp.c.ur(0) - '0');
 	        cp.c.shift(1);
 	    }
-	    return neg ? -value : value;
+	    return neg != 0 ? -value : value;
 	}
 
 	int CmdNum(String Cmd) 
@@ -820,7 +820,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    return 0;
 	}
 
-	int ParseConfigFile(CurPos cp) {
+	int ParseConfigFile(CurPos cp) throws IOException {
 		String w = "";
 	    String s = null;
 	    int p = 0;
@@ -848,8 +848,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    PutNull(cp, CF_END);
 	                }
 	                break;
+	                
 	            case K_MENU:
-
 	                {
 	                	String MenuName;
 	                    //int menu = -1, item = -1;
@@ -938,6 +938,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    PutNull(cp, CF_END);
 	                }
 	                break;
+	                
 	            case K_EVENTMAP:
 	                {
 	                    if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
@@ -948,7 +949,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    if (Parse(cp) == P_COLON) {
 	                        GetOp(cp, P_COLON);
 	                        if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                        if (GetWord(cp, UpMode) != 0) Fail(cp, "Parse failed");
+	                        if ((UpMode = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    }
 	                    PutString(cp, CF_PARENT, UpMode);
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
@@ -960,7 +961,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                        if (p == P_EOF) Fail(cp, "Unexpected EOF");
 	                        if (p != P_WORD) Fail(cp, "Syntax error");
 
-	                        if (GetWord(cp, w) != 0) Fail(cp, "Parse failed");
+	                        if ((w = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                        switch (Lookup(CfgKW, w)) {
 	                        case K_KEY: // mode::key
 	                            if (Parse(cp) != P_KEYSPEC) Fail(cp, "'[' expected");
@@ -1040,14 +1041,14 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    long LastState = -1;
 
 	                    if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                    if (GetWord(cp, ObjName) != null) Fail(cp, "Parse failed");
+	                    if ((ObjName = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    PutString(cp, CF_COLORIZE, ObjName);
 
 	                    //UpMode[0] = 0;
 	                    if (Parse(cp) == P_COLON) {
 	                        GetOp(cp, P_COLON);
 	                        if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                        if (GetWord(cp, UpMode) != null) Fail(cp, "Parse failed");
+	                        if ((UpMode = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    }
 	                    PutString(cp, CF_PARENT, UpMode);
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
@@ -1059,7 +1060,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                        if (p == P_EOF) Fail(cp, "Unexpected EOF");
 	                        if (p != P_WORD) Fail(cp, "Syntax error");
 
-	                        if (GetWord(cp, w) != null) Fail(cp, "Parse failed");
+	                        if ((w  = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                        switch (Lookup(CfgKW, w)) {
 	                        case K_COLOR: // mode::color
 	                            if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
@@ -1341,14 +1342,14 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	            case K_MODE: // mode::
 	                {
 	                    if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                    if (GetWord(cp, ObjName) != null) Fail(cp, "Parse failed");
+	                    if ((ObjName = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    PutString(cp, CF_MODE, ObjName);
 
 	                    //UpMode[0] = 0;
 	                    if (Parse(cp) == P_COLON) {
 	                        GetOp(cp, P_COLON);
 	                        if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                        if (GetWord(cp, UpMode) != null) Fail(cp, "Parse failed");
+	                        if ((UpMode = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    }
 	                    PutString(cp, CF_PARENT, UpMode);
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
@@ -1360,7 +1361,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                        if (p == P_EOF) Fail(cp, "Unexpected EOF");
 	                        if (p != P_WORD) Fail(cp, "Syntax error");
 
-	                        if (GetWord(cp, w) != null) Fail(cp, "Parse failed");
+	                        if ((w = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                        //switch (Lookup(CfgKW, w)) {
 	                        //default:  // mode::
 	                        if (Parse(cp) != P_ASSIGN) Fail(cp, "'=' expected");
@@ -1407,27 +1408,27 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	            case K_OBJECT:
 	                {
 	                    if (Parse(cp) != P_WORD) Fail(cp, "Syntax error");
-	                    if (GetWord(cp, ObjName) != null) Fail(cp, "Parse failed");
+	                    if ((ObjName = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
 	                    GetOp(cp, P_OPENBRACE);
 
 	                    PutString(cp, CF_OBJECT, ObjName);
 
-	                    while (1) {
+	                    while (true) {
 	                        p = Parse(cp);
 	                        if (p == P_CLOSEBRACE) break;
 	                        if (p == P_EOF) Fail(cp, "Unexpected EOF");
 	                        if (p != P_WORD) Fail(cp, "Syntax error");
 
-	                        if (GetWord(cp, w) != null) Fail(cp, "Parse failed");
+	                        if ((w = GetWord(cp)) == null) Fail(cp, "Parse failed");
 	                        switch (Lookup(CfgKW, w)) {
 	                        case K_COLOR: // mode::color
 	                            if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
 	                            GetOp(cp, P_OPENBRACE);
 	                            PutNull(cp, CF_COLOR);
 
-	                            while (1) {
-	                                String sname, *svalue;
+	                            while (true) {
+	                                String sname, svalue;
 
 	                                if (Parse(cp) == P_CLOSEBRACE) break;
 	                                if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
@@ -1551,7 +1552,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    if (Parse(cp) != P_OPENBRACE) Fail(cp, "'{' expected");
 	                    GetOp(cp, P_OPENBRACE);
 
-//	                    while (true) {
+	                    while (true) {
 	                        String sname, svalue;
 
 	                        if (Parse(cp) == P_CLOSEBRACE) break;
@@ -1564,7 +1565,9 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                        if (Parse(cp) != P_STRING) Fail(cp, "String expected");
 	                        svalue = GetString(cp);
 	                        svalue = GetColor(cp, svalue);
-	                        assert(DefineColor(sname, svalue) == 1);
+	                        
+	                        DefineColor(sname, svalue);
+	                        
 	                        if (Parse(cp) != P_CLOSEBRACE) Fail(cp, "'}' expected");
 	                        GetOp(cp, P_CLOSEBRACE);
 	                        if (Parse(cp) != P_COMMA)
@@ -1583,7 +1586,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	                    if (Parse(cp) != P_STRING) Fail(cp, "String expected");
 	                    fn = GetString(cp);
 
-	                    if (LoadFile(cp.name, fn) != 0) Fail(cp, "Include of file '%s' failed", fn);
+	                    if (!LoadFile(cp.name, fn, 1)) Fail(cp, "Include of file '%s' failed", fn);
 	                    if (Parse(cp) != P_EOS) Fail(cp, "';' expected");
 	                    GetOp(cp, P_EOS);
 	                }
@@ -1598,7 +1601,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    }
 	}
 
-	int LoadFile(String WhereName, String CfgName, int Level) {
+	boolean LoadFile(String WhereName, String CfgName, int Level) {
 	    int rc;
 	    //String buffer = 0;
 	    //struct stat statbuf;
@@ -1716,7 +1719,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	        Fail(cp, "Parse failed");
 	    }
 	    //free(buffer);
-	    return rc;
+	    return rc == 0;
 	}
 	
 	
