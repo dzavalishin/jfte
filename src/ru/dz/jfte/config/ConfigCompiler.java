@@ -2,6 +2,7 @@ package ru.dz.jfte.config;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -86,7 +87,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    output.write(l0);
 	    output.write(l1);
 	    
-	    output.write(obj);
+	    if( null != obj ) output.write(obj);
 	    /*
 	    if (fwrite(&tag, 1, 1, output) != 1 ||
 	        fwrite(l, 2, 1, output) != 1 ||
@@ -158,9 +159,10 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 
 	private void compile(String Source, String Target) 
 	{
+		Target = new File(Target).getAbsolutePath();
 	    Console.JustDirectory(Target, XTarget);
 	    XTarget[0] = Console.Slash(XTarget[0], 1);
-	    XTarget[0] += String.format( "cfte%ld.tmp", 33 );// TODO (long)getpid());
+	    XTarget[0] += String.format( "cfte%d.tmp", 33 );// TODO (long)getpid());
 	    
 		//try(BufferedWriter o = Files.newBufferedWriter(Path.of(XTarget[0]), Main.charset))
 	    try(BufferedOutputStream o = new BufferedOutputStream(new FileOutputStream(XTarget[0]));)
