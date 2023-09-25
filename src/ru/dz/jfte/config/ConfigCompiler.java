@@ -107,7 +107,9 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	}
 
 	void PutString(CurPos cp, int xtag, String str) throws IOException {
-	    PutObject(cp, xtag, slen(str), str.getBytes());
+		//byte[] b = str.getBytes(Main.charset);
+		byte[] b = str.getBytes(); // TODO utf-8?
+	    PutObject(cp, xtag, b.length, b);
 	}
 
 	void PutNumber(CurPos cp, int xtag, long num) throws IOException {

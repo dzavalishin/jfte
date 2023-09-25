@@ -185,7 +185,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			ConfigSourcePath = p;
 		}
 
-		while(cp.c.hasCurrent()) 
+		//while(cp.c.hasCurrent()) 
+		while(true) 
 		{
 			obj = GetObj(cp);
 			if( obj.type == 0xFF)
@@ -312,7 +313,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				ReadObject(cp, ObjName);
 			}
 			break;
-			case (byte) CF_EOF:
+			case CF_EOF:
 				return;
 
 			default:
