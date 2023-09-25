@@ -8,19 +8,19 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
 	String Path;
 	FileInfo [] Files = null;
-	int FCount;
-	int SearchLen;
-	String SearchName;
+	int FCount = 0;
+	int SearchLen = 0;
+	String SearchName = null;
 	int SearchPos[];
 
 
 
-
+	/*
 	static EDirectory newEDirectory(int createFlags, EModel ARoot, String aPath) 
 	{
 		EModel []ARootP = {ARoot};
 		return new EDirectory( createFlags, ARootP, aPath);
-	}
+	} */
 
 	EDirectory(int createFlags, EModel []ARoot, String aPath) 
 	{
@@ -28,8 +28,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
 		String [] XPath = {""};
 
-		FCount = 0;
-		SearchLen = 0;
+		//FCount = 0;
+		//SearchLen = 0;
 		Console.ExpandPath(aPath, XPath);
 		Path = Console.Slash(XPath[0], 1);
 		RescanList();
@@ -149,7 +149,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 					FCount, Console.ConGetDrawChar(DCH_V),
 					DirCount, Console.ConGetDrawChar(DCH_V),
 					SizeCount, Console.ConGetDrawChar(DCH_V),
-					Dir);
+					Dir[0]);
 			SetTitle(CTitle);
 		}
 		// TODO qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);

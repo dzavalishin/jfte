@@ -226,6 +226,8 @@ public class Main implements MainConst
 		Console.start();
 		//STARTFUNC("main");
 
+		//EModel.ActiveModel[0] = null; // strange...
+		
 		EGUI g = new EGUI( argv, Config.ScreenSizeX, Config.ScreenSizeY);
 		if (GUI.gui == null || g == null)
 			Console.DieError(1, "Failed to initialize display\n");

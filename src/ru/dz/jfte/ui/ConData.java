@@ -8,8 +8,8 @@ import ru.dz.jfte.PCell;
 
 public class ConData 
 {
-	static int xCell = 20;
-	static int yCell = 30;
+	static int xCell = 14;
+	static int yCell = 18;
 	
 	int xSize = 80;
 	int ySize = 25;
@@ -27,9 +27,10 @@ public class ConData
 	
 	public void paint(Graphics2D g) 
 	{
-		//g.setFont(g.getFont().deriveFont(30));
+		g.setFont(g.getFont().deriveFont(40));
 		
 		for( int y = 0; y < ySize; y++ )
+		{
 			for( int x = 0; x < xSize; x++ )
 			{
 				int fb = colors[x][y];
@@ -38,17 +39,25 @@ public class ConData
 				Color fg = map[ fb & 0xF];
 				Color bg = map[ (fb >> 4) & 0xF];
 
+				int xp = (x+0)*xCell;
+				int yp = (y+1)*yCell;
+				
 				g.setColor(bg);
 				g.setColor(Color.black); // TODO test
 				g.fillRect(x*xCell, y*yCell, xCell, yCell);
 				
 				g.setColor(fg);				
-				g.drawString(""+ch, x*xCell, y*yCell);
+				g.setColor(Color.yellow); // TODO test
+				g.drawString(""+ch, xp, yp);
 				
 				g.setColor(Color.darkGray); // TODO test
-				g.drawRect(x*xCell, y*yCell, xCell, yCell);
+				//g.drawRect(x*xCell, y*yCell, xCell, yCell);
 				//g.drawLine(x, y, x, y);
+				
+				System.out.print(ch);
 			}
+			System.out.print('\n');
+		}
 	}
 	
 	

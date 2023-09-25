@@ -9,7 +9,7 @@ import ru.dz.jfte.ui.ConFrame;
 public class JavaConsole implements GuiDefs, EventDefs
 {
 	private ConData cd = new ConData();
-	ConCanvas cc = new ConCanvas(cd );
+	ConCanvas cc = new ConCanvas( cd );
 	private ConFrame cf;
 	private boolean cursorVisible = true;
 	Point cursorPos = new Point(0, 0);
@@ -38,7 +38,8 @@ public class JavaConsole implements GuiDefs, EventDefs
 		{
 			for( int j = 0; j < w; j ++)
 				cd.putc( x+j, y+i, cell.r(j));
-		}		
+		}
+		cc.repaint();
 	}
 
 	// copy same char all over the box
@@ -49,6 +50,7 @@ public class JavaConsole implements GuiDefs, EventDefs
 			for( int j = 0; j < w; j ++)
 				cd.putc( x+j, y+i, cell.r(0));
 		}		
+		cc.repaint();
 	}
 	
 	
@@ -59,6 +61,7 @@ public class JavaConsole implements GuiDefs, EventDefs
 			for( int j = 0; j < w; j ++)
 				cd.putc( x+j, y+i, cell.r(j + i*w));
 		}		
+		cc.repaint();
 	}
 
 	public void getBox(int x, int y, int w, int h, PCell cell) {
@@ -70,6 +73,7 @@ public class JavaConsole implements GuiDefs, EventDefs
 				cell.w(j + i*w, ch);
 			}
 		}		
+		cc.repaint();
 	}
 
 	
@@ -80,6 +84,7 @@ public class JavaConsole implements GuiDefs, EventDefs
 			for( int j = 0; j < w; j ++)
 				cd.putc( x+j, y+i, ch, attr);
 		}		
+		cc.repaint();
 	}
 	
 	public void scroll(int way, int x, int y, int w, int h, int fill, int count) {
@@ -104,11 +109,12 @@ public class JavaConsole implements GuiDefs, EventDefs
 			
 		}
 
+		cc.repaint();
 	}
 
 	public void drawCursor(int i) {
 		cursorVisible  = i != 0;
-		
+		cc.repaint();		
 	}
 
 	public void setTitle(String string) {
@@ -117,7 +123,8 @@ public class JavaConsole implements GuiDefs, EventDefs
 
 	public void setCursorPos(int x, int y) {
 		cursorPos = new Point(x, y);		
-	}
+		cc.repaint();
+}
 
 	public void queryCursorPos(int[] x, int[] y) {
 		x[0] = cursorPos.x;

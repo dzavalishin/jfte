@@ -17,13 +17,13 @@ public class EFrame extends GFrame implements GuiDefs, ModeDefs
         GxView V = (GxView)Active;
 
         if (V!=null) {
-            if (CModel != EModel.ActiveModel && EModel.ActiveModel!=null) {
+            if (CModel != EModel.ActiveModel[0] && EModel.ActiveModel[0]!=null) {
                 String[] Title = {""}; //fte: ";
                 String[] STitle = {""}; //"fte: ";
 
-                EModel.ActiveModel.GetTitle(Title,STitle);
+                EModel.ActiveModel[0].GetTitle(Title,STitle);
                 ConSetTitle(Title[0], STitle[0]);
-                CModel = EModel.ActiveModel;
+                CModel = EModel.ActiveModel[0];
             }
         }
         super.Update();

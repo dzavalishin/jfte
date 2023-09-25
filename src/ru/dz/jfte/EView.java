@@ -14,6 +14,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	String CurMsg;
 
 
+	//static final EView [] ActiveView = {null};
 	static EView ActiveView = null;
 
 	EView(EModel AModel) {
@@ -97,7 +98,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 
 	void SetModel(EModel AModel) {
 		Model = AModel;
-		EModel.ActiveModel = Model;
+		EModel.ActiveModel[0] = Model;
 	}
 
 	void SelectModel(EModel AModel) {
@@ -110,7 +111,13 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		}
 	}
 
-	void SwitchToModel(EModel AModel) {
+	void SwitchToModel(EModel [] AModel)
+	{
+		SwitchToModel(AModel[0]); 
+	}
+	
+	void SwitchToModel(EModel AModel) 
+	{
 		if (Model != AModel) {
 			if (Model != null)
 				FocusChange(0);
@@ -476,7 +483,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 
 	ExResult ViewBuffers(ExState State) {
 		if (BufferView.BufferList == null) {
-			BufferView.BufferList = BufferView.newBufferView(0, EModel.ActiveModel);
+			BufferView.BufferList = new BufferView(0, EModel.ActiveModel);
 			SwitchToModel(BufferView.BufferList);
 		} else {
 			BufferView.BufferList.UpdateList();
@@ -503,8 +510,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 				MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
 				return ExResult.ErFAIL;
 			}
-			EModel [] am = {EModel.ActiveModel};
-			Buffer.Routines = new RoutineView(0, am, Buffer);
+			//EModel [] am = {EModel.ActiveModel};
+			Buffer.Routines = new RoutineView(0, EModel.ActiveModel, Buffer);
 			if (Buffer.Routines == null)
 				return ExResult.ErFAIL;
 		} else {
@@ -545,7 +552,10 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 			}
 		}
 		if (dir == null)
-			dir = EDirectory.newEDirectory(0, EModel.ActiveModel, XPath[0]);
+		{
+			//EModel [] rootPtr = {EModel.ActiveModel};
+			dir = new EDirectory(0, EModel.ActiveModel, XPath[0]);
+		}
 		SelectModel(dir);
 		return ExResult.ErOK;
 	}
@@ -611,7 +621,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 			if (Console.GetDefaultDirectory(Model, Dir) == 0)
 				return ExResult.ErFAIL;
 
-			msgs = EMessages.newEMessages(0, EModel.ActiveModel, Dir[0], Command);
+			msgs = new EMessages(0, EModel.ActiveModel, Dir[0], Command);
 		}
 		SwitchToModel(msgs);
 		return ExResult.ErOK;

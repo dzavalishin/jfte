@@ -16,12 +16,12 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     static BufferView BufferList = null;
     
 
-    
+    /*
     static BufferView newBufferView(int createFlags, EModel mm)  
     {
     	EModel [] m = {mm};
     	return new BufferView(createFlags,m);
-    }    
+    } */   
     
     BufferView(int createFlags, EModel []ARoot)  
     {
@@ -54,7 +54,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
 
     @Override
     void UpdateList() {
-        EModel B = ActiveModel;
+        EModel B = ActiveModel[0];
         //int No;
         //char s[512] = "";
         
@@ -63,17 +63,17 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         while (B != null) {
             BCount++;
             B = B.Next;
-            if (B == ActiveModel) break;
+            if (B == ActiveModel[0]) break;
         }
         //BList = (char **) malloc(sizeof(char *) * BCount);
         BList = new String[BCount];
-        B = ActiveModel;
+        B = ActiveModel[0];
         int No = 0;
         while (B!=null) {
             String s =B.GetInfo();
             BList[No++] = s;
             B = B.Next;
-            if (B == ActiveModel) break;
+            if (B == ActiveModel[0]) break;
             if (No >= BCount) break;
         }
         Count = BCount;
@@ -81,14 +81,14 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     }
         
     EModel GetBufferById(int No) {
-        EModel B = ActiveModel;
+        EModel B = ActiveModel[0];
         while (B != null) {
             if (No == 0) {
                 return B;
             }
             No--;
             B = B.Next;
-            if (B == ActiveModel) break;
+            if (B == ActiveModel[0]) break;
         }
         return null;
     }

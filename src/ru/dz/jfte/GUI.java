@@ -137,6 +137,9 @@ public abstract class GUI implements GuiDefs, EventDefs
 		if (E.What != evNone) {
 			NextEvent.What = evNone;
 		}
+
+		frames.Update();
+
 		if (E.What == evNone &&
 				( (E = Console.ConGetEvent(evMouse | evCommand | evKeyboard, 0, true)) == null ||
 				E.What == evNone )

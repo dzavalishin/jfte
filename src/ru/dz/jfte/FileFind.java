@@ -1,11 +1,9 @@
 package ru.dz.jfte;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.FilenameFilter;
-import java.nio.file.PathMatcher;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 
 public class FileFind //implements Closeable
 {
@@ -43,7 +41,6 @@ public class FileFind //implements Closeable
 	@Override
 	public void close() {
 
-		// TODO close
 	}*/
 
 	FileInfo FindNext() {

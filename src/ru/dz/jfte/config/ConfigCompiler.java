@@ -22,7 +22,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 {
 
 	public ConfigCompiler() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	
@@ -36,7 +36,6 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	//BufferedWriter output;
 	BufferedOutputStream output;
 
-	//FILE *output = 0;
 	int lntotal = 0;
 	long offset = -1;
 	long pos = 0;
@@ -164,7 +163,18 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 		Target = new File(Target).getAbsolutePath();
 	    Console.JustDirectory(Target, XTarget);
 	    XTarget[0] = Console.Slash(XTarget[0], 1);
-	    XTarget[0] += String.format( "cfte%d.tmp", 33 );// TODO (long)getpid());
+	    
+	    
+		try {
+			File tempFile = File.createTempFile(XTarget[0]+"cfte-", ".tmp");
+		    tempFile.deleteOnExit();
+
+		    XTarget[0] = tempFile.getAbsolutePath();
+		} catch (IOException e) {
+			e.printStackTrace();
+
+			XTarget[0] += String.format( "cfte%d.tmp", 33 );
+		}
 	    
 		//try(BufferedWriter o = Files.newBufferedWriter(Path.of(XTarget[0]), Main.charset))
 	    try(BufferedOutputStream o = new BufferedOutputStream(new FileOutputStream(XTarget[0]));)

@@ -157,8 +157,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         } else {
             CharMap = "["+Msg+"]";
         }
-        if (EModel.ActiveModel != null)
-            EModel.ActiveModel.Msg(S_INFO, CharMap);
+        if (EModel.ActiveModel[0] != null)
+            EModel.ActiveModel[0].Msg(S_INFO, CharMap);
     }
 
     void SetOverrideMap(EKeyMap aMap, String ModeName) {
@@ -234,7 +234,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                         Event.What = evNone;
                         return ;
                     } else {
-                        // TODO ExecMacro(view, key.Cmd);
+                        ExecMacro(view, key.Cmd);
                         Event.What = evNone;
                         return ;
                     }
@@ -244,6 +244,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             if (EventMap == null) break;
             map = EventMap.KeyMap;
         }
+// [dz] commented out in orig code        
 //        if (GetCharFromEvent(Event, &Ch))
 //            CharEvent(view, Event, Ch);
         SetMap(null, null);
@@ -340,12 +341,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
             if (EModel.ActiveModel == null && CreateNew!=0) {
                 EView V = EView.ActiveView;
-                EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, Path[0]);
+                //EModel[] rootPtr = {EModel.ActiveModel};
+                EModel m = new EDirectory(0, EModel.ActiveModel, Path[0]);
                 assert(m != null);
 
                 do {
                     V = V.Next;
-                    V.SelectModel(EModel.ActiveModel);
+                    V.SelectModel(EModel.ActiveModel[0]);
                 } while (V != EView.ActiveView);
                 return ExResult.ErFAIL;
             }
@@ -392,7 +394,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         view = new GxView(View.Parent);
         if (view == null)
             return ExResult.ErFAIL;
-        win = new EView(EModel.ActiveModel);
+        win = new EView(EModel.ActiveModel[0]);
         if (win == null)
             return ExResult.ErFAIL;
         edit = new ExModelView(win);
@@ -442,14 +444,14 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     }
 
     ExResult ExitEditor(EView View) {
-        EModel B = EModel.ActiveModel;
+        EModel B = EModel.ActiveModel[0];
 
         // check/save modified files
-        while (EModel.ActiveModel!=null) {
-            if (EModel.ActiveModel.CanQuit()) ;
+        while (EModel.ActiveModel[0]!=null) {
+            if (EModel.ActiveModel[0].CanQuit()) ;
             else {
-                View.SelectModel(EModel.ActiveModel);
-                int rc = EModel.ActiveModel.ConfQuit(View.MView.Win, 1);
+                View.SelectModel(EModel.ActiveModel[0]);
+                int rc = EModel.ActiveModel[0].ConfQuit(View.MView.Win, 1);
                 if (rc == -2) {
                     View.FileSaveAll();
                     break;
@@ -458,8 +460,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                     return ExResult.ErFAIL;
             }
 
-            EModel.ActiveModel = EModel.ActiveModel.Next;
-            if (EModel.ActiveModel == B)
+            EModel.ActiveModel[0] = EModel.ActiveModel[0].Next;
+            if (EModel.ActiveModel[0] == B)
                 break;
         }
 
@@ -479,8 +481,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         while (EModel.ActiveModel!=null) {
             if (View.Model.GetContext() == CONTEXT_ROUTINES)  // Never delete Routine models directly
             {
-                EModel.ActiveModel = EModel.ActiveModel.Next;
-                View.SelectModel(EModel.ActiveModel);
+                EModel.ActiveModel[0] = EModel.ActiveModel[0].Next;
+                View.SelectModel(EModel.ActiveModel[0]);
             }
 
             View.Model.DeleteRelated();  // delete related views first
@@ -501,7 +503,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     ExResult RunProgram(ExState State, GxView view) {
 
         if (EModel.ActiveModel!=null)
-            Console.SetDefaultDirectory(EModel.ActiveModel);
+            Console.SetDefaultDirectory(EModel.ActiveModel[0]);
 
         if (State.GetStrParam(EView.ActiveView, Cmd) == 0)
 			//try {
@@ -519,7 +521,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     ExResult RunProgramAsync(ExState State, GxView view) {
 
         if (EModel.ActiveModel!=null)
-        	Console.SetDefaultDirectory(EModel.ActiveModel);
+        	Console.SetDefaultDirectory(EModel.ActiveModel[0]);
 
         if (State.GetStrParam(EView.ActiveView, Cmd ) == 0)
 			//try {
@@ -591,7 +593,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         view = new GxView(frames);
         assert(view != null);
 
-        new EView(EModel.ActiveModel);
+        new EView(EModel.ActiveModel[0]);
         assert(EView.ActiveView != null);
 
         edit = new ExModelView(EView.ActiveView);
@@ -725,7 +727,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         //SSBuffer = new EBuffer(0, (EModel **)&SSBuffer, "Scrap");
         //assert(SSBuffer != null);
     	EBuffer.SSBuffer.BFI_SET(EBuffer.SSBuffer, BFI_Undo, 0); // disable undo for clipboard
-        EModel.ActiveModel = null;
+        EModel.ActiveModel[0] = null;
     }
 
     int InterfaceInit() {
@@ -835,10 +837,15 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 String [] Path = {null};
 
                 QuoteNext = false;
-                if (Console.ExpandPath(argv[Arg], Path) == 0 && Console.IsDirectory(Path[0])) {
-                    EModel m = EDirectory.newEDirectory(EModel.cfAppend, EModel.ActiveModel, Path[0]);
+                if (Console.ExpandPath(argv[Arg], Path) == 0 && Console.IsDirectory(Path[0])) 
+                {
+                    //EModel[] rootPtr = {EModel.ActiveModel};
+					//EModel m = EDirectory.newEDirectory(EModel.cfAppend, EModel.ActiveModel, Path[0]);
+                    EModel m = new EDirectory(EModel.cfAppend, EModel.ActiveModel, Path[0]);
                     assert(EModel.ActiveModel != null && m != null);
-                } else {
+                }
+                else 
+                {
                     if (LCount != 0)
                     	EBuffer.suspendLoads = 1;
                     if (!Console.MultiFileLoad(EModel.cfAppend, argv[Arg],
@@ -850,33 +857,33 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                     EBuffer.suspendLoads = 0;
 
                     if (GotoLine) {
-                        if (!((EBuffer )EModel.ActiveModel).Loaded)
-                            ((EBuffer )EModel.ActiveModel).Load();
+                        if (!((EBuffer )EModel.ActiveModel[0]).Loaded)
+                            ((EBuffer )EModel.ActiveModel[0]).Load();
                         if (GotoLine) {
                             GotoLine = false;
-                            ((EBuffer)EModel.ActiveModel).SetNearPosR(ColNum - 1, LineNum - 1);
+                            ((EBuffer)EModel.ActiveModel[0]).SetNearPosR(ColNum - 1, LineNum - 1);
                         } else {
                             int [] r = {0}, c = {0};
 
-                            if (FPosHistory.RetrieveFPos(((EBuffer)EModel.ActiveModel).FileName, r, c))
-                                ((EBuffer)EModel.ActiveModel).SetNearPosR(c[0], r[0]);
+                            if (FPosHistory.RetrieveFPos(((EBuffer)EModel.ActiveModel[0]).FileName, r, c))
+                                ((EBuffer)EModel.ActiveModel[0]).SetNearPosR(c[0], r[0]);
                         }
                         //EView.ActiveView.SelectModel(EModel.ActiveModel);
                     }
                     if (ReadOnly) {
                         ReadOnly = false;
-                        EBuffer b = (EBuffer)EModel.ActiveModel; 
+                        EBuffer b = (EBuffer)EModel.ActiveModel[0]; 
                         b.BFI_SET(b, BFI_ReadOnly, 1);
                     }
                 }
                 EBuffer.suspendLoads = 1;
-                EView.ActiveView.SelectModel(EModel.ActiveModel.Next);
+                EView.ActiveView.SelectModel(EModel.ActiveModel[0].Next);
                 EBuffer.suspendLoads = 0;
                 LCount++;
             }
         } 
         
-        EModel P = EModel.ActiveModel;
+        EModel P = EModel.ActiveModel[0];
         while (LCount-- > 0)
             P = P.Prev;
         EView.ActiveView.SelectModel(P);
@@ -904,15 +911,18 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         DoLoadDesktopOnEntry(argc, argv);
     #endif */
 
-        if (CmdLoadFiles(argv) == ExResult.ErFAIL)
-            return 3;
+        if (CmdLoadFiles(argv) == ExResult.ErFAIL)            return 3;
 
-        if (EModel.ActiveModel == null) {
+        if (EModel.ActiveModel[0] == null) {
    // #ifdef CONFIG_OBJ_DIRECTORY
-            String [] Path = {""};
+            String [] Path = {"."};
 
             Console.GetDefaultDirectory(null, Path);
-            EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, Path[0]);
+            
+            //EModel[] rootPtr = { EModel.ActiveModel };
+			//EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, Path[0]);
+            EModel m = new EDirectory(0, EModel.ActiveModel, Path[0]);
+            
             assert(EModel.ActiveModel != null && m != null);
             EView.ActiveView.SwitchToModel(EModel.ActiveModel);
     /*#else
@@ -956,7 +966,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     {        
         w.write(DESKTOP_VER);
         
-        EModel M = EModel.ActiveModel;
+        EModel M = EModel.ActiveModel[0];
         while (M != null) {
             switch(M.GetContext()) {
             case CONTEXT_FILE:
@@ -975,7 +985,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 break;
             }
             M = M.Next;
-            if (M == EModel.ActiveModel)
+            if (M == EModel.ActiveModel[0])
                 break;
         }
 
@@ -1036,19 +1046,20 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                     EBuffer.suspendLoads  = 0;
 
                 } else if (c0 == 'D') { // directory
-                    EModel m = EDirectory.newEDirectory(0, EModel.ActiveModel, line.substring(p));
+                    //EModel[] rootPtr = {EModel.ActiveModel};
+                    EModel m = new EDirectory(0, EModel.ActiveModel, line.substring(p));
                     assert(EModel.ActiveModel != null && m != null);
                 }
 
                 if (EModel.ActiveModel != null) {
                     if (ModelNo != -1) {
-                        if (EModel.FindModelID(EModel.ActiveModel, ModelNo) == null)
-                        	EModel.ActiveModel.ModelNo = ModelNo;
+                        if (EModel.FindModelID(EModel.ActiveModel[0], ModelNo) == null)
+                        	EModel.ActiveModel[0].ModelNo = ModelNo;
                     }
 
-                    if (EModel.ActiveModel != EModel.ActiveModel.Next) {
+                    if (EModel.ActiveModel[0] != EModel.ActiveModel[0].Next) {
                     	EBuffer.suspendLoads = 1;
-                        EView.ActiveView.SelectModel(EModel.ActiveModel.Next);
+                        EView.ActiveView.SelectModel(EModel.ActiveModel[0].Next);
                         EBuffer.suspendLoads  = 0;
                     }
                 }

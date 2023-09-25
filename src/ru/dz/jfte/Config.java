@@ -580,7 +580,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//                    return -1;
 				//                }
 
-				/* TODO AddCommand
+				/* 
 				if (AddCommand(Cmd, cmd, cnt, ign) == 0) {
 					if (Name == null || !Name.equals("xx")) {
 						System.err.printf("Bad Command Id: %ld\n", cmd);

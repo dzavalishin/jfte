@@ -109,12 +109,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	///////////////////////////////////////////////////////////////////////////////
 
-	static EBuffer newEBuffer(int createFlags, EModel ARoot, String AName)
+	/*static EBuffer newEBuffer(int createFlags, EModel ARoot, String AName)
 	{
 		EModel []Root = {ARoot};
 		return new EBuffer(createFlags, Root, AName);
 
-	}
+	}*/
 
 
 	EBuffer(int createFlags, EModel []ARoot, String AName)
@@ -5208,8 +5208,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		m.trySetSize(0);
 
 		// initialize folding array.
-		// TODO: allocate only when folds are actually used.
-		// needs fixing a lot of code in other places.
 		VCount = RCount;
 		VGap = VCount;
 		AllocVis(VCount !=0 ? VCount : 1);
@@ -5218,7 +5216,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (strip != -1) { // strip CR character from EOL if specified
 
-			// TODO: this should be done during load above to improve performance
+			// this should be done during load above to improve performance
 			for (int l = 0; l < RCount; l++) {
 				if (LL[l].getCount() > 0)
 				{

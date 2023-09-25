@@ -432,14 +432,14 @@ public static String SlashDir(String Path)
 		EModel M;
 		EBuffer B;
 
-		M = EModel.ActiveModel;
+		M = EModel.ActiveModel[0];
 		while (M!=null) {
 			if (M.GetContext() == CONTEXT_FILE) {
 				B = (EBuffer )M;
 				if (filecmp(B.FileName, FileName) == 0) { return B; }
 			}
 			M = M.Next;
-			if (M == EModel.ActiveModel) break;
+			if (M == EModel.ActiveModel[0]) break;
 		}
 		return null;
 	}
@@ -476,7 +476,7 @@ public static String SlashDir(String Path)
 			View.SwitchToModel(B);
 			return true;
 		}
-		B = EBuffer.newEBuffer(createFlags, EModel.ActiveModel, Name[0]);
+		B = new EBuffer(createFlags, EModel.ActiveModel, Name[0]);
 		B.SetFileName(Name[0], Mode);
 
 		View.SwitchToModel(B);
@@ -520,9 +520,8 @@ public static String SlashDir(String Path)
 		return f.isFile();
 	}
 
-	public static BasicFileAttributes stat(String fileName) {
-		// TODO Auto-generated method stub
-		//return null;
+	public static BasicFileAttributes stat(String fileName) 
+	{
 		Path p = Path.of(fileName);
 		BasicFileAttributes attrs;
 		try {

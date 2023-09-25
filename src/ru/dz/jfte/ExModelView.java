@@ -8,6 +8,7 @@ public class ExModelView extends ExView
     boolean MouseCaptured = false;
     boolean MouseMoved = false;
 
+    @Override
     boolean IsModelView() { return true; }
 
     
@@ -23,44 +24,65 @@ public class ExModelView extends ExView
         }
     } */
 
+    @Override
     int GetContext() {
         return View.GetContext();
     }
 
+    @Override
     void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
         View.Activate(gotfocus);
     }
 
+    @Override
     EEventMap GetEventMap() {
         return View.GetEventMap();
     }
 
+    @Override
     ExResult ExecCommand(ExCommands Command, ExState State) {
         return View.ExecCommand(Command, State);
     }
 
+    @Override
     int BeginMacro() {
         return View.BeginMacro();
     }
 
+    @Override
     void HandleEvent(TEvent Event) throws IOException {
         super.HandleEvent(Event);
         View.HandleEvent(Event);
     }
 
+    @Override
     void UpdateView() {
         View.UpdateView();
     }
 
+    @Override
     void RepaintView() {
         View.RepaintView();
     }
 
+    @Override
     void RepaintStatus() {
         View.RepaintStatus();
     }
 
+    void UpdateStatus() {
+        View.UpdateStatus();
+    }
+
+    void Resize(int width, int height) {
+        View.Resize(width, height);
+    }
+
+    void WnSwitchBuffer(EModel B) {
+       if (View!=null)
+           View.SwitchToModel(B);
+    }
     
     
 }

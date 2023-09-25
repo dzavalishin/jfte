@@ -125,9 +125,9 @@ public class EMarkIndex {
 	        if (b == null) {
 	            if (!Console.FileLoad(0, m.getFileName(), null, aView))
 	                return false;
-	            if (retrieveForBuffer((EBuffer)EModel.ActiveModel) == 0)
+	            if (retrieveForBuffer((EBuffer)EModel.ActiveModel[0]) == 0)
 	                return false;
-	            b = (EBuffer)EModel.ActiveModel;
+	            b = (EBuffer)EModel.ActiveModel[0];
 	        }
 	        aView.SwitchToModel(b);
 	        return b.GotoBookmark(m.getName());

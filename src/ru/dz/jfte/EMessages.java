@@ -23,11 +23,11 @@ public class EMessages extends EList implements Closeable
 
 	static EMessages CompilerMsgs = null;
 
-	static EMessages newEMessages(int createFlags, EModel ARoot, String ADir, String ACommand) 
+	/*static EMessages newEMessages(int createFlags, EModel ARoot, String ADir, String ACommand) 
 	{
 		EModel []ARootP = {ARoot};
 		return new EMessages(createFlags, ARootP,  ADir,  ACommand);
-	}
+	}*/
 
 	EMessages(int createFlags, EModel []ARoot, String ADir, String ACommand) 
 	{
@@ -365,7 +365,7 @@ public class EMessages extends EList implements Closeable
 				} else {
 					if (Console.FileLoad(0, ErrList[err].file, null, V)) {
 						V.SwitchToModel(ActiveModel);
-						((EBuffer)ActiveModel).CenterNearPosR(0, ErrList[err].line - 1);
+						((EBuffer)ActiveModel[0]).CenterNearPosR(0, ErrList[err].line - 1);
 					}
 				}
 				if (ErrList[err].msg != null)
