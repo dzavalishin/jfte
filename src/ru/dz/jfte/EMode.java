@@ -11,17 +11,19 @@ public class EMode {
     EEventMap fEventMap;
     EMode fParent;
 
-    // TODO EColorize fColorize = null;
+    EColorize fColorize = null;
 
     String filename;
 
     
-    static EMode [] Modes = new EMode [1];
-    
+    //static EMode Modes [] = new EMode [1];
+    static EMode Modes = null;
+
+    /*
     static {
     	// TODO Modes
     	Modes[0] = new EMode(null, null, null);
-    }
+    }*/
     
     EMode(EMode aMode, EEventMap Map, String aName) {
         fName = aName;
@@ -29,7 +31,7 @@ public class EMode {
         fParent = aMode;
         //InitWordChars();
         if (aMode != null) {
-            // TODO fColorize = aMode.fColorize;
+            fColorize = aMode.fColorize;
             Flags = aMode.Flags;
 
             // duplicate strings in flags to allow them be freed
@@ -53,21 +55,19 @@ public class EMode {
 
     static EMode FindMode(String Name) 
     {
-    	/*
         EMode m = Modes;
 
         //fprintf(stderr, "Searching mode %s\n", Name);
-        while (m) {
-            if (strcmp(Name, m->fName) == 0)
+        while (m != null) {
+            if (Name.equals(m.fName))
                 return m;
-            m = m->fNext;
+            m = m.fNext;
         }
-        return 0;
-        */
     	
+    	/*
     	for( EMode m : Modes )
     		if(m.fName.equals(Name))
-    			return m;
+    			return m; */
     	
     	return null;
     }
@@ -75,24 +75,24 @@ public class EMode {
     
     static EMode GetModeForName(String FileName)     
     {
-    	/* TODO
+        EMode m;
+    	/* TODO GetModeForName
         //    char ext[10];
         //    char *p;
         int l, i;
-        EMode m;
         RxMatchRes RM;
-        char buf[81];
+        //char buf[81];
         int fd;
 
         m = Modes;
         while (m) {
-            if (m->MatchNameRx)
-                if (RxExec(m->MatchNameRx,
+            if (m.MatchNameRx)
+                if (RxExec(m.MatchNameRx,
                            FileName, strlen(FileName), FileName,
                            &RM) == 1)
                     return m;
-            if (m->fNext == 0) break;
-            m = m->fNext;
+            if (m.fNext == 0) break;
+            m = m.fNext;
         }
 
         fd = open(FileName, O_RDONLY);
@@ -110,27 +110,27 @@ public class EMode {
                 }
                 m = Modes;
                 while (m) {
-                    if (m->MatchLineRx)
-                        if (RxExec(m->MatchLineRx, buf, l, buf, &RM) == 1)
+                    if (m.MatchLineRx)
+                        if (RxExec(m.MatchLineRx, buf, l, buf, &RM) == 1)
                             return m;
-                    if (m->fNext == 0) break;
-                    m = m->fNext;
+                    if (m.fNext == 0) break;
+                    m = m.fNext;
                 }
             }
         }
 
         if ((m = FindMode(DefaultModeName)) != 0) return m;
-
 		*/
 
-        //m = Modes;
-        //while (m && m->fNext) m = m->fNext;
-        //return m;
-        
+        m = Modes;
+        while (m != null && m.fNext != null) m = m.fNext;
+        return m;
+        /*
     	if(Modes == null || Modes.length == 0)
     		return null;
     	
         return Modes[Modes.length-1];
+        */
     }
 
     

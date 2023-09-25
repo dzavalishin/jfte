@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.ByteArrayPtr;
 
 public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs 
@@ -52,19 +51,14 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	static class CurPos {
 		int sz;
-		//String a;
-		//String c;
-		//String z;
-		//ByteArrayPtr a;
 		ByteArrayPtr c; // cur ptr
-		//ByteArrayPtr z; // endpos?
 		int line;
 		String name; // filename
 	};
 
 	static class Obj
 	{
-		byte type;
+		int type;
 		int len;
 	}
 
@@ -251,16 +245,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 
-				/* TODO / add new mode
-				if ((Mode = FindColorizer(ModeName)) == 0)
+				// add new mode
+				if ((Mode = EColorize.FindColorizer(ModeName)) == null)
 					Mode = new EColorize(ModeName, UpMode);
 				else {
-					if (Mode.Parent == 0)
-						Mode.Parent = FindColorizer(UpMode);
+					if (Mode.Parent == null)
+						Mode.Parent = EColorize.FindColorizer(UpMode);
 				}
 				if (ReadColorize(cp, Mode, ModeName) == -1)
 					return false;
-				 */
+				 
 			}
 			break;
 
@@ -268,38 +262,36 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				EMode Mode = null;
 				String ModeName = GetCharStr(cp, obj.len);
-				String UpMode = null;
+				String UpMode = "";
 
 				obj = GetObj(cp);
 				if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
 					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
-				/* TODO / add new mode
-				if ((Mode = FindMode(ModeName)) == 0) {
-					EMode OrgMode = 0;
+				if ((Mode = EMode.FindMode(ModeName)) == null) {
+					EMode OrgMode = null;
 					EEventMap Map;
 
-					if (strcmp(UpMode, "") != 0)
-						OrgMode = FindMode(UpMode);
-					Map = FindEventMap(ModeName);
-					if (Map == 0) {
-						EEventMap OrgMap = 0;
+					if(!UpMode.isBlank())
+						OrgMode = EMode.FindMode(UpMode);
+					Map = EEventMap.FindEventMap(ModeName);
+					if (Map == null) {
+						EEventMap OrgMap = null;
 
-						if (strcmp(UpMode, "") != 0)
-							OrgMap = FindEventMap(UpMode);
+						if(!UpMode.isBlank())
+							OrgMap = EEventMap.FindEventMap(UpMode);
 						Map = new EEventMap(ModeName, OrgMap);
 					}
 					Mode = new EMode(OrgMode, Map, ModeName);
-					Mode.fNext = Modes;
-					Modes = Mode;
+					Mode.fNext = EMode.Modes;
+					EMode.Modes = Mode;
 				} else {
-					if (Mode.fParent == 0)
-						Mode.fParent = FindMode(UpMode);
+					if (Mode.fParent == null)
+						Mode.fParent = EMode.FindMode(UpMode);
 				}
 				if (ReadMode(cp, Mode, ModeName) == -1)
 					return false;
-				 */
 			}
 			break;
 			case CF_OBJECT:
@@ -466,9 +458,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		ret.type = (byte) 0xff;
 
 		int lh, ll;
-		ret.type  = cp.c.rpp();
-		ll = cp.c.rpp();
-		lh = cp.c.rpp();
+		ret.type  = cp.c.urpp();
+		ll = cp.c.urpp();
+		lh = cp.c.urpp();
 		ret.len = (lh << 8) + ll;
 
 		return ret;
@@ -746,7 +738,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		switch (what) {
 
-		/*
+		/* TODO C_ params
 	    case FLAG_C_Indent:          C_Indent = number; break;
 	    case FLAG_C_BraceOfs:        C_BraceOfs = number; break;
 	    case FLAG_C_CaseOfs:         C_CaseOfs = number; break;
@@ -773,12 +765,12 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		case FLAG_CursorOverEnd:     CursorOverSize[1] = number; break;
 		case FLAG_SysClipboard:      SystemClipboard = number; break;
 		case FLAG_OpenAfterClose:    OpenAfterClose = number; break;
-		// case FLAG_ShowVScroll:       ShowVScroll = number; break; 
-		//case FLAG_ShowHScroll:       ShowHScroll = number; break;
+		case FLAG_ShowVScroll:       GFrame.ShowVScroll = b; break; 
+		case FLAG_ShowHScroll:       GFrame.ShowHScroll = b; break;
 		case FLAG_ScrollBarWidth:    ScrollBarWidth = number; break;
 		case FLAG_SelectPathname:    SelectPathname = number; break;
-		//case FLAG_ShowMenuBar:       ShowMenuBar = number; break;
-		//case FLAG_ShowToolBar:       ShowToolBar = number; break;
+		case FLAG_ShowMenuBar:       GFrame.ShowMenuBar = b; break;
+		case FLAG_ShowToolBar:       GFrame.ShowToolBar = b; break;
 		case FLAG_KeepHistory:       KeepHistory = number; break;
 		case FLAG_LoadDesktopOnEntry: LoadDesktopOnEntry = number; break;
 		case FLAG_SaveDesktopOnExit: SaveDesktopOnExit = b; break;
@@ -927,7 +919,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 
 	//#ifdef CONFIG_SYNTAX_HILIT
-	int ReadColorize(CurPos cp, EColorize Colorize, String ModeName) {
+	static int ReadColorize(CurPos cp, EColorize Colorize, String ModeName) {
 		Obj obj;
 		short len;
 
@@ -1145,7 +1137,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 	//#endif
 
-	private boolean getHex(String value, int[] col) {
+	private static boolean getHex(String value, int[] col) {
 		try { 
 		col[0] = Integer.parseInt(value,16);
 		}
@@ -1173,7 +1165,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 
 
-	int ReadMode(CurPos cp, EMode Mode, String  ModeName) {
+	static int ReadMode(CurPos cp, EMode Mode, String  ModeName) {
 		Obj obj;
 
 		while (true) 
@@ -1218,7 +1210,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		return -1;
 	}
 
-	int ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) {
+	static int ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) {
 	    Obj obj;
 
 		while (true) 
@@ -1253,7 +1245,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	
 	
-	int ReadKeywords(CurPos cp, ColorKeywords keywords, int color) {
+	static int ReadKeywords(CurPos cp, ColorKeywords keywords, int color) {
 	    Obj obj;
 
 		while (true) 
@@ -1303,7 +1295,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	
 	
 	
-	int SetModeNumber(EMode mode, int what, int number) {
+	static int SetModeNumber(EMode mode, int what, int number) {
 	    int j = what;
 
 	    if (j == BFI_LeftMargin || j == BFI_RightMargin) number--;
@@ -1311,7 +1303,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    return 0;
 	}
 
-	int SetModeString(EMode mode, int what, String string) {
+	static int SetModeString(EMode mode, int what, String string) {
 	    int j = what;
 
 	//#ifdef CONFIG_SYNTAX_HILIT
@@ -1345,7 +1337,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	static void SetWordChars(char [] w, String s) {
 		//String p;
 		//memset((void *)w, 0, 32);
-		w[0] = w[1] = w[2] = w[3] = 0;
+		//w[0] = w[1] = w[2] = w[3] = 0;
+		Arrays.fill(w, (char)0);
 
 		int p = 0;
 		while(p < s.length()) {
@@ -1354,7 +1347,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				p++;
 				if (p >= s.length()) return;
 			} 
-			else if (s.charAt(p+1) == '-') 
+			else if( (p+1 < s.length()) && (s.charAt(p+1) == '-') ) 
 			{
 				if (p+2 >= s.length()) return;
 				
@@ -1396,13 +1389,13 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    //String p, d;
 	    EEventMap xm = aMap;
 
-	    // printf("Setting key %s\n", Key);
+	    //System.out.printf("Setting key %s\n", aKey);
 	    //strcpy(Key, aKey);
 
 	    // if mode has parent, get parent keymap
 	    while (xm != null && xm.Parent != null && (parent == null)) {
 	        parent = xm.Parent.KeyMap;
-	        //        printf("%s : %s : %d\n", xm.fName, xm.fParent.fName, parent);
+	        //System.out.printf("%s : %s : %d\n", xm.Name, xm.Parent.Name, parent.hashCode());
 	        xm = xm.Parent;
 	    }
 
@@ -1419,7 +1412,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	        d = p.indexOf((byte)'_');
 	        
 	        if ( d != null) {
-	            if (d.r(1) == 0 || d.r(1) == '_')
+	            if (d.hasBytesLeft() < 2 || d.r(1) == 0 || d.r(1) == '_')
 	                d.inc();
 
 	            if (!d.hasCurrent())
@@ -1447,7 +1440,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	            // if introductory key
 
 	            if (pmap.KeyMap == null) { // first key in mode, create map
-	                //                printf("new map key = %s, parent %d\n", p, parent);
+	            	//System.out.printf("new map key = %s, parent %d\n", p.getRestAsString(), parent.hashCode());
 	                k = new EKey(p.getRestAsString(), null);
 	            	pmap.KeyMap = new EKeyMap();
 	                pmap.KeyMap.fParent = parent;
@@ -1468,7 +1461,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	            // get parent keymap
 	            pm = parent;
 	            parent = null;
-	            //            printf("Searching %s\n", p);
+	            //System.out.printf("Searching %s\n", p.getRestAsString());
 	            while (pm != null) { // while exists
 	                KeySel ks = new KeySel();
 	                EKey pk;
@@ -1490,7 +1483,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	
 
 	
-	int SetColorizeString(EColorize Colorize, int what, String string) {
+	static int SetColorizeString(EColorize Colorize, int what, String string) {
 	    //STARTFUNC("SetColorizeString");
 	    //LOG << "What: " << what << " String: " << string << ENDLINE;
 	    switch (what) {
@@ -1504,7 +1497,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 	
 	
-	int GetHilitMode(String Str) {
+	static int GetHilitMode(String Str) {
 		/*/ TODO HilitModes
 	    for (int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
 	        if (strcmp(Str, HilitModes[i].Name) == 0)
@@ -1525,7 +1518,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	 * @param keyword
 	 * @return
 	 */
-	int AddKeyword(ColorKeywords tab, char color, String keyword) {
+	static int AddKeyword(ColorKeywords tab, char color, String keyword) {
 	    int len = keyword.length();
 	    byte[] kwb = keyword.getBytes();
 	    

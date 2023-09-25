@@ -121,7 +121,7 @@ public interface KeyDefs {
 
 	    ks.Mask = 0;
 	    ks.Key = 0;
-	    while (p.hasBytesLeft() >= 2 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
+	    while (p.hasBytesLeft() >= 2 && p.r(0) != 0 && ((p.r(1) == '+') || (p.r(1) == '-'))) {
 	        if (p.r(1) == '-') {
 	            switch (p.r(0)) {
 	            case 'A': ks.Mask |= kfAlt; break;
