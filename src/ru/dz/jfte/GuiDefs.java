@@ -37,9 +37,9 @@ public interface GuiDefs {
 	static final int  SEARCH_WORDEND = 0x00008000;   // match at end of words only
 	static final int  SEARCH_WORD    = (SEARCH_WORDBEG | SEARCH_WORDEND);
 	//= 0x00000800   // search words
-	//static final int  SEARCH_LINE    = 0x00002000   // search on current line only TODO
-	//static final int  SEARCH_WRAP    = 0x00004000   // similiar to GLOBAL, but goes to start
-	// only when match from current position fails TODO
+	//static final int  SEARCH_LINE    = 0x00002000   // TODO search on current line only 
+	//static final int  SEARCH_WRAP    = 0x00004000   // TODO similiar to GLOBAL, but goes to start
+	// only when match from current position fails 
 	//static final int  SEARCH_BOL     = 0x00008000   // search at line start
 	//static final int  SEARCH_EOL     = 0x00010000   // search at line end
 

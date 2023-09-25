@@ -77,20 +77,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	//int BMCount;
 	Map<String,EBookmark> BMarks = new HashMap<>();
 
-	///* TODO #ifdef CONFIG_OBJ_ROUTINE
-	RoutineList rlst;
-	RoutineView Routines;
-	//#endif */ 
+	RoutineList rlst = new RoutineList();
+	RoutineView Routines = null;
 
 	int MinRedraw, MaxRedraw;
 	int RedrawToEos;
 
-	/* TODO /* TODO #ifdef CONFIG_WORD_HILIT
-    String *WordList;
-    int WordCount;
-#endif */
-	/* TODO #ifdef CONFIG_SYNTAX_HILIT
-#endif */ 
+	String [] WordList = null;
+	int WordCount = 0;
+
 	SyntaxProc HilitProc;
 	int StartHilit, EndHilit;
 
@@ -139,19 +134,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		US.Record = 1;
 		US.Undo = 0;
 		#endif */
-		/* TODO #ifdef CONFIG_BOOKMARKS
-		BMCount = 0;
-		BMarks = 0;
-		#endif */
-		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		rlst.getCount() = 0;
-		rlst.Lines = 0;
-		Routines = 0;
-		#endif */
-		/* TODO #ifdef CONFIG_WORD_HILIT
-		WordList = 0;
-		WordCount = 0;
-		#endif */ 
+
 		//Name = strdup(AName);
 		Allocate(0);
 		AllocVis(0);
@@ -166,13 +149,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		MinRedraw = -1;
 		MaxRedraw = -1;
 		RedrawToEos = 0;
-		/* TODO /* TODO #ifdef CONFIG_SYNTAX_HILIT
+
 		StartHilit = 0;
 		EndHilit = -1;
-		HilitProc = 0;
-		if (Mode && Mode.fColorize)
-			HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
-		#endif */ 
+		HilitProc = null;
+		
+		//if (Mode != null && Mode.fColorize != null)
+			// TODO HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+
 		InsertLine(CP,0,null); /* there should always be at least one line in the edit buffer */
 		Flags = (Mode.Flags);
 		Modified = 0;
@@ -196,46 +180,30 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		Clear();
 
-
-
-	/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		rlst.Lines = 0;
+		rlst.Lines = null;
 		DeleteRelated();
-		#endif */
 	} 
 
-    @Override
+	@Override
 	void DeleteRelated() {
-		/* /* TODO #ifdef CONFIG_OBJ_ROUTINE
-		if (Routines) {
-			::ActiveView.DeleteModel(Routines);
-			Routines = 0;
+		if (Routines!=null) {
+			EView.ActiveView.DeleteModel(Routines);
+			Routines = null;
 		}
-		#endif */ 
 	}
 
 	boolean Clear() {
 		Modified = 1;
-		/* TODO #ifdef CONFIG_SYNTAX_HILIT
+
 		EndHilit = -1;
 		StartHilit = 0;
 
-		while (WordCount--)
-		{
-			free(WordList[WordCount]);
-		}
-		free(WordList);
-
 		WordCount = 0;
-		WordList = 0;
-		#endif */
-		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		rlst.getCount() = 0;
-		if (rlst.Lines) {
-			free(rlst.Lines);
-			rlst.Lines = 0;
-		}
-		#endif */
+		WordList = null;
+		
+		rlst.Count = 0;
+		rlst.Lines = null;
+
 		LL = null;
 		RCount = RAllocated = RGap = 0;
 		VCount = VAllocated = VGap = 0;
@@ -458,16 +426,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//V = V.NextView;
 		}
 
-		/* TODO #ifdef CONFIG_OBJ_ROUTINE
-		for (int i = 0; i < rlst.getCount() && rlst.Lines; i++) {
-			EPoint M;
+		for (int i = 0; i < rlst.Count && rlst.Lines != null; i++) {
+			EPoint M = new EPoint();
 
 			M.Col = 0;
 			M.Row = rlst.Lines[i];
 			UpdateMark(M, Type, Row, Col, Rows, Cols);
 			rlst.Lines[i] = M.Row;
 		}
-		#endif */
 
 		/* TODO FF
 		for (int f = 0; f < FCount; f++) {
@@ -479,10 +445,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			FF[f].line = M.Row;
 		} */
 
-		/* TODO #ifdef CONFIG_BOOKMARKS
-		for (int b = 0; b < BMCount; b++)
-			UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
-		#endif */
+		//for (int b = 0; b < BMCount; b++)			UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
+		
+		for( EBookmark bm : BMarks.values() )
+			UpdateMark(bm.BM, Type, Row, Col, Rows, Cols);
+			
 
 		if (OldBB.Row != BB.Row) {
 			int MinL = Math.min(OldBB.Row, BB.Row);
@@ -1388,75 +1355,82 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	ELine RLine(int No) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		int N = GapLine(No, RGap, RCount, RAllocated);
-		if (!((No < RCount) && (No >= 0) && (LL[N]!=null))) {
-			printf("Get No = %d/%d Gap=%d RAlloc = %d, VCount = %d\n", No, RCount, RGap, RAllocated, VCount);
-			assert((No < RCount) && (No >= 0) && (LL[N]!=null));
+		if(Main.DEBUG_EDITOR)
+		{
+			int N = GapLine(No, RGap, RCount, RAllocated);
+			if (!((No < RCount) && (No >= 0) && (LL[N]!=null))) {
+				printf("Get No = %d/%d Gap=%d RAlloc = %d, VCount = %d\n", No, RCount, RGap, RAllocated, VCount);
+				assert((No < RCount) && (No >= 0) && (LL[N]!=null));
+			}
 		}
-		//#endif */
 		return LL[GapLine(No, RGap, RCount, RAllocated)];
 	}
 
 	void RLine(int No, ELine L) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (!((No >= 0))) printf("Set No = %d\n", No);
-		assert((No >= 0));
-		// TODO #endif */
+		if(Main.DEBUG_EDITOR)
+		{
+			if (!((No >= 0))) printf("Set No = %d\n", No);
+			assert((No >= 0));
+		}
 		LL[GapLine(No, RGap, RCount, RAllocated)] = L;
 	}
 
 	int Vis(int No) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (No < 0 || No >= VCount) {
-			printf("Vis get no %d of %d\n", No, VCount);
-			assert (No >= 0 && No < VCount);
+		if(Main.DEBUG_EDITOR)
+		{
+			if (No < 0 || No >= VCount) {
+				printf("Vis get no %d of %d\n", No, VCount);
+				assert (No >= 0 && No < VCount);
+			}
 		}
-		// TODO #endif */
 		return VV[GapLine(No, VGap, VCount, VAllocated)];
 	}
 
 	void Vis(int No, int V) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (No < 0 || No >= VCount) {
-			printf("Vis set no %d of %d to %d\n", No, VCount, V);
-			assert (No >= 0 && No < VCount);
+		if(Main.DEBUG_EDITOR)
+		{
+			if (No < 0 || No >= VCount) {
+				printf("Vis set no %d of %d to %d\n", No, VCount, V);
+				assert (No >= 0 && No < VCount);
+			}
 		}
-		//#endif */
 		VV[GapLine(No, VGap, VCount, VAllocated)] = V;
 	}
 
 	ELine VLine(int No) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (!((No < VCount) && (No >= 0))) {
-			printf("VGet No = %d\n", No);
-			assert((No < VCount) && (No >= 0));
+		if(Main.DEBUG_EDITOR)
+		{
+			if (!((No < VCount) && (No >= 0))) {
+				printf("VGet No = %d\n", No);
+				assert((No < VCount) && (No >= 0));
+			}
+			if (Vis(No) < 0)
+				assert(1 == 0);
 		}
-		if (Vis(No) < 0)
-			assert(1 == 0);
-		//#endif */
 		return RLine(No + Vis(No));
 	}
 
 	void VLine(int No, ELine L) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (!((No >= 0))) {
-			printf("VSet No = %d\n", No);
-			assert((No >= 0));
+		if(Main.DEBUG_EDITOR)
+		{
+			if (!((No >= 0))) {
+				printf("VSet No = %d\n", No);
+				assert((No >= 0));
+			}
+			if (VV[No] < 0)
+				assert(1 == 0);
 		}
-		if (VV[No] < 0)
-			assert(1 == 0);
-		//#endif */
 		RLine(No + Vis(No), L);
 	}
 
 	int VToR(int No) {
-		// TODO /* TODO #ifdef DEBUG_EDITOR
-		if (!(No < VCount)) {
-			printf("Get No = %d\n", No);
-			assert((No < VCount));
+		if(Main.DEBUG_EDITOR)
+		{
+			if (!(No < VCount)) {
+				printf("Get No = %d\n", No);
+				assert((No < VCount));
+			}
 		}
-		//#endif */
 		return No + Vis(No);
 	}
 
@@ -1779,28 +1753,28 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					B.MoveAttr( StartPos, W, hcPlain_Selected, EndPos - StartPos);
 			}
 
-	        if (BFI(this, BFI_ShowBookmarks)) 
-	        {
-	            //int i = 0;
-	            //String Name;
-	            //EPoint P;
-	            
-	            List<EBookmark> ret = GetBookmarksForLine(Row);
-	            
-	            //while ((i = GetBookmarkForLine(i, Row, Name, P)) != -1) 
-	            for( EBookmark b : ret )
-	            {
-	            	if( b.Name.substring(0,4).equals("_BMK"))
-	                {
-	                    // User bookmark, hilite line
-	                    if (BFI(this, BFI_SeeThruSel))
-	                        B.MoveBgAttr( 0, W, hcPlain_Bookmark, W);
-	                    else
-	                        B.MoveAttr( 0, W, hcPlain_Bookmark, W);
-	                    break;
-	                }
-	            }
-	        }
+			if (BFI(this, BFI_ShowBookmarks)) 
+			{
+				//int i = 0;
+				//String Name;
+				//EPoint P;
+
+				List<EBookmark> ret = GetBookmarksForLine(Row);
+
+				//while ((i = GetBookmarkForLine(i, Row, Name, P)) != -1) 
+				for( EBookmark b : ret )
+				{
+					if( b.Name.substring(0,4).equals("_BMK"))
+					{
+						// User bookmark, hilite line
+						if (BFI(this, BFI_SeeThruSel))
+							B.MoveBgAttr( 0, W, hcPlain_Bookmark, W);
+						else
+							B.MoveAttr( 0, W, hcPlain_Bookmark, W);
+						break;
+					}
+				}
+			}
 
 			if (Match.Row != -1 && Match.Col != -1) {
 				if (Row == Match.Row) {
@@ -4449,12 +4423,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if(Append)
 			throw new RuntimeException("no append yet");
 
-		Charset charset = Charset.forName("US-ASCII"); // TODO ASCII?
+		//Charset charset = Charset.forName("US-ASCII"); 
 
 		Msg(S_INFO, "Writing %s...", AFileName);
 
 
-		try (BufferedWriter writer = Files.newBufferedWriter(Path.of(AFileName), charset)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(Path.of(AFileName), Main.charset)) {
 			//String s;
 			//writer.write(s, 0, s.length());
 
@@ -5590,19 +5564,29 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 
 	        bindex = 0; blen = 0;
-	/* TODO #ifdef CONFIG_BOOKMARKS
-	        if (BFI(this, BFI_SaveBookmarks) == 1 || BFI(this, BFI_SaveBookmarks) == 2) {
-	            blen = 4;     // Just after "BOOK"
-	            while ((bindex = GetUserBookmarkForLine(bindex, l, bname, bpos)) != -1) {
+	        */
+
+    		String book = "BOOK";
+	        if (iBFI(this, BFI_SaveBookmarks) == 1 || iBFI(this, BFI_SaveBookmarks) == 2) {
+	        	//int bindex;
+	    		//String [] bname = {""};
+	    		//EPoint [] bpos = {new EPoint()};
+	        	
+	            //blen = 4;     // Just after "BOOK"
+	            
+	            List<EBookmark> bl = GetUserBookmarkForLine(l);
+	            
+	            for(EBookmark b: bl) {
 	                // Skip too long bookmarks
-	                if (strlen(bname) > 256 || blen + strlen(bname) + 6 + 6 > sizeof(book)) continue;
-	                blen += sprintf(book + blen, "%04x%02x%s", bpos.Col, strlen(bname), bname);
+	                //if (strlen(bname) > 256 || blen + strlen(bname) + 6 + 6 > sizeof(book)) continue;
+	                book += String.format("%04x%02x%s", b.BM.Col, b.Name.length(), b.Name );
 	            }
-	            if (blen != 4) {
-	                blen += sprintf(book + blen, "x%04xb", blen);
+	            blen = book.length();
+	            if (!bl.isEmpty()) {
+	            	book += String.format( "x%04xb", blen);
 	            } else blen = 0;      // Signal, that no bookmarks were saved
 	        }
-	#endif */
+
 
 			// what - write at 1 = beginning / 2 = end of line
 			for (int what = 1; what < 3; what++) {
@@ -5619,12 +5603,19 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    if (fwrite(fold, 1, foldlen, fp) != foldlen) goto fail;
 	                    ByteCount += foldlen;
 	                } */
-					/*TODO #ifdef CONFIG_BOOKMARKS
+					
+					/*
 	                if (BFI(this, BFI_SaveBookmarks) == what && blen) {
 	                    if (fwrite(book, 1, blen, fp) != blen) goto fail;
 	                    ByteCount += blen;
 	                }
-	#endif */
+					 */
+	                if (iBFI(this, BFI_SaveBookmarks) == what && blen != 0) {
+	                    //if (fwrite(book, 1, blen, fp) != blen) goto fail;
+						writer.write(book);
+	                    ByteCount += blen;
+	                }
+					
 					if (len_end!=0) {
 						//if (fwrite(BFS(this, BFS_CommentEnd), 1, len_end, fp) != len_end) goto fail;
 						writer.write(BFS(this, BFS_CommentEnd), 0, len_end);
@@ -5770,17 +5761,17 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	{
 		List<EBookmark> ret = new ArrayList<>();
 
-	    for( EBookmark bm : BMarks.values() )	
-	    {
-	        if (searchForLine==-1||bm.BM.Row==searchForLine) 
-	        	ret.add(bm);
-	        /*{
+		for( EBookmark bm : BMarks.values() )	
+		{
+			if (searchForLine==-1||bm.BM.Row==searchForLine) 
+				ret.add(bm);
+			/*{
 	            Name[0] = bm.Name;
 	            P[0] = bm.BM;
 	            return true;
 	        }*/
-	    }
-	    return ret;
+		}
+		return ret;
 	}
 
 
@@ -5909,21 +5900,21 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		Msg(S_INFO, "Failed to write to %s", PrintDevice);
 		return 0;
 	}
-	*/
+	 */
 
 
 
 	boolean FilePrint() {
 
 		PrintService printService =
-			PrintServiceLookup.lookupDefaultPrintService();
-		
+				PrintServiceLookup.lookupDefaultPrintService();
+
 		if(printService==null)
 		{
 			Msg(S_ERROR, "No print service found");
 			return false;
 		}
-		
+
 		Msg(S_INFO, "Printing %s to %s...", FileName, printService.getName());
 
 		DocPrintJob job = printService.createPrintJob();
@@ -5942,7 +5933,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Msg(S_ERROR, "Error printing %s to %s: %s", FileName, printService.getName(), e.getMessage());
 			return false;
 		}		
-		
+
 		if(rc)
 			Msg(S_INFO, "Printed %s.", FileName);
 		else
@@ -5969,7 +5960,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 			sw.write(RLine(l).Chars.toString());
-			
+
 			if (BFI(this, BFI_AddCR)) sw.write( cr );
 			/*if (BFI(this, BFI_AddLF))*/ sw.write( lf );
 
@@ -5994,39 +5985,39 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	boolean PlaceUserBookmark( String n,EPoint P) {
-	    String name = "_BMK"+n;
-	    boolean result;
-	    EPoint prev;
 
-	    if ((prev=GetBookmark(name))==null) {
-	        prev.Row=-1;prev.Col=-1;
-	    }
-	    
-	    result=PlaceBookmark(name, P);
-	    
-	    if (result) {
-	        if (BFI (this,BFI_ShowBookmarks)) {
-	            FullRedraw ();
-	        }
-	        if(iBFI(this,BFI_SaveBookmarks)==1||iBFI(this,BFI_SaveBookmarks)==2) {
-	            if (!Modify ()) return result;   // Never try to save to read-only
-	/* TODO #ifdef CONFIG_UNDOREDO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	boolean PlaceUserBookmark( String n,EPoint P) {
+		String name = "_BMK"+n;
+		boolean result;
+		EPoint prev;
+
+		if ((prev=GetBookmark(name))==null) {
+			prev.Row=-1;prev.Col=-1;
+		}
+
+		result=PlaceBookmark(name, P);
+
+		if (result) {
+			if (BFI (this,BFI_ShowBookmarks)) {
+				FullRedraw ();
+			}
+			if(iBFI(this,BFI_SaveBookmarks)==1||iBFI(this,BFI_SaveBookmarks)==2) {
+				if (!Modify ()) return result;   // Never try to save to read-only
+				/* TODO #ifdef CONFIG_UNDOREDO
 	            if (BFI(this, BFI_Undo)) {
 	                if (PushULong(prev.Row) == 0) return 0;
 	                if (PushULong(prev.Col) == 0) return 0;
@@ -6035,108 +6026,108 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                if (PushUChar(ucPlaceUserBookmark) == 0) return 0;
 	            }
 	#endif */
-	        }
-	    }
-	    return result;
+			}
+		}
+		return result;
 	}
 
 	boolean RemoveUserBookmark( String n) {
-	    String name  = "_BMK"+n;
-	    boolean result;
-	    EPoint p;
+		String name  = "_BMK"+n;
+		boolean result;
+		EPoint p;
 
-	    p = GetBookmark(name);       // p is valid only if remove is successful
-	    result=RemoveBookmark(name);
-	    if (result) {
-	        if (BFI (this,BFI_ShowBookmarks)) {
-	            FullRedraw ();
-	        }
-	        if (iBFI (this,BFI_SaveBookmarks)==1||iBFI (this,BFI_SaveBookmarks)==2) {
-	            if (!Modify ()) return result;   // Never try to save to read-only
-	/* #ifdef CONFIG_UNDOREDO
+		p = GetBookmark(name);       // p is valid only if remove is successful
+		result=RemoveBookmark(name);
+		if (result) {
+			if (BFI (this,BFI_ShowBookmarks)) {
+				FullRedraw ();
+			}
+			if (iBFI (this,BFI_SaveBookmarks)==1||iBFI (this,BFI_SaveBookmarks)==2) {
+				if (!Modify ()) return result;   // Never try to save to read-only
+				/* #ifdef CONFIG_UNDOREDO
 	            if (PushULong(p.Row) == 0) return 0;
 	            if (PushULong(p.Col) == 0) return 0;
 	            if (PushUData((void *)n,strlen (n)+1) == 0) return 0;
 	            if (PushULong(strlen (n)+1) == 0) return 0;
 	            if (PushUChar(ucRemoveUserBookmark) == 0) return 0;
 	#endif */
-	        }
-	    }
-	    return result;
+			}
+		}
+		return result;
 	}
 
 	boolean GotoUserBookmark( String n) {
-	    return GotoBookmark("_BMK"+n);
+		return GotoBookmark("_BMK"+n);
 	}
 
-	List<EBookmark> GetUserBookmarkForLine(int searchFrom, int searchForLine, String [] Name, EPoint [] P) 
+	List<EBookmark> GetUserBookmarkForLine(int searchForLine) 
 	{
 		List<EBookmark> ret = new ArrayList<>();
-		
-	    for(EBookmark b : GetBookmarksForLine(searchForLine)) 
-	    {
 
-	        if(b.Name.substring(0, 4).equals("_BMK"))
-	        	ret.add(b);
-	    }
-	    
-	    return ret;
+		for(EBookmark b : GetBookmarksForLine(searchForLine)) 
+		{
+
+			if(b.Name.substring(0, 4).equals("_BMK"))
+				ret.add(b);
+		}
+
+		return ret;
 	}
 
 	boolean PlaceBookmark(ExState State) {
-	    String [] name = {""};
-	    EPoint P = CP;
+		String [] name = {""};
+		EPoint P = CP;
 
-	    P.Row = VToR(P.Row);
+		P.Row = VToR(P.Row);
 
-	    if (State.GetStrParam(View, name ) == 0)
-	        if (View.MView.Win.GetStr("Place Bookmark", name, HIST_BOOKMARK) == 0) return false;
-	    return PlaceUserBookmark(name[0], P);
+		if (State.GetStrParam(View, name ) == 0)
+			if (View.MView.Win.GetStr("Place Bookmark", name, HIST_BOOKMARK) == 0) return false;
+		return PlaceUserBookmark(name[0], P);
 	}
 
 	boolean RemoveBookmark(ExState State) {
-	    String [] name = {""};
+		String [] name = {""};
 
-	    if (State.GetStrParam(View, name) == 0)
-	        if (View.MView.Win.GetStr("Remove Bookmark", name, HIST_BOOKMARK) == 0) return false;
-	    return RemoveUserBookmark(name[0]);
+		if (State.GetStrParam(View, name) == 0)
+			if (View.MView.Win.GetStr("Remove Bookmark", name, HIST_BOOKMARK) == 0) return false;
+		return RemoveUserBookmark(name[0]);
 	}
 
 	boolean GotoBookmark(ExState State) {
-	    String [] name = {""};
+		String [] name = {""};
 
-	    if (State.GetStrParam(View, name) == 0)
-	        if (View.MView.Win.GetStr("Goto Bookmark", name, HIST_BOOKMARK) == 0) return false;
-	    return GotoUserBookmark(name[0]);
+		if (State.GetStrParam(View, name) == 0)
+			if (View.MView.Win.GetStr("Goto Bookmark", name, HIST_BOOKMARK) == 0) return false;
+		return GotoUserBookmark(name[0]);
 	}
 
 
 	boolean PlaceGlobalBookmark(ExState State) {
-	    String [] name = {""};
-	    EPoint P = CP;
+		String [] name = {""};
+		EPoint P = CP;
 
-	    P.Row = VToR(P.Row);
+		P.Row = VToR(P.Row);
 
-	    if (State.GetStrParam(View, name) == 0)
-	        if (View.MView.Win.GetStr("Place Global Bookmark", name, HIST_BOOKMARK) == 0) return false;
-	    if (EMarkIndex.markIndex.insert(name[0], this, P) == null) {
-	        Msg(S_ERROR, "Error placing global bookmark %s.", name[0]);
-	    }
-	    return true;
+		if (State.GetStrParam(View, name) == 0)
+			if (View.MView.Win.GetStr("Place Global Bookmark", name, HIST_BOOKMARK) == 0) return false;
+		if (EMarkIndex.markIndex.insert(name[0], this, P) == null) {
+			Msg(S_ERROR, "Error placing global bookmark %s.", name[0]);
+		}
+		return true;
 	}
 
 	boolean PushGlobalBookmark() {
-	    EPoint P = CP;
+		EPoint P = CP;
 
-	    P.Row = VToR(P.Row);
-	    EMark m = EMarkIndex.markIndex.pushMark(this, P);
-	    if (m != null)
-	         Msg(S_INFO, "Placed bookmark %s", m.getName());
-	    return m != null;
+		P.Row = VToR(P.Row);
+		EMark m = EMarkIndex.markIndex.pushMark(this, P);
+		if (m != null)
+			Msg(S_INFO, "Placed bookmark %s", m.getName());
+		return m != null;
 	}
-	
-	
-	
+
+
+
 
 }
 

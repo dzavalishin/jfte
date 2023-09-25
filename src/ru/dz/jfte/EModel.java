@@ -102,7 +102,7 @@ public class EModel implements ModeDefs, Closeable
 	}
 
 	void RemoveView(EView V) {
-		/* TODO
+		/* 
        EView **X = &View;
 
        if (V==null) return;

@@ -255,7 +255,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         if (Event.Command > 65536 + 16384)
         { // hack for PM toolbar
             Event.Command -= 65536 + 16384;
-            // TODO BeginMacro(view);
+            BeginMacro(view);
             ExState State = new ExState();
             State.Macro = 0;
             State.Pos = 0;
@@ -263,7 +263,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
             Event.What = evNone;
         } else if (Event.Command >= 65536) {
             Event.Command -= 65536;
-         // TODO ExecMacro(view, Event.Command);
+            ExecMacro(view, Event.Command);
             Event.What = evNone;
         }
     }

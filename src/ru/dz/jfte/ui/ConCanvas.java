@@ -69,14 +69,10 @@ public class ConCanvas extends JPanel implements EventDefs
 			
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override

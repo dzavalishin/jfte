@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.Closeable;
+
 /**
  * 
  * must be subclasses - now just text mode
@@ -8,7 +10,7 @@ package ru.dz.jfte;
  *
  */
 
-public class GViewPeer implements ColorDefs, EventDefs 
+public class GViewPeer implements ColorDefs, EventDefs, Closeable
 {
 	GView View;
 	int wX, wY, wW, wH, wState;
@@ -45,12 +47,12 @@ public class GViewPeer implements ColorDefs, EventDefs
 		cX = cY = 0;
 	}
 
-	/* TODO ~GViewPeer() {
+	public void close() {
         if (MouseCapture == View)
-            MouseCapture = 0;
+            MouseCapture = null;
         if (FocusCapture == View)
-            FocusCapture = 0;
-    } */
+            FocusCapture = null;
+    } 
 
 	int ConPutBox(int X, int Y, int W, int H, PCell Cell) {
 		return Console.ConPutBox(X + wX, Y + wY, W, H, Cell);

@@ -8,6 +8,8 @@ public class Main implements MainConst
 
 	public static final Charset charset = Charset.forName("US-ASCII"); // TODO ASCII?
 
+	public static final boolean DEBUG_EDITOR = false;
+
 	static void Usage() {
 		System.out.print(usage);
 	}
