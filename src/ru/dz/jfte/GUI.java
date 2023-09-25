@@ -1,8 +1,6 @@
 package ru.dz.jfte;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public abstract class GUI implements GuiDefs, EventDefs 
 {
@@ -477,58 +475,6 @@ public abstract class GUI implements GuiDefs, EventDefs
 	static final int MAX_PIPES = 4;
 	//#define PIPE_BUFLEN 4096
 
-	static class GPipe {
-		//boolean used = false;
-		int id;
-		//int fd;
-		//int pid;
-		boolean stopped = false;
-		Process p;
-		BufferedReader input;
-
-		EModel notify;
-
-		public boolean run(String command) {
-			
-			ProcessBuilder pb = new ProcessBuilder(command); 
-
-		    try {
-				p = pb.start();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			}
-
-			input = new BufferedReader(new 
-							InputStreamReader(p.getInputStream()));
-			/*		
-            String line; 
-            while ((line = input.readLine()) != null) { 
-                System.out.println(line); 
-            } 
-        } 
-    } catch (IOException e) { 
-        e.printStackTrace(); 
-    } */
-
-			return true;
-		}
-
-		public TEvent checkPipe() {
-			try {
-				if( input.ready() )
-				{
-					return TEvent.newNotifyPipeEvent(id,notify);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-	}
-
 	static GPipe [] Pipes = new GPipe[MAX_PIPES];
 
 
@@ -547,7 +493,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 		return null;
 	}
 	
-	int OpenPipe(String Command, EModel  notify)
+	static int OpenPipe(String Command, EModel  notify)
 	{
 		int i;
 
@@ -562,7 +508,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 		return -1;
 	}
 
-	int SetPipeView(int id, EModel  notify)
+	static int SetPipeView(int id, EModel  notify)
 	{
 		if (id < 0 || id > MAX_PIPES)
 			return -1;
@@ -574,7 +520,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 		return 0;
 	}
 
-	String ReadPipe(int id)
+	static String ReadPipe(int id)
 	{
 		int rc;
 
@@ -602,7 +548,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 		return s;
 	}
 
-	int ClosePipe(int id)
+	static int ClosePipe(int id)
 	{
 		if (id < 0 || id > MAX_PIPES)
 			return -1;
