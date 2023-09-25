@@ -17,7 +17,7 @@ public class HMachine {
     		state = Arrays.copyOf(state, state.length + 1);
 
         state[state.length-1] = aState;
-        state[state.length-1].firstTrans = trans.length;
+        state[state.length-1].firstTrans = (trans == null) ? 0 : trans.length;
     }
 
     void AddTrans(HTrans aTrans) 

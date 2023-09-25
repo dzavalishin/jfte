@@ -132,9 +132,10 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		cp.c = new ByteArrayPtr( allCfg, 2 * 4 ); 
 		cp.line = 1;
 
-		boolean rc;
+		//boolean rc;
 		try {
-			rc = ReadConfigFile(cp);
+			//rc = 
+			ReadConfigFile(cp);
 		} catch (ConfigFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -143,10 +144,10 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			return false;
 		}
 
-		if (!rc) {
+		/*if (!rc) {
 			Console.DieError(1, "Error %s offset %d\n", CfgFileName, cp.c.getPos());
 			return false;
-		}
+		}*/
 
 		return true;
 	}
@@ -169,17 +170,17 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 
 
-	static boolean ReadConfigFile(CurPos cp) throws ConfigFormatException {
+	static void ReadConfigFile(CurPos cp) throws ConfigFormatException {
 		Obj obj;
 		//short len;
 
 		{
 			String p;
 
-			obj = GetObj(cp);
-			assert(obj.type == CF_STRING);
-			if ((p = GetCharStr(cp, obj.len)) == null)
-				return false;
+			obj = GetAssertObj(cp,CF_STRING);
+			//assert(obj.type == CF_STRING);
+			//if ((p = GetCharStr(cp, obj.len)) == null)				return false;
+			p = GetCharStr(cp, obj.len);
 
 			ConfigSourcePath = p;
 		}
@@ -196,14 +197,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				String CmdName = GetCharStr(cp, obj.len);
 
-				if (ReadCommands(cp, CmdName) == -1) return false;
+				//if (ReadCommands(cp, CmdName) == -1) return false;
+				ReadCommands(cp, CmdName);
 			}
 			break;
 			case CF_MENU:
 			{
 				String MenuName = GetCharStr(cp, obj.len);
 
-				if (ReadMenu(cp, MenuName) == -1) return false;
+				//if (ReadMenu(cp, MenuName) == -1) return false;
+				ReadMenu(cp, MenuName);
 			}
 			break;
 			case CF_EVENTMAP:
@@ -212,10 +215,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String MapName = GetCharStr(cp, obj.len);
 				String UpMap = "";
 
-				obj = GetObj(cp);
-				if (obj.type != CF_PARENT) return false;
+				obj = GetAssertObj(cp,CF_PARENT);
+				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
-					if ((UpMap = GetCharStr(cp, obj.len)) == null) return false;
+					UpMap = GetCharStr(cp, obj.len);
+					//if ((UpMap = GetCharStr(cp, obj.len)) == null) return false;
 
 				// add new mode
 				if ((EventMap = EEventMap.FindEventMap(MapName)) == null) {
@@ -228,7 +232,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					if (EventMap.Parent == null)
 						EventMap.Parent = EEventMap.FindEventMap(UpMap);
 				}
-				if (ReadEventMap(cp, EventMap, MapName) == -1) return false;
+				//if (ReadEventMap(cp, EventMap, MapName) == -1) return false;
+				ReadEventMap(cp, EventMap, MapName);
 
 			}
 			break;
@@ -239,10 +244,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String ModeName = GetCharStr(cp, obj.len);
 				String UpMode = null;
 
-				obj = GetObj(cp);
-				if (obj.type != CF_PARENT) return false;
+				obj = GetAssertObj(cp,CF_PARENT);
+				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
-					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
+					UpMode = GetCharStr(cp, obj.len);
+					//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 
 				// add new mode
@@ -252,8 +258,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					if (Mode.Parent == null)
 						Mode.Parent = EColorize.FindColorizer(UpMode);
 				}
-				if (ReadColorize(cp, Mode, ModeName) == -1)
-					return false;
+				//if (ReadColorize(cp, Mode, ModeName) == -1)					return false;
+				ReadColorize(cp, Mode, ModeName);
 				 
 			}
 			break;
@@ -264,10 +270,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String ModeName = GetCharStr(cp, obj.len);
 				String UpMode = "";
 
-				obj = GetObj(cp);
-				if (obj.type != CF_PARENT) return false;
+				obj = GetAssertObj(cp,CF_PARENT);
+				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
-					if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
+					UpMode = GetCharStr(cp, obj.len);
+					//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 				if ((Mode = EMode.FindMode(ModeName)) == null) {
 					EMode OrgMode = null;
@@ -290,22 +297,23 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					if (Mode.fParent == null)
 						Mode.fParent = EMode.FindMode(UpMode);
 				}
-				if (ReadMode(cp, Mode, ModeName) == -1)
-					return false;
+				ReadMode(cp, Mode, ModeName);
+				//if (ReadMode(cp, Mode, ModeName) == -1)					return false;
 			}
 			break;
 			case CF_OBJECT:
 			{
 				String ObjName;
 
-				if ((ObjName = GetCharStr(cp, obj.len)) == null)
-					return false;
-				if (ReadObject(cp, ObjName) == -1)
-					return false;
+				//if ((ObjName = GetCharStr(cp, obj.len)) == null)					return false;
+				ObjName = GetCharStr(cp, obj.len);
+				
+				//if (ReadObject(cp, ObjName) == -1)					return false;
+				ReadObject(cp, ObjName);
 			}
 			break;
 			case (byte) CF_EOF:
-				return true;
+				return;
 
 			default:
 				System.err.printf("unk obj type %d\n", obj.type);
@@ -314,13 +322,13 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//return false;
 			}
 		}
-		return false;
+		//return false;
 	}
 
 
 
 
-	static int ReadObject(CurPos cp, String ObjName) throws ConfigFormatException 
+	static void ReadObject(CurPos cp, String ObjName) throws ConfigFormatException 
 	{
 		Obj obj;
 
@@ -334,7 +342,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			switch (obj.type) {
 
 			case CF_COLOR:
-				if (ReadColors(cp, ObjName) == -1) return -1;
+				//if (ReadColors(cp, ObjName) == -1) return -1;
+				ReadColors(cp, ObjName);
 				break;
 
 			case CF_COMPRX:
@@ -353,7 +362,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				msg = GetNum(cp);
 				//if (GetObj(cp, len) != CF_REGEXP) return -1;
 				obj = GetAssertObj(cp, CF_REGEXP);
-				if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+				//if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+				regexp = GetCharStr(cp, obj.len);
 
 				// TODO if (AddCRegexp(file, line, msg, regexp) == 0) return -1;
 			}
@@ -365,7 +375,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				//if (GetObj(cp, len) != CF_REGEXP) return -1;
 				obj = GetAssertObj(cp, CF_REGEXP);
-				if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+				//if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
+				regexp = GetCharStr(cp, obj.len);
 
 				// TODO if (AddCvsIgnoreRegexp(regexp) == 0) return -1;
 			}
@@ -379,9 +390,13 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				switch (obj.type) {
 				case CF_STRING:
 				{
-					if (obj.len == 0) return -1;
+					if (obj.len == 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadObject SETVAR name empty");
+
 					String val = GetCharStr(cp, obj.len);
-					if (SetGlobalString((int)what, val) != 0) return -1;
+					if (SetGlobalString((int)what, val) != 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadObject SetGlobalString");
+						
 				}
 				break;
 				case CF_INT:
@@ -389,24 +404,29 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					long num;
 
 					num = GetNum(cp);
-					if (SetGlobalNumber((int)what, (int) num) != 0) return -1;
+					if (SetGlobalNumber((int)what, (int) num) != 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadObject SetGlobalNum");
 				}
 				break;
 				default:
-					return -1;
+		        	throw new ConfigFormatException(cp, obj, "SETVAR");
+					//return -1;
 				}
 			}
 			break;
 			case CF_END:
-				return 0;
+				return;
+				
 			default:
-				System.err.printf("unk obj type %d in ReadObject\n", obj.type);
-				cp.c.shift(obj.len);
-				break;
+				//System.err.printf("unk obj type %d in ReadObject\n", obj.type);
+				//cp.c.shift(obj.len);
+	        	throw new ConfigFormatException(cp, obj, "ReadObject");
+
+				//break;
 				/// TODO return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 
 
@@ -470,11 +490,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	{
 		Obj o = GetObj(cp);
 		if( o.type != type )
-			throw new ConfigFormatException("type is not "+type+" at "+cp.c.getPos());
+			throw new ConfigFormatException(cp,"type is not "+type+" at "+cp.c.getPos());
 		return o;
 	}
 
-	static String GetCharStr(CurPos cp, int len) {
+	static String GetCharStr(CurPos cp, int len) throws ConfigFormatException {
 		//STARTFUNC("GetCharStr");
 		// // LOG << "Length: " << len << ENDLINE;
 
@@ -488,7 +508,12 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    cp.c += len;
 	    ENDFUNCRC(p);
 		 */
-		return cp.c.getLenAsString(len);
+		String ret = cp.c.getLenAsString(len);
+		
+		if(ret == null)
+			throw new ConfigFormatException(cp, "No string");
+		
+		return ret;
 	}
 
 	static int GetNum(CurPos cp) {
@@ -507,14 +532,15 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		return num;
 	}
 
-	static int ReadCommands(CurPos cp, String Name) {
+	static int ReadCommands(CurPos cp, String Name) throws ConfigFormatException 
+	{
 		//STARTFUNC("ReadCommands");
 		// LOG << "Name = " << Name << ENDLINE;
 
 		//long Cmd = ExMacro.NewCommand(Name);
 
-		Obj obj = GetObj(cp);
-		if ( obj.type != CF_INT) return -1;
+		Obj obj = GetAssertObj(cp, CF_INT);
+		//if ( obj.type != CF_INT) return -1;
 
 		int cmdno = GetNum(cp);
 		/*if (cmdno != (Cmd | CMD_EXT)) {
@@ -541,11 +567,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				//                if ((s = GetCharStr(cp, len)) == 0) return -1;
 				int cmd = GetNum(cp);
-				obj = GetObj(cp); 
-				if (obj.type != CF_INT) return -1;
+				obj = GetAssertObj(cp,CF_INT); 
+				//if (obj.type != CF_INT) return -1;
 				int cnt = GetNum(cp);
-				obj = GetObj(cp); 
-				if (obj.type != CF_INT) return -1;
+				obj = GetAssertObj(cp,CF_INT); 
+				//if (obj.type != CF_INT) return -1;
 				int ign = GetNum(cp);
 
 				//                if (cmd != CmdNum(s)) {
@@ -567,38 +593,49 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			case CF_STRING:
 			{
 				String s = GetCharStr(cp, obj.len);
-				if (ExMacro.AddString(Cmd, s) == 0) return -1;
+				if (ExMacro.AddString(Cmd, s) == 0)// return -1;
+		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddString");
+
 			}
 			break;
 			case CF_INT:
 			{
 				int num = GetNum(cp);
-				if (ExMacro.AddNumber(Cmd, num) == 0) return -1;
+				if (ExMacro.AddNumber(Cmd, num) == 0)// return -1;
+		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddNum");
 			}
 			break;
 			case CF_VARIABLE:
 			{
 				int num = GetNum(cp);
 
-				if (ExMacro.AddVariable(Cmd, num) == 0) return -1;
+				if (ExMacro.AddVariable(Cmd, num) == 0) //return -1;
+					throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddVar");
 			}
 			break;
 			case CF_CONCAT:
-				if (ExMacro.AddConcat(Cmd) == 0) return -1;
+				if (ExMacro.AddConcat(Cmd) == 0)// return -1;
+		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddConcat");
 				break;
+			
 			case CF_END:
 				return (int) Cmd;
+			
 			default:
-				System.err.printf("unk obj type %d in ReadCommands\n", obj.type);
-				cp.c.shift(obj.len);
-				break;
+	        	throw new ConfigFormatException(cp, obj, "ReadCommands");
+
+				//System.err.printf("unk obj type %d in ReadCommands\n", obj.type);
+				//cp.c.shift(obj.len);
+				//break;
 				// TODO return -1;
 			}
 		}
-		return -1;
+		//return -1;
+    	throw new ConfigFormatException(cp, obj, "ReadCommands fin");
 	}
 
-	static int ReadMenu(CurPos cp, String MenuName) {
+	static void ReadMenu(CurPos cp, String MenuName) throws ConfigFormatException 
+	{
 		Obj obj;
 
 		int menu = -1, item = -1;
@@ -619,11 +656,13 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				} else {
 					String s = GetCharStr(cp, obj.len);
 					int Cmd;
-					if (s == null) return -1;
+					//if (s == null) return -1;
 					item = UpMenu.NewItem(menu, s);
-					obj = GetObj(cp);
-					if (obj.type != CF_MENUSUB) return -1;
-					if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+					obj = GetAssertObj(cp,CF_MENUSUB);
+					//if (obj.type != CF_MENUSUB) return -1;
+					//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+					Cmd = ReadCommands(cp, null);
+					
 					UpMenu.Menus[menu].Items.get(item).Cmd = Cmd + 65536;
 				}
 			}
@@ -633,9 +672,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String s = GetCharStr(cp, obj.len);
 				String w;
 
-				obj = GetObj(cp);
-				if (obj.type != CF_STRING) return -1;
-				if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				obj = GetAssertObj(cp,CF_STRING);
+				//if (obj.type != CF_STRING) return -1;
+				//if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				w = GetCharStr(cp, obj.len);
+				
 				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_NORMAL);
 			}
 			break;
@@ -645,26 +686,32 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String s = GetCharStr(cp, obj.len);
 				String w;
 
-				obj = GetObj(cp);
-				if (obj.type != CF_STRING) return -1;
-				if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				obj = GetAssertObj(cp,CF_STRING);
+				//if (obj.type != CF_STRING) return -1;
+				//if ((w = GetCharStr(cp, obj.len)) == null) return -1;
+				w = GetCharStr(cp, obj.len);
+				
 				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_CONDITIONAL);
 			}
 			break;
 
 			case CF_END:
-				return 0;
+				return;
+				
 			default:
-				System.err.printf("unk obj type %d in ReadMenu\n", obj.type);
-				cp.c.shift(obj.len);
-				break;
+	        	throw new ConfigFormatException(cp, obj, "ReadMenu");
+
+				//System.err.printf("unk obj type %d in ReadMenu\n", obj.type);
+				//cp.c.shift(obj.len);
+				//break;
 				// TODO return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 
-	static int ReadColors(CurPos cp, String ObjName) {
+	static void ReadColors(CurPos cp, String ObjName) throws ConfigFormatException 
+	{
 		Obj obj;
 
 		while(true) 
@@ -679,26 +726,29 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				///char cl[30];
 				String sname = GetCharStr(cp, obj.len);
 				String svalue;
-				if (sname == null) return -1;
+				//if (sname == null) return -1;
 
-				obj = GetObj(cp);
-				if (obj.type != CF_STRING) return -1;
-				if ((svalue = GetCharStr(cp, obj.len)) == null) return -1;
+				obj = GetAssertObj(cp,CF_STRING);
+				//if (obj.type != CF_STRING) return -1;
+				//if ((svalue = GetCharStr(cp, obj.len)) == null) return -1;
+				svalue = GetCharStr(cp, obj.len);
 				String cl = ObjName+"."+sname;
 				// TODO if (SetColor(cl, svalue) == 0) return -1;
 			}
 			break;
 			case CF_END:
-				return 0;
+				return;
 
 			default:
-				System.err.printf("unk obj type %d in ReadColors\n", obj.type);
-				cp.c.shift(obj.len);
-				break;
+	        	throw new ConfigFormatException(cp, obj, "ReadColors");
+
+				//System.err.printf("unk obj type %d in ReadColors\n", obj.type);
+				//cp.c.shift(obj.len);
+				//break;
 				// TODO return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 
 
@@ -832,7 +882,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 
 
-	static int ReadEventMap(CurPos cp, EEventMap Map, String  MapName) {
+	static void ReadEventMap(CurPos cp, EEventMap Map, String  MapName) throws ConfigFormatException 
+	{
 		Obj obj;
 
 		while(true) 
@@ -848,12 +899,15 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String s;
 				int Cmd;
 
-				if ((s = GetCharStr(cp, obj.len)) == null) return -1;
-				if ((Key = SetKey(Map, s)) == null) return -1;
+				//if ((s = GetCharStr(cp, obj.len)) == null) return -1;
+				s = GetCharStr(cp, obj.len);
+				if ((Key = SetKey(Map, s)) == null) //return -1;
+					throw new ConfigFormatException(cp, "SetKey failed");
 				
-				obj = GetObj(cp);
-				if (obj.type != CF_KEYSUB) return -1;
-				if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+				obj = GetAssertObj(cp,CF_KEYSUB);
+				//if (obj.type != CF_KEYSUB) return -1;
+				//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+				Cmd = ReadCommands(cp, null);
 				Key.Cmd = Cmd;
 			}
 			break;
@@ -866,16 +920,21 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String x;
 				int Cmd;
 
-				if ((s = GetCharStr(cp, obj.len)) == null) return -1;
+				//if ((s = GetCharStr(cp, obj.len)) == null) return -1;
+				s = GetCharStr(cp, obj.len);
+				
 				obj = GetObj(cp);
 				if (obj.type == CF_KEYSUB) {
-					if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+					//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
+					Cmd = ReadCommands(cp, null);
 					Ab = new EAbbrev(s, Cmd);
 				} else if (obj.type == CF_STRING) {
 					x = GetCharStr(cp, obj.len);
 					Ab = new EAbbrev(s, x);
 				} else
-					return -1;
+					//return -1;
+					throw new ConfigFormatException(cp, obj, "ReadEventMap ABBREV");
+				
 				if (Ab != null) {
 					Map.AddAbbrev(Ab);
 				}
@@ -892,8 +951,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				case CF_STRING:
 				{
 					String val = GetCharStr(cp, obj.len);
-					if (obj.len == 0) return -1;
-					if (SetEventString(Map, what, val) != 0) return -1;
+					if (obj.len == 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadEventMap SETVAR name");
+					
+					if (SetEventString(Map, what, val) != 0) //return -1;
+						throw new ConfigFormatException(cp, "SetEventString");
 				}
 				break;
 				/*                case CF_INT:
@@ -905,21 +967,25 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                     }
 	                     break;*/
 				default:
-					return -1;
+		        	throw new ConfigFormatException(cp, obj, "CF_SETVAR/EventMap");
+
+					//return -1;
 				}
 			}
 			break;
 			case CF_END:
-				return 0;
+				return;
 			default:
-				return -1;
+	        	throw new ConfigFormatException(cp, obj, "EventMap");
+
+				//return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 
 	//#ifdef CONFIG_SYNTAX_HILIT
-	static int ReadColorize(CurPos cp, EColorize Colorize, String ModeName) {
+	static void ReadColorize(CurPos cp, EColorize Colorize, String ModeName) throws ConfigFormatException {
 		Obj obj;
 		short len;
 
@@ -933,14 +999,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 			switch (obj.type) {
 			case CF_COLOR:
-				if (ReadHilitColors(cp, Colorize, ModeName) == -1) return -1;
+				//if (ReadHilitColors(cp, Colorize, ModeName) == -1) return -1;
+				ReadHilitColors(cp, Colorize, ModeName);
 				break;
 
 			case CF_KEYWORD:
 			{
 				String colorstr;
 
-				if ((colorstr = GetCharStr(cp, obj.len)) == null) return -1;
+				//if ((colorstr = GetCharStr(cp, obj.len)) == null) return -1;
+				colorstr = GetCharStr(cp, obj.len);
 
 				int Col;
 				int ColBg, ColFg;
@@ -949,15 +1017,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				String[] ss = colorstr.split(" ");
 				if(ss.length != 2)
-					return 0;
-				
+					//return 0;
+	        		throw new ConfigFormatException(cp, obj, "ReadColorize !=2");
+
 				ColFg = Integer.parseInt(ss[0], 16);
 				ColBg = Integer.parseInt(ss[1], 16);
 				
 				Col = ColFg | (ColBg << 4);
 
 				int color = Col; // ChColor(Col);
-				if (ReadKeywords(cp, Colorize.Keywords, color) == -1) return -1;
+
+				//if (ReadKeywords(cp, Colorize.Keywords, color) == -1) return -1;
+				ReadKeywords(cp, Colorize.Keywords, color);
 			}
 			break;
 
@@ -972,8 +1043,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				assert(stateno == LastState + 1);
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 
 				int color = GetNum(cp);
 
@@ -995,18 +1066,19 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				int nextState = GetNum(cp);
 				
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int matchFlags = GetNum(cp);
 				
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int color = GetNum(cp);
 				
-				obj = GetObj(cp);
+				obj = GetAssertObj(cp,CF_STRING);
 				assert(obj.type == CF_STRING);
-				if ((match = GetCharStr(cp, obj.len)) == null)
-					return -1;
+
+				//if ((match = GetCharStr(cp, obj.len)) == null)					return -1;
+				match = GetCharStr(cp, obj.len);
 
 				HTrans newTrans = new HTrans();
 
@@ -1034,26 +1106,27 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				String wordChars;
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int nextKwdMatchedState = GetNum(cp);
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int nextKwdNotMatchedState = GetNum(cp);
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int nextKwdNoCharState = GetNum(cp);
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_INT);
+				obj = GetAssertObj(cp,CF_INT);
+				//assert(obj.type == CF_INT);
 				int options = GetNum(cp);
 
-				obj = GetObj(cp);
-				assert(obj.type == CF_STRING);
-				if ((wordChars = GetCharStr(cp, obj.len)) == null)
-					return -1;
+				obj = GetAssertObj(cp,CF_STRING);
+				//assert(obj.type == CF_STRING);
+
+				//if ((wordChars = GetCharStr(cp, obj.len)) == null)					return -1;
+				wordChars = GetCharStr(cp, obj.len);
 
 				Colorize.hm.LastState().options = options;
 				Colorize.hm.LastState().nextKwdMatchedState = nextKwdMatchedState;
@@ -1063,7 +1136,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				if (wordChars != null && !wordChars.isBlank()) {
 					//Colorize.hm.LastState().wordChars = (String )malloc(256/8);
 					//assert(Colorize.hm.LastState().wordChars != NULL);
-					SetWordChars(Colorize.hm.LastState().wordChars.toCharArray(), wordChars);
+					Colorize.hm.LastState().wordChars = new char[32]; // TODO 32
+					//SetWordChars(Colorize.hm.LastState().wordChars.toCharArray(), wordChars);
+					SetWordChars(Colorize.hm.LastState().wordChars, wordChars);
 				}
 			}
 			break;
@@ -1071,7 +1146,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			case CF_HWORDS:
 			{
 				String colorstr;
-				if ((colorstr = GetCharStr(cp, obj.len)) == null) return -1;
+				//if ((colorstr = GetCharStr(cp, obj.len)) == null) return -1;
+				colorstr = GetCharStr(cp, obj.len);
 
 				int color = hcPlain_Keyword;
 
@@ -1084,20 +1160,26 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 						//Value = Value.substring(1);
 						
 						//if (sscanf(Value, "%1X", Col) != 1) return -1;
-						if(!getHex(Value.substring(1, 1), Col)) return -1;
+						if(!getHex(Value.substring(1, 1), Col)) //return -1;
+							throw new ConfigFormatException( cp, "getHex 1 "+Value);
 						Col[0] |= (hcPlain_Background & 0xF0);
 					} else if (Value.charAt(1) == '-') {
 						//if (sscanf(Value, "%1X", Col) != 1) return -1;
-						if(!getHex(Value.substring(0, 1), Col)) return -1;
+						if(!getHex(Value.substring(0, 1), Col)) //return -1;
+							throw new ConfigFormatException( cp, "getHex 0 "+Value);
+
 						Col[0] <<= 4;
 						Col[0] |= (hcPlain_Background & 0x0F);
 					} else {
 						//if (sscanf(Value, "%2X", Col) != 1) return -1;
-						if(!getHex(Value.substring(0, 2), Col)) return -1;
+						if(!getHex(Value.substring(0, 2), Col)) //return -1;
+							throw new ConfigFormatException( cp, "getHex 01 '"+Value+"'");
 					}
 					color = Col[0];
 				}
-				if (ReadKeywords(cp, Colorize.hm.LastState().keywords, color) == -1) return -1;
+
+				//if (ReadKeywords(cp, Colorize.hm.LastState().keywords, color) == -1) return -1;
+				ReadKeywords(cp, Colorize.hm.LastState().keywords, color);
 			}
 			break;
 
@@ -1110,8 +1192,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				case CF_STRING:
 				{
 					String val = GetCharStr(cp, obj.len);
-					if (obj.len == 0) return -1;
-					if (SetColorizeString(Colorize, what, val) != 0) return -1;
+					if (obj.len == 0) //return -1;
+						throw new ConfigFormatException(cp, obj, "ReadColorize empty val");
+
+					if (SetColorizeString(Colorize, what, val) != 0) //return -1;
+						throw new ConfigFormatException(cp, obj, "ReadColorize SetColStr");
 				}
 				break;
 				/*                case CF_INT:
@@ -1123,21 +1208,26 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                     }
 	                     break;*/
 				default:
-					return -1;
+		        	throw new ConfigFormatException(cp, obj, "ReadColorize SETVAR");
+					//return -1;
 				}
 			}
 			break;
 			case CF_END:
-				return 0;
+				return;
+				
 			default:
-				return -1;
+	        	throw new ConfigFormatException(cp, obj, "ReadColorize");
+
+				//return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 	//#endif
 
-	private static boolean getHex(String value, int[] col) {
+	private static boolean getHex(String value, int[] col)  
+	{
 		try { 
 		col[0] = Integer.parseInt(value,16);
 		}
@@ -1165,7 +1255,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 
 
-	static int ReadMode(CurPos cp, EMode Mode, String  ModeName) {
+	static void ReadMode(CurPos cp, EMode Mode, String  ModeName) throws ConfigFormatException {
 		Obj obj;
 
 		while (true) 
@@ -1184,33 +1274,43 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				case CF_STRING:
 				{
 					String val = GetCharStr(cp, obj.len);
-					if (obj.len == 0) return -1;
-					if (SetModeString(Mode, what, val) != 0) return -1;
+					/** TODO temp off
+					if (obj.len == 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadMode '"+ModeName+"' SetModeStr "+what+" empty val");
+					*/
+
+					if (SetModeString(Mode, what, val) != 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadMode SetModeStr");
 				}
 				break;
 				case CF_INT:
 				{
 					int num = GetNum(cp);
-					if (SetModeNumber(Mode, what, num) != 0) return -1;
+					if (SetModeNumber(Mode, what, num) != 0) //return -1;
+						throw new ConfigFormatException(cp, "ReadMode SetModeNUm");
 				}
 				break;
 				default:
-					return -1;
+		        	throw new ConfigFormatException(cp, obj, "ReadMode SETVAR");
+					//return -1;
 				}
 			}
 			break;
 			
 			case CF_END:
-				return 0;
+				return;
 				
 			default:
-				return -1;
+	        	throw new ConfigFormatException(cp, obj, "ReadMode");
+
+				//return -1;
 			}
 		}
-		return -1;
+		//return -1;
 	}
 
-	static int ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) {
+	static void ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) throws ConfigFormatException 
+	{
 	    Obj obj;
 
 		while (true) 
@@ -1225,27 +1325,30 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	                int cidx = GetNum(cp);
 	                
-	    			obj = GetObj(cp);
-	                if (obj.type != CF_STRING)               return -1;
-	                if ((svalue = GetCharStr(cp, obj.len)) == null)
-	                    return -1;
+	    			obj = GetAssertObj(cp,CF_STRING);
+	                //if (obj.type != CF_STRING)               return -1;
+	                //if ((svalue = GetCharStr(cp, obj.len)) == null)	                    return -1;
+	                svalue = GetCharStr(cp, obj.len);
 	                
 	                if (Colorize.SetColor(cidx, svalue) == 0)
-	                    return -1;
+	    	        	throw new ConfigFormatException(cp, obj, "ReadHilitColors SetColor");
+	                    //return -1;
 	            }
 	            break;
 	        case CF_END:
-	            return 0;
+	            return;
+	            
 	        default:
-	            return -1;
+	        	throw new ConfigFormatException(cp, obj, "ReadHilitColors");
+	            //return -1;
 	        }
 	    }
-	    return -1;
+	    //return -1;
 	}
 
 	
 	
-	static int ReadKeywords(CurPos cp, ColorKeywords keywords, int color) {
+	static void ReadKeywords(CurPos cp, ColorKeywords keywords, int color) throws ConfigFormatException {
 	    Obj obj;
 
 		while (true) 
@@ -1257,17 +1360,22 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	        case CF_STRING:
 	            {
 	                String kname = GetCharStr(cp, obj.len);
-	                if (kname == null) return -1;
-	                if (AddKeyword(keywords, (char) color, kname) != 1) return -1;
+	                //if (kname == null) return -1;
+	                if (AddKeyword(keywords, (char) color, kname) != 1) // return -1;
+	                	throw new ConfigFormatException(cp, "ReadKW AddKeyword");
 	            }
 	            break;
+	            
 	        case CF_END:
-	            return 0;
+	            return;
+	            
 	        default:
-	            return -1;
+	        	throw new ConfigFormatException(cp, obj, "ReadKW");
+
+	            //return -1;
 	        }
 	    }
-	    return -1;
+	    //return -1;
 	}
 	
 	
@@ -1370,6 +1478,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	        Map.SetMenu(what, string);
 	        break;
 	    default:
+	    	
 	    	return -1;
 	    }
 	    return 0;

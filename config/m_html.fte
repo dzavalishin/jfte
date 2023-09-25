@@ -34,10 +34,10 @@ sub HTML_TXT {
     ?FindReplace /</ /&lt;/ "agn" ;
     ?FindReplace />/ /&gt;/ "agn" ;
     ?FindReplace /</ /&lt;/ "agn" ;
-    ?FindReplace /"/ /&quot;/ "agn" ;
+#    ?FindReplace /"/ /&quot;/ "agn" ;
     ?FindReplace /(c)/ /&copy;/ "agn" ;
     ?FindReplace /|/ /&brvbar;/ "agn";
-    ?FindReplace /ª/ /&not;/ "agn";
+#    ?FindReplace /ª/ /&not;/ "agn";
     ?FindReplace /(tm)/ /<sup><small>tm<//small><//sup>/ "agn";
     MoveFileStart;
     LineInsert; # MoveUp;

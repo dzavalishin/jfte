@@ -9,7 +9,8 @@ public class HState implements ModeDefs, ColorDefs
     int color = 0;
     
     ColorKeywords keywords = new ColorKeywords();
-    String wordChars;
+    //String wordChars;
+    char [] wordChars;
     long options = 0;
     int nextKwdMatchedState = -1;
     int nextKwdNotMatchedState = -1;
