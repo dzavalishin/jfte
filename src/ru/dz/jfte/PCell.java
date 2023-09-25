@@ -296,8 +296,9 @@ public class PCell extends ArrayPtr<Long>
 			int at = was ? A1 : A0;
 			was = false;
 
-			long set = charAndAttr(s.charAt(Ch), MaxCount);
+			long set = charAndAttr(s.charAt(Ch), at);
 			p.wpp(set);
+			Ch++;
 			/**p++ = (unsigned char) (*Ch++);
 	        if (was) {
 			 *p++ = (unsigned char) A1;
@@ -350,5 +351,19 @@ public class PCell extends ArrayPtr<Long>
 	}
 
 
+	
+	
+	@Override
+	public String toString() {
+		byte [] res = new byte[length()]; 
+		for(int i = 0; i < length(); i++)
+		{
+			if(null == r(i))
+				break;
+			res[i] = (byte)(long)r(i);
+		}
+			
+		return new String(res);
+	}
 
 }

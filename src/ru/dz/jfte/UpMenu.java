@@ -80,6 +80,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				}
 			}
 		}
+		//System.out.println( B.toString() );
 		Console.ConPutBox(x, y, Cols - x, 1, B);
 		return 1;
 	}

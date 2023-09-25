@@ -40,23 +40,23 @@ public class ConData
 				Color bg = map[ (fb >> 4) & 0xF];
 
 				int xp = (x+0)*xCell;
-				int yp = (y+1)*yCell;
+				int yp = (y+1)*yCell-1;
 				
 				g.setColor(bg);
-				g.setColor(Color.black); // TODO test
+				//g.setColor(Color.black); // TODO test
 				g.fillRect(x*xCell, y*yCell, xCell, yCell);
 				
 				g.setColor(fg);				
-				g.setColor(Color.yellow); // TODO test
+				//g.setColor(Color.yellow); // TODO test
 				g.drawString(""+ch, xp, yp);
 				
 				g.setColor(Color.darkGray); // TODO test
 				//g.drawRect(x*xCell, y*yCell, xCell, yCell);
 				//g.drawLine(x, y, x, y);
 				
-				System.out.print(ch);
+				//System.out.print(ch);
 			}
-			System.out.print('\n');
+			//System.out.print('\n');
 		}
 	}
 	
@@ -66,13 +66,28 @@ public class ConData
 	static Color [] map = new Color[NCOLOR];
 	
 	static {
-		for( int i = 0; i < NCOLOR; i++ )
+		/*for( int i = 0; i < NCOLOR; i++ )
 		{
 			map[i] = Color.yellow;
-		}
+		}*/
 		
 		map[0] = Color.black;
-		// TODO others
+		map[1] = Color.blue;
+		map[2] = Color.green;
+		map[3] = Color.cyan;
+		map[4] = Color.red;
+		map[5] = Color.magenta;
+		map[6] = new Color(0xAA5500);
+		map[7] = new Color(0xAAAAAA);
+		
+		map[8] = new Color(0x555555);
+		map[9] = new Color(0x5555FF);
+		map[10] = new Color(0x55FF55);
+		map[11] = new Color(0x55FFFF);
+		map[12] = new Color(0xFF5555);
+		map[13] = new Color(0xFF55FF);
+		map[14] = new Color(0xFFFF55);
+		map[15] = new Color(0xFFFFFF);
 	}
 
 	public void clear() {
@@ -85,7 +100,7 @@ public class ConData
 		chars[x][y] = ch;
 	}
 
-	public void putc(int x, int y, Long c) {
+	public void putc(int x, int y, long c) {
 		colors[x][y] = PCell.getAttr(c);
 		chars[x][y] = (char) PCell.getChar(c);
 	}
