@@ -138,7 +138,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 			NextEvent.What = evNone;
 		}
 
-		frames.Update();
+		frames.Update(); // TODO delete?
 
 		if (E.What == evNone &&
 				( (E = Console.ConGetEvent(evMouse | evCommand | evKeyboard, 0, true)) == null ||

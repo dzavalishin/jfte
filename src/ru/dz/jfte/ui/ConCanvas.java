@@ -17,9 +17,10 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import ru.dz.jfte.EventDefs;
+import ru.dz.jfte.KeyDefs;
 import ru.dz.jfte.TEvent;
 
-public class ConCanvas extends JPanel implements EventDefs
+public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 {
 
 	private static final int MAX_EVENTS = 50;
@@ -36,7 +37,7 @@ public class ConCanvas extends JPanel implements EventDefs
 
 		//setSize(1000, 800);
 
-		
+		/*
 		addMouseMotionListener(
 				new MouseMotionAdapter(){
 
@@ -79,25 +80,27 @@ public class ConCanvas extends JPanel implements EventDefs
 			public void mouseClicked(MouseEvent e) {
 				//queueEvent(e);
 			}
-		});
+		});/**/
 		
 		addKeyListener(new KeyListener() {
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
-				queueEvent(e);
+				//queueEvent(e);
 				// TODO else cry aloud?
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
 				// TODO Auto-generated method stub
+				queueEvent(e);
 				
 			}
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
 				// TODO Auto-generated method stub
+				queueEvent(e);
 				
 			}
 		});
@@ -120,7 +123,7 @@ public class ConCanvas extends JPanel implements EventDefs
 	}
 
 	
-	private void queueEvent(KeyEvent e) {
+	void queueEvent(KeyEvent e) {
 		if( kelist.size() < MAX_EVENTS)
 			kelist.add(e);
 	}
@@ -138,12 +141,24 @@ public class ConCanvas extends JPanel implements EventDefs
 			KeyEvent e = kelist.remove(0);
 			
 			char c = e.getKeyChar();
-			int code = e.getKeyCode();
-					
-			// TODO remap?
+			int code = remapKey( e.getKeyCode() );
+			int id = e.getID();
 			
-			if( c != 0 ) code = c;
-			// TODO key up?
+			int mod = e.getModifiersEx();
+					
+			//System.out.printf("key %s \n", e );
+			//System.out.printf("k char %x code %x id %d\n", (int)c, code, id );
+			
+			//if( c != 0xFFFF ) code = c;
+			// TODO key ch
+			
+			if(id == KeyEvent.KEY_RELEASED)
+				code |= kfKeyUp;
+			
+			if(0 != (mod & KeyEvent.ALT_DOWN_MASK)) code |= kfAlt;
+			if(0 != (mod & KeyEvent.CTRL_DOWN_MASK)) code |= kfCtrl;
+			if(0 != (mod & KeyEvent.SHIFT_DOWN_MASK)) code |= kfShift;
+			
 			return TEvent.newKeyDownEvent(code);
 		}
 		
@@ -173,6 +188,51 @@ public class ConCanvas extends JPanel implements EventDefs
 		}
 		
 		return null;
+	}
+
+	private int remapKey(int k) {
+		
+		//if(k >= 112 && k <= 123)			return (k - 112 + 0x101) | kfSpecial; // F1...F12
+		
+		switch(k)
+		{
+		case KeyEvent.VK_UP: return kbUp;
+		case KeyEvent.VK_DOWN: return kbDown;
+		case KeyEvent.VK_LEFT: return kbLeft;
+		case KeyEvent.VK_RIGHT: return kbRight;
+
+		case KeyEvent.VK_HOME: return kbHome;
+		case KeyEvent.VK_END: return kbEnd;
+		case KeyEvent.VK_PAGE_UP: return kbPgUp;
+		case KeyEvent.VK_PAGE_DOWN: return kbPgDn;
+
+		case KeyEvent.VK_INSERT: return kbIns;
+		case KeyEvent.VK_DELETE: return kbDel;
+
+		case KeyEvent.VK_BACK_SPACE: return kbBackSp;
+		case KeyEvent.VK_TAB: return kbTab;
+		case KeyEvent.VK_ENTER: return kbEnter;
+		case KeyEvent.VK_ESCAPE: return kbEsc;
+
+		
+		case KeyEvent.VK_F1: return kbF1;
+		case KeyEvent.VK_F2: return kbF2;
+		case KeyEvent.VK_F3: return kbF3;
+		case KeyEvent.VK_F4: return kbF4;
+		case KeyEvent.VK_F5: return kbF5;
+		case KeyEvent.VK_F6: return kbF6;
+		case KeyEvent.VK_F7: return kbF7;
+		case KeyEvent.VK_F8: return kbF8;
+		case KeyEvent.VK_F9: return kbF9;
+		case KeyEvent.VK_F10: return kbF10;
+		case KeyEvent.VK_F11: return kbF11;
+		case KeyEvent.VK_F12: return kbF12;
+		
+		// TODO more keys
+		
+		}
+		
+		return k;
 	}
 
 }

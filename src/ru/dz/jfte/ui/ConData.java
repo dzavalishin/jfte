@@ -25,6 +25,9 @@ public class ConData
 		}
 	}
 	
+	
+	private static boolean fixColors = false; // test
+	
 	public void paint(Graphics2D g) 
 	{
 		g.setFont(g.getFont().deriveFont(40));
@@ -43,11 +46,11 @@ public class ConData
 				int yp = (y+1)*yCell-1;
 				
 				g.setColor(bg);
-				//g.setColor(Color.black); // TODO test
+				if(fixColors) g.setColor(Color.black); 
 				g.fillRect(x*xCell, y*yCell, xCell, yCell);
 				
 				g.setColor(fg);				
-				//g.setColor(Color.yellow); // TODO test
+				if(fixColors) g.setColor(Color.yellow); 
 				g.drawString(""+ch, xp, yp);
 				
 				g.setColor(Color.darkGray); // TODO test

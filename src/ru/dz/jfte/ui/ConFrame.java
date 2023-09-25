@@ -1,5 +1,8 @@
 package ru.dz.jfte.ui;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 import javax.swing.JFrame;
 
 public class ConFrame extends JFrame
@@ -10,6 +13,30 @@ public class ConFrame extends JFrame
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		getContentPane().add(cc);
+		cc.requestFocusInWindow();
+		
+		addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				//cc.queueEvent(e);
+				// TODO else cry aloud?
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				cc.queueEvent(e);
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				cc.queueEvent(e);
+				
+			}
+		});
+				
 		
 		setSize(1000, 800);
 		
