@@ -185,7 +185,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			ConfigSourcePath = p;
 		}
 
-		while(true) 
+		while(cp.c.hasCurrent()) 
 		{
 			obj = GetObj(cp);
 			if( obj.type == 0xFF)
@@ -1228,6 +1228,10 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	private static boolean getHex(String value, int[] col)  
 	{
+		// TODO strip
+		
+		value = value.strip();
+		
 		try { 
 		col[0] = Integer.parseInt(value,16);
 		}

@@ -303,13 +303,13 @@ eventmap PLAIN {
 
 sub noumlaut {
     PlaceBookmark "0";
-    ?FindReplace /ä/ /\"a/ "agn" ;
-    ?FindReplace /ö/ /\"o/ "agn" ;
-    ?FindReplace /ü/ /\"u/ "agn" ;
-    ?FindReplace /Ä/ /\"A/ "agn" ;
-    ?FindReplace /Ö/ /\"O/ "agn" ;
-    ?FindReplace /Ü/ /\"U/ "agn" ;
-    ?FindReplace /ß/ /{\ss}/ "agn" ;
+#    ?FindReplace /ä/ /\"a/ "agn" ;
+#    ?FindReplace /ö/ /\"o/ "agn" ;
+#    ?FindReplace /ü/ /\"u/ "agn" ;
+#    ?FindReplace /Ä/ /\"A/ "agn" ;
+#    ?FindReplace /Ö/ /\"O/ "agn" ;
+#    ?FindReplace /Ü/ /\"U/ "agn" ;
+#    ?FindReplace /ß/ /{\ss}/ "agn" ;
     GotoBookmark "0";
 }
 
