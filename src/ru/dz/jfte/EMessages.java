@@ -39,7 +39,7 @@ public class EMessages extends EList implements Closeable
 
 	@Override
 	public void close() {
-		GUI.gui.ClosePipe(PipeId);
+		GPipe.ClosePipe(PipeId);
 		FreeErrors();
 		CompilerMsgs = null;
 	}
@@ -140,7 +140,7 @@ public class EMessages extends EList implements Closeable
 		}
 
 		Console.ChangeDir(Directory);
-		PipeId = GUI.gui.OpenPipe(Command, this);
+		PipeId = GPipe.OpenPipe(Command, this);
 		return 0;
 	}
 
@@ -155,7 +155,7 @@ public class EMessages extends EList implements Closeable
 		case ExChildClose:
 			if (!Running || PipeId == -1)
 				break;
-			ReturnCode = GUI.gui.ClosePipe(PipeId);
+			ReturnCode = GPipe.ClosePipe(PipeId);
 			PipeId = -1;
 			Running = false;
 			{
@@ -231,10 +231,10 @@ public class EMessages extends EList implements Closeable
 		Line[0] = null;
 
 		if (Running && PipeId != -1) {
-			p = GUI.gui.ReadPipe(PipeId);
+			p = GPipe.ReadPipe(PipeId);
 			//fprintf(stderr, "GetLine: ReadPipe rc = %d\n", rc);
 			if (p == null) {
-				ReturnCode = GUI.gui.ClosePipe(PipeId);
+				ReturnCode = GPipe.ClosePipe(PipeId);
 				PipeId = -1;
 				Running = false;
 			}

@@ -312,7 +312,7 @@ public class Console implements ModeDefs, GuiDefs
 			
 
 			// poll pipes?
-			if( (e = GUI.checkPipeData()) != null)
+			if( (e = GPipe.checkPipeData()) != null)
 				break;
 			
 			try {
