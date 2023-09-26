@@ -61,7 +61,7 @@ public class ExState {
         
         if( m.cmds.size() <= Pos )
         {
-        	System.err.printf("GetIntParam for Macro %d Pos %d out of array size %d",
+        	System.err.printf("GetIntParam for Macro %d Pos %d out of array size %d\n",
         			Macro, Pos, m.cmds.size() );
         	return 0;
         }

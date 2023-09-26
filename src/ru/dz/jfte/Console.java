@@ -382,7 +382,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 					//#endif
 					) {
 				if (ISSLASH(Path.charAt(len - 1))) {
-					Path = Path.substring(len - 1);
+					Path = Path.substring(0,len - 1);
 				}
 			}
 		}

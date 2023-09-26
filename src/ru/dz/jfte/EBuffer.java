@@ -184,13 +184,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		DeleteRelated();
 	} 
 
-	@Override
-	void DeleteRelated() {
-		if (Routines!=null) {
-			EView.ActiveView.DeleteModel(Routines);
-			Routines = null;
-		}
-	}
 
 	boolean Clear() {
 		Modified = 1;
@@ -3217,6 +3210,49 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return CP.Col;
 	}
 
+	boolean InsertChar(ExState State) {
+	    char Ch;
+	    int [] No = {0};
+
+	    if (State.GetIntParam(View, No) == 0) {
+	    	/*
+	        TEvent E;
+	        E.What = evKeyDown;
+	        E.Key.Code = View.MView.Win.GetChar("Quote Char:");
+	        if (!GetCharFromEvent(E, Ch)) return 0;
+	        No = Ch;
+	        */
+	    	TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar("Quote Char:") );	    	
+	        No[0] = E.GetChar();
+	    }
+
+	    Ch = (char)No[0];
+	    if (Ch < 0 || Ch > 255) return false;
+	    return InsertChar(Ch);
+	}
+
+	boolean TypeChar(ExState State) {
+	    char Ch;
+	    int [] No = {0};
+
+	    if (State.GetIntParam(View, No) == 0) 
+	    {
+	    	/*
+	        TEvent E;
+	        E.What = evKeyDown;
+	        E.Key.Code = View.MView.Win.GetChar(0);
+	        if (!GetCharFromEvent(E, Ch)) return 0;
+	        */
+	    	TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar(null) );	    	
+	        No[0] = E.GetChar();
+	    }
+
+	    Ch = (char)No[0];
+	    if (Ch < 0 || Ch > 255) return false;
+	    return TypeChar(Ch);
+	}
+
+	
 	boolean InsertChar(char aCh) {
 		return InsertString(""+aCh, 1);
 	}
@@ -6145,7 +6181,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	
 	
-	
+	@Override
 	EViewPort CreateViewPort(EView V) {
 	    V.Port = new EEditPort(this, V);
 	    AddView(V);
@@ -6213,7 +6249,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    int Color = hcPlain_Normal;
 	    //int i; 
 	    //int len = Line.getCount(); 
-	    //char *p = Line->Chars;
+	    //char *p = Line.Chars;
 	    //int pp = 0;
 	    int NC = 0, C = 0; 
 	    //int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
@@ -6290,12 +6326,676 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 	
 
+
 	
 	
 	
+	
+	
+	boolean ScrollLeft(ExState State) {
+	    int [] Cols = {0};
+
+	    if (State.GetIntParam(View, Cols) == 0)
+	        Cols[0] = 8;
+	    return ScrollLeft(Cols[0]);
+	}
+
+	boolean ScrollRight(ExState State) {
+	    int [] Cols = {0};
+
+	    if (State.GetIntParam(View, Cols) == 0)
+	        Cols[0] = 8;
+	    return ScrollRight(Cols[0]);
+	}
+
+	boolean ScrollDown(ExState State) {
+	    int [] Rows = {0};
+
+	    if (State.GetIntParam(View, Rows) == 0)
+	        Rows[0] = 1;
+	    return ScrollDown(Rows[0]);
+	}
+
+	boolean ScrollUp(ExState State) {
+	    int [] Rows = {0};
+
+	    if (State.GetIntParam(View, Rows) == 0)
+	        Rows[0] = 1;
+	    return ScrollUp(Rows[0]);
+	}
+	
+	
+	
+	boolean InsertString(ExState State) {
+	    //char strbuf[1024] = "";
+		String [] strbuf = {null};
+
+	    if (State.GetStrParam(View, strbuf) == 0) {
+	        if (View.MView.Win.GetStr("Insert String", strbuf, HIST_DEFAULT) == 0)
+	            return false;
+	    }
+	    return InsertString(strbuf[0], strbuf[0].length());
+	}
+	
+	boolean ChangeMode(ExState State) {
+	    //char Mode[32] = "";
+		String [] Mode = {null};
+
+	    if (State.GetStrParam(View, Mode ) == 0)
+	        if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
+	        	return false;
+
+	    boolean rc = ChangeMode(Mode[0]);
+	    FullRedraw();
+	    return rc;
+	}
+	
+	
+	// TODO [dz] "Mode" must be "Flags"?
+	boolean ChangeFlags(ExState State) {
+	    //char Mode[32] = "";
+		String [] Mode = {null};
+
+	    if (State.GetStrParam(View, Mode) == 0)
+	        if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
+	        	return false;
+
+	    boolean rc = ChangeFlags(Mode[0]);
+	    FullRedraw();
+	    return rc;
+	}
+	
+	
+	
+	boolean FileSaveAs(String FName) {
+	    String [] Name = {null};
+
+	    if (Console.ExpandPath(FName, Name) == -1) {
+	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
+	        return false;
+	    }
+	    if (Console.FindFile(Name[0]) == null) {
+	        if (Console.FileExists(Name[0])) {
+	            switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
+	                           2,
+	                           "&Overwrite",
+	                           "&Cancel",
+	                           "%s", Name[0]))
+	            {
+	            case 0:
+	                break;
+	            case 1:
+	            case -1:
+	            default:
+	                return false;
+
+	            }
+	        }
+	        //free(FileName);
+	        FileName = Name[0];
+	        UpdateTitle();
+	        return Save();
+	    } else {
+	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name[0]);
+	        return false;
+	    }
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	@Override
 	EEventMap GetEventMap() {
 	    return EEventMap.FindActiveMap(Mode);
 	}
+	
+	
+	@Override
+	ExResult ExecCommand(ExCommands Command, ExState State) {
+		return doExecCommand(Command, State) ? ExResult.ErOK : ExResult.ErFAIL;
+	}
+	
+	
+	private boolean doExecCommand(ExCommands Command, ExState State) {
+	    switch (Command) {
+	    case ExMoveUp:                return MoveUp();
+	    case ExMoveDown:              return MoveDown();
+	    case ExMoveLeft:              return MoveLeft();
+	    case ExMoveRight:             return MoveRight();
+	    case ExMovePrev:              return MovePrev();
+	    case ExMoveNext:              return MoveNext();
+	    case ExMoveWordLeft:          return MoveWordLeft();
+	    case ExMoveWordRight:         return MoveWordRight();
+	    case ExMoveWordPrev:          return MoveWordPrev();
+	    case ExMoveWordNext:          return MoveWordNext();
+	    case ExMoveWordEndLeft:       return MoveWordEndLeft();
+	    case ExMoveWordEndRight:      return MoveWordEndRight();
+	    case ExMoveWordEndPrev:       return MoveWordEndPrev();
+	    case ExMoveWordEndNext:       return MoveWordEndNext();
+	    case ExMoveWordOrCapLeft:     return MoveWordOrCapLeft();
+	    case ExMoveWordOrCapRight:    return MoveWordOrCapRight();
+	    case ExMoveWordOrCapPrev:     return MoveWordOrCapPrev();
+	    case ExMoveWordOrCapNext:     return MoveWordOrCapNext();
+	    case ExMoveWordOrCapEndLeft:  return MoveWordOrCapEndLeft();
+	    case ExMoveWordOrCapEndRight: return MoveWordOrCapEndRight();
+	    case ExMoveWordOrCapEndPrev:  return MoveWordOrCapEndPrev();
+	    case ExMoveWordOrCapEndNext:  return MoveWordOrCapEndNext();
+	    case ExMoveLineStart:         return MoveLineStart();
+	    case ExMoveLineEnd:           return MoveLineEnd();
+	    case ExMovePageStart:         return MovePageStart();
+	    case ExMovePageEnd:           return MovePageEnd();
+	    case ExMovePageUp:            return MovePageUp();
+	    case ExMovePageDown:          return MovePageDown();
+	    case ExMovePageLeft:          return MovePageLeft();
+	    case ExMovePageRight:         return MovePageEnd();
+	    case ExMoveFileStart:         return MoveFileStart();
+	    case ExMoveFileEnd:           return MoveFileEnd();
+	    case ExMoveBlockStart:        return MoveBlockStart();
+	    case ExMoveBlockEnd:          return MoveBlockEnd();
+	    case ExMoveFirstNonWhite:     return MoveFirstNonWhite();
+	    case ExMoveLastNonWhite:      return MoveLastNonWhite();
+	    case ExMovePrevEqualIndent:   return MovePrevEqualIndent();
+	    case ExMoveNextEqualIndent:   return MoveNextEqualIndent();
+	    case ExMovePrevTab:           return MovePrevTab();
+	    case ExMoveNextTab:           return MoveNextTab();
+	    case ExMoveTabStart:          return MoveTabStart();
+	    case ExMoveTabEnd:            return MoveTabEnd();
+	    case ExMoveLineTop:           return MoveLineTop();
+	    case ExMoveLineCenter:        return MoveLineCenter();
+	    case ExMoveLineBottom:        return MoveLineBottom();
+	    case ExMoveBeginOrNonWhite:   return MoveBeginOrNonWhite();
+	    case ExMoveBeginLinePageFile: return MoveBeginLinePageFile();
+	    case ExMoveEndLinePageFile:   return MoveEndLinePageFile();
+	    case ExScrollLeft:            return ScrollLeft(State);
+	    case ExScrollRight:           return ScrollRight(State);
+	    case ExScrollDown:            return ScrollDown(State);
+	    case ExScrollUp:              return ScrollUp(State);
+	    case ExKillLine:              return KillLine();
+	    case ExKillChar:              return KillChar();
+	    case ExKillCharPrev:          return KillCharPrev();
+	    case ExKillWord:              return KillWord();
+	    case ExKillWordPrev:          return KillWordPrev();
+	    case ExKillWordOrCap:         return KillWordOrCap();
+	    case ExKillWordOrCapPrev:     return KillWordOrCapPrev();
+	    case ExKillToLineStart:       return KillToLineStart();
+	    case ExKillToLineEnd:         return KillToLineEnd();
+	    case ExKillBlock:             return KillBlock();
+	    case ExBackSpace:             return BackSpace();
+	    case ExDelete:                return Delete();
+	    /* TODO editod cmds
+	    case ExCharCaseUp:            return CharCaseUp();
+	    case ExCharCaseDown:          return CharCaseDown();
+	    case ExCharCaseToggle:        return CharCaseToggle();
+	    case ExLineCaseUp:            return LineCaseUp();
+	    case ExLineCaseDown:          return LineCaseDown();
+	    case ExLineCaseToggle:        return LineCaseToggle();
+	    */
+	    case ExLineInsert:            return LineInsert();
+	    case ExLineAdd:               return LineAdd();
+	    case ExLineSplit:             return LineSplit();
+	    case ExLineJoin:              return LineJoin();
+	    case ExLineNew:               return LineNew();
+	    case ExLineIndent:            return LineIndent();
+	    case ExLineTrim:              return LineTrim();
+	    case ExLineCenter:            return LineCenter() != 0;
+	    case ExInsertSpacesToTab:
+	        {
+	            int [] no = {0};
+
+	            if(State.GetIntParam(View, no) == 0)
+	                no[0] = 0;
+	            return InsertSpacesToTab(no[0]);
+	        }
+	    case ExInsertTab:             return InsertTab();
+	    case ExInsertSpace:           return InsertSpace();
+	    case ExWrapPara:
+	// TODO #ifdef CONFIG_WORDWRAP
+	//        return WrapPara();
+	//#else
+	        //return ExResult.ErFAIL;
+	        return false;
+	//#endif
+	    case ExInsPrevLineChar:       return InsPrevLineChar();
+	    case ExInsPrevLineToEol:      return InsPrevLineToEol();
+	    case ExLineDuplicate:         return LineDuplicate();
+	    case ExBlockBegin:            return BlockBegin();
+	    case ExBlockEnd:              return BlockEnd();
+	    case ExBlockUnmark:           return BlockUnmark();
+	    case ExBlockCut:              return BlockCut(false);
+	    case ExBlockCopy:             return BlockCopy(false);
+	    case ExBlockCutAppend:        return BlockCut(true);
+	    case ExBlockCopyAppend:       return BlockCopy(true);
+	    case ExClipClear:             return ClipClear();
+	    case ExBlockPaste:            return BlockPaste();
+	    case ExBlockKill:             return BlockKill();
+	    case ExBlockIndent:
+	        {
+	            int saved_persistence = iBFI(this, BFI_PersistentBlocks);
+	            BFI_SET(this, BFI_PersistentBlocks, 1);
+	            boolean ret_code = BlockIndent();
+	            BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
+	            return ret_code;
+	        }
+	    case ExBlockUnindent:
+	        {
+	            int saved_persistence = iBFI(this, BFI_PersistentBlocks);
+	            BFI_SET(this, BFI_PersistentBlocks, 1);
+	            boolean ret_code = BlockUnindent();
+	            BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
+	            return ret_code ;
+	        }
+	    case ExBlockClear:            return BlockClear();
+	    case ExBlockMarkStream:       return BlockMarkStream();
+	    case ExBlockMarkLine:         return BlockMarkLine();
+	    case ExBlockMarkColumn:       return BlockMarkColumn();
+	 // TODO case ExBlockCaseUp:           return BlockCaseUp();
+	 // TODO case ExBlockCaseDown:         return BlockCaseDown();
+	 // TODO case ExBlockCaseToggle:       return BlockCaseToggle();
+	    case ExBlockExtendBegin:      return BlockExtendBegin();
+	    case ExBlockExtendEnd:        return BlockExtendEnd();
+	    case ExBlockReIndent:         return BlockReIndent();
+	    case ExBlockSelectWord:       return BlockSelectWord();
+	    case ExBlockSelectLine:       return BlockSelectLine();
+	    case ExBlockSelectPara:       return BlockSelectPara();
+	    case ExBlockUnTab:            return BlockUnTab();
+	    case ExBlockEnTab:            return BlockEnTab();
+	// TODO #ifdef CONFIG_UNDOREDO
+	//    case ExUndo:                  return Undo();
+	//    case ExRedo:                  return Redo();
+	//#else
+	    //case ExUndo:                  return ErFAIL;
+	    //case ExRedo:                  return ErFAIL;
+	    case ExUndo:
+	    case ExRedo:
+        	return false;
+
+	//#endif
+        	// TODO case ExMatchBracket:          return MatchBracket();
+	    case ExMovePrevPos:           return MovePrevPos();
+	    case ExMoveSavedPosCol:       return MoveSavedPosCol();
+	    case ExMoveSavedPosRow:       return MoveSavedPosRow();
+	    case ExMoveSavedPos:          return MoveSavedPos();
+	    case ExSavePos:               return SavePos();
+	 // TODO case ExCompleteWord:          return CompleteWord();
+	    case ExBlockPasteStream:      return BlockPasteStream();
+	    case ExBlockPasteLine:        return BlockPasteLine();
+	    case ExBlockPasteColumn:      return BlockPasteColumn();
+	    // TODO case ExShowPosition:          return ShowPosition();
+	    /* TODO fold
+	    case ExFoldCreate:            return FoldCreate(VToR(CP.Row));
+	    case ExFoldDestroy:           return FoldDestroy(VToR(CP.Row));
+	    case ExFoldDestroyAll:        return FoldDestroyAll();
+	    case ExFoldPromote:           return FoldPromote(VToR(CP.Row));
+	    case ExFoldDemote:            return FoldDemote(VToR(CP.Row));
+	    case ExFoldOpen:              return FoldOpen(VToR(CP.Row));
+	    case ExFoldOpenNested:        return FoldOpenNested();
+	    case ExFoldClose:             return FoldClose(VToR(CP.Row));
+	    case ExFoldOpenAll:           return FoldOpenAll();
+	    case ExFoldCloseAll:          return FoldCloseAll();
+	    case ExFoldToggleOpenClose:   return FoldToggleOpenClose();
+	    case ExFoldCreateAtRoutines:  return FoldCreateAtRoutines();
+	    case ExMoveFoldTop:           return MoveFoldTop();
+	    case ExMoveFoldPrev:          return MoveFoldPrev();
+	    case ExMoveFoldNext:          return MoveFoldNext();
+	    */
+	    case ExFileSave:              return Save();
+	    case ExFilePrint:             return FilePrint();
+	    // TODO case ExBlockPrint:            return BlockPrint();
+	    case ExBlockTrim:             return BlockTrim();
+	    case ExFileTrim:              return FileTrim();
+	    case ExHilitWord:
+	// TODO #ifdef CONFIG_WORD_HILIT
+	//        return HilitWord();
+	//#else
+	        return false; //ErFAIL;
+	//#endif
+		    /* TODO edit cmds
+
+	    case ExSearchWordPrev:        return SearchWord(SEARCH_BACK | SEARCH_NEXT);
+	    case ExSearchWordNext:        return SearchWord(SEARCH_NEXT);
+	    case ExHilitMatchBracket:     return HilitMatchBracket();
+	    */
+	    case ExToggleAutoIndent:      return ToggleAutoIndent();
+	    case ExToggleInsert:          return ToggleInsert();
+	    case ExToggleExpandTabs:      return ToggleExpandTabs();
+	    case ExToggleShowTabs:        return ToggleShowTabs();
+	    case ExToggleUndo:            return ToggleUndo();
+	    case ExToggleReadOnly:        return ToggleReadOnly();
+	    case ExToggleKeepBackups:     return ToggleKeepBackups();
+	    case ExToggleMatchCase:       return ToggleMatchCase();
+	    case ExToggleBackSpKillTab:   return ToggleBackSpKillTab();
+	    case ExToggleDeleteKillTab:   return ToggleDeleteKillTab();
+	    case ExToggleSpaceTabs:       return ToggleSpaceTabs();
+	    case ExToggleIndentWithTabs:  return ToggleIndentWithTabs();
+	    case ExToggleBackSpUnindents: return ToggleBackSpUnindents();
+	    case ExToggleWordWrap:        return ToggleWordWrap();
+	    case ExToggleTrim:            return ToggleTrim();
+	    case ExToggleShowMarkers:     return ToggleShowMarkers();
+	    case ExToggleHilitTags:       return ToggleHilitTags();
+	    case ExToggleShowBookmarks:   return ToggleShowBookmarks();
+	    case ExSetLeftMargin:         return SetLeftMargin();
+	    case ExSetRightMargin:        return SetRightMargin();
+	    /* TODO edit cmds
+
+	    case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
+
+	        // stuff with UI
+	    case ExMoveToLine:          return MoveToLine(State);
+	    case ExMoveToColumn:        return MoveToColumn(State);
+	    case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
+	/* TODO #ifdef CONFIG_BOOKMARKS
+	    case ExPlaceBookmark:       return PlaceBookmark(State);
+	    case ExRemoveBookmark:      return RemoveBookmark(State);
+	    case ExGotoBookmark:        return GotoBookmark(State);
+	#else */
+	    case ExPlaceBookmark:
+	    case ExRemoveBookmark:
+	    case ExGotoBookmark:
+        	return false; //ErFAIL;
+	//#endif
+	    case ExPlaceGlobalBookmark: return PlaceGlobalBookmark(State);
+	    case ExPushGlobalBookmark:  return PushGlobalBookmark();
+	    case ExInsertString:        return InsertString(State);
+	    /* TODO edit cmds
+	    case ExSelfInsert:          return SelfInsert(State);
+	    case ExFileReload:          return FileReload(State);
+	    case ExFileSaveAs:          return FileSaveAs(State);
+	    case ExFileWriteTo:         return FileWriteTo(State);
+	    case ExBlockRead:           return BlockRead(State);
+	    case ExBlockReadStream:     return BlockReadStream(State);
+	    case ExBlockReadLine:       return BlockReadLine(State);
+	    case ExBlockReadColumn:     return BlockReadColumn(State);
+	    case ExBlockWrite:          return BlockWrite(State);
+	    case ExBlockSort:           return BlockSort(0);
+	    case ExBlockSortReverse:    return BlockSort(1);
+	    case ExFind:                return Find(State);
+	    case ExFindReplace:         return FindReplace(State);
+	    case ExFindRepeat:          return FindRepeat(State);
+	    case ExFindRepeatOnce:      return FindRepeatOnce(State);
+	    case ExFindRepeatReverse:   return FindRepeatReverse(State);
+	    case ExSearch:              return Search(State);
+	    case ExSearchB:             return SearchB(State);
+	    case ExSearchRx:            return SearchRx(State);
+	    case ExSearchAgain:         return SearchAgain(State);
+	    case ExSearchAgainB:        return SearchAgainB(State);
+	    case ExSearchReplace:       return SearchReplace(State);
+	    case ExSearchReplaceB:      return SearchReplaceB(State);
+	    case ExSearchReplaceRx:     return SearchReplaceRx(State); */
+	    case ExInsertChar:          return InsertChar(State);
+	    case ExTypeChar:            return TypeChar(State);
+	    case ExChangeMode:          return ChangeMode(State);
+	    //case ExChangeKeys:          return ChangeKeys(State);
+	    case ExChangeFlags:         return ChangeFlags(State);
+	 // TODO case ExChangeTabSize:       return ChangeTabSize(State);
+	 // TODO case ExChangeLeftMargin:    return ChangeLeftMargin(State);
+	 // TODO case ExChangeRightMargin:   return ChangeRightMargin(State);
+	    /* TODO case ExASCIITable:
+	#ifdef CONFIG_I_ASCII
+	        return ASCIITable(State);
+	#else
+	        return false; //ErFAIL;
+	#endif */
+	    /* TODO edit cmds
+	    case ExCharTrans:           return CharTrans(State);
+	    case ExLineTrans:           return LineTrans(State);
+	    case ExBlockTrans:          return BlockTrans(State);
+		*/
+	/* TODO #ifdef CONFIG_TAGS
+	    case ExTagFind:             return FindTag(State);
+	    case ExTagFindWord:         return FindTagWord(State);
+	#endif */
+
+	    // TODO case ExSetCIndentStyle:     return SetCIndentStyle(State);
+
+	    case ExBlockMarkFunction:   return BlockMarkFunction();
+	    case ExIndentFunction:      return IndentFunction();
+	    case ExMoveFunctionPrev:    return MoveFunctionPrev();
+	    case ExMoveFunctionNext:    return MoveFunctionNext();
+	    /* TODO edit cmds
+	    case ExInsertDate:          return InsertDate(State);
+	    case ExInsertUid:           return InsertUid();
+	    case ExShowHelpWord:        return ShowHelpWord(State);
+	    */
+	    }
+
+	    return super.ExecCommand(Command, State) == ExResult.ErOK;
+	}
+
+	
+	@Override
+	boolean CanQuit() {
+	    return Modified == 0;
+	}
+
+	@Override
+	int ConfQuit(GxView V, int multiFile) {
+	    if (Modified!=0) {
+	        if (multiFile!=0) {
+	            switch (V.Choice(GPC_ERROR,
+	                              "File Modified",
+	                              5,
+	                              "&Save",
+	                              "&As",
+	                              "A&ll",
+	                              "&Discard",
+	                              "&Cancel",
+	                              "%s", FileName))
+	            {
+	            case 0: /* Save */
+	                if (!Save()) return 0;
+	                break;
+	            case 1: /* As */
+	                {
+	                    String [] FName = {FileName};
+	                    //strcpy(FName, FileName);
+	                    if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
+	                    if (FileSaveAs(FName[0])) return 0;
+	                }
+	                break;
+	            case 2: /* Save all */
+	                return -2;
+	            case 3: /* Discard */
+	                break;
+	            case 4: /* Cancel */
+	            case -1:
+	            default:
+	                return 0;
+	            }
+	        }else {
+	            switch (V.Choice(GPC_ERROR,
+	                              "File Modified",
+	                              4,
+	                              "&Save",
+	                              "&As",
+	                              "&Discard",
+	                              "&Cancel",
+	                              "%s", FileName))
+	            {
+	            case 0: /* Save */
+	                if (!Save()) return 0;
+	                break;
+	            case 1: /* As */
+	                {
+	                    String [] FName = {FileName};
+	                    //char FName[MAXPATH];
+	                    //strcpy(FName, FileName);
+	                    if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
+	                    if (!FileSaveAs(FName[0])) return 0;
+	                }
+	                break;
+	            case 2: /* Discard */
+	                break;
+	            case 3: /* Cancel */
+	            case -1:
+	            default:
+	                return 0;
+	            }
+	        }
+	    }
+	    return 1;
+	}
+	
+
+	@Override
+	String GetName() { return FileName; }
+	
+	@Override
+	String GetPath() { 
+		String [] APath = {null};
+		Console.JustDirectory(FileName, APath);
+		return APath[0]; 
+		}
+	
+	@Override
+	String GetInfo() { 
+	    String []  buf = {null};
+	    //char winTitle[256] = {0};
+	    String winTitle = "";
+
+	    Console.JustFileName(FileName, buf);
+	    if (buf[0] == null || buf[0].isBlank()) // if there is no filename, try the directory name.
+	    	Console.JustLastDirectory(FileName, buf);
+
+	    if (buf[0] == null || buf[0].isBlank()) // if there is a file/dir name, stick it in here.
+	        winTitle += buf + " - ";
+
+	    winTitle += FileName;
+
+	    return String.format(
+	            "%2d %04d:%03d%c%-150s ",
+	            ModelNo,
+	            1 + CP.Row, 1 + CP.Col,
+	            Modified!=0 ? '*': ' ',
+	            winTitle);
+
+	}
+	
+
+	@Override
+	void GetTitle(String [] ATitle, String [] ASTitle) 
+	{ 
+	    String []  buf = {null};
+
+	    ATitle[0] = FileName;
+
+    	Console.JustFileName(FileName, buf);
+    	if (buf[0] == null || buf[0].isBlank())    	
+	        ASTitle[0] = FileName;
+	    else 
+	        ASTitle[0] = buf[0];
+	}
+
+	
+	@Override
+	void DeleteRelated() {
+		if (Routines!=null) {
+			EView.ActiveView.DeleteModel(Routines);
+			Routines = null;
+		}
+	}
+	
+
+	@Override
+	int GetStrVar(int var, String [] str) 
+	{
+	    //puts("variable EBuffer\x7");
+	    switch (var) {
+	    case mvFilePath:
+	        //puts("variable FilePath\x7");
+	        str[0] = FileName;
+	        return 1;
+
+	    case mvFileName:
+	        Console.JustFileName(FileName, str);
+	        return 1;
+
+	    case mvFileDirectory:
+	    	Console.JustDirectory(FileName, str);
+	        return 1;
+	        
+	    case mvFileBaseName:
+	        {
+	            String [] buf = {null};
+	            //char *dot, *dot2;
+
+	            Console.JustFileName(FileName, buf);
+
+	            //File f = new File(buf[0]);
+	            //Path.of(buf[0]).
+	            
+	            int pointPos = buf[0].lastIndexOf('.');
+	            if(pointPos < 0)
+	            	str[0] = buf[0];
+	            else
+	            	str[0] = buf[0].substring(0, pointPos);
+	            /*
+	            dot = strchr(buf, '.');
+	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
+	                dot = dot2;
+	            if (dot)
+	                *dot = 0;
+	            strcpy(str, buf);
+	            */
+	        }
+	        return 1;
+
+	    case mvFileExtension:
+	        {
+	            String [] buf = {null};
+
+	            Console.JustFileName(FileName, buf);
+
+	            int pointPos = buf[0].lastIndexOf('.');
+	            if(pointPos < 0)
+	            	str[0] = buf[0];
+	            else
+	            	str[0] = buf[0].substring(pointPos+1);
+	            
+	            /*
+	            dot = strchr(buf, '.');
+	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
+	                dot = dot2;
+	            if (dot)
+	                strcpy(str, dot);
+	            else
+	                str[0] = 0;
+	            */
+	        }
+	        return 1;
+
+	    case mvChar:
+	    case mvWord:
+	    case mvLine:
+	        return 0;
+	    }
+	    
+	    return super.GetStrVar(var, str);
+	}
+
+	@Override
+	int GetIntVar(int var, int []value) {
+	    switch (var) {
+	    case mvCurRow: value[0] = VToR(CP.Row) + 1; return 1;
+	    case mvCurCol: value[0] = CP.Col; return 1;
+	    }
+	    return super.GetIntVar(var, value);
+	}
+	
+	
+	
+	
 	
 }
 
