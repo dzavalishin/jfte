@@ -264,7 +264,11 @@ public class BinaryString
 	
 	public void copyIn(int ofs, String data, int count) {
 		char[] ca = data.toCharArray();
-		System.arraycopy(ca, 0, mem, ofs, count);		
+		//System.arraycopy(ca, 0, mem, ofs, count);
+		for(int i = 0; i < count; i++)
+		{
+			mem[ofs+i] = ca[i];
+		}
 	}
 
 	public void copyIn(int toPos, BinaryString src, int srcPos, int len) {

@@ -2,8 +2,8 @@ package ru.dz.jfte;
 
 public class EBufferFlags implements ModeDefs 
 {
-	int num[];// = new Integer [BFI_COUNT];
-	String str[];// = new String[BFS_COUNT];
+	int num[] = new int [BFI_COUNT];
+	String str[] = new String[BFS_COUNT];
 	char WordChars[] = new char[32]; // TODO 32
 	char CapitalChars[] = null;
 
@@ -17,8 +17,10 @@ public class EBufferFlags implements ModeDefs
 
 	EBufferFlags()
 	{
-		num = defaultNumFlags;
-		str = defaultStringFlags;
+		//num = defaultNumFlags;
+		System.arraycopy(defaultNumFlags, 0, num, 0, defaultNumFlags.length);
+		//str = defaultStringFlags;
+		System.arraycopy(defaultStringFlags, 0, str, 0, defaultStringFlags.length);
 	}
 
 	static int [] defaultNumFlags =     	    {

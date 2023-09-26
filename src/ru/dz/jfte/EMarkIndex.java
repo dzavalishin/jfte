@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 public class EMarkIndex {
 	//private int marks.length = 0;
-	private EMark [] marks = null;
+	private EMark [] marks = new EMark[0];
 	
-	public static EMarkIndex markIndex;
+	public static EMarkIndex markIndex = new EMarkIndex();
 
 
 
@@ -135,7 +135,8 @@ public class EMarkIndex {
 	    return false;
 	}
 
-	int retrieveForBuffer(EBuffer aBuffer) {
+	int retrieveForBuffer(EBuffer aBuffer) 
+	{
 	    for (int n = 0; n < marks.length; n++)
 	        if (marks[n].getBuffer() == null &&
 	            Console.filecmp(aBuffer.FileName, marks[n].getFileName()) == 0)

@@ -1214,8 +1214,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean Allocate(int ACount) {
 		//ELine [] L = (ELine ) realloc(LL, sizeof(ELine) * (ACount + 1));
 
-		LL = new ELine [ACount];
-		Arrays.fill(LL, null);
+		if(LL == null)
+		{
+			LL = new ELine [ACount];
+			Arrays.fill(LL, null);
+		}
+		else
+			LL = Arrays.copyOf(LL, ACount);			
 
 		RAllocated = ACount;
 
@@ -5062,7 +5067,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//(len = read(fd, FileBuffer, sizeof(FileBuffer))) > 0)
 			char cFileBuffer[] = new char[1024];
 			len = reader.read(cFileBuffer);
-			if( len == 0 )
+			if( len <= 0 )
 				break;
 
 			String FileBuffer = new String(cFileBuffer);
@@ -5194,7 +5199,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if ((LL[RCount++] = new ELine(m.toString())) == null)
 				//goto fail;
 				throw new RuntimeException("line == 0");
-			m = null;
+			//m = null;
+			m.trySetSize(0);
 			RGap = RCount;
 		}
 
@@ -6126,6 +6132,46 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
+	
+	
+	
+	
+	
+	
+	EViewPort CreateViewPort(EView V) {
+	    V.Port = new EEditPort(this, V);
+	    AddView(V);
+
+	    if (!Loaded && suspendLoads == 0) {
+	        Load();
+
+	/* TODO #ifdef CONFIG_OBJ_MESSAGES
+	        if (CompilerMsgs)
+	            CompilerMsgs.FindFileErrors(this);
+	#endif
+	#ifdef CONFIG_OBJ_CVS
+	        if (CvsDiffView) CvsDiffView.FindFileLines(this);
+	#endif */
+
+	        EMarkIndex.markIndex.retrieveForBuffer(this);
+
+	/* #ifdef CONFIG_HISTORY
+	        int r, c;
+
+	        if (RetrieveFPos(FileName, r, c) == 1)
+	            SetNearPosR(c, r);
+	        //printf("setting to c:%d r:%d f:%s", c, r, FileName);
+	        V.Port.GetPos();
+	        V.Port.ReCenter = 1;
+
+	#ifdef CONFIG_BOOKMARKS
+	        if (BFI (this,BFI_SaveBookmarks)==3) RetrieveBookmarks(this);
+	#endif
+	#endif */
+	    }
+	    return V.Port;
+	}
+	
 
 }
 

@@ -5,8 +5,9 @@ import java.io.Closeable;
 public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDefs, ColorDefs, GuiDefs, ModeDefs
 {
     EBuffer Buffer;
-    EPoint TP, OldTP;
-    EPoint CP;
+    EPoint TP = new EPoint();
+    EPoint OldTP = new EPoint();
+    EPoint CP = new EPoint();
     int Rows, Cols;
 
     
