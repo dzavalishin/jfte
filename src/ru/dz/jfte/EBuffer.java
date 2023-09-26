@@ -1682,7 +1682,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        else
 	#endif */
 			int [] ecp = {0};
-			// TODO Hilit_Plain(this, Row, B, C, W, L, State, 0, ecp);
+			Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
 			ECol = ecp[0];
 
 			if (L.StateE != State) {
@@ -6178,6 +6178,115 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	#endif */
 	    }
 	    return V.Port;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
+	    //ChColor *Colors = BF.Mode.fColorize.Colors;
+	    // TODO int[] Colors = BF.Mode.fColorize.Colors;
+	    //HILIT_VARS(Colors[CLR_Normal], Line);
+
+	    //PCLI BPtr; 
+	    int BPos; 
+	    // TOD int /*ChColor*/ Color = Colors[CLR_Normal];
+	    int Color = hcPlain_Normal;
+	    //int i; 
+	    //int len = Line.getCount(); 
+	    //char *p = Line->Chars;
+	    //int pp = 0;
+	    int NC = 0, C = 0; 
+	    //int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
+	    //boolean ExpandTabs = EBuffer.BFI(BF, BFI_ExpandTabs);
+	    
+	    
+	/*#ifdef CONFIG_WORD_HILIT
+	    int j = 0;
+	    
+	    if (BF.Mode.fColorize.Keywords.TotalCount > 0 ||
+	        BF.WordCount > 0)
+	    { //* words have to be hilited, go slow 
+	        for(i = 0; i < Line.Count;) {
+	            IF_TAB() else {
+	                if (isalpha(*p) || (*p == '_')) {
+	                    j = 0;
+	                    while (((i + j) < Line.Count) &&
+	                           (isalnum(Line.Chars[i+j]) ||
+	                            (Line.Chars[i + j] == '_'))
+	                          ) j++;
+	                    if (BF.GetHilitWord(j, Line.Chars + i, Color, 1)) ;
+	                    else {
+	                        Color = Colors[CLR_Normal];
+	                        State = hsPLAIN_Normal;
+	                    }
+	                    if (StateMap)
+	                        memset(StateMap + i, State, j);
+	                    if (B)
+	                        MoveMem(B, C - Pos, Width, Line.Chars + i, Color, j);
+	                    i += j;
+	                    len -= j;
+	                    p += j;
+	                    C += j;
+	                    State = hsPLAIN_Normal;
+	                    Color = Colors[CLR_Normal];
+	                    continue;
+	                }
+	                ColorNext();
+	                continue;
+	            }
+	        }
+	    } else
+	#endif */
+	    /* TOD if (ExpandTabs) { // use slow mode 
+	        for (i = 0; i < Line.getCount();) {
+	            IF_TAB() else {
+	                ColorNext();
+	            }
+	        }
+	    } else */ { /* fast mode */
+	        if (Pos < Line.getCount()) {
+	            if (Pos + Width < Line.getCount()) {
+	                if (B != null) 
+	                	//B.MoveMem(0, Width, Line.Chars + Pos, Color, Width);
+	                	B.MoveMem(0, Width, Line.Chars, Pos, Color, Width);
+	                if (StateMap != null)
+	                    //memset(StateMap, State, Line.getCount());
+	                	Arrays.fill(StateMap, 0, Line.getCount(), State);
+
+	            } else {
+	                if (B != null) 
+	                    //B.MoveMem(0, Width, Line.Chars, + Pos, Color, Line.getCount() - Pos);
+	                    B.MoveMem(0, Width, Line.Chars, Pos, Color, Line.getCount() - Pos);
+	                if (StateMap != null)
+	                	Arrays.fill(StateMap, 0, Line.getCount(), State);
+	                    //memset(StateMap, State, Line.getCount());
+	            }
+	        }
+	        C = Line.getCount();
+	    }
+	    ECol[0] = C;
+	    State = 0;
+	    return 0;
 	}
 	
 

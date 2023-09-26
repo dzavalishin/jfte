@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import ru.dz.jfte.c.ArrayPtr;
+import ru.dz.jfte.c.BinaryString;
 
 /**
  * Cell pointer
@@ -116,7 +117,35 @@ public class PCell extends ArrayPtr<Long>
 	}
 
 	*/
+	public void MoveMem(int Pos, int Width, BinaryString src, int srcPos, int Attr, int Count) {
+		PCell p = new PCell(this);
 
+		//BinaryString src = new BinaryString(asrc);
+		//src.
+		
+		if (Pos < 0) {
+			Count += Pos;
+			//Ch -= Pos;
+			srcPos -= Pos;
+			Pos = 0;
+		}
+		if (Pos >= Width) return;
+		if (Pos + Count > Width) Count = Width - Pos;
+		if (Count <= 0) return;
+
+		p.shift(Pos);
+		for (; Count > 0; Count--) {
+			//*p++ = (unsigned char) (*Ch++);
+			//*p++ = (unsigned char) Attr;
+
+			int CCh = src.charAt(srcPos++);
+			p.wpp( charAndAttr(CCh, Attr) );
+		}
+	}
+
+	
+	
+	
 	void MoveStr(/*PCell B,*/ int Pos, int Width, String Ch, int Attr, int MaxCount) {
 		//unsigned char *p = (unsigned char *) B;
 		PCell p = new PCell(this);
@@ -365,5 +394,6 @@ public class PCell extends ArrayPtr<Long>
 			
 		return new String(res);
 	}
+
 
 }

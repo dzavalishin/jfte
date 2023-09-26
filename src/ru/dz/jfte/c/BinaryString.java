@@ -269,6 +269,9 @@ public class BinaryString
 		{
 			mem[ofs+i] = ca[i];
 		}
+		
+		if(usedLen < ofs+count)
+			usedLen = ofs+count;
 	}
 
 	public void copyIn(int toPos, BinaryString src, int srcPos, int len) {
