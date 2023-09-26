@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import ru.dz.jfte.c.ByteArrayPtr;
 
@@ -93,7 +95,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		String cwd = new File(".").getAbsolutePath();
 		System.out.print("Loading config "+CfgFileName+" cwd "+cwd+"\n");
-		
+
 		byte[] allCfg = null;
 		try {	
 			allCfg = Files.readAllBytes(Path.of(CfgFileName));
@@ -112,8 +114,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		cp.c = new ByteArrayPtr( allCfg, 0 ); 
 		cp.line = 1;
-		
-		
+
+
 		int ln = GetNum(cp);
 
 		if (ln != CONFIG_ID) {
@@ -124,9 +126,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		ln = GetNum(cp);
 
 		if (ln != MainConst.VERNUM) {
-	    	Console.DieError(0, "Bad .CNF version.");
-	        return false;
-	    }
+			Console.DieError(0, "Bad .CNF version.");
+			return false;
+		}
 
 
 		cp.c = new ByteArrayPtr( allCfg, 2 * 4 ); 
@@ -220,7 +222,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
 					UpMap = GetCharStr(cp, obj.len);
-					//if ((UpMap = GetCharStr(cp, obj.len)) == null) return false;
+				//if ((UpMap = GetCharStr(cp, obj.len)) == null) return false;
 
 				// add new mode
 				if ((EventMap = EEventMap.FindEventMap(MapName)) == null) {
@@ -249,7 +251,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
 					UpMode = GetCharStr(cp, obj.len);
-					//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
+				//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 
 				// add new mode
@@ -261,7 +263,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				}
 				//if (ReadColorize(cp, Mode, ModeName) == -1)					return false;
 				ReadColorize(cp, Mode, ModeName);
-				 
+
 			}
 			break;
 
@@ -275,7 +277,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (obj.type != CF_PARENT) return false;
 				if (obj.len > 0)
 					UpMode = GetCharStr(cp, obj.len);
-					//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
+				//if ((UpMode = GetCharStr(cp, obj.len)) == null) return false;
 
 				if ((Mode = EMode.FindMode(ModeName)) == null) {
 					EMode OrgMode = null;
@@ -308,7 +310,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				//if ((ObjName = GetCharStr(cp, obj.len)) == null)					return false;
 				ObjName = GetCharStr(cp, obj.len);
-				
+
 				//if (ReadObject(cp, ObjName) == -1)					return false;
 				ReadObject(cp, ObjName);
 			}
@@ -397,7 +399,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					String val = GetCharStr(cp, obj.len);
 					if (SetGlobalString((int)what, val) != 0) //return -1;
 						throw new ConfigFormatException(cp, "ReadObject SetGlobalString");
-						
+
 				}
 				break;
 				case CF_INT:
@@ -410,18 +412,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				}
 				break;
 				default:
-		        	throw new ConfigFormatException(cp, obj, "SETVAR");
+					throw new ConfigFormatException(cp, obj, "SETVAR");
 					//return -1;
 				}
 			}
 			break;
 			case CF_END:
 				return;
-				
+
 			default:
 				//System.err.printf("unk obj type %d in ReadObject\n", obj.type);
 				//cp.c.shift(obj.len);
-	        	throw new ConfigFormatException(cp, obj, "ReadObject");
+				throw new ConfigFormatException(cp, obj, "ReadObject");
 
 				//break;
 				/// TODO return -1;
@@ -510,10 +512,10 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    ENDFUNCRC(p);
 		 */
 		String ret = cp.c.getLenAsString(len);
-		
+
 		if(ret == null)
 			throw new ConfigFormatException(cp, "No string");
-		
+
 		return ret;
 	}
 
@@ -595,7 +597,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				String s = GetCharStr(cp, obj.len);
 				if (ExMacro.AddString(Cmd, s) == 0)// return -1;
-		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddString");
+					throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddString");
 
 			}
 			break;
@@ -603,7 +605,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			{
 				int num = GetNum(cp);
 				if (ExMacro.AddNumber(Cmd, num) == 0)// return -1;
-		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddNum");
+					throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddNum");
 			}
 			break;
 			case CF_VARIABLE:
@@ -616,14 +618,14 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			break;
 			case CF_CONCAT:
 				if (ExMacro.AddConcat(Cmd) == 0)// return -1;
-		        	throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddConcat");
+					throw new ConfigFormatException(cp, "ReadCommands ExMacro.AddConcat");
 				break;
-			
+
 			case CF_END:
 				return (int) Cmd;
-			
+
 			default:
-	        	throw new ConfigFormatException(cp, obj, "ReadCommands");
+				throw new ConfigFormatException(cp, obj, "ReadCommands");
 
 				//System.err.printf("unk obj type %d in ReadCommands\n", obj.type);
 				//cp.c.shift(obj.len);
@@ -632,7 +634,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			}
 		}
 		//return -1;
-    	throw new ConfigFormatException(cp, obj, "ReadCommands fin");
+		throw new ConfigFormatException(cp, obj, "ReadCommands fin");
 	}
 
 	static void ReadMenu(CurPos cp, String MenuName) throws ConfigFormatException 
@@ -663,7 +665,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					//if (obj.type != CF_MENUSUB) return -1;
 					//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
 					Cmd = ReadCommands(cp, null);
-					
+
 					UpMenu.Menus[menu].Items.get(item).Cmd = Cmd + 65536;
 				}
 			}
@@ -677,7 +679,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (obj.type != CF_STRING) return -1;
 				//if ((w = GetCharStr(cp, obj.len)) == null) return -1;
 				w = GetCharStr(cp, obj.len);
-				
+
 				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_NORMAL);
 			}
 			break;
@@ -691,16 +693,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (obj.type != CF_STRING) return -1;
 				//if ((w = GetCharStr(cp, obj.len)) == null) return -1;
 				w = GetCharStr(cp, obj.len);
-				
+
 				item = UpMenu.NewSubMenu(menu, s, UpMenu.GetMenuId(w), SUBMENU_CONDITIONAL);
 			}
 			break;
 
 			case CF_END:
 				return;
-				
+
 			default:
-	        	throw new ConfigFormatException(cp, obj, "ReadMenu");
+				throw new ConfigFormatException(cp, obj, "ReadMenu");
 
 				//System.err.printf("unk obj type %d in ReadMenu\n", obj.type);
 				//cp.c.shift(obj.len);
@@ -741,7 +743,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				return;
 
 			default:
-	        	throw new ConfigFormatException(cp, obj, "ReadColors");
+				throw new ConfigFormatException(cp, obj, "ReadColors");
 
 				//System.err.printf("unk obj type %d in ReadColors\n", obj.type);
 				//cp.c.shift(obj.len);
@@ -904,7 +906,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				s = GetCharStr(cp, obj.len);
 				if ((Key = SetKey(Map, s)) == null) //return -1;
 					throw new ConfigFormatException(cp, "SetKey failed");
-				
+
 				obj = GetAssertObj(cp,CF_KEYSUB);
 				//if (obj.type != CF_KEYSUB) return -1;
 				//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
@@ -923,7 +925,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 				//if ((s = GetCharStr(cp, obj.len)) == null) return -1;
 				s = GetCharStr(cp, obj.len);
-				
+
 				obj = GetObj(cp);
 				if (obj.type == CF_KEYSUB) {
 					//if ((Cmd = ReadCommands(cp, null)) == -1) return -1;
@@ -935,7 +937,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				} else
 					//return -1;
 					throw new ConfigFormatException(cp, obj, "ReadEventMap ABBREV");
-				
+
 				if (Ab != null) {
 					Map.AddAbbrev(Ab);
 				}
@@ -954,7 +956,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					String val = GetCharStr(cp, obj.len);
 					if (obj.len == 0) //return -1;
 						throw new ConfigFormatException(cp, "ReadEventMap SETVAR name");
-					
+
 					if (SetEventString(Map, what, val) != 0) //return -1;
 						throw new ConfigFormatException(cp, "SetEventString");
 				}
@@ -968,7 +970,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                     }
 	                     break;*/
 				default:
-		        	throw new ConfigFormatException(cp, obj, "CF_SETVAR/EventMap");
+					throw new ConfigFormatException(cp, obj, "CF_SETVAR/EventMap");
 
 					//return -1;
 				}
@@ -977,7 +979,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			case CF_END:
 				return;
 			default:
-	        	throw new ConfigFormatException(cp, obj, "EventMap");
+				throw new ConfigFormatException(cp, obj, "EventMap");
 
 				//return -1;
 			}
@@ -1019,11 +1021,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				String[] ss = colorstr.split(" ");
 				if(ss.length != 2)
 					//return 0;
-	        		throw new ConfigFormatException(cp, obj, "ReadColorize !=2");
+					throw new ConfigFormatException(cp, obj, "ReadColorize !=2");
 
 				ColFg = Integer.parseInt(ss[0], 16);
 				ColBg = Integer.parseInt(ss[1], 16);
-				
+
 				Col = ColFg | (ColBg << 4);
 
 				int color = Col; // ChColor(Col);
@@ -1066,15 +1068,15 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//long color;
 
 				int nextState = GetNum(cp);
-				
+
 				obj = GetAssertObj(cp,CF_INT);
 				//assert(obj.type == CF_INT);
 				int matchFlags = GetNum(cp);
-				
+
 				obj = GetAssertObj(cp,CF_INT);
 				//assert(obj.type == CF_INT);
 				int color = GetNum(cp);
-				
+
 				obj = GetAssertObj(cp,CF_STRING);
 				assert(obj.type == CF_STRING);
 
@@ -1159,7 +1161,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					if (Value.charAt(0) == '-') {
 						//Value++;
 						//Value = Value.substring(1);
-						
+
 						//if (sscanf(Value, "%1X", Col) != 1) return -1;
 						if(!getHex(Value.substring(1, 1), Col)) //return -1;
 							throw new ConfigFormatException( cp, "getHex 1 "+Value);
@@ -1187,7 +1189,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			case CF_SETVAR:
 			{
 				int what = GetNum(cp);
-				
+
 				obj = GetObj(cp);
 				switch (obj.type) {
 				case CF_STRING:
@@ -1209,16 +1211,16 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	                     }
 	                     break;*/
 				default:
-		        	throw new ConfigFormatException(cp, obj, "ReadColorize SETVAR");
+					throw new ConfigFormatException(cp, obj, "ReadColorize SETVAR");
 					//return -1;
 				}
 			}
 			break;
 			case CF_END:
 				return;
-				
+
 			default:
-	        	throw new ConfigFormatException(cp, obj, "ReadColorize");
+				throw new ConfigFormatException(cp, obj, "ReadColorize");
 
 				//return -1;
 			}
@@ -1230,11 +1232,11 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	private static boolean getHex(String value, int[] col)  
 	{
 		// TODO strip
-		
+
 		value = value.strip();
-		
+
 		try { 
-		col[0] = Integer.parseInt(value,16);
+			col[0] = Integer.parseInt(value,16);
 		}
 		catch (NumberFormatException  e) {
 			return false;
@@ -1267,13 +1269,13 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		{
 			obj = GetObj(cp);
 			if(obj.type == 0xFF) break;
-			
+
 			switch (obj.type) {
 			case CF_SETVAR:
 			{
 
 				int what = GetNum(cp);
-				
+
 				obj = GetObj(cp);
 				switch (obj.type) {
 				case CF_STRING:
@@ -1282,7 +1284,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 					/** TODO temp off
 					if (obj.len == 0) //return -1;
 						throw new ConfigFormatException(cp, "ReadMode '"+ModeName+"' SetModeStr "+what+" empty val");
-					*/
+					 */
 
 					if (SetModeString(Mode, what, val) != 0) //return -1;
 						throw new ConfigFormatException(cp, "ReadMode SetModeStr");
@@ -1296,17 +1298,17 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				}
 				break;
 				default:
-		        	throw new ConfigFormatException(cp, obj, "ReadMode SETVAR");
+					throw new ConfigFormatException(cp, obj, "ReadMode SETVAR");
 					//return -1;
 				}
 			}
 			break;
-			
+
 			case CF_END:
 				return;
-				
+
 			default:
-	        	throw new ConfigFormatException(cp, obj, "ReadMode");
+				throw new ConfigFormatException(cp, obj, "ReadMode");
 
 				//return -1;
 			}
@@ -1316,137 +1318,151 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	static void ReadHilitColors(CurPos cp, EColorize Colorize, String  ObjName) throws ConfigFormatException 
 	{
-	    Obj obj;
+		Obj obj;
 
 		while (true) 
 		{
 			obj = GetObj(cp);
 			if(obj.type == 0xFF) break;
-			
-			switch (obj.type) {
-	        case CF_INT:
-	            {
-	                String svalue;
 
-	                int cidx = GetNum(cp);
-	                
-	    			obj = GetAssertObj(cp,CF_STRING);
-	                //if (obj.type != CF_STRING)               return -1;
-	                //if ((svalue = GetCharStr(cp, obj.len)) == null)	                    return -1;
-	                svalue = GetCharStr(cp, obj.len);
-	                
-	                if (Colorize.SetColor(cidx, svalue) == 0)
-	    	        	throw new ConfigFormatException(cp, obj, "ReadHilitColors SetColor");
-	                    //return -1;
-	            }
-	            break;
-	        case CF_END:
-	            return;
-	            
-	        default:
-	        	throw new ConfigFormatException(cp, obj, "ReadHilitColors");
-	            //return -1;
-	        }
-	    }
-	    //return -1;
+			switch (obj.type) {
+			case CF_INT:
+			{
+				String svalue;
+
+				int cidx = GetNum(cp);
+
+				obj = GetAssertObj(cp,CF_STRING);
+				//if (obj.type != CF_STRING)               return -1;
+				//if ((svalue = GetCharStr(cp, obj.len)) == null)	                    return -1;
+				svalue = GetCharStr(cp, obj.len);
+
+				if (Colorize.SetColor(cidx, svalue) == 0)
+					throw new ConfigFormatException(cp, obj, "ReadHilitColors SetColor");
+				//return -1;
+			}
+			break;
+			case CF_END:
+				return;
+
+			default:
+				throw new ConfigFormatException(cp, obj, "ReadHilitColors");
+				//return -1;
+			}
+		}
+		//return -1;
 	}
 
-	
-	
+
+
 	static void ReadKeywords(CurPos cp, ColorKeywords keywords, int color) throws ConfigFormatException {
-	    Obj obj;
+		Obj obj;
 
 		while (true) 
 		{
 			obj = GetObj(cp);
 			if(obj.type == 0xFF) break;
-			
+
 			switch (obj.type) {
-	        case CF_STRING:
-	            {
-	                String kname = GetCharStr(cp, obj.len);
-	                //if (kname == null) return -1;
-	                if (AddKeyword(keywords, (char) color, kname) != 1) // return -1;
-	                	throw new ConfigFormatException(cp, "ReadKW AddKeyword");
-	            }
-	            break;
-	            
-	        case CF_END:
-	            return;
-	            
-	        default:
-	        	throw new ConfigFormatException(cp, obj, "ReadKW");
+			case CF_STRING:
+			{
+				String kname = GetCharStr(cp, obj.len);
+				//if (kname == null) return -1;
+				if (AddKeyword(keywords, (char) color, kname) != 1) // return -1;
+					throw new ConfigFormatException(cp, "ReadKW AddKeyword");
+			}
+			break;
 
-	            //return -1;
-	        }
-	    }
-	    //return -1;
+			case CF_END:
+				return;
+
+			default:
+				throw new ConfigFormatException(cp, obj, "ReadKW");
+
+				//return -1;
+			}
+		}
+		//return -1;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	static int SetModeNumber(EMode mode, int what, int number) {
-	    int j = what;
+		int j = what;
 
-	    if (j == BFI_LeftMargin || j == BFI_RightMargin) number--;
-	    mode.Flags.num[j] = number;
-	    return 0;
+		if (j == BFI_LeftMargin || j == BFI_RightMargin) number--;
+		mode.Flags.num[j] = number;
+		return 0;
 	}
 
 	static int SetModeString(EMode mode, int what, String string) {
-	    int j = what;
+		int j = what;
 
-	//#ifdef CONFIG_SYNTAX_HILIT
-	    if (j == BFI_Colorizer) {
-	        // TODO mode.fColorize = FindColorizer(string);
-	    } else
-	//#endif
-	        if (j == BFI_EventMap) {
-	            mode.fEventMap = EEventMap.FindEventMap(string);
-	        } else if (j == BFI_IndentMode) {
-	            mode.Flags.num[j] = 0; // TODO GetIndentMode(string);
-	        } else if (j == BFS_WordChars) {
-	            SetWordChars(mode.Flags.WordChars, string);
-	        } else if (j == BFS_CapitalChars) {
-	            SetWordChars(mode.Flags.CapitalChars, string);
-	        } else if (j == BFS_FileNameRx) {
-	            mode.MatchName = string;
-	            mode.MatchNameRx = null; // TODO RxCompile(string);
-	        } else if (j == BFS_FirstLineRx) {
-	            mode.MatchLine = string;
-	            mode.MatchLineRx = null; // TODO RxCompile(string);
-	        } else {
-	            mode.Flags.str[j & 0xFF] = string;
-	        }
-	    return 0;
+		//#ifdef CONFIG_SYNTAX_HILIT
+		if (j == BFI_Colorizer) {
+			mode.fColorize = EColorize.FindColorizer(string);
+		} else
+			//#endif
+			if (j == BFI_EventMap) {
+				mode.fEventMap = EEventMap.FindEventMap(string);
+			} else if (j == BFI_IndentMode) {
+				mode.Flags.num[j] = 0; // TODO GetIndentMode(string);
+			} else if (j == BFS_WordChars) {
+				SetWordChars(mode.Flags.WordChars, string);
+			} else if (j == BFS_CapitalChars) {
+				SetWordChars(mode.Flags.CapitalChars, string);
+			} else if (j == BFS_FileNameRx) {
+				mode.MatchName = string;
+				mode.MatchNameRx = null; // TODO RxCompile(string);
+				try {
+					mode.MatchNameRx = Pattern.compile(string); // TODO RxCompile(string);
+				} catch(PatternSyntaxException e)
+				{
+					// TODO PatternSyntaxException
+					System.err.printf("MatchNameRx '%s': %s", string, e.toString() );
+				}
+			} else if (j == BFS_FirstLineRx) {
+				mode.MatchLine = string;
+				mode.MatchLineRx = null;
+				try {
+				mode.MatchLineRx = Pattern.compile(string); // TODO RxCompile(string);
+				} catch(PatternSyntaxException e)
+				{
+					// TODO PatternSyntaxException
+					System.err.printf("MatchLineRx '%s': %s", string, e.toString() );
+				}
+			} else {
+				mode.Flags.str[j & 0xFF] = string;
+			}
+		return 0;
 	}
 
-	
-	
-	
+
+
+
 	static void SetWordChars(char [] w, String s) {
 		//String p;
 		//memset((void *)w, 0, 32);
@@ -1463,7 +1479,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			else if( (p+1 < s.length()) && (s.charAt(p+1) == '-') ) 
 			{
 				if (p+2 >= s.length()) return;
-				
+
 				for (int i = s.charAt(p); i < s.charAt(p+2); i++)
 					ModeDefs.WSETBIT(w, i, 1);
 				p += 2;
@@ -1472,156 +1488,156 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			p++;
 		}
 	}
-	
+
 
 	static int SetEventString(EEventMap Map, int what, String string) {
-	    //STARTFUNC("SetEventString");
-	    //LOG << "What: " << what << " String: " << string << ENDLINE;
-	    switch (what) {
-	    case EM_MainMenu:
-	    case EM_LocalMenu:
-	        Map.SetMenu(what, string);
-	        break;
-	    default:
-	    	
-	    	return -1;
-	    }
-	    return 0;
+		//STARTFUNC("SetEventString");
+		//LOG << "What: " << what << " String: " << string << ENDLINE;
+		switch (what) {
+		case EM_MainMenu:
+		case EM_LocalMenu:
+			Map.SetMenu(what, string);
+			break;
+		default:
+
+			return -1;
+		}
+		return 0;
 	}
-	
-	
-	
-	
+
+
+
+
 	static EKey SetKey(EEventMap aMap, String aKey) 
 	{
-	    //EKeyMap map = aMap.KeyMap;
+		//EKeyMap map = aMap.KeyMap;
 		KeyMapper pmap = aMap;
-	    		
-	    EKeyMap pm, parent = null;
-	    EKey k;
-	    char [] Key  = aKey.toCharArray();// new char[256];
-	    //String p, d;
-	    EEventMap xm = aMap;
 
-	    //System.out.printf("Setting key %s\n", aKey);
-	    //strcpy(Key, aKey);
+		EKeyMap pm, parent = null;
+		EKey k;
+		char [] Key  = aKey.toCharArray();// new char[256];
+		//String p, d;
+		EEventMap xm = aMap;
 
-	    // if mode has parent, get parent keymap
-	    while (xm != null && xm.Parent != null && (parent == null)) {
-	        parent = xm.Parent.KeyMap;
-	        //System.out.printf("%s : %s : %d\n", xm.Name, xm.Parent.Name, parent.hashCode());
-	        xm = xm.Parent;
-	    }
+		//System.out.printf("Setting key %s\n", aKey);
+		//strcpy(Key, aKey);
 
-	    //d = p = Key;
-	    //ArrayPtr<Character> d = new ArrayPtr<>(ArrayPtr.toCharacterArray(Key)); 
-	    ByteArrayPtr d = new ByteArrayPtr(ByteArrayPtr.CharArrayToByte(Key)); 
-	    
-	    while (d.hasCurrent()) {
-	        // parse key combination
-	    	//ArrayPtr<Character> p = new ArrayPtr<>(d);
-	    	ByteArrayPtr p = new ByteArrayPtr(d);
-	    	
-	        //d = strchr(p, '_');
-	        d = p.indexOf((byte)'_');
-	        
-	        if ( d != null) {
-	            if (d.hasBytesLeft() < 2 || d.r(1) == 0 || d.r(1) == '_')
-	                d.inc();
+		// if mode has parent, get parent keymap
+		while (xm != null && xm.Parent != null && (parent == null)) {
+			parent = xm.Parent.KeyMap;
+			//System.out.printf("%s : %s : %d\n", xm.Name, xm.Parent.Name, parent.hashCode());
+			xm = xm.Parent;
+		}
 
-	            if (!d.hasCurrent())
-	                d = null;
-	            else {
-	                d.wpp((byte)0);
-	            }
-	        }
+		//d = p = Key;
+		//ArrayPtr<Character> d = new ArrayPtr<>(ArrayPtr.toCharacterArray(Key)); 
+		ByteArrayPtr d = new ByteArrayPtr(ByteArrayPtr.CharArrayToByte(Key)); 
 
-	        // if lastkey
+		while (d.hasCurrent()) {
+			// parse key combination
+			//ArrayPtr<Character> p = new ArrayPtr<>(d);
+			ByteArrayPtr p = new ByteArrayPtr(d);
 
-	        if (d == null) {
-	            k = new EKey(p.getRestAsString());
-	            if (pmap.KeyMap != null) {
-	                pmap.KeyMap.AddKey(k);
-	            } else {
-	            	aMap.KeyMap = new EKeyMap();
-	                pmap.KeyMap = aMap.KeyMap;
-	                pmap.KeyMap.fParent = parent;
-	                pmap.KeyMap.AddKey(k);
-	            }
-	            return k;
+			//d = strchr(p, '_');
+			d = p.indexOf((byte)'_');
 
-	        } else {
-	            // if introductory key
+			if ( d != null) {
+				if (d.hasBytesLeft() < 2 || d.r(1) == 0 || d.r(1) == '_')
+					d.inc();
 
-	            if (pmap.KeyMap == null) { // first key in mode, create map
-	            	//System.out.printf("new map key = %s, parent %d\n", p.getRestAsString(), parent.hashCode());
-	                k = new EKey(p.getRestAsString(), null);
-	            	pmap.KeyMap = new EKeyMap();
-	                pmap.KeyMap.fParent = parent;
-	                pmap.KeyMap.AddKey(k);
-	            } else {
-	                KeySel ks = new KeySel();
+				if (!d.hasCurrent())
+					d = null;
+				else {
+					d.wpp((byte)0);
+				}
+			}
 
-	                KeyDefs.ParseKey(p.getRestAsString(), ks);
-	                if ((k = pmap.KeyMap.FindKey(ks.Key)) == null) { // check if key exists
-	                    // add it if not
-	                    k = new EKey(p.getRestAsString(), null);
-	                    pmap.KeyMap.AddKey(k);
-	                }
-	            }
-	            //map = &k.fKeyMap; // set current map to key's map
-	            pmap = k;
+			// if lastkey
 
-	            // get parent keymap
-	            pm = parent;
-	            parent = null;
-	            //System.out.printf("Searching %s\n", p.getRestAsString());
-	            while (pm != null) { // while exists
-	                KeySel ks = new KeySel();
-	                EKey pk;
+			if (d == null) {
+				k = new EKey(p.getRestAsString());
+				if (pmap.KeyMap != null) {
+					pmap.KeyMap.AddKey(k);
+				} else {
+					aMap.KeyMap = new EKeyMap();
+					pmap.KeyMap = aMap.KeyMap;
+					pmap.KeyMap.fParent = parent;
+					pmap.KeyMap.AddKey(k);
+				}
+				return k;
 
-	                KeyDefs.ParseKey(p.getRestAsString(), ks);
-	                if ((pk = pm.FindKey(ks.Key)) != null) { // if key exists, find parent of it
-	                    parent = pk.KeyMap;
-	                    //                    printf("Key found %d\n", parent);
-	                    break;
-	                }
-	                pm = pm.fParent; // otherwise find parent of current keymap
-	            }
-	        }
-	    }
+			} else {
+				// if introductory key
 
-	    return null;
+				if (pmap.KeyMap == null) { // first key in mode, create map
+					//System.out.printf("new map key = %s, parent %d\n", p.getRestAsString(), parent.hashCode());
+					k = new EKey(p.getRestAsString(), null);
+					pmap.KeyMap = new EKeyMap();
+					pmap.KeyMap.fParent = parent;
+					pmap.KeyMap.AddKey(k);
+				} else {
+					KeySel ks = new KeySel();
+
+					KeyDefs.ParseKey(p.getRestAsString(), ks);
+					if ((k = pmap.KeyMap.FindKey(ks.Key)) == null) { // check if key exists
+						// add it if not
+						k = new EKey(p.getRestAsString(), null);
+						pmap.KeyMap.AddKey(k);
+					}
+				}
+				//map = &k.fKeyMap; // set current map to key's map
+				pmap = k;
+
+				// get parent keymap
+				pm = parent;
+				parent = null;
+				//System.out.printf("Searching %s\n", p.getRestAsString());
+				while (pm != null) { // while exists
+					KeySel ks = new KeySel();
+					EKey pk;
+
+					KeyDefs.ParseKey(p.getRestAsString(), ks);
+					if ((pk = pm.FindKey(ks.Key)) != null) { // if key exists, find parent of it
+						parent = pk.KeyMap;
+						//                    printf("Key found %d\n", parent);
+						break;
+					}
+					pm = pm.fParent; // otherwise find parent of current keymap
+				}
+			}
+		}
+
+		return null;
 	}
-	
-	
 
-	
+
+
+
 	static int SetColorizeString(EColorize Colorize, int what, String string) {
-	    //STARTFUNC("SetColorizeString");
-	    //LOG << "What: " << what << " String: " << string << ENDLINE;
-	    switch (what) {
-	    case COL_SyntaxParser:
-	        Colorize.SyntaxParser = GetHilitMode(string);
-	        break;
-	    default:
-	        return -1;
-	    }
-	    return (0);
+		//STARTFUNC("SetColorizeString");
+		//LOG << "What: " << what << " String: " << string << ENDLINE;
+		switch (what) {
+		case COL_SyntaxParser:
+			Colorize.SyntaxParser = GetHilitMode(string);
+			break;
+		default:
+			return -1;
+		}
+		return (0);
 	}
-	
-	
+
+
 	static int GetHilitMode(String Str) {
 		/*/ TODO HilitModes
 	    for (int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
 	        if (strcmp(Str, HilitModes[i].Name) == 0)
 	            return HilitModes[i].Num;
-	    */
-	    return HILIT_PLAIN;
+		 */
+		return HILIT_PLAIN;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * 
 	 * Looks like tab.key[len] contains all keywords with length = len,
@@ -1633,37 +1649,37 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	 * @return
 	 */
 	static int AddKeyword(ColorKeywords tab, char color, String keyword) {
-	    int len = keyword.length();
-	    byte[] kwb = keyword.getBytes();
-	    
-	    if (len < 1 || len >= CK_MAXLEN) return 0;
+		int len = keyword.length();
+		byte[] kwb = keyword.getBytes();
 
-	    if(tab.key[len] != null) {
-	        int lx = tab.key.length;
-	        
-	        //String key = (String )realloc(tab.key[len], lx + len + 1 + 1);
+		if (len < 1 || len >= CK_MAXLEN) return 0;
 
-	        tab.key[len] = Arrays.copyOf(tab.key[len], lx + len + 1 + 1);
+		if(tab.key[len] != null) {
+			int lx = tab.key.length;
 
-	        //strcpy(tab.key[len] + lx, keyword);
-	        System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
-	        
-	        tab.key[len][lx + len] = (byte)color;
-	        tab.key[len][lx + len + 1] = 0;
-	    } else {
-	        //tab.key[len] = (String )malloc(len + 2);
-	        tab.key[len] = new byte[len + 2];
+			//String key = (String )realloc(tab.key[len], lx + len + 1 + 1);
 
-	        //strcpy(tab.key[len], keyword);
-	        System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
+			tab.key[len] = Arrays.copyOf(tab.key[len], lx + len + 1 + 1);
 
-	        tab.key[len][len] = (byte)color;
-	        tab.key[len][len + 1] = 0;
-	    }
-	    tab.count[len]++;
-	    tab.TotalCount++;
-	    return 1;
+			//strcpy(tab.key[len] + lx, keyword);
+			System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
+
+			tab.key[len][lx + len] = (byte)color;
+			tab.key[len][lx + len + 1] = 0;
+		} else {
+			//tab.key[len] = (String )malloc(len + 2);
+			tab.key[len] = new byte[len + 2];
+
+			//strcpy(tab.key[len], keyword);
+			System.arraycopy(kwb, 0, tab.key[len], 0, len);	        
+
+			tab.key[len][len] = (byte)color;
+			tab.key[len][len + 1] = 0;
+		}
+		tab.count[len]++;
+		tab.TotalCount++;
+		return 1;
 	}
-	
-	
+
+
 }

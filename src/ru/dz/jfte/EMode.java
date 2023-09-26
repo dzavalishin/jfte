@@ -1,145 +1,178 @@
 package ru.dz.jfte;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 public class EMode {
-    EMode fNext = null;
-    String fName;
-    String MatchName = null;
-    String MatchLine = null;
-    RxNode MatchNameRx = null;
-    RxNode MatchLineRx = null;
-    EBufferFlags Flags = new EBufferFlags();
-    EEventMap fEventMap;
-    EMode fParent;
+	EMode fNext = null;
+	String fName;
+	String MatchName = null;
+	String MatchLine = null;
+	//RxNode MatchNameRx = null;
+	//RxNode MatchLineRx = null;
 
-    EColorize fColorize = null;
+	Pattern MatchNameRx = null;
+	Pattern MatchLineRx = null;
 
-    String filename;
+	EBufferFlags Flags = new EBufferFlags();
+	EEventMap fEventMap;
+	EMode fParent;
 
-    
-    //static EMode Modes [] = new EMode [1];
-    static EMode Modes = null;
+	EColorize fColorize = null;
 
-    /*
+	String filename;
+
+
+	//static EMode Modes [] = new EMode [1];
+	static EMode Modes = null;
+
+	/*
     static {
     	// TODO Modes
     	Modes[0] = new EMode(null, null, null);
     }*/
-    
-    EMode(EMode aMode, EEventMap Map, String aName) {
-        fName = aName;
-        fEventMap = Map;
-        fParent = aMode;
-        //InitWordChars();
-        if (aMode != null) {
-            fColorize = aMode.fColorize;
-            try {
+
+	EMode(EMode aMode, EEventMap Map, String aName) {
+		fName = aName;
+		fEventMap = Map;
+		fParent = aMode;
+		//InitWordChars();
+		if (aMode != null) {
+			fColorize = aMode.fColorize;
+			try {
 				Flags = aMode.Flags.clone();
 			} catch (CloneNotSupportedException e) {
 				//e.printStackTrace();
 				throw new RuntimeException("aMode.Flags.clone", e);
 			}
 
-            // duplicate strings in flags to allow them be freed
-            /*
+			// duplicate strings in flags to allow them be freed
+			/*
             for (int i=0; i<BFS_COUNT; i++)
             {
                 if (aMode.Flags.str[i] != null)
                     Flags.str[i] = aMode.Flags.str[i];
             }*/
 
-            if (aMode.MatchName!=null) {
-                MatchName = aMode.MatchName;
-                MatchNameRx = RxNode.RxCompile(MatchName);
-            }
-            if (aMode.MatchLine!=null) {
-                MatchLine = aMode.MatchLine;
-                MatchLineRx = RxNode.RxCompile(MatchLine);
-            }
-        }
-    }
+			if (aMode.MatchName!=null) {
+				MatchName = aMode.MatchName;
+				try {
+					MatchNameRx = Pattern.compile(MatchName); // RxNode.RxCompile(MatchName);
+				} catch(PatternSyntaxException e)
+				{
+					// TODO PatternSyntaxException
+					System.err.printf("MatchNameRx '%s': %s", MatchName, e.toString() );
+				}
+			}
+			if (aMode.MatchLine!=null) {
+				MatchLine = aMode.MatchLine;
+				try {
+					MatchLineRx = Pattern.compile(MatchLine);
+				} catch(PatternSyntaxException e)
+				{
+					// TODO PatternSyntaxException
+					System.err.printf("MatchNameRx '%s': %s", MatchLine, e.toString() );
+				}
+			}
+		}
+	}
 
-    static EMode FindMode(String Name) 
-    {
-        EMode m = Modes;
+	static EMode FindMode(String Name) 
+	{
+		EMode m = Modes;
 
-        //fprintf(stderr, "Searching mode %s\n", Name);
-        while (m != null) {
-            if (Name.equals(m.fName))
-            {
-                return m;
-            }
-            m = m.fNext;
-        }
-    	
-    	/*
+		//fprintf(stderr, "Searching mode %s\n", Name);
+		while (m != null) {
+			if (Name.equals(m.fName))
+			{
+				return m;
+			}
+			m = m.fNext;
+		}
+
+		/*
     	for( EMode m : Modes )
     		if(m.fName.equals(Name))
     			return m; */
-    	
-    	return null;
-    }
-    
-    
-    static EMode GetModeForName(String FileName)     
-    {
-        EMode m;
-    	/* TODO GetModeForName
-        //    char ext[10];
-        //    char *p;
-        int l, i;
-        RxMatchRes RM;
-        //char buf[81];
-        int fd;
 
-        m = Modes;
-        while (m) {
-            if (m.MatchNameRx)
-                if (RxExec(m.MatchNameRx,
-                           FileName, strlen(FileName), FileName,
-                           &RM) == 1)
-                    return m;
-            if (m.fNext == 0) break;
-            m = m.fNext;
-        }
+		return null;
+	}
 
-        fd = open(FileName, O_RDONLY);
-        if (fd != -1) {
-            l = read(fd, buf, 80);
-            close(fd);
-            if (l > 0) {
-                buf[l] = 0;
-                for (i = 0; i < l; i++) {
-                    if (buf[i] == '\n') {
-                        buf[i] = 0;
-                        l = i;
-                        break;
-                    }
-                }
-                m = Modes;
-                while (m) {
-                    if (m.MatchLineRx)
-                        if (RxExec(m.MatchLineRx, buf, l, buf, &RM) == 1)
-                            return m;
-                    if (m.fNext == 0) break;
-                    m = m.fNext;
-                }
-            }
-        }
 
-        if ((m = FindMode(DefaultModeName)) != 0) return m;
-		*/
+	static EMode GetModeForName(String FileName)     
+	{
+		//* TODO GetModeForName
+		//    char ext[10];
+		//    char *p;
+		//int l, i;
+		//RxMatchRes RM;
+		//char buf[81];
+		//int fd;
 
-        m = Modes;
-        while (m != null && m.fNext != null) 
-        	m = m.fNext;
-        return m;
-        /*
+		EMode m = Modes;
+
+		if(!FileName.isBlank())
+		{
+			while (m != null) {
+				if (m.MatchNameRx != null)
+					//if (RxExec(m.MatchNameRx,                           FileName, strlen(FileName), FileName,                           &RM) == 1)
+					if( m.MatchNameRx.matcher(FileName).matches() )
+						return m;
+				if (m.fNext == null) break;
+				m = m.fNext;
+			}
+
+			String buf = null;
+			try {
+				buf = Files.readString(Path.of(FileName));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			if(buf != null && !buf.isBlank())
+			{
+				/*
+			buf[l] = 0;
+			for (i = 0; i < l; i++) {
+				if (buf[i] == '\n') {
+					buf[i] = 0;
+					l = i;
+					break;
+				}
+			}*/
+				int eol = buf.indexOf('\n');
+				if( eol >= 0)
+					buf = buf.substring(0, eol);
+
+				m = Modes;
+				while (m != null) {
+					if (m.MatchLineRx != null)
+						//if (RxExec(m.MatchLineRx, buf, l, buf, &RM) == 1)
+						if( m.MatchLineRx.matcher(buf).matches() )
+							return m;
+					if (m.fNext == null) break;
+					m = m.fNext;
+				}
+			}
+		}
+		if ((m = FindMode(Config.DefaultModeName)) != null) 
+			return m;
+
+		m = Modes;
+		while (m != null && m.fNext != null) 
+			m = m.fNext;
+		return m;
+		/*
     	if(Modes == null || Modes.length == 0)
     		return null;
-    	
-        return Modes[Modes.length-1];
-        */
-    }
 
-    
+        return Modes[Modes.length-1];
+		 */
+	}
+
+
 }
