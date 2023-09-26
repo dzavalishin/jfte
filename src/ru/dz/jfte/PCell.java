@@ -33,7 +33,8 @@ public class PCell extends ArrayPtr<Long>
 		super(new TDrawBuffer(size));
 	}
 
-	private static final int shift = 8; // 32
+	//private static final int shift = 8; // 32
+	private static final int shift = 32;
 	
 	public static long charAndAttr(int c, int a)
 	{
@@ -43,7 +44,8 @@ public class PCell extends ArrayPtr<Long>
 	public static int getChar(long ca)
 	{
 		//return (int) (ca & 0xFFFFFFFF);
-		return (int) (ca & 0xFF);
+		//return (int) (ca & 0xFF);
+		return (int) (ca & 0xFFFF); // Let Unicode pass through
 	}
 
 	public static int getAttr(long ca)

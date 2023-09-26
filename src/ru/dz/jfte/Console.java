@@ -174,7 +174,8 @@ public class Console implements ModeDefs, GuiDefs
 		//return '+';
 
 		if (null==chtab) 
-			chtab="в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??".toCharArray();
+			//chtab="в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??".toCharArray();
+			chtab="\u250C\u2510\u2514\u2518\u2500\u2502\u252C\u251C\u2524\u2534\u253C\u001A·─▒░\u001B\u001A".toCharArray();
 		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??");
 		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј\x1AВ·в”Ђв–’в–‘\x1B\x1A");
 

@@ -146,14 +146,28 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 			
 			int mod = e.getModifiersEx();
 					
-			//System.out.printf("key %s \n", e );
+			System.out.printf("key %s \n", e );
 			//System.out.printf("k char %x code %x id %d\n", (int)c, code, id );
 			
-			//if( c != 0xFFFF ) code = c;
+			// Skip those per se
+			switch(code)
+			{
+			case KeyEvent.VK_SHIFT:
+			case KeyEvent.VK_ALT:
+			case KeyEvent.VK_CONTROL:
+				return null;				
+			}
+			
+			//if( c != 0xFFFF && code != KeyEvent.VK_ESCAPE ) code = c;
 			// TODO key ch
 			
 			if(id == KeyEvent.KEY_RELEASED)
+			{
 				code |= kfKeyUp;
+				// TODO key release 
+				//System.out.printf("release key %s \n", e );
+				return null;				
+			}
 			
 			if(0 != (mod & KeyEvent.ALT_DOWN_MASK)) code |= kfAlt;
 			if(0 != (mod & KeyEvent.CTRL_DOWN_MASK)) code |= kfCtrl;
