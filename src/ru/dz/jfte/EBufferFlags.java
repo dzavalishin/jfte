@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.util.Arrays;
+
 public class EBufferFlags implements ModeDefs 
 {
 	int num[] = new int [BFI_COUNT];
@@ -23,6 +25,25 @@ public class EBufferFlags implements ModeDefs
 		System.arraycopy(defaultStringFlags, 0, str, 0, defaultStringFlags.length);
 	}
 
+	
+	
+	@Override
+	protected EBufferFlags clone() throws CloneNotSupportedException {
+		EBufferFlags ret = new EBufferFlags();
+
+		System.arraycopy(num, 0, ret.num, 0, num.length);
+		System.arraycopy(str, 0, ret.str, 0, str.length);
+		
+		ret.WordChars = Arrays.copyOf(WordChars, WordChars.length);
+		ret.CapitalChars = (CapitalChars == null) ? null : Arrays.copyOf(CapitalChars, CapitalChars.length);
+
+		return ret;
+	}
+	
+	
+	
+	
+	
 	static int [] defaultNumFlags =     	    {
 			1,                  // AutoIndent
 			1,                  // InsertOn

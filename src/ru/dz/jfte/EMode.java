@@ -32,7 +32,12 @@ public class EMode {
         //InitWordChars();
         if (aMode != null) {
             fColorize = aMode.fColorize;
-            Flags = aMode.Flags;
+            try {
+				Flags = aMode.Flags.clone();
+			} catch (CloneNotSupportedException e) {
+				//e.printStackTrace();
+				throw new RuntimeException("aMode.Flags.clone", e);
+			}
 
             // duplicate strings in flags to allow them be freed
             /*
@@ -60,7 +65,9 @@ public class EMode {
         //fprintf(stderr, "Searching mode %s\n", Name);
         while (m != null) {
             if (Name.equals(m.fName))
+            {
                 return m;
+            }
             m = m.fNext;
         }
     	
@@ -123,7 +130,8 @@ public class EMode {
 		*/
 
         m = Modes;
-        while (m != null && m.fNext != null) m = m.fNext;
+        while (m != null && m.fNext != null) 
+        	m = m.fNext;
         return m;
         /*
     	if(Modes == null || Modes.length == 0)
