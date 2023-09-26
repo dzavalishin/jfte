@@ -73,15 +73,16 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 					Files[Line].Size());
 			*/
 	        Date modifiedDate = new Date(Files[Line].MTime());
-	        String s = modifiedDate.toString() + " " + Files[Line].Size();
+	        String s = modifiedDate.toString(); // + " " + Files[Line].Size()+ " ";
 
-			s += Files[Line].name;
+			String fn = Files[Line].name;
+			fn += Files[Line].isDir() ? '/' : ' ';
 
-			//s += Files[Line].isDir() ? SLASH : ' ';
-			s += Files[Line].isDir() ? '/' : ' ';
-
+			s = String.format("%s %9d  %-40s", s, Files[Line].Size(), fn);
+			
 			if (Col < s.length())
-				B.MoveStr( 0, Width, s + Col, color, Width);
+				B.MoveStr( 0, Width, s.substring(Col), color, Width);
+				//TODO s + Col : B.MoveStr( 0, Width, s + Col, color, Width);
 		}
 	}
 
