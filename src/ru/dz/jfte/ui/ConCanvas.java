@@ -196,18 +196,18 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 		
 		switch(k)
 		{
-		case KeyEvent.VK_UP: return kbUp;
-		case KeyEvent.VK_DOWN: return kbDown;
-		case KeyEvent.VK_LEFT: return kbLeft;
-		case KeyEvent.VK_RIGHT: return kbRight;
+		case KeyEvent.VK_UP: return kbUp|kfGray;
+		case KeyEvent.VK_DOWN: return kbDown|kfGray;
+		case KeyEvent.VK_LEFT: return kbLeft|kfGray;
+		case KeyEvent.VK_RIGHT: return kbRight|kfGray;
 
-		case KeyEvent.VK_HOME: return kbHome;
-		case KeyEvent.VK_END: return kbEnd;
-		case KeyEvent.VK_PAGE_UP: return kbPgUp;
-		case KeyEvent.VK_PAGE_DOWN: return kbPgDn;
+		case KeyEvent.VK_HOME: return kbHome|kfGray;
+		case KeyEvent.VK_END: return kbEnd|kfGray;
+		case KeyEvent.VK_PAGE_UP: return kbPgUp|kfGray;
+		case KeyEvent.VK_PAGE_DOWN: return kbPgDn|kfGray;
 
-		case KeyEvent.VK_INSERT: return kbIns;
-		case KeyEvent.VK_DELETE: return kbDel;
+		case KeyEvent.VK_INSERT: return kbIns|kfGray;
+		case KeyEvent.VK_DELETE: return kbDel|kfGray;
 
 		case KeyEvent.VK_BACK_SPACE: return kbBackSp;
 		case KeyEvent.VK_TAB: return kbTab;

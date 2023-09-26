@@ -17,6 +17,12 @@ public class ExState {
         ExMacro m = ExMacro.Macros.get(Macro);
         if(m == null) return 0;
         
+        if(m.cmds.size() <= Pos)
+        {
+        	System.err.printf("GetStrParam pos %d >= size %d\n", Pos, m.cmds.size() );
+        	return 0;
+        }
+        
         if (m.cmds.get(Pos).type == CommandType.CT_STRING) {
             str[0] = m.cmds.get(Pos).string;
             Pos++;

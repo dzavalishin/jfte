@@ -541,7 +541,9 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         if (State.GetStrParam(null, s) == 0)
             s[0] = "";
 
-        View.Parent.ExecMainMenu(s[0].charAt(0));
+        char c = s[0].length() > 0 ? s[0].charAt(0) : 0;
+        
+        View.Parent.ExecMainMenu(c);
         return ExResult.ErOK;
     }
 
