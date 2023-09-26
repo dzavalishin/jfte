@@ -6,7 +6,7 @@ public abstract class TEvent implements EventDefs, KeyDefs
 	GView View = null;
 
 	abstract public TEvent clone();
-	
+
 	public static TEvent newKeyDownEvent(int code)
 	{
 		return new TKeyEvent(evKeyDown, code);
@@ -35,7 +35,21 @@ public abstract class TEvent implements EventDefs, KeyDefs
 		return e;
 	}
 
+	@Override
+	public String toString() {
+		if(View != null)
+			return String.format("Event %d for %d ", What, View.hashCode());
+		else
+			return String.format("Event %d ", What);
+	}
+
 }
+
+
+
+
+
+
 
 class TEmptyEvent extends TEvent {
 
@@ -50,7 +64,19 @@ class TEmptyEvent extends TEvent {
 		e.View = View;
 		return e;
 	}
+	
+	@Override
+	public String toString() {
+		return "EMPTY "+super.toString();
+	}
+	
 }
+
+
+
+
+
+
 
 
 class TKeyEvent extends TEvent 
@@ -81,34 +107,48 @@ class TKeyEvent extends TEvent
 		GetChar(Ch);
 		return Ch[0];
 	}
-	
+
 	public boolean GetChar(char[] Ch) {
-	    Ch[0] = 0;
-	    
-	    if(0!= (Code & kfModifier))
-	        return false;
-	    
-	    if (KeyDefs.kbCode(Code) == kbEsc) { Ch[0] = 27; return true; }
-	    if (KeyDefs.kbCode(Code) == kbEnter) { Ch[0] = 13; return true; }
-	    if (KeyDefs.kbCode(Code) == (kbEnter | kfCtrl)) { Ch[0] = 10; return true; }
-	    if (KeyDefs.kbCode(Code) == kbBackSp) { Ch[0] = 8; return true; }
-	    if (KeyDefs.kbCode(Code) == (kbBackSp | kfCtrl)) { Ch[0] = 127; return true; }
-	    if (KeyDefs.kbCode(Code) == kbTab) { Ch[0] = 9; return true; }
-	    if (KeyDefs.kbCode(Code) == kbDel) { Ch[0] = 127; return true; }
-	    
-	    if (KeyDefs.keyType(Code) == kfCtrl) {
-	        Ch[0] = (char) (Code & 0x1F);
-	        return true;
-	    }
-	    if (KeyDefs.isAscii(Code)) {
-	        Ch[0] = (char)Code;
-	        return true;
-	    }
-	    
-	    return false;
+		Ch[0] = 0;
+
+		if(0!= (Code & kfModifier))
+			return false;
+
+		if (KeyDefs.kbCode(Code) == kbEsc) { Ch[0] = 27; return true; }
+		if (KeyDefs.kbCode(Code) == kbEnter) { Ch[0] = 13; return true; }
+		if (KeyDefs.kbCode(Code) == (kbEnter | kfCtrl)) { Ch[0] = 10; return true; }
+		if (KeyDefs.kbCode(Code) == kbBackSp) { Ch[0] = 8; return true; }
+		if (KeyDefs.kbCode(Code) == (kbBackSp | kfCtrl)) { Ch[0] = 127; return true; }
+		if (KeyDefs.kbCode(Code) == kbTab) { Ch[0] = 9; return true; }
+		if (KeyDefs.kbCode(Code) == kbDel) { Ch[0] = 127; return true; }
+
+		if (KeyDefs.keyType(Code) == kfCtrl) {
+			Ch[0] = (char) (Code & 0x1F);
+			return true;
+		}
+		if (KeyDefs.isAscii(Code)) {
+			Ch[0] = (char)Code;
+			return true;
+		}
+
+		return false;
+	}
+
+	
+	@Override
+	public String toString() {
+		return String.format("%s key %x ", super.toString(), Code );
 	}
 	
 }
+
+
+
+
+
+
+
+
 
 class TMouseEvent extends TEvent{
 	int X;
@@ -116,7 +156,7 @@ class TMouseEvent extends TEvent{
 	int Buttons;
 	int Count;
 	long /*TKeyCode*/  KeyMask;
-	
+
 	public TMouseEvent(int what) {
 		What = what;
 	}
@@ -133,8 +173,24 @@ class TMouseEvent extends TEvent{
 
 		return e;
 	}
+
+	@Override
+	public String toString() {
+		return String.format("%s mouse @%d,%d btn %x cnt %d mask %x", 
+				super.toString(), 
+				X, Y, Buttons, Count, KeyMask );
+	}
+	
 	
 }
+
+
+
+
+
+
+
+
 
 class TMsgEvent extends TEvent
 {
@@ -148,7 +204,7 @@ class TMsgEvent extends TEvent
 		What = w;
 	}
 
-	
+
 	public TMsgEvent(int w, int c, int p1) {
 		What = w;
 		Command = c;
@@ -166,7 +222,7 @@ class TMsgEvent extends TEvent
 		View = v;
 		Command = cmd;
 	}
-	
+
 
 
 	/**

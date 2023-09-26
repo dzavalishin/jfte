@@ -135,7 +135,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 
 	static int ConQueryMousePos(int []X, int []Y) { /*FOLD00*/
 		Point m = jc.getMousePos();
-		X[0] = m.x;
+		X[0] = m.x ;
 		Y[0] = m.y;
 
 		// NT does not have this ? (not needed anyway, but check mouse hiding above).
@@ -283,6 +283,8 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 		while(e == null)
 			fillEvent();
 
+		System.out.println(e);
+		
 		TEvent ret = e;
 
 		if(delete) 

@@ -12,8 +12,8 @@ import ru.dz.jfte.PCell;
 
 public class ConData 
 {
-	static int xCell = 10;
-	static int yCell = 18;
+	public static final int xCell = 10;
+	public static final int yCell = 18;
 
 	int xSize = 80;
 	int ySize = 25;
@@ -95,11 +95,6 @@ public class ConData
 	static Color [] map = new Color[NCOLOR];
 
 	static {
-		/*for( int i = 0; i < NCOLOR; i++ )
-		{
-			map[i] = Color.yellow;
-		}*/
-
 		map[0] = Color.black;
 		map[1] = Color.blue;
 		map[2] = Color.green;

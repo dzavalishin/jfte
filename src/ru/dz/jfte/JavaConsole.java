@@ -130,8 +130,8 @@ public class JavaConsole implements GuiDefs, EventDefs
 	}
 
 	public Point getMousePos() 
-	{ 
-		return cc.mousePos;
+	{ 		
+		return new Point(cc.mousePos.x / ConData.xCell, cc.mousePos.y / ConData.yCell);
 	}
 
 	public void enableMouse(boolean mouseVisible) {

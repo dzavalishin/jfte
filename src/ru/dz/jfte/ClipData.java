@@ -19,6 +19,10 @@ public class ClipData {
 		return data.charAt(i);
 	}
 	
+	@Override
+	public String toString() {
+		return data;
+	}
 	
 	boolean GetClipText()
 	{

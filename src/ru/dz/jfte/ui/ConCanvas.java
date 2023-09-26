@@ -37,7 +37,7 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 
 		//setSize(1000, 800);
 
-		/*
+		/* */
 		addMouseMotionListener(
 				new MouseMotionAdapter(){
 
@@ -146,7 +146,7 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 			
 			int mod = e.getModifiersEx();
 					
-			System.out.printf("key %s \n", e );
+			//System.out.printf("key %s \n", e );
 			//System.out.printf("k char %x code %x id %d\n", (int)c, code, id );
 			
 			// Skip those per se
@@ -182,12 +182,13 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 			
 			int what, x,  y,  buttons,  count = 0;
 			
-			x = e.getX();
-			y = e.getY();
+			x = e.getX() / ConData.xCell;
+			y = e.getY() / ConData.yCell;
 			
 			count = e.getClickCount();
 			
 			buttons = e.getButton()+1;
+			//buttons = e.getButton();
 			
 			what = 0;
 			
@@ -210,11 +211,18 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 		
 		switch(k)
 		{
+		/*
 		case KeyEvent.VK_UP: return kbUp|kfGray;
 		case KeyEvent.VK_DOWN: return kbDown|kfGray;
 		case KeyEvent.VK_LEFT: return kbLeft|kfGray;
 		case KeyEvent.VK_RIGHT: return kbRight|kfGray;
+		*/
 
+		case KeyEvent.VK_UP: return kbUp;
+		case KeyEvent.VK_DOWN: return kbDown;
+		case KeyEvent.VK_LEFT: return kbLeft;
+		case KeyEvent.VK_RIGHT: return kbRight;
+		
 		case KeyEvent.VK_HOME: return kbHome|kfGray;
 		case KeyEvent.VK_END: return kbEnd|kfGray;
 		case KeyEvent.VK_PAGE_UP: return kbPgUp|kfGray;

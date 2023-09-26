@@ -715,11 +715,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 	static void ReadColors(CurPos cp, String ObjName) throws ConfigFormatException 
 	{
-		Obj obj;
-
 		while(true) 
 		{
-			obj = GetObj(cp); 
+			Obj obj = GetObj(cp); 
 			if(obj.type == 0xFF)
 				break;
 
@@ -854,19 +852,18 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		switch (what) {
 		case FLAG_DefaultModeName: DefaultModeName = string; break;
-		// TODO case FLAG_CompletionFilter: if ((CompletionFilter = RxCompile(string)) == NULL) return -1; break;
 		case FLAG_PrintDevice: PrintDevice = string; break;
 		case FLAG_CompileCommand: CompileCommand = string; break;
 		case FLAG_WindowFont: WindowFont = string; break;
 		case FLAG_HelpCommand: HelpCommand = string; break;
 		case FLAG_GUICharacters:
-			// just ignore
-			// AppendGUICharacters (string); 
+			// TODO AppendGUICharacters (string); 
 			break;
 		case FLAG_CvsCommand: CvsCommand = string; break;
 		case FLAG_CvsLogMode: CvsLogMode = string; break;
 		//CompletionFilter
 		case FLAG_CompletionFilter: 
+			// TODO if ((CompletionFilter = RxCompile(string)) == NULL) return -1; break;
 			break;
 		default:
 			System.err.printf("Unknown global string: %d = '%s'\n", what, string);
