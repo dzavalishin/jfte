@@ -1,5 +1,10 @@
 package ru.dz.jfte;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 public class Main implements MainConst
@@ -218,11 +223,20 @@ public class Main implements MainConst
 	    return 1;
 	}
 
-	public static void main(String[] argv)  
+	
+	private static Font monoFont;
+	
+	public static Font getMonoFont() { return monoFont; }
+	
+	public static void main(String[] argv) throws FontFormatException, IOException  
 	{
 		if (CmdLoadConfiguration(argv) == 0)
 			return;
 
+		var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		monoFont = loadFont("JetBrainsMono-Medium.ttf", ge).deriveFont(16.0f);
+
+		
 		Console.start();
 		//STARTFUNC("main");
 
@@ -235,5 +249,24 @@ public class Main implements MainConst
 		GUI.gui.Run();
 	}
 
+	private static Font loadFont(String fontName, GraphicsEnvironment ge) throws FontFormatException, IOException 
+	{
+		//try(InputStream rs = Main.class.getResourceAsStream("/fonts/"+fontName)) 
+		try(InputStream rs = Main.class.getResourceAsStream("/"+fontName)) 
+		{
+			Font f = Font.createFont(Font.TRUETYPE_FONT, rs);
+			ge.registerFont(f);
+			
+			//System.out.println("loaded "+f.getName());
+			// TODO log.log(Level.FINE, "Got font "+fontName);
+			return f;
+		} catch(Throwable e)
+		{
+			// TODO log.log(Level.SEVERE, "Load font "+fontName, e);
+			//return null;
+			throw e;
+		}
+	}
+	
 
 }

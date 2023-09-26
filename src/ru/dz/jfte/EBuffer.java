@@ -5056,6 +5056,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        return 0;
 	    }
 		 */
+		
+		if(!Console.FileExists(AFileName))
+		{
+            Msg(S_INFO, "New file %s.", AFileName);
+	        Loaded = true;
+	        return true;
+		}
+		
 		Loading = true;
 		Clear();
 		BlockUnmark();

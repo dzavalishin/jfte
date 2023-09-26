@@ -2,13 +2,15 @@ package ru.dz.jfte.ui;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.Arrays;
 
+import ru.dz.jfte.Main;
 import ru.dz.jfte.PCell;
 
 public class ConData 
 {
-	static int xCell = 14;
+	static int xCell = 12;
 	static int yCell = 18;
 	
 	int xSize = 80;
@@ -30,7 +32,12 @@ public class ConData
 	
 	public void paint(Graphics2D g) 
 	{
-		g.setFont(g.getFont().deriveFont(40));
+		g.setFont(Main.getMonoFont()); //g.getFont().deriveFont(40));
+
+		RenderingHints rh = new RenderingHints(
+	             RenderingHints.KEY_TEXT_ANTIALIASING,
+	             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+	    g.setRenderingHints(rh);
 		
 		for( int y = 0; y < ySize; y++ )
 		{
@@ -43,7 +50,7 @@ public class ConData
 				Color bg = map[ (fb >> 4) & 0xF];
 
 				int xp = (x+0)*xCell;
-				int yp = (y+1)*yCell-1;
+				int yp = (y+1)*yCell-2;
 				
 				g.setColor(bg);
 				if(fixColors) g.setColor(Color.black); 

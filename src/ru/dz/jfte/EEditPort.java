@@ -4,7 +4,7 @@ import java.io.Closeable;
 
 public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDefs, ColorDefs, GuiDefs, ModeDefs
 {
-    EBuffer Buffer;
+    final EBuffer Buffer;
     EPoint TP = new EPoint();
     EPoint OldTP = new EPoint();
     EPoint CP = new EPoint();
@@ -32,10 +32,12 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         }
     }
 
+    @Override
     public void close() {
         StorePos();
     }
 
+    @Override
     void Resize(int Width, int Height) {
         Cols = Width;
         Rows = Height - 1;
@@ -62,11 +64,13 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         return 1;
     }
 
+    @Override
     void StorePos() {
         Buffer.CP = CP;
         Buffer.TP = TP;
     }
 
+    @Override
     void GetPos() {
         CP = Buffer.CP;
         TP = Buffer.TP;
@@ -101,7 +105,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         ///    Redraw(0, 0, Cols, Rows);
     }
 
-
+    @Override
     void HandleEvent(TEvent Event) 
     {
         super.HandleEvent(Event);
@@ -185,6 +189,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
             break;
         }
     }
+
     void HandleMouse(TMouseEvent event) {
         int x, y, xx, yy, W, H;
 
@@ -310,17 +315,21 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
         }
     }
 
+    @Override
     void UpdateView() {
         Buffer.Redraw();
     }
 
+    @Override
     void RepaintView() {
         RedrawAll();
     }
 
+    @Override
     void UpdateStatus() {
     }
 
+    @Override
     void RepaintStatus() {
         //Buffer.Redraw();
     }

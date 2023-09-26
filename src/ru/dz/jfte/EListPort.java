@@ -18,10 +18,12 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         GetPos();
     }
 
+    @Override
     public void close() {
         StorePos();
     }
 
+    @Override
     void StorePos() {
         List.Row = Row;
         List.TopRow = TopRow;
@@ -29,12 +31,14 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         List.NeedsUpdate = 1;
     }
 
+    @Override
     void GetPos() {
         Row = List.Row;
         TopRow = List.TopRow;
         LeftCol = List.LeftCol;
     }
 
+    @Override
     void HandleEvent(TEvent Event) {
         int W = 1;
         int H = 1;
@@ -198,6 +202,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         }
     }
 
+    @Override
     void UpdateView() {
         if (OldLeftCol != LeftCol || OldTopRow != TopRow || OldCount != List.Count)
             List.NeedsRedraw = List.NeedsUpdate = 1;
@@ -224,6 +229,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         }
     }
 
+    @Override
     void RepaintView() {
         PaintView(1);
         OldRow = Row;
@@ -234,7 +240,7 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         List.NeedsRedraw = 0;
     }
 
-    void PaintView(int PaintAll) {
+    private void PaintView(int PaintAll) {
         TDrawBuffer B = new TDrawBuffer();
         int I;
         int /*ChColor*/ color;
@@ -276,10 +282,12 @@ public class EListPort extends EViewPort implements Closeable, ColorDefs, EventD
         }
     }
 
+    @Override
     void UpdateStatus() {
         RepaintStatus();
     }
 
+    @Override
     void RepaintStatus() {
         TDrawBuffer B = new TDrawBuffer();
         //char s[80];
