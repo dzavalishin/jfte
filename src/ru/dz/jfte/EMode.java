@@ -60,7 +60,7 @@ public class EMode {
 			if (aMode.MatchName!=null) {
 				MatchName = aMode.MatchName;
 				try {
-					MatchNameRx = Pattern.compile(MatchName); // RxNode.RxCompile(MatchName);
+					MatchNameRx = Pattern.compile(MatchName,Pattern.CASE_INSENSITIVE); // RxNode.RxCompile(MatchName);
 				} catch(PatternSyntaxException e)
 				{
 					// TODO PatternSyntaxException

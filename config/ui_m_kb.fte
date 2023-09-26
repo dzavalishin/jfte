@@ -8,36 +8,36 @@ menu MOpenInMode {
     item "&HTML"       { FileOpenInMode 'HTML' }
     item "&IPF"        { FileOpenInMode 'IPF' }
     item "&Ada"        { FileOpenInMode 'Ada' }
-    item "&REXX"       { FileOpenInMode 'REXX' }
+#    item "&REXX"       { FileOpenInMode 'REXX' }
     item "MA&KE"        { FileOpenInMode 'MAKE' }
     item "&FTE"        { FileOpenInMode 'FTE' }
     item "&Win Resource" { FileOpenInMode 'RESOURCE' }
     item "&DIFF"       { FileOpenInMode 'DIFF' }
     item "&MERGE"      { FileOpenInMode 'MERGE' }
     item "&SH"         { FileOpenInMode 'SH' }
-    item "PER&L"       { FileOpenInMode 'PERL' }
-    item "PASCAL"      { FileOpenInMode 'PASCAL' }
+#    item "PER&L"       { FileOpenInMode 'PERL' }
+#    item "PASCAL"      { FileOpenInMode 'PASCAL' }
     item "&JAVA"       { FileOpenInMode 'JAVA' }
-    item "TE&X"        { FileOpenInMode 'TEX' }
+#    item "TE&X"        { FileOpenInMode 'TEX' }
     item "&BIN"        { FileOpenInMode 'BIN' }
-    item "4&GL"        { FileOpenInMode 'GL' }
-    item "SGML"        { FileOpenInMode 'SGML' }
+#    item "4&GL"        { FileOpenInMode 'GL' }
+#    item "SGML"        { FileOpenInMode 'SGML' }
 }
 
 menu MOpenInModeMore {
-    item "ASM"			{ FileOpenInMode 'ASM' }
-    item "ASM 370 (.CPY,.MLC)"	{ FileOpenInMode 'ASM370' }
-    item "TCL"			{ FileOpenInMode 'TCL' }
-    item "Fortran 90"		{ FileOpenInMode 'FORTRAN' }
-    item "IPF"			{ FileOpenInMode 'IPF' }
-    item "A51"			{ FileOpenInMode 'A51' }
+#    item "ASM"			{ FileOpenInMode 'ASM' }
+#    item "ASM 370 (.CPY,.MLC)"	{ FileOpenInMode 'ASM370' }
+#    item "TCL"			{ FileOpenInMode 'TCL' }
+#    item "Fortran 90"		{ FileOpenInMode 'FORTRAN' }
+#    item "IPF"			{ FileOpenInMode 'IPF' }
+#    item "A51"			{ FileOpenInMode 'A51' }
     item "&PHP"			{ FileOpenInMode 'PHP' }
-    item "CLARION (.CLW)"	{ FileOpenInMode 'CLARION' }
-    item "EBFN"			{ FileOpenInMode 'EBFN' }
-    item "SIOD (.cscm)"		{ FileOpenInMode 'SIOD' }
-    item "S&Lang"		{ FileOpenInMode 'sl' }
-    item "Module 3"		{ FileOpenInMode 'MODULA3' }
-    item "Tex Info"		{ FileOpenInMode 'TEXINFO' }
+#    item "CLARION (.CLW)"	{ FileOpenInMode 'CLARION' }
+#    item "EBFN"			{ FileOpenInMode 'EBFN' }
+#    item "SIOD (.cscm)"		{ FileOpenInMode 'SIOD' }
+#    item "S&Lang"		{ FileOpenInMode 'sl' }
+#    item "Module 3"		{ FileOpenInMode 'MODULA3' }
+#    item "Tex Info"		{ FileOpenInMode 'TEXINFO' }
 }
 
 menu Object {

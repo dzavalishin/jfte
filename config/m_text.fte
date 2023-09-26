@@ -1,6 +1,6 @@
 
 mode TEXT: PLAIN {              # Text files (wordwrap)
-    FileNameRx          = /\.\c{TXT}|{DOC}$/;
+    FileNameRx          = /.*\.(TXT)|(DOC)$/;
 # try also 1
     WordWrap            = 2;
 }

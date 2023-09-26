@@ -21,7 +21,7 @@ colorize FTE {
 }
 
 mode FTE: PLAIN {
-    FileNameRx          = /\.\cfte$/;
+    FileNameRx          = /.*\.fte$/;
     HilitOn             = 1;
     Colorizer           = 'FTE';
     IndentMode          = 'C';

@@ -327,7 +327,7 @@ colorize HTML {
 }
 
 mode HTML: PLAIN {
-    FileNameRx          = /\.\c{S?HTML?}$/;
+    FileNameRx          = /.*\.(S?HTML?)$/;
     HilitOn             = 1;
     Colorizer           = "HTML";
     MultiLineHilit      = 1;

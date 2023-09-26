@@ -29,7 +29,7 @@ colorize JAVA {
 }
 
 mode JAVA: PLAIN {      # JAVA Mode
-    FileNameRx          = /\.\c{JAVA}$/;
+    FileNameRx          = /.*\.(JAVA)$/;
     HilitOn             = 1;
     Colorizer           = 'JAVA';
     AutoIndent          = 1;

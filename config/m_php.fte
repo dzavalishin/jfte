@@ -152,7 +152,7 @@ colorize PHP {
 }
 
 mode PHP: PLAIN {      # PHP Mode
-    FileNameRx          = /\.\c{PHP3}|{PHP4}|{PHP}|{PHTML}$/;
+    FileNameRx          = /.*\.(PHP3)|(PHP4)|(PHP)|(PHTML)$/;
     HilitOn             = 1;
     Colorizer           = 'PHP';
     AutoIndent          = 1;

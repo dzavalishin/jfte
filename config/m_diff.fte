@@ -48,7 +48,7 @@ colorize MERGE {
 }
 
 mode DIFF: PLAIN {        # unix/gnu diff
-    FileNameRx          = /\.\c{DIFF?}$/;
+    FileNameRx          = /.*\.(DIFF?)$/;
     FirstLineRx         = /^diff /;
     HilitOn             = 1;
     Colorizer           = 'DIFF';                     
@@ -56,7 +56,7 @@ mode DIFF: PLAIN {        # unix/gnu diff
 }
 
 mode MERGE: PLAIN {                      # unix/gnu rscmerge
-    FileNameRx          = /\.\cMRG$/;
+    FileNameRx          = /.*\.MRG$/;
     HilitOn             = 1;
     Colorizer           = 'MERGE';
     MultiLineHilit      = 0;

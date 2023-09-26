@@ -859,9 +859,15 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		case FLAG_CompileCommand: CompileCommand = string; break;
 		case FLAG_WindowFont: WindowFont = string; break;
 		case FLAG_HelpCommand: HelpCommand = string; break;
-		// TODO case FLAG_GUICharacters: AppendGUICharacters (string); break;
+		case FLAG_GUICharacters:
+			// just ignore
+			// AppendGUICharacters (string); 
+			break;
 		case FLAG_CvsCommand: CvsCommand = string; break;
 		case FLAG_CvsLogMode: CvsLogMode = string; break;
+		//CompletionFilter
+		case FLAG_CompletionFilter: 
+			break;
 		default:
 			System.err.printf("Unknown global string: %d = '%s'\n", what, string);
 			return 0;
@@ -1438,7 +1444,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				mode.MatchName = string;
 				mode.MatchNameRx = null; // TODO RxCompile(string);
 				try {
-					mode.MatchNameRx = Pattern.compile(string); // TODO RxCompile(string);
+					mode.MatchNameRx = Pattern.compile(string,Pattern.CASE_INSENSITIVE); // TODO RxCompile(string);
 				} catch(PatternSyntaxException e)
 				{
 					// TODO PatternSyntaxException
