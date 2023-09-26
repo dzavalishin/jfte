@@ -58,13 +58,21 @@ public class ExState {
 
         ExMacro m = ExMacro.Macros.get(Macro);
         if(m == null) return 0;
-
         
-        if (m.cmds.get(Pos).type == CommandType.CT_NUMBER) {
-            value[0] = (int) m.cmds.get(Pos).num;
+        if( m.cmds.size() <= Pos )
+        {
+        	System.err.printf("GetIntParam for Macro %d Pos %d out of array size %d",
+        			Macro, Pos, m.cmds.size() );
+        	return 0;
+        }
+        
+        CommandType cmd = m.cmds.get(Pos);
+        
+		if (cmd.type == CommandType.CT_NUMBER) {
+            value[0] = (int) cmd.num;
             Pos++;
-        } else if (view != null && m.cmds.get(Pos).type == CommandType.CT_VARIABLE) {
-            if (view.GetIntVar((int)m.cmds.get(Pos).num, value) == 0)
+        } else if (view != null && cmd.type == CommandType.CT_VARIABLE) {
+            if (view.GetIntVar((int)cmd.num, value) == 0)
                 return 0;
             Pos++;
         } else

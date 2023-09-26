@@ -135,7 +135,7 @@ public class JavaConsole implements GuiDefs, EventDefs
 	}
 
 	public void enableMouse(boolean mouseVisible) {
-		// TODO Auto-generated method stub
+		// TODO enableMouse
 		
 	}
 

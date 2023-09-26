@@ -337,6 +337,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							//ne.Command = Menus[id].Items.get(cur).Cmd;
 							//E = ne;
 							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+							// dz - right?
+							GUI.gui.ConPutEvent(E);
 							abort = 1;
 						} else {
 							dovert = true;
@@ -366,6 +368,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									if (cur != -1) {
 										if (Menus[id].Items.get(cur).SubMenu == -1) {
 											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+											// dz - right?
+											GUI.gui.ConPutEvent(E);
 											abort = 1;
 										} else {
 											dovert = true;
@@ -510,6 +514,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items.get(cur).Cmd);
 						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+						// dz - right?
+						GUI.gui.ConPutEvent(E);
 						abort = 1;
 					}
 				}

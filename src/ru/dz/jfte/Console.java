@@ -277,6 +277,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 
 	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) 
 	{
+		// TODO eventMask
 		// TODO pipe events?
 		//return null;
 
