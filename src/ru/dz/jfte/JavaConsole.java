@@ -12,7 +12,6 @@ public class JavaConsole implements GuiDefs, EventDefs
 	ConCanvas cc = new ConCanvas( cd );
 	private ConFrame cf;
 	private boolean cursorVisible = true;
-	Point cursorPos = new Point(0, 0);
 	
 
 	public JavaConsole() {
@@ -122,13 +121,13 @@ public class JavaConsole implements GuiDefs, EventDefs
 	}
 
 	public void setCursorPos(int x, int y) {
-		cursorPos = new Point(x, y);		
+		cd.cursorPos = new Point(x, y);		
 		cc.repaint();
 }
 
 	public void queryCursorPos(int[] x, int[] y) {
-		x[0] = cursorPos.x;
-		y[0] = cursorPos.y;
+		x[0] = cd.cursorPos.x;
+		y[0] = cd.cursorPos.y;
 	}
 
 	public Point getMousePos() 

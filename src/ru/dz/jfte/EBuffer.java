@@ -262,7 +262,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					View.MView.Win.Choice(
 							GPC_ERROR, "Warning! Press Esc!",
 							0,
-							"File %-.55s changed on disk!", 
+							"File %-55.55s changed on disk!", 
 							FileName);
 
 					cr = View.MView.Win.Choice(0, "File Changed on Disk",
@@ -1960,14 +1960,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 					if (CurPos < NumChars) {
 						CurCh = VLine(CurLine).Chars.charAt(CurPos);
-						CCharStr = String.format("%3u,%02X", CurCh, CurCh);
+						CCharStr = String.format("%3d,%02X", (int)CurCh, (int)CurCh);
 					} else {
 						if (CurPos > NumChars) CCharStr = "      ";
 						else if (CurLine < NumLines - 1) CCharStr = "   EOL";
 						else CCharStr = "   EOF";
 					}
 
-					String s = String.format( "%04d:%02d %c%c%c%c%c %.6s %c"
+					String s = String.format( "%04d:%02d %c%c%c%c %.6s %c"
 							//#ifdef DOS
 							//                        " %lu "
 							//#endif
@@ -1977,29 +1977,29 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 							CurColumn + 1,
 							//                    CurPos + 1,
 							(BFI(this, BFI_Insert)) ? 'I' : ' ',
-									(BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
-											//                    (BFI(this, BFI_ExpandTabs))?'T':' ',
-											(BFI(this, BFI_MatchCase)) ? 'C' : ' ',
-													AutoExtend ?
-															(
-																	(BlockMode == bmStream) ? 's' :
-																		(BlockMode == bmLine) ? 'l' : 'c'
-																	) :
-																		(
-																				(BlockMode == bmStream) ? 'S' :
-																					(BlockMode == bmLine) ? 'L': 'C'
-																				),
-																		/* TODO #ifdef CONFIG_WORDWRAP
+							(BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
+							//  (BFI(this, BFI_ExpandTabs))?'T':' ',
+							(BFI(this, BFI_MatchCase)) ? 'C' : ' ',
+							AutoExtend ?
+								(
+										(BlockMode == bmStream) ? 's' :
+										(BlockMode == bmLine) ? 'l' : 'c'
+								) :
+								(
+										(BlockMode == bmStream) ? 'S' :
+										(BlockMode == bmLine) ? 'L': 'C'
+								),
+							/* TODO #ifdef CONFIG_WORDWRAP
 	                        (BFI(this, BFI_WordWrap) == 3) ? 't' :
 	                        (BFI(this, BFI_WordWrap) == 2) ? 'W' :
 	                        (BFI(this, BFI_WordWrap) == 1) ? 'w' :
 	                        ' ',
-	#endif */
-																		//                    (BFI(this, BFI_Undo))?'U':' ',
-																		//                    (BFI(this, BFI_Trim))?'E':' ',
-																		//                    (Flags.KeepBackups)?'B':' ',
-																		Mode.fName,
-																		(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
+							#endif */
+							//                    (BFI(this, BFI_Undo))?'U':' ',
+							//                    (BFI(this, BFI_Trim))?'E':' ',
+							//                    (Flags.KeepBackups)?'B':' ',
+							Mode.fName,
+							(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
 							);
 
 					int l = s.length();
@@ -6290,6 +6290,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 	
 
+	
+	
+	
+	EEventMap GetEventMap() {
+	    return EEventMap.FindActiveMap(Mode);
+	}
+	
 }
 
 

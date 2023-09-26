@@ -66,4 +66,14 @@ public class EEventMap extends KeyMapper implements ModeDefs
 		return null;
 	}
 
+	
+	static EEventMap FindActiveMap(EMode Mode) {
+	    while (Mode != null) {
+	        if (Mode.fEventMap != null)
+	            return Mode.fEventMap;
+	        Mode = Mode.fParent;
+	    }
+	    return null;
+	}
+	
 }

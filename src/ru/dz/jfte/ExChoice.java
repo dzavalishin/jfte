@@ -29,6 +29,8 @@ public class ExChoice extends ExView implements ColorDefs
         NOpt = NSel;
         lChoice = 0;
         
+        SOpt = new String[NSel];
+        
         for (i = 0; i < NSel; i++) {
             SOpt[i] = choice[i];
             lChoice += PCell.CStrLen(SOpt[i]) + 1;
@@ -87,7 +89,15 @@ public class ExChoice extends ExView implements ColorDefs
         	TKeyEvent Event = (TKeyEvent) pEvent;
             switch (KeyDefs.kbCode(Event.Code)) {
             case kbTab | kfShift:
-            case kbLeft: if (Cur == -1) Cur = 0; Cur--; if (Cur < 0) Cur = NOpt - 1; Event.What = evNone; break;
+            case kbLeft: 
+            	if (Cur == -1) 
+            		Cur = 0; 
+            	Cur--; 
+            	if (Cur < 0) 
+            		Cur = NOpt - 1; 
+            	Event.What = evNone; 
+            break;
+            
             case kbTab:
             case kbRight: if (Cur == -1) Cur = 0; Cur++; if (Cur >= NOpt) Cur = 0; Event.What = evNone; break;
             case kbHome: Cur = 0; Event.What = evNone; break;

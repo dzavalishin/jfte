@@ -3,6 +3,8 @@ package ru.dz.jfte.ui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Point;
+
 import java.util.Arrays;
 
 import ru.dz.jfte.Main;
@@ -18,6 +20,9 @@ public class ConData
 	
 	int colors[][] = new int[xSize][ySize];
 	char chars[][] = new char[xSize][ySize];
+	
+	public Point cursorPos = new Point(0, 0);
+
 	
 	public ConData() {
 		for( int x = 0; x < xSize; x++ )
@@ -65,9 +70,19 @@ public class ConData
 				//g.drawLine(x, y, x, y);
 				
 				//System.out.print(ch);
+				
+				
 			}
 			//System.out.print('\n');
 		}
+		
+		
+		g.setColor(Color.yellow);
+		int cpx = cursorPos.x*xCell;
+		int cpy = (cursorPos.y + 1)*yCell;
+
+		g.drawLine(cpx, cpy, cpx+xCell, cpy);
+		g.drawLine(cpx, cpy+1, cpx+xCell, cpy+1);
 	}
 	
 	
