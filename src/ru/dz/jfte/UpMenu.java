@@ -20,9 +20,9 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 		for (i = 0; i < Menus[id].Items.size(); i++) {
 			if (i == cur) return pos;
-			
+
 			String s = Menus[id].Items.get(i).Name;
-			
+
 			if (s!=null) {
 				len = PCell.CStrLen(s);
 				pos += len + 2;
@@ -109,7 +109,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 	}
 
 
-	static int DrawVMenu(int x, int y, int id, int active) {
+	static int DrawVMenu(int x, int y, int id, int active) 
+	{
 		TDrawBuffer B = new TDrawBuffer();
 		//int i;
 		int /*TAttr*/ color1, color2;
@@ -131,7 +132,9 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		B.MoveCh( Console.ConGetDrawChar(DCH_C1), hcMenu_Background, 1);
 		new PCell(B,w - 1).MoveCh(/*B + w - 1,*/ Console.ConGetDrawChar(DCH_C2), hcMenu_Background, 1);
 		Console.ConPutBox(x, y, w, 1, B);
-		for (int i = 0; i < Menus[id].Items.size(); i++) {
+
+		for (int i = 0; i < Menus[id].Items.size(); i++) 
+		{
 			if (i == active) {
 				color1 = hcMenu_ActiveItem;
 				color2 = hcMenu_ActiveChar;
@@ -153,8 +156,15 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				len = PCell.CStrLen(name);
 				if (arg)					len2 = PCell.CStrLen(arg);
 				 */
-				int len = tabPos;
-				String arg = mname.substring(tabPos+1);
+				int len = mname.length();
+				String arg = "";
+
+				if(tabPos >= 0)
+				{
+					len = tabPos;
+					arg = mname.substring(tabPos+1);
+					len2 = arg.length();
+				}
 
 				B.MoveChar( 0, w, ' ', color1, w);
 				B.MoveCh( Console.ConGetDrawChar(DCH_V), hcMenu_Background, 1);
@@ -387,7 +397,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 										}
 										break;
 									}
-									*/
+								 */
 							}
 						}
 					}
@@ -637,7 +647,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
 							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
-							
+
 							abort = 1;
 						} else {
 							dovert = 1;
@@ -669,7 +679,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									}
 									break;
 								}
-								
+
 								/*
 								char []o = strchr(Menus[id].Items.get(i).Name, '&');
 								if (o)
@@ -690,7 +700,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 										}
 										break;
 									}
-								*/
+								 */
 							}
 						}
 					}
@@ -713,8 +723,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 				}
 				dovert = 1;
 			}
-				break;
-				
+			break;
+
 			case evMouseMove:
 			{
 				TMouseEvent mE = (TMouseEvent) E;
@@ -727,7 +737,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					dovert = 1;
 				}
 			}
-				break;
+			break;
 			case evMouseUp:
 			{
 				TMouseEvent mE = (TMouseEvent) E;
@@ -756,7 +766,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					}
 				}
 			}
-				break;
+			break;
 			}
 		}
 		DrawHMenu(0, 0, id, -1);
@@ -783,7 +793,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		int n = MenuCount;
 
 		Menus[n] = new mMenu();
-		
+
 		Menus[n].Name = Name;
 		//Menus[n].Count = 0;
 		//Menus[n].Items = null;
@@ -803,21 +813,21 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 		//if( Menus[menu].Items[n] == null ) 
 		mItem i = new mItem();
-				
+
 		i.SubMenu = -1;
 		i.Name = Name;
 		i.Arg = null;
 		i.Cmd = -1;
-		
+
 		/*
 		Menus[menu].Items[n].SubMenu = -1;
 		Menus[menu].Items[n].Name = Name;
 		Menus[menu].Items[n].Arg = null;
 		Menus[menu].Items[n].Cmd = -1;
-		*/
-		
+		 */
+
 		Menus[menu].Items.add(i);
-		
+
 		//Menus[menu].Count++;
 		return Menus[menu].Items.size() - 1;//n;
 	}
@@ -830,7 +840,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 		int n = Menus[menu].Items.size();
 
 		mItem i = new mItem();
-		
+
 		i.SubMenu = submenu;
 		i.Name = Name;
 		i.Arg = null;

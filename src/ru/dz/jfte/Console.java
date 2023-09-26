@@ -15,7 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes;
  *
  */
 
-public class Console implements ModeDefs, GuiDefs
+public class Console implements ModeDefs, GuiDefs, EventDefs
 {
 
 	public static Completer CompletePath = new FileCompleter();
@@ -111,13 +111,13 @@ public class Console implements ModeDefs, GuiDefs
 
 	static int ConShowCursor() { /*FOLD00*/
 		CursorVisible = 1;
-		jc.drawCursor(1);
+		jc.drawCursor(true);
 		return 0;
 	}
 
 	static int ConHideCursor() { /*FOLD00*/
 		CursorVisible = 0;
-		jc.drawCursor(0);
+		jc.drawCursor(false);
 		return 0;
 	}
 
@@ -173,9 +173,16 @@ public class Console implements ModeDefs, GuiDefs
 		// TODO ConGetDrawChar
 		//return '+';
 
-		if (null==chtab) 
+		if (null==chtab)
+		{
 			//chtab="в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??".toCharArray();
 			chtab="\u250C\u2510\u2514\u2518\u2500\u2502\u252C\u251C\u2524\u2534\u253C\u001A·─▒░\u001B\u001A".toCharArray();
+			chtab[DCH_RPTR] = '→';
+			chtab[DCH_EOF]= '□';
+			
+			chtab[DCH_AUP] = '↑';
+			chtab[DCH_ADOWN] = '↓';
+		}
 		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј?В·в”Ђв–’в–‘??");
 		//chtab=GetGUICharacters ("WindowsNT","в”Њв”ђв””в”�в”Ђв”‚в”¬в”њв”¤в”ґв”ј\x1AВ·в”Ђв–’в–‘\x1B\x1A");
 

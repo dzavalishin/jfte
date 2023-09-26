@@ -11,7 +11,6 @@ public class JavaConsole implements GuiDefs, EventDefs
 	private ConData cd = new ConData();
 	ConCanvas cc = new ConCanvas( cd );
 	private ConFrame cf;
-	private boolean cursorVisible = true;
 	
 
 	public JavaConsole() {
@@ -111,8 +110,8 @@ public class JavaConsole implements GuiDefs, EventDefs
 		cc.repaint();
 	}
 
-	public void drawCursor(int i) {
-		cursorVisible  = i != 0;
+	public void drawCursor(boolean b) {
+		cd.cursorVisible  = b;
 		cc.repaint();		
 	}
 

@@ -73,7 +73,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 		gui = this;
 	}
 
-	/** TODO ~GUI() { 
+	/**  ~GUI() { 
 	    RestoreScreen();
 
 	    if (SavedScreen)
