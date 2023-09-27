@@ -323,6 +323,8 @@ eventmap PLAIN {
 #   key [G-Right] { MoveNext }
 #   key [A+C+Enter] { noumlaut; RunProgram "latex " . $FileName; }
 
+# [dz] added right here
+
     key     [G-Left]    { MoveLeft }
     key   [C+G-Left]    { MoveWordPrev }
     key     [G-Right]   { MoveRight }
@@ -337,5 +339,7 @@ eventmap PLAIN {
     key   [C+G-PgUp]    { MoveFileStart }
     key     [G-PgDn]    { MovePageDown }
     key   [C+G-PgDn]    { MoveFileEnd }
+
+    key     [G-Ins]     { ToggleInsert }
 
 }

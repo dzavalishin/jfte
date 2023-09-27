@@ -20,7 +20,7 @@ public class EModel implements ModeDefs, Closeable
 	static final int cfNoActivate = 2;
 
 	static final EModel [] ActiveModel = { null };
-	
+
 	//String msgbuftmp = "";
 
 	static EModel FindModelID(EModel Model, int ID) {
@@ -101,18 +101,6 @@ public class EModel implements ModeDefs, Closeable
 	}
 
 	void RemoveView(EView V) {
-		/* 
-       EView **X = &View;
-
-       if (V==null) return;
-       while (*X) {
-           if ((*X) == V) {
-		 *X = V.NextView;
-               return;
-           }
-           X = (&(*X).NextView);
-       }
-		 */
 		if( V!=null )
 			views.remove(V);
 	}
@@ -167,18 +155,11 @@ public class EModel implements ModeDefs, Closeable
 
 
 	void UpdateTitle() {
-		String Title[] = {null}; //fte: ";
-		String STitle[] = {null}; //"fte: ";
-		//EView V;
+		String Title[] = {"jfte"}; 
+		String STitle[] = {""}; 
 
 		GetTitle(Title,STitle);
 
-		/*
-		V = View;
-		while (V != null) {
-			V.MView.Win.UpdateTitle(Title[0], STitle[0]);
-			V = V.NextView;
-		}*/
 		for( EView v : views )
 			v.MView.Win.UpdateTitle(Title[0], STitle[0]);
 	}
