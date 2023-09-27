@@ -51,7 +51,8 @@ public class UndoRedoController
 	//--------------------------------------------------------------------
 
 	/**
-	 * 
+	 * Main entry point for redo action recording operation.
+	 * <p>
 	 * Get root undo/redo record used to store objects related to one undo/redo operation.
 	 * <p>
 	 * Usage: 
@@ -61,6 +62,9 @@ public class UndoRedoController
 	 *   pushInt(y).
 	 *   pushOp(ucPosition);
 	 * }
+	 * <p>
+	 * As a result new undo (or redo if we are undoing now) record is stored to be
+	 * played back later.
 	 * 
 	 * @return object to record undo/redo operation for editor action
 	 */

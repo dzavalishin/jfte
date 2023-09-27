@@ -1,4 +1,4 @@
-package ru.dz.jfte;
+package ru.dz.jfte.undo;
 
 public interface UndoDefs {
 

@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 /** 
  * 
- * Emulate C byte array strings
+ * Emulate C byte array strings, but item is Java 16 bit char
  * 
  * @author dz
  *

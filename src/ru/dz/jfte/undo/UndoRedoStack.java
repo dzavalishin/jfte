@@ -4,14 +4,12 @@ package ru.dz.jfte.undo;
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.dz.jfte.UndoDefs;
-
 /**
  * 
  * <P>
- * Basically UNDO (or REDO) stack is a list of UndoStackItem
- * which is a list of (int/long/char) objects used by undo/redo code for
- * each operation.
+ * Basically UNDO (or REDO) stack is a list of {@code  UndoStackItem } 
+ * which is a list of (int/long/char/other) objects used by undo/redo code for
+ * each operation replay.
  * 
  * @author dz
  *

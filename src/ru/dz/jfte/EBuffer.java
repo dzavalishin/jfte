@@ -28,6 +28,7 @@ import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
 import ru.dz.jfte.c.BitOps;
 import ru.dz.jfte.c.ByteArrayPtr;
+import ru.dz.jfte.undo.UndoDefs;
 import ru.dz.jfte.undo.UndoOperation;
 import ru.dz.jfte.undo.UndoRedoController;
 import ru.dz.jfte.undo.UndoStackItem;

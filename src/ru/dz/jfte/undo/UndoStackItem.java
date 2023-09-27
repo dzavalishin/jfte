@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import ru.dz.jfte.EPoint;
-import ru.dz.jfte.UndoDefs;
 import ru.dz.jfte.c.BinaryString;
 
 /**
