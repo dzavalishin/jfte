@@ -29,12 +29,10 @@ public abstract class EList extends EModel
         return V.Port;
     }
 
-    EListPort GetViewVPort(EView V) {
-        return (EListPort)V.Port;
-    }
+    //EListPort GetViewVPort(EView V) {        return (EListPort)V.Port;    }
     
-    EListPort GetVPort() {
-        return (EListPort )View.Port;
+    EViewPort GetVPort() {
+        return View.Port;
     }
 
     void SetTitle(String ATitle) {

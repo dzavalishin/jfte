@@ -288,11 +288,9 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int PickASCII() throws IOException {
+    int PickASCII() {
         int rc;
-        ExASCII ascii;
-
-        ascii = new ExASCII();
+        ExASCII ascii = new ExASCII();
 
         PushView(ascii);
         rc = Execute();
@@ -303,7 +301,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int ICompleteWord(EView View) throws IOException {
+    int ICompleteWord(EView View)  {
         int rc = 0;
 
         if (View.GetContext() == CONTEXT_FILE) {

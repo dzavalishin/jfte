@@ -6441,6 +6441,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    }
 	}
 	
+	boolean ASCIITable(ExState State) {
+	    int rc = View.MView.Win.PickASCII();
+	    if (rc != -1)
+	        return InsertChar((char)rc);
+
+	    return true;
+	}
 	
 	
 	
@@ -6741,12 +6748,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	 // TODO case ExChangeTabSize:       return ChangeTabSize(State);
 	 // TODO case ExChangeLeftMargin:    return ChangeLeftMargin(State);
 	 // TODO case ExChangeRightMargin:   return ChangeRightMargin(State);
-	    /* TODO case ExASCIITable:
-	#ifdef CONFIG_I_ASCII
+	    case ExASCIITable:
 	        return ASCIITable(State);
-	#else
-	        return false; //ErFAIL;
-	#endif */
+	    /*
 	    /* TODO edit cmds
 	    case ExCharTrans:           return CharTrans(State);
 	    case ExLineTrans:           return LineTrans(State);

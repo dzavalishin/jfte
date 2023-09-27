@@ -84,8 +84,8 @@ public class ConData
 			int cpx = cursorPos.x*xCell;
 			int cpy = (cursorPos.y + 1)*yCell;
 
-			g.drawLine(cpx, cpy, cpx+xCell, cpy);
-			g.drawLine(cpx, cpy+1, cpx+xCell, cpy+1);
+			g.drawLine(cpx, cpy-1, cpx+xCell, cpy-1);
+			g.drawLine(cpx, cpy+0, cpx+xCell, cpy+0);
 		}
 	}
 

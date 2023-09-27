@@ -506,7 +506,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 			if (View.MView.Win.GetStr("Set directory", Dir, HIST_PATH) == 0)
 				return ExResult.ErFAIL;
 		}
-		if (Console.ExpandPath(Dir[0], Dir2) == -1)
+		if (Console.ExpandPath(Dir[0].strip(), Dir2) == -1)
 			return ExResult.ErFAIL;
 
 		// is this needed for other systems as well ?
@@ -527,5 +527,26 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
     @Override
 	boolean CanActivate(int Line) { return true; }
 
+    @Override
+    String GetInfo() {
+    	    String buf[] = {""};
+    	    String winTitle = "";
+
+    	    Console.JustFileName(Path, buf);
+    	    if (buf[0] == null || buf[0].isBlank()) // if there is no filename, try the directory name.
+    	    	Console.JustLastDirectory(Path, buf);
+
+    	    if (buf[0] != null) // if there is a file/dir name, stick it in here.
+    	        winTitle += buf[0] + "/ - ";
+
+    	    winTitle += Path;
+
+    	    return String.format(
+    	            "%2d %04d/%03d %-150s",
+    	            ModelNo,
+    	            Row + 1, FCount,
+    	            winTitle);
+    	
+    }
 
 }

@@ -16,17 +16,10 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     static BufferView BufferList = null;
     
 
-    /*
-    static BufferView newBufferView(int createFlags, EModel mm)  
-    {
-    	EModel [] m = {mm};
-    	return new BufferView(createFlags,m);
-    } */   
-    
+
     BufferView(int createFlags, EModel []ARoot)  
     {
-    	super(createFlags, ARoot, "Buffers");
-    	
+    	super(createFlags, ARoot, "Buffers");    	
     }
 
         
@@ -43,8 +36,8 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     @Override
     void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
         if (Line < BCount)
-            if (Col < BList[Line].length())
-                B.MoveStr( 0, Width, BList[Line] + Col, color, Width);
+            if (BList[Line] != null && Col < BList[Line].length())
+                B.MoveStr( 0, Width, BList[Line].substring(Col), color, Width);
     }
 
     @Override
@@ -70,7 +63,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
         B = ActiveModel[0];
         int No = 0;
         while (B!=null) {
-            String s =B.GetInfo();
+            String s = B.GetInfo();
             BList[No++] = s;
             B = B.Next;
             if (B == ActiveModel[0]) break;
@@ -265,6 +258,11 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     void GetTitle(String [] ATitle, String [] ASTitle) {
         ATitle[0] = "Buffers";
         ASTitle[0] = "Buffers";
+    }
+
+    @Override
+    String GetInfo() {
+        return String.format("%2d %04d/%03d Buffers", ModelNo, Row + 1, Count);
     }
     
 }
