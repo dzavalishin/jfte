@@ -499,8 +499,9 @@ public static String SlashDir(String Path)
 
 		assert(View != null);
 
-		JustDirectory(FileName, fX);
+		fX[0] = directory(FileName);
 		if (fX[0] == null) fX[0] = ".";
+		
 		JustFileName(FileName, FName);
 		if (ExpandPath(fX[0], FPath) == -1) return false;
 		FPath[0] = Slash(FPath[0], 1);
@@ -701,12 +702,67 @@ public static String SlashDir(String Path)
 	    //return 0;
 	}
 
-	public static int JustDirectory(String path, String[] Dir) {
-		Path p = Path.of(path).getParent();
+
+	/**
+	 * 
+	 * @param path
+	 * @return Parent or null for root. Converts to absolute
+	 */
+	public static String parent(String path) {
+		Path a = Path.of(path).toAbsolutePath();
+		Path p = a.getParent();
+		
 		if(p == null)
-			Dir[0] = null;
+			return null;
 		else
+			return p.toString();
+	}
+
+	/**
+	 * 
+	 * @param path
+	 * @return path refers to dir - return it. If to file - return dir
+	 */
+	public static String directory(String path) {
+		Path a = Path.of(path).toAbsolutePath();
+
+		if( a.toFile().isDirectory() )
+			return a.toString();
+
+		Path p = a.getParent();
+		
+		if(p == null)
+			return null;
+		else
+			return p.toString();
+	}
+	
+	
+	public static int _off_JustDirectory(String path, String[] Dir) {
+		Path a = Path.of(path).toAbsolutePath();
+		Path p = a.getParent();
+
+		/*
+		if( p == null && a.toFile().isDirectory() )
+		{
+			Dir[0] = a.toString();
+			return 0;
+		}*/
+		
+		if(p == null)
+		{
+			// must be root dir?
+			Dir[0] = null;
+			return -1;
+			
+			//Dir[0] = a.toString();
+			//return 0;
+		}
+		else
+		{
 			Dir[0] = p.toString();
+			return 0;
+		}
 		/*
 		String p;
 
@@ -716,7 +772,7 @@ public static String SlashDir(String Path)
 	    if (p) { p[1] = 0; }
 	    else Dir[0] = 0;
 	    */
-	    return 0;
+	    //return 0;
 	}
 
 	static int JustLastDirectory(String path, String [] Dir) 	
@@ -743,8 +799,8 @@ public static String SlashDir(String Path)
 
 	static int JustFileName(String path, String [] Name) 
 	{
-		Path p = Path.of(path);
-		Name[0] = p.getFileName().toString();
+		Path p = Path.of(path).getFileName();
+		Name[0] = p == null ? path : p.toString();
 		/*
 		int len = strlen(Path);
 

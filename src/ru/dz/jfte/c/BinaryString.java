@@ -77,6 +77,41 @@ public class BinaryString
 		this(ba, 0, ba.length);
 	}
 
+	/**
+	 * 
+	 * @param len length
+	 */
+	public BinaryString(int len) 
+	{
+		mem = new Character[len];
+		usedLen = 0;
+		pos = 0;
+	}
+	
+	/**
+	 * 
+	 * @param len length
+	 * @param init initial data to clear with
+	 */
+	public BinaryString(int len, char init) 
+	{
+		mem = new Character[len];
+		usedLen = 0;
+		pos = 0;
+		
+		for( int p = 0; p < len; p++ )
+			mem[p] = init;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public char charAt(int i)
 	{
 		return mem[i];
@@ -260,7 +295,9 @@ public class BinaryString
 		return 0;
 	}
 	
-	
+	public void copyIn(int ofs, String data) {
+		copyIn(ofs, data, data.length());
+		}	
 	
 	public void copyIn(int ofs, String data, int count) {
 		char[] ca = data.toCharArray();

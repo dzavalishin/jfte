@@ -128,6 +128,7 @@ public class ExISearch extends ExView implements KeyDefs, GuiDefs
                //Event.What = evKeyDown;
                //Event.Key.Code = Win.GetChar(null);
                Event = new TKeyEvent(evKeyDown,(int)Win.GetChar(null));
+               Event.dispatch();
            default:
                if (KeyDefs.isAscii(kcode) && (len < MAXISEARCH)) {
                    char Ch = (char) kcode;

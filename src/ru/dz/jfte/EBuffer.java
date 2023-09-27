@@ -6853,9 +6853,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	@Override
 	String GetPath() { 
-		String [] APath = {null};
-		Console.JustDirectory(FileName, APath);
-		return APath[0]; 
+		//String [] APath = {null};
+		//Console.JustDirectory(FileName, APath);
+		//return APath[0]; 
+		
+		return Console.directory(FileName);
 		}
 	
 	@Override
@@ -6922,7 +6924,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        return 1;
 
 	    case mvFileDirectory:
-	    	Console.JustDirectory(FileName, str);
+	    	//Console.JustDirectory(FileName, str);
+	    	str[0] = Console.directory(FileName);
 	        return 1;
 	        
 	    case mvFileBaseName:

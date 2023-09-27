@@ -659,7 +659,9 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     //#ifdef UNIX
     //            ExpandPath("~/" DESKTOP_NAME, DesktopFileName);
     //#else
-            	Console.JustDirectory(argv[0], DesktopFileName);
+            	// TODO argv[0] is not prog path
+            	//Console.JustDirectory(argv[0], DesktopFileName);
+            	DesktopFileName [0] = Console.directory(argv[0]); 
                 DesktopFileName [0] += DESKTOP_NAME;
     //#endif
             }

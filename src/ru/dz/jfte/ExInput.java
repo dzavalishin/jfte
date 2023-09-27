@@ -39,7 +39,10 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 
 		// TODO where do we copy back?
 		//Line = ALine[0];
-		Line = new BinaryString(ALine[0]);
+		int w = 80; // TODO ConWidth(); fails for no window yet
+		Line = new BinaryString(w,' ');
+		Line.copyIn(0, ALine[0]);
+		
 		Pos = Line.length();
 		LPos = 0;
 
@@ -273,6 +276,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 				//Event.What = evKeyDown;
 				//Event.Key.Code = Win.GetChar(null);
 				Event = new TKeyEvent(evKeyDown, (int) Win.GetChar(null));
+				Event.dispatch();
 			default:
 			{
 				char Ch;
@@ -344,6 +348,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 		ArrayPtr<Character> lp = Line.getPointer();
 		lp.shift(LPos);
 		B.MoveStr( FPos, W[0], lp, hcEntry_Field, FLen);
+		//B.MoveStr( FPos, W[0], lp, hcEntry_Field, Math.min(FLen, lp.length()));
 
 		B.MoveAttr( FPos + SelStart - LPos, W[0], hcEntry_Selection, SelEnd - SelStart);
 		ConSetCursorPos(FPos + Pos - LPos, H[0] - 1);

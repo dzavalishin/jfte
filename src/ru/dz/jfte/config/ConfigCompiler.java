@@ -161,7 +161,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	private void compile(String Source, String Target) 
 	{
 		Target = new File(Target).getAbsolutePath();
-	    Console.JustDirectory(Target, XTarget);
+	    //Console.JustDirectory(Target, XTarget);
+	    XTarget[0] = Console.parent(Target); 
 	    XTarget[0] = Console.Slash(XTarget[0], 1);
 	    
 	    
@@ -1629,7 +1630,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 
 	    //fprintf(stderr, "Loading file %s %s\n", WhereName, CfgName);
 
-	    Console.JustDirectory(WhereName, last);
+	    //Console.JustDirectory(WhereName, last);
+	    last[0] = Console.directory(WhereName);
 
 	    if (Console.IsFullPath(CfgName)) {
 	        Cfg[0] = CfgName;

@@ -43,6 +43,10 @@ public abstract class TEvent implements EventDefs, KeyDefs
 			return String.format("Event %d ", What);
 	}
 
+	public void dispatch() {
+		GUI.gui.ConPutEvent(this);
+	}
+
 }
 
 

@@ -108,7 +108,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
     @Override
 	void RescanList() {
 		String [] Dir = {""};
-		String [] Name = {""};
+		//String [] Name = {""};
 		int DirCount = 0;
 		int SizeCount = 0;
 		FileFind ff;
@@ -119,8 +119,12 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
 		Count = 0;
 		FCount = 0;
-		if (Console.JustDirectory(Path, Dir) != 0) return;
-		Console.JustFileName(Path, Name);
+		
+		Dir[0] = Console.directory(Path);
+		if( null == Dir[0]) return;
+		
+		//if (Console.JustDirectory(Path, Dir) != 0) return;
+		//Console.JustFileName(Path, Name);
 
 		ff = new FileFind(Dir[0], "*", FileFind.ffDIRECTORY | FileFind.ffHIDDEN);
 
@@ -166,7 +170,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	boolean isDir(int No) {
 		String FilePath[] = {""};
 
-		Console.JustDirectory(Path, FilePath);
+		//Console.JustDirectory(Path, FilePath);
+		FilePath[0] = Console.directory(Path); 
 		FilePath[0] = Console.Slash(FilePath[0], 1);
 		FilePath[0] += Files[No].name;
 		return Console.IsDirectory(FilePath[0]);
@@ -367,9 +372,11 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		} else if (Name.equals("..")) {
 			Path = Console.Slash(Path, 0);
 			Console.JustFileName(Path, CName);
-			Console.JustDirectory(Path, Dir);
+			//Console.JustDirectory(Path, Dir);
+			Dir[0] = Console.parent(Path);
 		} else {
-			Console.JustDirectory(Path, Dir);
+			//Console.JustDirectory(Path, Dir);
+			Dir[0] = Console.directory(Path);
 			Dir[0] = Console.Slash(Dir[0], 1);
 			Dir[0] += Name;
 		}
@@ -428,7 +435,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	ExResult FmLoad(String Name, EView XView) {
 		String [] FilePath = {""};
 
-		Console.JustDirectory(Path, FilePath);
+		//Console.JustDirectory(Path, FilePath);
+		FilePath[0] = Console.directory(Path);
 		FilePath[0] = Console.Slash(FilePath[0], 1);
 		FilePath[0] += Name;
 		return Console.FileLoad(0, FilePath[0], null, XView) ? ExResult.ErOK : ExResult.ErFAIL;
@@ -483,7 +491,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
 		String sp = Console.Slash(Path, 0);
 
-		Console.JustDirectory(sp, ASTitle);
+		//Console.JustDirectory(sp, ASTitle);
+		ASTitle[0] = Console.directory(sp);
 		ASTitle[0] = Console.Slash(ASTitle[0], 1);
 
 	}

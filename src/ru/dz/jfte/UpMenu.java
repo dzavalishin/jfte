@@ -338,7 +338,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							//E = ne;
 							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 							// dz - right?
-							GUI.gui.ConPutEvent(E);
+							//GUI.gui.ConPutEvent(E);
+							E.dispatch();
 							abort = 1;
 						} else {
 							dovert = true;
@@ -369,7 +370,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 										if (Menus[id].Items.get(cur).SubMenu == -1) {
 											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 											// dz - right?
-											GUI.gui.ConPutEvent(E);
+											//GUI.gui.ConPutEvent(E);
+											E.dispatch();
 											abort = 1;
 										} else {
 											dovert = true;
@@ -377,7 +379,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									}
 									break;
 								}								
-								/*
+								/* TODO
 								char []o = strchr(Menus[id].Items.get(i).Name, '&');
 								if (o)
 									if (Character.toUpperCase(o[1]) == cc) {
@@ -394,6 +396,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 												//E = ne;
 
 												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+												E.dispatch();
+
 												abort = 1;
 											} else {
 												dovert = true;
@@ -515,7 +519,8 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items.get(cur).Cmd);
 						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
 						// dz - right?
-						GUI.gui.ConPutEvent(E);
+						//GUI.gui.ConPutEvent(E);
+						E.dispatch();
 						abort = 1;
 					}
 				}
@@ -653,6 +658,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 							//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
 							E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+							E.dispatch();
 
 							abort = 1;
 						} else {
@@ -678,6 +684,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									if (cur != -1) {
 										if (Menus[id].Items.get(cur).SubMenu == -1) {
 											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+											E.dispatch();
 											abort = 1;
 										} else {
 											dovert = 1;
@@ -686,7 +693,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									break;
 								}
 
-								/*
+								/* TODO
 								char []o = strchr(Menus[id].Items.get(i).Name, '&');
 								if (o)
 									if (Character.toUpperCase(o[1]) == cc) {
@@ -698,6 +705,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 												//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
 
 												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+												E.dispatch();
 
 												abort = 1;
 											} else {
@@ -767,6 +775,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 						E = me;
 						 */
 						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
+						E.dispatch();
 
 						abort = 1;
 					}
