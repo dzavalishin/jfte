@@ -237,7 +237,7 @@ public class BinaryString
 		
 		char [] ca = new char[len];
 		
-		for(int i = 0; i < usedLen; i++)
+		for(int i = 0; i < len; i++)
 			ca[i] = mem[i+start];
 		
 		return String.valueOf(ca, 0, len);

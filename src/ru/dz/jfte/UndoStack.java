@@ -15,7 +15,7 @@ import ru.dz.jfte.c.BinaryString;
  * 
  * @author dz
  *
- */
+ * /
 
 public class UndoStack implements UndoDefs 
 {
@@ -47,7 +47,7 @@ public class UndoStack implements UndoDefs
 	 * 
 	 * @param no UndoStackItem position in undo stack
 	 * @return number of objects in given UndoStackItem - used as start position to pop them 
-	 */
+	 * /
 	public int getStartPos(int no) 
 	{
 	    UndoStackItem op = data.get(no);
@@ -56,75 +56,7 @@ public class UndoStack implements UndoDefs
     
 }
 
-
-
-class UndoStackItem implements UndoDefs
-{
-	//int cmd; // action type
-	private boolean disabled = false;
-
-    List<Object> objects = new ArrayList<>(32); 
-
-    void add(Object o) {
-    	if(disabled) return;
-    	objects.add(o); 
-    	}
-
-    Object get(int index) { return objects.get(index); }
-
-    UndoStackItem PushULong(long l) 
-    {
-	    add((Long)l);
-	    return this;
-	}
-
-	UndoStackItem PushUChar(char ch) 
-	{
-	    add((Character)ch);
-	    return this;
-	}
-
-	UndoStackItem PushUChar(int ch) 
-	{
-	    add((Character)(char)ch);
-	    return this;
-	}
-	
-	UndoStackItem PushUData(Object data) { add(data); return this; }
-	
-	public void pushModified() {
-		PushUChar(ucModified);
-	}
-	public void pushPosition(EPoint CP) {
-		PushULong(CP.Col);
-		PushULong(CP.Row);
-		PushUChar(ucPosition);
-		
-	}
-	public UndoStackItem pushString(String s, int aCount) {
-		PushUData( s.substring(0, aCount) );
-		return this;
-	}
-	public UndoStackItem pushString(BinaryString s, int ofs, int aCount) {
-
-		PushUData( s.substring(ofs, aCount) );
-
-		
-		return this;
-	}
-
-	/**
-	 * @return the disabled
-	 */
-	public boolean isDisabled() {		return disabled;	}
-
-	/**
-	 * @param disabled the disabled to set
-	 */
-	public void setDisabled(boolean disabled) {		this.disabled = disabled;	}
-	
-	
-}
+*/
 
 
 

@@ -4,8 +4,10 @@ public class EPoint {
     int Row;
     int Col;
 
-    EPoint(int aRow, int aCol) { Row = aRow; Col = aCol; }
-    EPoint(int aRow) { Row = aRow; Col = 0; }
-    EPoint() { Row = Col = 0; }
+    public EPoint(int aRow, int aCol) { Row = aRow; Col = aCol; }
+    public EPoint(int aRow) { Row = aRow; Col = 0; }
+    public EPoint() { Row = Col = 0; }
 
+    public int getCol() { return Col; }
+    public int getRow() { return Row; }
 }

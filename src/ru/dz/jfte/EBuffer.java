@@ -28,13 +28,16 @@ import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
 import ru.dz.jfte.c.BitOps;
 import ru.dz.jfte.c.ByteArrayPtr;
+import ru.dz.jfte.undo.UndoOperation;
+import ru.dz.jfte.undo.UndoRedoController;
+import ru.dz.jfte.undo.UndoStackItem;
 
 public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs, UndoDefs 
 {
 	String FileName = null;
-	int Modified = 0;
+	public int Modified = 0;
 	EPoint TP = new EPoint();
-	EPoint CP = new EPoint();
+	public EPoint CP = new EPoint();
 
 	EPoint BB = new EPoint(-1, -1);
 	EPoint BE = new EPoint(-1, -1);
@@ -43,12 +46,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	EBufferFlags Flags;
 	EMode Mode;
-	int BlockMode = bmStream;
+	public int BlockMode = bmStream;
 	int ExtendGrab = 0;
 	boolean AutoExtend = false;
 	boolean Loaded = false;
 
-	UndoStack US = new UndoStack();
+	//UndoStack US = new UndoStack();
+	UndoRedoController us = new UndoRedoController(this); 
 
 	BasicFileAttributes FileStatus = null;
 	boolean FileOk = false;
@@ -257,7 +261,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			}
 			/* TODO #ifdef CONFIG_UNDOREDO
 			if (BFI(this, BFI_Undo))
-				if (PushUChar(ucModified) == 0) return false;
+				if (pushOp( UndoOperation.ucModified) == 0) return false;
 			#endif */
 			getSlot().pushModified();
 		}
@@ -477,7 +481,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return FileName != null;
 	}
 
-	boolean SetPos(int Col, int Row) {
+	public boolean SetPos(int Col, int Row) {
 		return SetPos(Col, Row, 0);
 	}	
 
@@ -628,7 +632,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	boolean DelLine(int Row) { return DelLine(Row, false); }	
+	public boolean DelLine(int Row) { return DelLine(Row, false); }	
 
 	boolean DelLine(int Row, boolean DoMark) {
 		int VLine;
@@ -660,10 +664,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		//#endif */
 		getSlot().
-			PushUData(RLine(Row).Chars).
-			//PushULong(RLine(Row).getCount().
-			PushULong(Row).
-			PushUChar(ucDelLine);
+			pushString(RLine(Row).Chars).
+			//pushInt(RLine(Row).getCount().
+			pushInt(Row).
+			pushOp( UndoOperation.ucDelLine );
 		
 		if (DoMark)
 			UpdateMarker(umDelete, Row, 0, 1, 0);
@@ -702,7 +706,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean InsLine(int Row, int DoAppend) {
+	public boolean InsLine(int Row, int DoAppend) {
 		return InsLine(Row, DoAppend, false);
 	}	
 
@@ -736,7 +740,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		#endif */
 		
-		getSlot().PushULong(Row).PushUChar(ucInsLine);
+		getSlot().pushInt(Row).pushOp( UndoOperation.ucInsLine);
 		
 		if (DoMark)
 			UpdateMarker(umInsert, Row, 0, 1, 0);
@@ -776,13 +780,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean DelChars(int Row, int Ofs, int ACount) {
-		ELine L;
+	public boolean DelChars(int Row, int Ofs, int ACount) {
+
 
 		//   printf("DelChars: %d:%d %d\n", Row, Ofs, ACount);
 		if (Row < 0) return false;
 		if (Row >= RCount) return false;
-		L = RLine(Row);
+		ELine L = RLine(Row);
 
 		if (Ofs < 0) return false;
 		if (Ofs >= L.getCount()) return false;
@@ -803,10 +807,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		#endif */
 
 		getSlot().
-			pushString( L.Chars.substring(Ofs), ACount ).
-			PushULong(Ofs).
-			PushULong(Row).
-			PushUChar(ucDelChars);
+			pushString( L.Chars, Ofs, ACount ).
+			pushInt(Ofs).
+			pushInt(Row).
+			pushOp( UndoOperation.ucDelChars);
 		
 		/*
 		if (L.getCount() > Ofs + ACount)
@@ -826,7 +830,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean InsChars(int Row, int Ofs, int ACount, String Buffer) {
+	public boolean InsChars(int Row, int Ofs, int ACount, String Buffer) {
 		//   printf("InsChars: %d:%d %d\n", Row, Ofs, ACount);
 
 		assert(Row >= 0 && Row < RCount && Ofs >= 0);
@@ -847,10 +851,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		#endif */
 		getSlot().
-			PushULong(Row).
-			PushULong(Ofs).
-			PushULong(ACount).
-			PushUChar(ucInsChars);
+			pushInt(Row).
+			pushInt(Ofs).
+			pushInt(ACount).
+			pushOp( UndoOperation.ucInsChars);
 		
 		L.Allocate(L.getCount() + ACount);
 		if (L.getCount() > Ofs)
@@ -920,13 +924,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		
 		getSlot().
 			pushString(L.Chars, Ofs, ACount).
-			PushULong(Ofs).
-			PushULong(Row).
-			PushUChar(ucDelChars).
-			PushULong(Row).
-			PushULong(Ofs).
-			PushULong(ACount).
-			PushUChar(ucInsChars);
+			pushInt(Ofs).
+			pushInt(Row).
+			pushOp( UndoOperation.ucDelChars).
+			pushInt(Row).
+			pushInt(Ofs).
+			pushInt(ACount).
+			pushOp( UndoOperation.ucInsChars);
 		
 		Hilit(Row);
 		Draw(Row, Row);
@@ -966,7 +970,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	boolean InsText(int Row, int Col, int ACount, String ABuffer) {
+	public boolean InsText(int Row, int Col, int ACount, String ABuffer) {
 		return InsText(Row, Col, ACount, ABuffer, false );
 	}	
 	boolean InsText(int Row, int Col, int ACount, String ABuffer, boolean DoMark) {
@@ -3842,7 +3846,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	//Block Commands                                                            //
 	///////////////////////////////////////////////////////////////////////////////
 
-	boolean SetBB(EPoint M) {
+	public boolean SetBB(EPoint M) {
 		EPoint OldBB = BB;
 		int MinL, MaxL;
 
@@ -3860,7 +3864,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean SetBE(EPoint M) {
+	public boolean SetBE(EPoint M) {
 		EPoint OldBE = BE;
 		int MinL, MaxL;
 
@@ -3905,7 +3909,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean BlockRedraw() {
+	public boolean BlockRedraw() {
 		if (BB.Row == -1 || BE.Row == -1) return false;
 		Draw(BB.Row, BE.Row);
 		return true;
@@ -6049,7 +6053,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	boolean PlaceUserBookmark( String n,EPoint P) {
+	public boolean PlaceUserBookmark( String n,EPoint P) {
 		String name = "_BMK"+n;
 		boolean result;
 		EPoint prev;
@@ -6076,16 +6080,16 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            }
 				#endif */
 				getSlot().
-					PushULong(prev.Row).
-					PushULong(prev.Col).
-					PushUData(n).
-					PushUChar(ucPlaceUserBookmark);
+					pushInt(prev.Row).
+					pushInt(prev.Col).
+					pushString(n).
+					pushOp( UndoOperation.ucPlaceUserBookmark);
 			}
 		}
 		return result;
 	}
 
-	boolean RemoveUserBookmark(String n) {
+	public boolean RemoveUserBookmark(String n) {
 		String name  = "_BMK"+n;
 		boolean result;
 		EPoint p;
@@ -6106,10 +6110,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            if (PushUChar(ucRemoveUserBookmark) == 0) return 0;
 	#endif */
 				getSlot().
-					PushULong(p.Row).
-					PushULong(p.Col).
-					PushUData(n).
-					PushUChar(ucRemoveUserBookmark);
+					pushInt(p.Row).
+					pushInt(p.Col).
+					pushString(n).
+					pushOp( UndoOperation.ucRemoveUserBookmark);
 				
 			}
 		}
@@ -7042,12 +7046,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	boolean CanUndo() {
 	    if (!BFI(this, BFI_Undo)) return false;
-	    return US.CanUndo();
+	    return us.CanUndo();
 	}
 
 	boolean CanRedo() {
 	    if (!BFI(this, BFI_Undo)) return false;
-	    return US.CanRedo();
+	    return us.CanRedo();
 	}
 	
 	
@@ -7056,423 +7060,54 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	void PushBlockData() {
 		getSlot().
-		    PushULong(BB.Col).
-		    PushULong(BB.Row).
-		    PushULong(BE.Col).
-		    PushULong(BE.Row).
-		    PushULong(BlockMode).
-		    PushUChar(ucBlock);
+		    pushInt(BB.Col).
+		    pushInt(BB.Row).
+		    pushInt(BE.Col).
+		    pushInt(BE.Row).
+		    pushInt(BlockMode).
+		    pushOp( UndoOperation.ucBlock);
 	}
 
-	//void BeginUndo() {	    US.NextCmd = 1;	}
-
-	boolean EndUndo() {
-		return true;
-		/*
-	    int N = US.getNum() - 1;
-	    
-	    assert(N >= 0);
-	    if (N >= 1) {
-	        int Order = 1;
-	        
-	        while (Order < N) Order <<= 1;
-
-	        US.Data = (void **) realloc(US.Data, sizeof(void *) * Order);
-	        US.Top = (int *) realloc(US.Top, sizeof(int) * Order);
-	        US.Num--;
-	    } else {
-	        //free(US.Data); US.Data = 0;
-	        //free(US.Top); US.Top = 0;
-	        US.Num = 0;
-	    }
-	    return 1; */
-	}
 
 
 
 	UndoStackItem getSlot() 
 	{
-	    //int N;
-	    //int Order = 1;
 
-	    UndoStackItem ret = new UndoStackItem();
+	    UndoStackItem ret = us.getRecordSlot();
 	    
-//	    printf("UPUSH: %d %c\n", len, *(char *)data); fflush(stdout);
-
-	    // turned offf? caller will write to not saved item
-	    if( (!BFI(this, BFI_Undo)) || (!US.Record))
-	    {
-	    	ret.setDisabled(true); 
-	    	return ret;
-	    }
+	    // turned off? caller will write to not saved item
+	    if( (!BFI(this, BFI_Undo)))
+	    	ret.setDisabled(); 
 	    
-	    //if (US.NextCmd != 0 || US.getNum() == 0) {
-	        //N = US.getNum();
-	        if ((iBFI(this, BFI_UndoLimit) == -1) || US.Undo || (US.getNum() < iBFI(this, BFI_UndoLimit))) {
-	            //N++;
-	            //US.Data = (void **) realloc(US.Data, sizeof(void *) * (N | 255));
-	            //US.Top = (int *)   realloc(US.Top,  sizeof(int)    * (N | 255));
-	            if (US.getNum() == US.UndoPtr && !US.Undo)
-	                US.UndoPtr++;
-	            //US.Num++;
-	        } else {
-	            //N = US.getNum();
-	            //free(US.Data[0]);
-	            //memmove(US.Data, US.Data + 1, (N - 1) * sizeof(US.Data[0]));
-	            //memmove(US.Top,  US.Top  + 1, (N - 1) * sizeof(US.Top[0]));
-	            
-	            // Remove last element of undo stack
-	            US.data.remove(US.data.size()-1);
-	        }
-	        //assert(US.Data);
-	        //assert(US.Top);
-	        
-	        //N = US.getNum() - 1;
-	        //US.Data[N] = 0;
-	        //US.Top[N] = 0;
-	        //if (US.NextCmd == 1) {
-	        //    US.NextCmd = 0;
-//	            puts("\x7");
-	    ret.pushPosition(CP);
-//	            puts("\x7");
-	        //}
-	        //US.NextCmd = 0;
-	    //}
-	    
-	    //N = US.getNum() - 1;
-	    //assert(N >= 0);
-   	    US.data.add(ret);
-	    
-	    if (!US.Undo) US.UndoPtr = US.getNum();
-
-	    //while (Order < (US.Top[N] + len)) Order <<= 1;
-	    //US.Data[N] = realloc(US.Data[N], Order);
-	    //memcpy((char *) US.Data[N] + US.Top[N], data, len);
-	    //US.data.
-	    //US.Top[N] += len;
-	    return ret;
+    	return ret;
 	}
 
-	
-	/**
-	 * 
-	 * @param No
-	 * @param pos
-	 * @param data
-	 * 
-	 * @throws IndexOutOfBoundsException if attempts to access not existing element
-	 */
-	
-	void GetUData(int No, int [] pos, Object [] data) 
-	{
-	    int N;
-	    
-	    if (No == -1)
-	        N = US.getNum() - 1;
-	    else
-	        N = No;
 
-	    // none of my business	    if (!BFI(this, BFI_Undo)) return false;
-	    // get() will throw if (N < 0) return false;
-	    
-	    
-	    /*
-	    if (US.Data[N] == 0) return 0;
-	    if (US.Top[N] == 0) return 0;
-	    
-	    if (pos == -1)
-	        pos = US.Top[N];
-	    
-	    
-	    if (pos == 0) 
-	        return 0;
-//	    printf("N,pos = %d,%d len = %d\n", N, pos, len);
-	    
-	    assert(pos >= len);
-	    data[0] = ( US.Data[N]) + pos - len;
-	    return 1;
-	    */
 
-	    UndoStackItem op = US.data.get(N);
-	    
-	    //if (pos[0] == -1)	        pos[0] = op.objects.size();
 
-	    pos[0]--;
-	    
-	    data[0] = op.objects.get(pos[0]); 
-	}
-
-	/**
-	 * 
-	 * @param no position in undo (big) array - refers to one undo/redo op
-	 * @param pos position in UndoStackItem (small) array - advanced as a result of access
-	 * @return character
-	 */
-	char UGETC(int no, int [] pos) 
-	{
-	    Object [] d = {null}; 
-	    GetUData(no, pos, d); 
-	    //*(unsigned char *)&what = *(unsigned char *)d; 
-	    //pos -= sizeof(unsigned char);
-	    return (Character)d[0];
-	}
-	
-	long UGET(int no, int [] pos) 
-	{
-	    Object [] d = {null}; 
-	    GetUData(no, pos, d); 
-	    //memcpy((void *)&what, d, sizeof(what)); 
-	    //pos -= sizeof(what); 
-	    
-	    return (Long)d[0];
-	}
-	
-	
-boolean  Undo(boolean undo) {
-	    char UndoCmd;
-	    //int rc;
-	    long Line;
-	    //long Len;
-	    //long ACount;
-	    long Col;
-	    //Object [] data;
-	    
-	    int No;
-	    
-	    if (!BFI(this, BFI_Undo))
-	        return false;
-	    
-	    if (undo)
-	        No = US.UndoPtr - 1;
-	    else
-	        No = US.getNum() - 1;
-	    
-	    //Pos = US.Top[No];
-	    int [] Pos = { US.getStartPos(No) };
-	    
-	    if (No == 0 && Pos[0] == 0) {
-	        //puts("bottom");
-	        return false;
-	    }
-	    
-//	    for (int i = 0; i < Pos; i++) {
-//	        printf("%d: %d\n", i, ((char *)US.Data[No])[i]);
-//	    }
-	    
-//	    printf("Undo %d %d,%d\n", undo, No, Pos); fflush(stdout);
-	    
-//	    fprintf(stderr, "\nNo = %d, Num = %d\n", No, US.getNum());
-	    //UndoCmd = UGETC(No, Pos);
-	    //while (rc == 1) 
-	    while (Pos[0] > 0) 
-	    {
-	    	UndoCmd = UGETC(No, Pos);
-	    	
-//	        printf("%d Undo %d %d,%d\n", UndoCmd, undo, No, Pos); fflush(stdout);
-	  //  for (int i = 0; i < Pos; i++) {
-//	        printf("%d: %d\n", i, ((char *)US.Data[No])[i]);
-//	    }
-	        switch (UndoCmd) {
-	        case ucInsLine:
-	            Line = UGET(No, Pos); 
-//	            printf("\tDelLine %d\n", Line);
-	            if (!DelLine((int) Line)) return false;
-	            break;
-	            
-	        case ucDelLine:
-	        {
-	        	String [] data = {null};
-	            Line = UGET(No, Pos); 
-	            GetUData(No, Pos, data);
-	            
-//	            printf("\tInsLine %d\n", Line);
-	            if (!InsLine((int) Line, 0)) return false;
-//	            printf("\tInsText %d - %d\n", Line, Len);
-	            if (!InsText((int) Line, 0, data[0].length(), data[0])) return false;
-	            //Pos -= Len;
-	        }
-	            break;
-	            
-	        case ucInsChars:
-	        	long ACount = UGET( No, Pos ); 
-	            Col = UGET(No, Pos); 
-	            Line = UGET(No, Pos); 
-//	            printf("\tDelChars %d %d %d\n", Line, Col, ACount);
-	            if (!DelChars((int)Line, (int)Col, (int)ACount)) return false;
-	            break;
-	            
-	        case ucDelChars:
-	        {
-	        	String [] data = {null};	        	
-	        
-	            Line = UGET(No, Pos); 
-	            Col = UGET(No, Pos); 
-	            //ACount = UGET(No, Pos); 
-	            GetUData(No, Pos, data);
-//	            printf("\tInsChars %d %d %d\n", Line, Col, ACount);
-	            if (!InsChars((int)Line, (int)Col, data[0].length(),  data[0])) return false;
-	            //Pos -= ACount;
-	        }
-	            break;
-	            
-	        case ucPosition:
-	            Line = UGET(No, Pos); 
-	            Col = UGET(No, Pos); 
-//	            printf("\tSetPos %d %d\n", Line, Col);
-	            if(!SetPos((int)Col, (int)Line)) return false;
-	            break;
-	          
-	        case ucBlock: 
-	            {
-	                EPoint P = new EPoint();
-	                long l;
-	                
-//	                printf("\tBlock\n");
-	                l = UGET(No, Pos); 
-	                if (BlockMode != (int)l) BlockRedraw();
-	                BlockMode = (int) l;
-	                l = UGET(No, Pos);    P.Row = (int) l;
-	                l = UGET(No, Pos);    P.Col = (int) l;
-	                if (!SetBE(P)) return false;
-	                l = UGET(No, Pos);    P.Row = (int) l;
-	                l = UGET(No, Pos);    P.Col = (int) l;
-	                if (!SetBB(P)) return false;
-	            }
-	            break;
-
-	        /* TODO Folds
-	        case ucFoldCreate:
-	            // puts("ucFoldCreate");
-	            Line = UGET(No, Pos); 
-	            if (FoldDestroy(Line) == 0) return false;
-	            break;
-	        
-	        case ucFoldDestroy:
-	            // puts("ucFoldDestroy");
-	            {
-	                 long level;
-	                int ff;
-	                
-	                Line = UGET(No, Pos); 
-	                level = UGET(No, Pos); 
-	                if (FoldCreate(Line) == 0) return false;
-	                
-	                ff = FindFold(Line);
-	                assert(ff != -1);
-	                FF[ff].level = ( char) level;
-	            }
-	            break;
-	        case ucFoldPromote:
-	            // puts("ucFoldPromote");
-	            Line = UGET(No, Pos); 
-	            if (FoldDemote(Line) == 0) return false;
-	            break;
-	            
-	        case ucFoldDemote:
-	            // puts("ucFoldDemote");
-	            Line = UGET(No, Pos); 
-	            if (FoldPromote(Line) == 0) return false;
-	            break;
-	            
-	        case ucFoldOpen:
-	            // puts("ucFoldOpen");
-	            Line = UGET(No, Pos); 
-	            if (FoldClose(Line) == 0) return false;
-	            break;
-	            
-	        case ucFoldClose:
-	            // puts("ucFoldClose");
-	            Line = UGET(No, Pos); 
-	            if (FoldOpen(Line) == 0) return false;
-	            break;
-	            */
-	        case ucModified:
-//	            printf("\tModified\n");
-	            Modified = 0;
-	            break;
-
-	        case ucPlaceUserBookmark:
-	        {
-	        	String [] data = {null};	        	
-
-	        	//puts ("ucPlaceUserBookmark");
-	            //UGET(rc, No, Pos, ACount); 
-	            GetUData(No, Pos, data);
-	            //Pos -= ACount;
-	            Col = UGET(No, Pos); 
-	            Line = UGET(No, Pos); 
-	            if (Col==-1||Line==-1) {
-	                if (!RemoveUserBookmark (data[0])) return false;
-	            } else {
-	                if (!PlaceUserBookmark (data[0], new EPoint((int)Line,(int)Col))) return false;
-	            }
-	        }
-	            break;
-
-	        case ucRemoveUserBookmark:
-	        {
-	        	String [] data = {null};	        	
-	            //puts("ucRemoveUserBookmark");
-	            //UGET(rc, No, Pos, ACount); 
-	            GetUData(No, Pos, data);
-	            //Pos -= ACount;
-	            Col = UGET(No, Pos); 
-	            Line = UGET(No, Pos); 
-	            if(!PlaceUserBookmark (data[0], new EPoint((int)Line,(int)Col))) return false;
-	        }
-	            break;
-
-	        default:
-	            assert(null == "Oops: invalid undo command.\n");
-	        }
-//	        puts("\tok");
-	        
-//	        fprintf(stderr, "\nNo = %d, Num = %d\n", No, US.getNum());
-	        //UndoCmd = UGETC(No, Pos);
-	    }
-	    
-	    if (undo)
-	        US.UndoPtr--;
-	    else {
-	        US.UndoPtr++;
-	        //free(US.Data[No]);
-	        if (!EndUndo()) return false;
-	    }
-	    
-	    return true;
-	}
 
 	boolean Redo() 
 	{
 	    if (!BFI(this, BFI_Undo)) return false;
 	    
-//	    US.NextCmd = 0; // disable auto push position
-	    
-	    if (!US.CanRedo()) {
+	    if (!us.CanRedo()) {
 	        Msg(S_INFO, "Nothing to redo.");
 	        return false;
 	    }
 	    
-	    US.Record = false;
-	    boolean rc =  Undo(false);
-	    US.Record = true;
-	    return rc;
+	    return us.redo();
 	}
 
 	boolean Undo() {	    
 	    if (!BFI(this, BFI_Undo)) return false;
 	    
-	    assert(US.getNum() >= 0);
-	    assert(US.UndoPtr >= 0);
-	    if(!US.CanUndo()) {
+	    if(!us.CanUndo()) {
 	        Msg(S_INFO, "Nothing to undo.");
 	        return false;
 	    }
 	    
-	    US.Undo = true;
-	    boolean rc = Undo(true);
-	    US.Undo = false;
-	    return rc;
+	    return us.undo();
 	}
 	
 	
