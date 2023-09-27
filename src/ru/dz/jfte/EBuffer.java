@@ -194,10 +194,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		VCount = VAllocated = VGap = 0;
 		VV = null;
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		FreeUndo();
-		#endif */
-
 		return false;
 	}
 
@@ -260,10 +256,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					}
 				}
 			}
-			/* TODO #ifdef CONFIG_UNDOREDO
-			if (BFI(this, BFI_Undo))
-				if (pushOp( UndoOperation.ucModified) == 0) return false;
-			#endif */
+
 			getSlot().pushModified();
 		}
 		Modified++;
@@ -489,13 +482,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean SetPos(int Col, int Row, int tabMode) {
 		assert (Col >= 0 && Row >= 0 && Row < VCount);
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1 && BFI(this, BFI_UndoMoves) == 1) {
-			if (PushULong(CP.Col) == false) return false;
-			if (PushULong(CP.Row) == false) return false;
-			if (PushUChar(ucPosition) == false) return false;
-		}
-		#endif */
 		if (BFI(this, BFI_Undo) && BFI(this, BFI_UndoMoves))
 			getSlot().pushPosition(CP);
 		
@@ -656,14 +642,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		VLine = RToV(Row);
 		assert(VLine != -1);
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1) {
-			if (PushUData(RLine(Row).Chars, RLine(Row).getCount()) == false) return false;
-			if (PushULong(RLine(Row).getCount()) == false) return false;
-			if (PushULong(Row) == false) return false;
-			if (PushUChar(ucDelLine) == false) return false;
-		}
-		//#endif */
 		getSlot().
 			pushString(RLine(Row).Chars).
 			//pushInt(RLine(Row).getCount().
@@ -672,7 +650,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		
 		if (DoMark)
 			UpdateMarker(umDelete, Row, 0, 1, 0);
-		//puts("Here");
 
 		Draw(Row, -1);
 		Hilit(Row);
@@ -734,14 +711,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		ELine L = new ELine("");
 		//if (L == 0) return false;
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1) {
-			if (PushULong(Row) == false) return false;
-			if (PushUChar(ucInsLine) == false) return false;
-		}
-		#endif */
 		
-		getSlot().pushInt(Row).pushOp( UndoOperation.ucInsLine);
+		getSlot().pushInt(Row).pushOp( UndoOperation.ucInsLine );
 		
 		if (DoMark)
 			UpdateMarker(umInsert, Row, 0, 1, 0);
@@ -843,14 +814,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (!Modify()) return false;
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1) {
-			if (PushULong(Row) == false) return false;
-			if (PushULong(Ofs) == false) return false;
-			if (PushULong(ACount) == false) return false;
-			if (PushUChar(ucInsChars) == false) return false;
-		}
-		#endif */
 		getSlot().
 			pushInt(Row).
 			pushInt(Ofs).
@@ -909,20 +872,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (!Modify()) return false;
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1) {
-			if (PushUData(L.Chars + Ofs, ACount) == false) return false;
-			if (PushULong(ACount) == false) return false;
-			if (PushULong(Ofs) == false) return false;
-			if (PushULong(Row) == false) return false;
-			if (PushUChar(ucDelChars) == false) return false;
-			if (PushULong(Row) == false) return false;
-			if (PushULong(Ofs) == false) return false;
-			if (PushULong(ACount) == false) return false;
-			if (PushUChar(ucInsChars) == false) return false;
-		}
-		#endif */
-		
 		getSlot().
 			pushString(L.Chars, Ofs, ACount).
 			pushInt(Ofs).
@@ -3870,9 +3819,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int MinL, MaxL;
 
 		if (BE.Row == M.Row && BE.Col == M.Col) return true;
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (PushBlockData() == 0) return false;
-		#endif */
+
+		PushBlockData(); // to undo stack
+
 		BE = M;
 		if (OldBE.Row == -1) OldBE = BB;
 		if ((OldBE.Col != BE.Col) && (BlockMode == bmColumn)) BlockRedraw();
@@ -4127,13 +4076,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		Draw(B.Row, -1);
 		//    if (MoveToPos(B.Col, B.Row) == false) return false;
 
-		/* TODO #ifdef CONFIG_UNDOREDO
-		if (BFI(this, BFI_Undo) == 1) {
-			if (PushULong(CP.Col) == false) return false;
-			if (PushULong(CP.Row) == false) return false;
-			if (PushUChar(ucPosition) == false) return false;
-		}
-		#endif */
 		getSlot().pushPosition(CP);
 
 		
@@ -4984,11 +4926,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (View != null)
 			View.SetMsg(null);
-		// TODO #ifdef CONFIG_UNDOREDO
-		//    return BeginUndo();
-		//#else
+
 		return true;
-		//#endif
 	}
 
 
@@ -6071,15 +6010,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			}
 			if(iBFI(this,BFI_SaveBookmarks)==1||iBFI(this,BFI_SaveBookmarks)==2) {
 				if (!Modify ()) return result;   // Never try to save to read-only
-				/* TODO #ifdef CONFIG_UNDOREDO
-	            if (BFI(this, BFI_Undo)) {
-	                if (PushULong(prev.Row) == 0) return 0;
-	                if (PushULong(prev.Col) == 0) return 0;
-	                if (PushUData((void *)n,strlen (n)+1) == 0) return 0;
-	                if (PushULong(strlen (n)+1) == 0) return 0;
-	                if (PushUChar(ucPlaceUserBookmark) == 0) return 0;
-	            }
-				#endif */
+
 				getSlot().
 					pushInt(prev.Row).
 					pushInt(prev.Col).
@@ -6636,16 +6567,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExBlockSelectPara:       return BlockSelectPara();
 	    case ExBlockUnTab:            return BlockUnTab();
 	    case ExBlockEnTab:            return BlockEnTab();
-	// TODO #ifdef CONFIG_UNDOREDO
+
 	    case ExUndo:                  return Undo();
 	    case ExRedo:                  return Redo();
-	//#else
-	    //case ExUndo:                  return ErFAIL;
-	    //case ExRedo:                  return ErFAIL;
-	    //case ExUndo:	    case ExRedo:        	return false;
 
-	//#endif
-        	// TODO case ExMatchBracket:          return MatchBracket();
+	    // TODO case ExMatchBracket:          return MatchBracket();
 	    case ExMovePrevPos:           return MovePrevPos();
 	    case ExMoveSavedPosCol:       return MoveSavedPosCol();
 	    case ExMoveSavedPosRow:       return MoveSavedPosRow();
