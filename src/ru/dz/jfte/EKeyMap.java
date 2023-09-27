@@ -69,5 +69,11 @@ public class EKeyMap implements KeyDefs
         }
         return null;
     }
+
+	public void dump() {
+		for( EKey p = fKeys; p != null; p = p.fNext )
+			p.dump();
+		
+	}
     
 }

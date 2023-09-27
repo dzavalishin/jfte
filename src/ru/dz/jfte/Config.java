@@ -238,6 +238,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if (ReadEventMap(cp, EventMap, MapName) == -1) return false;
 				ReadEventMap(cp, EventMap, MapName);
 
+				//EventMap.dump();
 			}
 			break;
 

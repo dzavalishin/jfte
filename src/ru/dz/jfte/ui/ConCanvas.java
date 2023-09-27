@@ -1,11 +1,9 @@
 package ru.dz.jfte.ui;
 
-import java.awt.AWTEvent;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -211,17 +209,17 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 		
 		switch(k)
 		{
-		/*
 		case KeyEvent.VK_UP: return kbUp|kfGray;
 		case KeyEvent.VK_DOWN: return kbDown|kfGray;
 		case KeyEvent.VK_LEFT: return kbLeft|kfGray;
 		case KeyEvent.VK_RIGHT: return kbRight|kfGray;
-		*/
 
+		/*
 		case KeyEvent.VK_UP: return kbUp;
 		case KeyEvent.VK_DOWN: return kbDown;
 		case KeyEvent.VK_LEFT: return kbLeft;
 		case KeyEvent.VK_RIGHT: return kbRight;
+		*/
 		
 		case KeyEvent.VK_HOME: return kbHome|kfGray;
 		case KeyEvent.VK_END: return kbEnd|kfGray;

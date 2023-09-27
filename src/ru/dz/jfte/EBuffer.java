@@ -6475,7 +6475,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 	
 	
-	private boolean doExecCommand(ExCommands Command, ExState State) {
+	private boolean doExecCommand(ExCommands Command, ExState State) 
+	{
 	    switch (Command) {
 	    case ExMoveUp:                return MoveUp();
 	    case ExMoveDown:              return MoveDown();

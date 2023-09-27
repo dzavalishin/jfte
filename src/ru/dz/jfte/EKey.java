@@ -26,5 +26,22 @@ public class EKey extends KeyMapper implements KeyDefs
         // if there is child keymaps delete them
         KeyMap.close();
     }
+
+	public void dump() 
+	{
+		String []Key = {""};
+		
+		KeyDefs.GetKeyName(Key, fKey);
+		
+		System.out.printf("\tkey %s cmd %d", Key[0], Cmd );
+		
+		/*if(null != fNext)
+		{
+			System.out.printf(" ->");
+			fNext.dump();
+		}
+		else*/
+			System.out.printf("\n");
+	}
     
 }

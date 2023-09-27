@@ -19,12 +19,9 @@ public class EModel implements ModeDefs, Closeable
 	static final int cfAppend = 1;
 	static final int cfNoActivate = 2;
 
-
-
-	//static EModel ActiveModel = null;
 	static final EModel [] ActiveModel = { null };
 	
-	String msgbuftmp = "";
+	//String msgbuftmp = "";
 
 	static EModel FindModelID(EModel Model, int ID) {
 		EModel M = Model;
@@ -140,10 +137,10 @@ public class EModel implements ModeDefs, Closeable
 		if (View == null)
 			return;
 
-		msgbuftmp = String.format(s, o);
+		//msgbuftmp = String.format(s, o);
 
 		if (level != S_BUSY)
-			View.SetMsg(msgbuftmp);
+			View.SetMsg(String.format(s, o));
 	}
 
 	boolean CanQuit() {

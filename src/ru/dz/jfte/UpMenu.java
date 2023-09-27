@@ -358,19 +358,19 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 
 						cc = Character.toUpperCase((char)(((TKeyEvent)E).Code & 0xFF));
 
-						for (i = 0; i < Menus[id].Items.size(); i++) {
-							if (Menus[id].Items.get(i).Name!=null) 
+						for (i = 0; i < Menus[id].Items.size(); i++) 
+						{
+							mItem item = Menus[id].Items.get(i);
+							if (item.Name!=null) 
 							{
-								int amppos = Menus[id].Items.get(i).Name.indexOf('&');
-								char ch = Menus[id].Items.get(i).Name.charAt(amppos+1);
+								int amppos = item.Name.indexOf('&');
+								char ch = item.Name.charAt(amppos+1);
 								if(Character.toUpperCase(ch) == cc )
 								{
 									cur = i;
 									if (cur != -1) {
 										if (Menus[id].Items.get(cur).SubMenu == -1) {
 											E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
-											// dz - right?
-											//GUI.gui.ConPutEvent(E);
 											E.dispatch();
 											abort = 1;
 										} else {
@@ -379,33 +379,6 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 									}
 									break;
 								}								
-								/* TODO
-								char []o = strchr(Menus[id].Items.get(i).Name, '&');
-								if (o)
-									if (Character.toUpperCase(o[1]) == cc) {
-										cur = i;
-										if (cur != -1) {
-											if (Menus[id].Items.get(cur).SubMenu == -1) {
-												//E.What = evCommand;
-												//E.Msg.View = GUI.frames.Active;
-												//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
-
-												//TMsgEvent ne = new TMsgEvent(evCommand);
-												//ne.View = GUI.frames.Active;
-												//ne.Command = Menus[id].Items.get(cur).Cmd;
-												//E = ne;
-
-												E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
-												E.dispatch();
-
-												abort = 1;
-											} else {
-												dovert = true;
-											}
-										}
-										break;
-									}
-								 */
 							}
 						}
 					}
@@ -513,14 +486,7 @@ public class UpMenu implements ColorDefs, EventDefs, KeyDefs
 					if (Menus[id].Items.get(cur).Name != null &&
 							Menus[id].Items.get(cur).SubMenu == -1)
 					{
-						//E.What = evCommand;
-						//E.Msg.View = GUI.frames.Active;
-						//E.Msg.Command = Menus[id].Items.get(cur).Cmd;
-						//fprintf(stderr, "Command set = %d %d %d\n", id, cur, Menus[id].Items.get(cur).Cmd);
-						E = new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd);
-						// dz - right?
-						//GUI.gui.ConPutEvent(E);
-						E.dispatch();
+						new TMsgEvent(evCommand, GUI.frames.Active, Menus[id].Items.get(cur).Cmd).dispatch();
 						abort = 1;
 					}
 				}

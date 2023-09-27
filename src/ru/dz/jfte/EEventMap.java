@@ -75,5 +75,17 @@ public class EEventMap extends KeyMapper implements ModeDefs
 	    }
 	    return null;
 	}
+
+
+	public void dump() {
+		System.out.printf("EEventMap '%s'\n", Name);
+		if(KeyMap != null) KeyMap.dump();
+		System.out.printf("EEventMap '%s' ---- END\n", Name);
+		if(null != Parent)
+		{
+			System.out.printf("EEventMap '%s' parent:\n", Name);
+			Parent.dump();
+		}
+	}
 	
 }

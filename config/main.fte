@@ -197,10 +197,10 @@ include 'uicstyle.fte';
 %if(UI_KB)
 include 'ui_kb.fte'; # kabi settinigs
 %endif
-%if(UI_FTE)
+#%if(UI_FTE)
 include 'ui_fte.fte'; # fte CUA style bindings
 ##include 'ui_fte2.fte'; # fte CUA style bindings with conditional cascade menus
-%endif
+#%endif
 %if(UI_WS)
 include 'ui_ws.fte';  # wordstar like
 %endif
@@ -321,5 +321,21 @@ eventmap PLAIN {
 #   key [G-Left] { MovePrev }
 #right arrow at the end of line moves to next line
 #   key [G-Right] { MoveNext }
-    key [A+C+Enter] { noumlaut; RunProgram "latex " . $FileName; }
+#   key [A+C+Enter] { noumlaut; RunProgram "latex " . $FileName; }
+
+    key     [G-Left]    { MoveLeft }
+    key   [C+G-Left]    { MoveWordPrev }
+    key     [G-Right]   { MoveRight }
+    key   [C+G-Right]   { MoveWordNext }
+    key     [G-Up]      { MoveUp }
+    key     [G-Down]    { MoveDown }
+    key     [G-Home]    { MoveLineStart }
+    key   [C+G-Home]    { MovePageStart }
+    key     [G-End]     { MoveLineEnd }
+    key   [C+G-End]     { MovePageEnd }
+    key     [G-PgUp]    { MovePageUp }
+    key   [C+G-PgUp]    { MoveFileStart }
+    key     [G-PgDn]    { MovePageDown }
+    key   [C+G-PgDn]    { MoveFileEnd }
+
 }
