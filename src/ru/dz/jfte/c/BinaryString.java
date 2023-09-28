@@ -126,17 +126,17 @@ public class BinaryString
 		if( pos > usedLen ) pos = usedLen;
 	}*/
 
-	public void trySetSize(int size)
+	public void setSize(int size)
 	{
 		if(size <= mem.length)
 			TryContract(size);
 		else
-			tryExtend(size);
+			tryExtend(size-pos);
 	}
 
 	/**
 	 * Shorten
-	 * @param i ne size
+	 * @param i new size
 	 */
 	public void TryContract(int i) 
 	{
@@ -146,9 +146,9 @@ public class BinaryString
 	
 	/**
 	 * Lengthen
-	 * @param size
+	 * @param size space to add after current position
 	 */
-	private void tryExtend(int size) 
+	public void tryExtend(int size) 
 	{
 		if( mem.length - pos > size)
 			return;

@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -4412,8 +4411,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if(Append)
 			throw new RuntimeException("no append yet");
 
-		//Charset charset = Charset.forName("US-ASCII"); 
-
 		Msg(S_INFO, "Writing %s...", AFileName);
 
 
@@ -4976,20 +4973,38 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return SaveTo(FileName);
 	}
 
-	//char FileBuffer[RWBUFSIZE];
 
-	static Charset charset = Charset.forName("ASCII");
-
+	
 	boolean LoadFrom(String AFileName) {
 
 		int SaveUndo = iBFI(this, BFI_Undo);
 		int SaveReadOnly = iBFI(this, BFI_ReadOnly);
 
-		try(BufferedReader reader = Files.newBufferedReader(Path.of(AFileName), charset)) {
+		try(BufferedReader reader = Files.newBufferedReader(Path.of(AFileName), Main.charset)) {
 
 			boolean rc = doLoadFrom(reader, AFileName);
+			reader.close();
 			BFI_SET(this, BFI_Undo, SaveUndo);
 			BFI_SET(this, BFI_ReadOnly, SaveReadOnly);
+
+			if (!Console.FileExists(FileName)) 
+			{
+				FileStatus = null;
+				FileOk = false;
+				throw new RuntimeException("no file?");
+			} else {
+				if(Console.isReadonly(FileName))
+					BFI_SET(this, BFI_ReadOnly, 1);
+				else
+					BFI_SET(this, BFI_ReadOnly, 0);
+			}
+
+			FileOk = true;
+			Modified = 0;
+			Loading = false;
+			Loaded = true;
+			Draw(0, -1);
+			Msg(S_INFO, "Loaded %s.", AFileName);
 
 			return rc;
 		}
@@ -5004,10 +5019,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			return false;
 		}
 
+
 	}	
 
-	boolean doLoadFrom(BufferedReader reader, String AFileName) throws IOException {
-		//int fd;
+	boolean doLoadFrom(BufferedReader reader, String AFileName) throws IOException 
+	{
 		int len = 0, partLen;
 		long numChars = 0, Lines = 0;
 		//String p, *e, *m = null;
@@ -5017,12 +5033,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		BinaryString m = new BinaryString();
 
-		//int SaveUndo, SaveReadOnly;
-		boolean first = true;
+		
 		int strip = iBFI(this, BFI_StripChar);
 		int lchar = iBFI(this, BFI_LineChar);
 		int margin = iBFI(this, BFI_LoadMargin);
-
+		
 		FileOk = false;
 		/* TODO Loaded
 	    fd = open(AFileName, O_RDONLY | O_BINARY, 0);
@@ -5051,57 +5066,28 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		BFI_SET(this, BFI_Undo, 0);
 		BFI_SET(this, BFI_ReadOnly, 0);
 
-		while (true) //(len = read(fd, FileBuffer, sizeof(FileBuffer))) > 0) 
+		boolean first = true;
+		
+		while (true) 
 		{
-			//(len = read(fd, FileBuffer, sizeof(FileBuffer))) > 0)
-			char cFileBuffer[] = new char[1024];
+			char cFileBuffer[] = new char[RWBUFSIZE];
+			
 			len = reader.read(cFileBuffer);
 			if( len <= 0 )
 				break;
 
-			String FileBuffer = new String(cFileBuffer);
+			String FileBuffer = new String(cFileBuffer).substring(0,len);
 
 			if (first) {
 				first = false;
-				if (BFI(this, BFI_DetectLineSep)) {
-					int was_lf = 0, was_cr = 0;
-					for (int c = 0; c < len; c++) {
-						if (FileBuffer.charAt(c) == 10) {
-							was_lf++;
-							break;
-						} else if (FileBuffer.charAt(c) == 13) {
-							was_cr++;
-							if (was_cr == 2)
-								break;
-						}
-					}
-					/* !!! fails if first line > 32k
-					 * ??? set first to 1 in that case ? */
-					if (was_cr!=0 || was_lf!=0) {
-						BFI_SET(this, BFI_StripChar, -1);
-						BFI_SET(this, BFI_LoadMargin, -1);
-						BFI_SET(this, BFI_AddLF, 0);
-						BFI_SET(this, BFI_AddCR, 0);
-						if (was_lf!=0) {
-							BFI_SET(this, BFI_LineChar, 10);
-							BFI_SET(this, BFI_AddLF, 1);
-							if (was_cr!=0) {
-								BFI_SET(this, BFI_StripChar, 13);
-								BFI_SET(this, BFI_AddCR, 1);
-							}
-						} else if (was_cr!=0) {
-							BFI_SET(this, BFI_LineChar, 13);
-							BFI_SET(this, BFI_AddCR, 1);
-						} else {
-							BFI_SET(this, BFI_LineChar, -1);
-							BFI_SET(this, BFI_LoadMargin, 64);
-						}
-						strip = iBFI(this, BFI_StripChar);
-						lchar = iBFI(this, BFI_LineChar);
-						margin = iBFI(this, BFI_LoadMargin);
-					}
-				}
+				detectCrLf(FileBuffer, len);
+
+				// again after detectCrLf
+				strip = iBFI(this, BFI_StripChar);
+				lchar = iBFI(this, BFI_LineChar);
+				margin = iBFI(this, BFI_LoadMargin);
 			}
+
 
 			//p = FileBuffer;
 			int ppos = 0;
@@ -5129,10 +5115,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				}
 				partLen = epos - ppos; // # of chars in buffer for current line
 				//m = (String )realloc(m, (lm + partLen) + CHAR_TRESHOLD);
-				m.trySetSize((lm + partLen) + CHAR_TRESHOLD);
-				//if (m == null) goto fail;
+				m.setSize((lm + partLen) + CHAR_TRESHOLD);
+
 				//memcpy((m + lm), p, partLen);
-				m.copyIn(lm, FileBuffer, partLen);
+				m.copyIn(lm, FileBuffer.substring(ppos), partLen);
 				lm += partLen;
 				numChars += partLen;
 
@@ -5143,7 +5129,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					//	goto fail;
 
 					if (lm == 0)// && m == null)
-						m.trySetSize(CHAR_TRESHOLD);
+						m.tryExtend(CHAR_TRESHOLD);
 
 					/*#if 0
 	                { // support for VIM tabsize commands
@@ -5154,18 +5140,18 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    if (ts > 0 && ts <= 16)
 	                        BFI(this, BFI_TabSize) = ts;
 	                }
-	#endif */
+					#endif */
 
 					// Grow the line table if required,
 					if (RCount == RAllocated)
 						Allocate(RCount !=0 ? (RCount * 2) : 1);
 
-					LL[RCount++] = new ELine(m.toString());
+					LL[RCount++] = new ELine(m.substring(0, lm));
 					RGap = RCount;
 
 					lm = 0;
 					//m = null;
-					m.trySetSize(0);
+					m.setSize(0);
 					Lines++;
 				}
 
@@ -5176,31 +5162,25 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Msg(S_INFO, "Loading: %d lines, %d bytes.", Lines, numChars);
 		}
 
+		// No full line was created, create one, or store final line with no NL char at end
 		if ((RCount == 0) || (lm > 0) || !BFI(this, BFI_ForceNewLine)) {
 			//if (lm == 0 && m == null && (m = (String )malloc(CHAR_TRESHOLD)) == 0)
 			//	throw new IOException();
 			if (lm == 0)
-				m.trySetSize(CHAR_TRESHOLD);
+				m.setSize(CHAR_TRESHOLD);
 
 			// Grow the line table if required,
 			if (RCount == RAllocated)
 				Allocate(RCount!=0 ? (RCount * 2) : 1);
-			if ((LL[RCount++] = new ELine(m.toString())) == null)
-				//goto fail;
-				throw new RuntimeException("line == 0");
+			LL[RCount++] = new ELine(m.toString());
+
 			//m = null;
-			m.trySetSize(0);
+			m.setSize(0);
 			RGap = RCount;
 		}
 
-		// Next time when you introduce something like this
-		// check all code paths - as the whole memory management
-		// is broken - you have forget to clear 'm' two line above comment!
-		// kabi@users.sf.net
-		// this bug has caused serious text corruption which is the worst
-		// thing for text editor
 		//m = null;
-		m.trySetSize(0);
+		m.setSize(0);
 
 		// initialize folding array.
 		VCount = RCount;
@@ -5374,44 +5354,48 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    }
 	    folds/bookmarks */
+		
 		if (!SetPosR(0, 0)) return false; // TODO exeption?
-		//BFI(this, BFI_Undo) = SaveUndo;
-		//BFI(this, BFI_ReadOnly) = SaveReadOnly;
-		BasicFileAttributes fstat;
-		if ((fstat=Console.stat(FileName)) == null) {
-			//memset(&FileStatus, 0, sizeof(FileStatus));
-			FileStatus = null;
-			FileOk = false;
-			//goto fail;
-			throw new RuntimeException("no file?");
-		} else {
-			if(Console.isReadonly(FileName))
-				BFI_SET(this, BFI_ReadOnly, 1);
-			else
-				BFI_SET(this, BFI_ReadOnly, 0);
-		}
-
-		try {
-			reader.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		FileOk = true;
-		Modified = 0;
-		Loading = false;
-		Loaded = true;
-		Draw(0, -1);
-		Msg(S_INFO, "Loaded %s.", AFileName);
+		
 		return true;
-		/*
-	fail:
-	    close(fd);
-	    Loading = 0;
-	    Draw(0, -1);
-	    View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error loading %s.", AFileName);
-	    return false; */
+
+	}
+	private void detectCrLf(String FileBuffer, int len) {
+		if (BFI(this, BFI_DetectLineSep)) {
+			int was_lf = 0, was_cr = 0;
+			for (int c = 0; c < len; c++) {
+				if (FileBuffer.charAt(c) == 10) {
+					was_lf++;
+					break;
+				} else if (FileBuffer.charAt(c) == 13) {
+					was_cr++;
+					if (was_cr == 2)
+						break;
+				}
+			}
+			/* !!! fails if first line > 32k
+			 * ??? set first to 1 in that case ? */
+			if (was_cr!=0 || was_lf!=0) {
+				BFI_SET(this, BFI_StripChar, -1);
+				BFI_SET(this, BFI_LoadMargin, -1);
+				BFI_SET(this, BFI_AddLF, 0);
+				BFI_SET(this, BFI_AddCR, 0);
+				if (was_lf!=0) {
+					BFI_SET(this, BFI_LineChar, 10);
+					BFI_SET(this, BFI_AddLF, 1);
+					if (was_cr!=0) {
+						BFI_SET(this, BFI_StripChar, 13);
+						BFI_SET(this, BFI_AddCR, 1);
+					}
+				} else if (was_cr!=0) {
+					BFI_SET(this, BFI_LineChar, 13);
+					BFI_SET(this, BFI_AddCR, 1);
+				} else {
+					BFI_SET(this, BFI_LineChar, -1);
+					BFI_SET(this, BFI_LoadMargin, 64);
+				}
+			}
+		}
 	}
 
 	private static String MakeBackup(String FileName, String [] NewName) {
@@ -5445,7 +5429,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		Msg(S_INFO, "Writing %s...", AFileName); 
 
-		try(BufferedWriter writer = Files.newBufferedWriter(Path.of(AFileName), charset)) {
+		try(BufferedWriter writer = Files.newBufferedWriter(Path.of(AFileName), Main.charset)) {
 			boolean rc = doSaveTo(writer, AFileName);
 
 			Msg(S_INFO, "Wrote %s.", AFileName);
@@ -6644,19 +6628,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExMoveToLine:          return MoveToLine(State);
 	    case ExMoveToColumn:        return MoveToColumn(State);
 	    case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
-	/* TODO #ifdef CONFIG_BOOKMARKS
+	    */
+
 	    case ExPlaceBookmark:       return PlaceBookmark(State);
 	    case ExRemoveBookmark:      return RemoveBookmark(State);
 	    case ExGotoBookmark:        return GotoBookmark(State);
-	#else */
-	    case ExPlaceBookmark:
-	    case ExRemoveBookmark:
-	    case ExGotoBookmark:
-        	return false; //ErFAIL;
-	//#endif
 	    case ExPlaceGlobalBookmark: return PlaceGlobalBookmark(State);
 	    case ExPushGlobalBookmark:  return PushGlobalBookmark();
 	    case ExInsertString:        return InsertString(State);
+	    
 	    /* TODO edit cmds
 	    case ExSelfInsert:          return SelfInsert(State);
 	    case ExFileReload:          return FileReload(State);
@@ -7036,6 +7016,19 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    
 	    return us.undo();
 	}
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

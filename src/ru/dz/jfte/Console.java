@@ -912,7 +912,7 @@ public static String SlashDir(String Path)
 	
 	
 	public static ExResult SysShowHelp(ExState state, int i) {
-		// TODO Auto-generated method stub
+		// TODO SysShowHelp
 		return ExResult.ErFAIL;
 	}
 

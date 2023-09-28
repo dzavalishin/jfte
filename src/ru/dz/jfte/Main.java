@@ -11,7 +11,7 @@ public class Main implements MainConst
 {
 	static String ConfigFileName = null;
 
-	public static final Charset charset = Charset.forName("US-ASCII"); // TODO ASCII?
+	public static final Charset charset = Charset.forName("US-ASCII"); // TODO charset - ASCII?
 
 	public static final boolean DEBUG_EDITOR = false;
 

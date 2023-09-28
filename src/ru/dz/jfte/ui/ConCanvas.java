@@ -84,20 +84,17 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
-				//queueEvent(e);
-				// TODO else cry aloud?
+				// Empty
 			}
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
 				queueEvent(e);
 				
 			}
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 				queueEvent(e);
 				
 			}

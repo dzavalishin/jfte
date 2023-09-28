@@ -10,7 +10,6 @@ public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs
 
 	@Override
 	public void close()  {
-		// TODO Auto-generated method stub
 		
 	}
     

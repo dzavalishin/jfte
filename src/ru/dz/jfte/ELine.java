@@ -27,11 +27,11 @@ public class ELine {
 	 */
 	void setCount(int size)
 	{
-		Chars.trySetSize(size);
+		Chars.setSize(size);
 	}
 
 	public void Allocate(int size) {
-		Chars.trySetSize(size);
+		Chars.setSize(size);
 	}
 
 	public void memmove(int dest, int src, int len) {

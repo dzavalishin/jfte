@@ -109,7 +109,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 			case kbBackSp | kfCtrl | kfShift:
 				SelStart = SelEnd = 0; 
 				Pos = 0;
-				Line.trySetSize(0);
+				Line.setSize(0);
 				TabCount = 0;
 				break;
 			case kbBackSp | kfCtrl:
