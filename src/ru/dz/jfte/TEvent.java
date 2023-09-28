@@ -125,13 +125,20 @@ class TKeyEvent extends TEvent
 		if (KeyDefs.kbCode(Code) == (kbBackSp | kfCtrl)) { Ch[0] = 127; return true; }
 		if (KeyDefs.kbCode(Code) == kbTab) { Ch[0] = 9; return true; }
 		if (KeyDefs.kbCode(Code) == kbDel) { Ch[0] = 127; return true; }
-
+		
 		if (KeyDefs.keyType(Code) == kfCtrl) {
 			Ch[0] = (char) (Code & 0x1F);
 			return true;
 		}
+		
 		if (KeyDefs.isAscii(Code)) {
-			Ch[0] = (char)Code;
+			// [dz] hack
+			char cc = (char)Code;
+			
+			if(KeyDefs.keyType(Code) != kfShift)
+				cc = Character.toLowerCase(cc);
+			
+			Ch[0] = cc;
 			return true;
 		}
 

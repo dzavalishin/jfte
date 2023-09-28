@@ -341,5 +341,6 @@ eventmap PLAIN {
     key   [C+G-PgDn]    { MoveFileEnd }
 
     key     [G-Ins]     { ToggleInsert }
+    key       [G-Enter] { LineIndent; LineNew }
 
 }

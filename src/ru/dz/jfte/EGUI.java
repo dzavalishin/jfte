@@ -106,9 +106,6 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
    
     static ExResult ExecMacro(GxView view, int Macro) {
-        //int i, j;
-        ExMacro m;
-
         if (Macro == -1)
             return ExResult.ErFAIL;
 
@@ -119,8 +116,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         State.Macro = Macro;
         State.Pos = 0;
 
-        //m = ExMacro.Macros[State.Macro];
-        m = ExMacro.Macros.get(State.Macro);
+        ExMacro m = ExMacro.Macros.get(State.Macro);
         
         for (; State.Pos < m.cmds.size(); State.Pos++)
         {
@@ -184,7 +180,6 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     }
 
     void DispatchKey(GxView view, TKeyEvent Event) {
-        EEventMap EventMap;
         EKey key = null;
         char [] Ch = {0};
 
@@ -195,6 +190,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         if(Event.GetChar(Ch))
             LastEventChar = Ch[0];
 
+        EEventMap EventMap;
         if ((EventMap = view.GetEventMap()) == null)
             return;
 

@@ -168,6 +168,8 @@ public class ConCanvas extends JPanel implements EventDefs, KeyDefs
 			if(0 != (mod & KeyEvent.CTRL_DOWN_MASK)) code |= kfCtrl;
 			if(0 != (mod & KeyEvent.SHIFT_DOWN_MASK)) code |= kfShift;
 			
+			//if( 0 != (e.getModifiers() & KeyEvent.SHIFT_MASK) ) code |= kfShift;
+			
 			return TEvent.newKeyDownEvent(code);
 		}
 		
