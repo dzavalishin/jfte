@@ -342,5 +342,112 @@ eventmap PLAIN {
 
     key     [G-Ins]     { ToggleInsert }
     key       [G-Enter] { LineIndent; LineNew }
+    key       [Tab]     { LineIndent; LineTrim }
+
+
+
+
+
+
+
+    key       [Esc]     { BlockMarkStream; BlockUnmark }
+    key       [F2]      { FileSave }
+    key     [S+F2]      { FileSaveAs }
+    key   [A+S+F2]      { FileSave; FileClose }
+    key     [S+F3]      { FileReload; WinRefresh }
+    key     [C+F3]      { FileOpenInMode }
+    key       [F7]      { BlockBegin }
+    key     [S+F7]      { MoveBlockStart }
+    key       [F8]      { BlockEnd }
+    key     [S+F8]      { MoveBlockEnd }
+
+    key   [C+G-Ins]     { BlockCopy }
+    key   [C+G-Del]     { BlockKill }
+    key   [S+G-Ins]     { BlockPasteStream }
+    key   [S+G-Del]     { BlockCut }
+    key   [A+G-Ins]     { BlockPasteColumn }
+    key [A+G-S+Ins]     { BlockPasteLine }
+    key     [G-Enter]   { LineNew }
+    key     [S-BackSp]  { BackSpace }
+    key     [G-Ins]     { ToggleInsert }
+    key     [G-Del]     { Delete }
+    key       [Tab]     { InsertTab }
+    key     [S+Tab]     { InsertSpacesToTab 10 }
+    key     [C+Tab]     { CompleteWord }
+#    key     [C+Tab]     { InsertTab }
+    key     [C+BackSp]  { KillWordPrev }
+    key   [C+S+BackSp]  { KillToLineStart }
+    key   [C+G-Enter]   { LineSplit }
+    key   [G-S+Enter]   { LineInsert }
+    key   [A+G-Enter]   { LineAdd }
+    key   [A+G-Del]     { KillWord }
+    key   [A+G-End]     { KillToLineEnd }
+    key     [A+BackSp]  { Undo }
+    key   [A+S+BackSp]  { Redo }
+
+    key     [C+C]       { BlockCopy }
+    key     [C+V]       { BlockPaste }
+    key     [C+X]       { BlockCut }
+    key     [C+Z]       { Undo }
+    key     [C+S+Z]     { Redo }
+    
+    
+    #key     [C+C]       { MoveToColumn }
+    key     [C+D]       { LineDuplicate }
+    key     [C+F]       { Find }
+    key     [C+G]       { FindRepeat }
+    key     [C+I]       { ListRoutines }
+    key     [C+J]       { LineJoin }
+    key     [C+H]       { FindRepeatReverse }
+    key     [C+M]       { DirOpen }
+    key     [C+Q]       { InsertChar }
+    key     [C+R]       { FindReplace }
+    key     [C+T]       { KillWord }
+    key     [C+Y]       { KillLine }
+#    key     [C+E]       { LineTrim }
+    key     [A+A]       { BlockMarkStream }
+    key     [A+B]       { MainMenu 'B' }
+    key     [A+C]       { BlockCopy }
+    key     [A+D]       { MainMenu 'D' }
+    key     [A+E]       { MainMenu 'E' }
+    key     [A+G]       { BlockCut }
+    key     [A+I]       { BlockIndent }
+    key     [A+J]       { MoveToLine }
+    key     [A+K]       { BlockMarkColumn }
+    key     [A+L]       { BlockMarkLine }
+    key     [A+O]       { MainMenu 'O' }
+    key     [A+R]       { WrapPara }           # Reformat 
+    key     [A+S]       { MainMenu 'S' }
+    key     [A+U]       { BlockUnindent }
+    key     [C+S]       { IncrementalSearch }
+    
+
+#    key     [G+*]       { LineInsert ; MoveUp; ScrollUp }
+    
+    key     [A+G++]     { FoldCreate }
+    key     [A+G+-]     { FoldDestroy }
+    key     [G+S++]     { FoldPromote }
+    key     [G+S+-]     { FoldDemote }
+    key     [C+G++]     { FoldOpen }
+    key     [C+G+-]     { FoldClose }
+    key     [C+G+*]     { FoldOpenNested }
+    key     [C+G+/]     { FoldToggleOpenClose }
+    key     [A+G+*]     { FoldOpenAll }
+    key     [A+G+/]     { FoldCloseAll }
+    
+#    key     [C+G-Up]    { MoveFoldPrev }
+#    key     [C+G-Down]  { MoveFoldNext }
+    
+    key     [A+,]     { SearchWordPrev }
+    key     [A+.]     { SearchWordNext }
+    key     [A+/]     { HilitWord }
+
+    key     [C+\]]    { TagFindWord }
+    key     [C+S+\]]  { TagFind }
+    key     [C+[]     { TagPop }
+    key     [A+\]]    { TagNext }
+    key     [A+[]     { TagPrev }
+    key     [S+Tab]   { InsertTab; LineTrim }
+
 
 }

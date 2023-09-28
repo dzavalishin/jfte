@@ -7,3 +7,9 @@ delete used as dispose - destructors do actions. find all 'delete' in C code and
 
 all == must be checked for .equals
 
+# byte operations
+
+## BinaryString class
+
+memcmp/memmove/memcpy operations
+

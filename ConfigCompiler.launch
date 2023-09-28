@@ -16,6 +16,6 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ru.dz.jfte.config.ConfigCompiler"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="jfte"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="config/main.fte main.cnf"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="config/main.fte fte.cnf"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="jfte"/>
 </launchConfiguration>
