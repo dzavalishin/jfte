@@ -206,9 +206,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Msg(S_ERROR, "File is read-only.");
 			return false;
 		}
-		if (Modified == 0) {
-
-
+		
+		if (Modified == 0) 
+		{
 			if ((FileName != null) && FileOk) 
 			{
 				Path fp = Paths.get(FileName);
@@ -221,8 +221,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				}
 
 				if( StatBuf != null &&
-						(FileStatus == null || FileStatus.size() != StatBuf.size() ||
-						FileStatus.lastModifiedTime() != StatBuf.lastModifiedTime())
+						( FileStatus == null || FileStatus.size() != StatBuf.size() ||
+						!FileStatus.lastModifiedTime().equals(StatBuf.lastModifiedTime()) )
 						)
 				{
 					int cr;
@@ -4987,7 +4987,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			BFI_SET(this, BFI_Undo, SaveUndo);
 			BFI_SET(this, BFI_ReadOnly, SaveReadOnly);
 
-			if (!Console.FileExists(FileName)) 
+			FileStatus = Files.readAttributes( Path.of(AFileName), BasicFileAttributes.class);
+
+			if (null == FileStatus) 
 			{
 				FileStatus = null;
 				FileOk = false;
@@ -5014,6 +5016,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			BFI_SET(this, BFI_ReadOnly, SaveReadOnly);
 
 			Loading = false;
+			FileOk = false;
 			Draw(0, -1);
 			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Error loading %s.", AFileName);
 			return false;
