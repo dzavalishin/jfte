@@ -22,7 +22,7 @@ public class CStringTokenizer implements Iterator<CString>
 
 		CString ret;
 
-		int end = s.strspn(delimiters, startPos);
+		int end = s.strcspn(delimiters, startPos);
 
 		if( end < 0 )
 		{

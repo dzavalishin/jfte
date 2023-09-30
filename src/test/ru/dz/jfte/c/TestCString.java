@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import ru.dz.jfte.c.CString;
+import ru.dz.jfte.c.CStringTokenizer;
 
 /**
  * @author dz
@@ -211,12 +212,28 @@ class TestCString {
 		assertEquals( 1, cs.strrchr('b') );
 		assertEquals( -1, cs.strchr('z') );
 		assertEquals( 8, cs.memchr('z', cs.length()) );
+
+		assertEquals( 9, cs.strchr('a', 7) );
+		assertEquals( -1, cs.strchr('a', 1) );
 		
 		assertEquals( 6, cs.strlen() );
 		assertEquals( 12, cs.length() );
 
 		assertEquals( 1, cs.strstr("bc") );
 		assertEquals( -1, cs.strstr("bcz") );
+		
+		
+		
+		cs = new CString("abc:def/xyz,abc");		
+		CStringTokenizer t = cs.strtok(":/,");
+		
+		assertTrue(t.hasNext());
+		assertEquals( "abc", t.next().toString() );
+		assertEquals( "def", t.next().toString() );
+		assertEquals( "xyz", t.next().toString() );
+		assertEquals( "abc", t.next().toString() );
+		
+		
 	}	
 	
 }

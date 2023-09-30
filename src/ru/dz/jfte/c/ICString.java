@@ -104,6 +104,15 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	int strchr( char c );
 	int strrchr( char c );
 	
+	/**
+	 * Search starting from given position.
+	 * 
+	 * @param c
+	 * @param start
+	 * @return
+	 */
+	int strchr(char c, int start);
+	
 	int memchr( char c, int len ); 
 	
 	int strstr( CharSequence src ); 
@@ -114,6 +123,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	int strspn(CharSequence delimiters, int start);
 	
 	int strcspn( CharSequence src ); 
+	int strcspn(CharSequence delimiters, int start);
 	
 	int strpbrk( CharSequence src ); 
 	
@@ -163,6 +173,8 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	 * @param size
 	 */
 	void setSize(int size);
+
+
 
 
 
