@@ -91,7 +91,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 
 	int memcmp( CharSequence src, int size ); 
 	
-	int strcoll( CharSequence src ); 
+	// TODO int strcoll( CharSequence src ); 
 	
 	boolean equals( CharSequence src );
 
@@ -118,7 +118,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	int strpbrk( CharSequence src ); 
 	
 	
-	int strxfrm( CharSequence src, int len );
+	// TODO int strxfrm( CharSequence src, int len );
 
 	// -------------------------------------------------------------------
 	// Export
@@ -153,6 +153,16 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 
         return cs1.length() - cs2.length();
     }
+
+	/**
+	 * 
+	 * Set size of the rest of string this object points to. If we set 
+	 * size through the pointer pointing to some string, given size is set
+	 * for the rest of string from the pointer to the end.
+	 * 
+	 * @param size
+	 */
+	void setSize(int size);
 
 
 

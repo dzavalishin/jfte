@@ -98,11 +98,24 @@ public abstract class AbstractCString implements ICString
 		return mem.length - pos;
 	}
 
+	/**
+	 * Internal. Ignores 'pos' variable.
+	 * 
+	 * @param size Absolute container size to set.
+	 */
 	
-	protected void setSize(int size) {
-		throw new RuntimeException("AbstractCString.setSize called");		
+	protected void reSize(int size) {
+		throw new RuntimeException("AbstractCString.reSize called");		
 	}
 
+
+	/**
+	 * Resize if mem is smaller
+	 * @param size New size
+	 */
+	protected void grow(int size) {
+		reSize(Math.max( owner.mem.length, size) );		
+	}
 	
 	
 	// -------------------------------------------------------------------
@@ -238,24 +251,32 @@ public abstract class AbstractCString implements ICString
 	}
 	
 	
+	// -------------------------------------------------------------------
+	// Concat
+	// -------------------------------------------------------------------
 	
 	@Override
 	public void strcat(CharSequence src) 
 	{
 		int len = src.length();
-		int newSize = len + pos;
-		owner.setSize( Math.max( owner.mem.length, newSize) );
-		memmove(0, src, 0, len);
+		int oldLen = length();
+		int newSize = len + oldLen + pos;
+		owner.grow( newSize );
+		memmove(oldLen, src, 0, len);
 	}
 
 	@Override
 	public void strncat(CharSequence src, int len) {
-		int newSize = len + pos;
-		owner.setSize( Math.max( owner.mem.length, newSize) );
-		memmove(0, src, 0, len);
+		int oldLen = length();
+		int newSize = len + oldLen + pos;
+		owner.grow( newSize );
+		memmove(oldLen, src, 0, len);
 	}
 
 
+	// -------------------------------------------------------------------
+	// Cmp
+	// -------------------------------------------------------------------
 
 	@Override
 	public int strcmp(CharSequence src) {		
@@ -263,29 +284,65 @@ public abstract class AbstractCString implements ICString
 	}
 
 	@Override
-	public int strncmp(CharSequence src, int len) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int strncmp(CharSequence src, int n) 
+	{
+	     if (n == 0)	         return 0;
+	     
+	     while (n-- > 0 && charAt(n) == src.charAt(n)) 
+	     {
+	         if (n == 0 || charAt(n) == '\0')
+	             return 0;
+	     }
+	     
+	     return charCmp(src, n);	
 	}
 
 	@Override
-	public int memcmp(CharSequence src, int size) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int memcmp(CharSequence src, int n) 
+	{
+	     if (n == 0)	         return 0;
+	     
+	     while (n-- > 0 && charAt(n) == src.charAt(n)) 
+	         if (n == 0)
+	             return 0;
+	     
+	     return charCmp(src, n);	
 	}
 
+
+	private int charCmp(CharSequence src, int n) {
+		int uc1 = (char)( 0xFF & charAt(n));
+	     int uc2 = (char)( 0xFF & src.charAt(n));
+	     
+	     if(uc1 < uc2) return -1;
+	     if(uc1 > uc2) return 1;
+
+	     return 0;
+	}
+
+	
+	/** TODO strcoll
 	@Override
 	public int strcoll(CharSequence src) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
+	} */
 
+	// -------------------------------------------------------------------
+	// Search
+	// -------------------------------------------------------------------
+	
 
 	@Override
 	public int strchr(char c) {
 		for( int i = pos; i < mem.length; i++)
+		{
+			if( mem[i] == 0 )
+				break;
+			
 			if( mem[i] == c )
 				return i;
+		}
 		
 		return -1;
 	}
@@ -296,8 +353,13 @@ public abstract class AbstractCString implements ICString
 		int ret = -1;
 		
 		for( int i = pos; i < mem.length; i++)
+		{
+			if( mem[i] == 0 )
+				break;
+			
 			if( mem[i] == c )
 				ret = i;
+		}
 		
 		return ret;
 	}
@@ -319,6 +381,9 @@ public abstract class AbstractCString implements ICString
 		
 		for( int i = pos; i < mem.length; i++)
 		{
+			if( mem[i] == 0 )
+				break;
+
 			if( mem[i] == src.charAt(0) )
 			{
 				boolean eq = true;
@@ -365,11 +430,13 @@ public abstract class AbstractCString implements ICString
 		return 0;
 	}
 
+	
+	/* TODO strxfrm
 	@Override
 	public int strxfrm(CharSequence src, int len) {
 		// TODO Auto-generated method stub
 		return 0;
-	}
+	} */
 
 
 	
@@ -407,5 +474,30 @@ public abstract class AbstractCString implements ICString
 	
 	@Override
 	public CStringPtr toPointer() { return new CStringPtr(this); } 
+
+	
+	// -------------------------------------------------------------------
+	// Size
+	// -------------------------------------------------------------------
+	
+	//static ICString malloc( int size ) { return new CString(size); }
+	
+	/**
+	 * 
+	 * NB! Sets absolute size for the container array. Caller must take in account own
+	 * 'pos' variable. 
+	 * 
+	 * @param size
+	 */
+
+	@Override
+	public void setSize(int size) {
+		reSize(pos+size);
+	}
+
+	public void realloc(int size) {
+		setSize(size);
+	}
+	
 	
 }

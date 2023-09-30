@@ -26,12 +26,12 @@ public class CString extends AbstractCString
 	
 	public CString(CharSequence src) {
 		super(src.length(),null);
-		strcpy(src);
+		memmove(src,src.length());
 	}
 
 	public CString(CharSequence src, int pos, int len) {
 		super(len,null);
-		strcpy(src.subSequence(pos, pos+len));
+		memmove( 0, src, pos, len);
 	}
 	
 
@@ -70,19 +70,18 @@ public class CString extends AbstractCString
 	// -------------------------------------------------------------------
 	// Size
 	// -------------------------------------------------------------------
-	
-	//static ICString malloc( int size ) { return new CString(size); }
-	
 
-	public void realloc(int size) {
-		setSize(size);
-	}
 
+	/**
+	 * Intternal
+	 */
+	
 	@Override
-	public void setSize(int size) {
-		mem = Arrays.copyOf(mem, size);
-		//if()
+	protected void reSize(int size) {
+		mem = Arrays.copyOf(mem, pos+size);
 	}
+	
+	
 
-
+	
 }

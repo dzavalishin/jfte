@@ -34,6 +34,7 @@ public class CStringPtr extends AbstractCString
 	}
 
 
+
 	
 	
 }

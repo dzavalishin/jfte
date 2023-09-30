@@ -116,6 +116,7 @@ class TestCString {
 		assertEquals(9, cs.strlen());
 
 		assertEquals("xyzcefxyz", cs.toString());
+
 		
 	}	
 	
@@ -131,7 +132,106 @@ class TestCString {
 		
 		cs.memmove("###", 2);
 		assertEquals("##cdefxyz", cs.toString());
+
+		cs.memmove( 2, "aaaqqq", 3, 2); 
+		assertEquals("##qqefxyz", cs.toString());
+
+		cs.memmove( 7, "z-!xel".toCharArray(), 1, 2); 
+		assertEquals("##qqefx-!", cs.toString());
+
+		cs.memmove( 1, "zyz".getBytes(), 1, 2); 
+		assertEquals("#yzqefx-!", cs.toString());
 		
+		cs.memmove( 0, 7, 2); 
+		assertEquals("-!zqefx-!", cs.toString());
+	}	
+
+	
+	@Test
+	void testMemSet() {
+		CString cs;
+		cs = new CString("abcdefxyz");
+
+		cs.memset( '%', 3 ); 
+		assertEquals("%%%defxyz", cs.toString());
+
+		cs.memset( '*', 6, 3 ); 
+		assertEquals("%%%def***", cs.toString());
+	}	
+
+
+	@Test
+	void testStrCat() {
+		CString cs;
+		cs = new CString("abcdefxyz");
+
+		cs.strcat( "123" ); 
+		assertEquals("abcdefxyz123", cs.toString());
+
+		cs.strncat( "789", 2 ); 
+		assertEquals("abcdefxyz12378", cs.toString());
+	}	
+	
+
+	
+	@Test
+	void testCmp() {
+		CString cs;
+		cs = new CString("abcdefxyz");
+		
+		assertTrue( cs.strcmp(new CString("bbcdefxyz")) < 0 );
+		assertTrue( cs.strcmp(new CString("aacdefxyz")) > 0 );
+		assertTrue( cs.strcmp(new CString("abcdefxyz")) == 0 );
+
+		assertTrue( cs.strncmp(new CString("bbcdefxyz"), 3) < 0 );
+		assertTrue( cs.strncmp(new CString("aacdefxyz"), 3) > 0 );
+		assertTrue( cs.strncmp(new CString("abcdefxyz"), 3) == 0 );
+		
+		assertTrue( cs.strncmp(new CString("abc---"), 3) == 0 );
+		assertTrue( cs.strncmp(new CString("ab\0"), 3) != 0 );
+
+		cs = new CString("ab\0aa");
+		assertTrue( cs.strncmp(new CString("ab\0bb"), 3) == 0 );
+		
+		assertTrue( cs.memcmp(new CString("ab\0bb"), 4) != 0 );
+	}	
+
+	
+	@Test
+	void testSearch() {
+		CString cs;
+		cs = new CString("abcdefxyzabc");
+
+		assertEquals( 3, cs.strchr('d') );
+
+		assertEquals( 1, cs.strchr('b') );
+		assertEquals( 10, cs.strrchr('b') );
+
+		cs = new CString("abcdef\0yzabc");
+		assertEquals( 1, cs.strrchr('b') );
+		assertEquals( -1, cs.strchr('z') );
+		assertEquals( 8, cs.memchr('z', cs.length()) );
+		
+		assertEquals( 6, cs.strlen() );
+		assertEquals( 12, cs.length() );
+
+		assertEquals( 1, cs.strstr("bc") );
+		assertEquals( -1, cs.strstr("bcz") );
 	}	
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
