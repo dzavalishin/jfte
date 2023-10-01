@@ -335,12 +335,12 @@ public abstract class AbstractCString implements ICString
 
 	@Override
 	public int strchr(char c) {
-		for( int i = shift; i < mem.length; i++)
+		for( int i = 0; i < mem.length-shift; i++)
 		{
-			if( mem[i] == 0 )
+			if( mem[i+shift] == 0 )
 				break;
 
-			if( mem[i] == c )
+			if( mem[i+shift] == c )
 				return i;
 		}
 
@@ -355,7 +355,7 @@ public abstract class AbstractCString implements ICString
 				break;
 
 			if( mem[i] == c )
-				return i;
+				return i-shift;
 		}
 
 		return -1;
@@ -372,7 +372,7 @@ public abstract class AbstractCString implements ICString
 				break;
 
 			if( mem[i] == c )
-				ret = i;
+				ret = i-shift;
 		}
 
 		return ret;
@@ -382,7 +382,7 @@ public abstract class AbstractCString implements ICString
 	public int memchr(char c, int len) {
 		for( int i = shift; i < len; i++)
 			if( mem[i] == c )
-				return i;
+				return i-shift;
 
 		return -1;
 	}
@@ -408,7 +408,7 @@ public abstract class AbstractCString implements ICString
 						break;
 					}
 				if(eq)
-					return i;
+					return i-shift;
 			}
 		}
 
