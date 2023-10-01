@@ -117,7 +117,7 @@ public class BinaryString
 		return mem[i];
 	}
 
-	public int length() { return usedLen; }
+	public int usedLength() { return usedLen; }
 
 	/*
 	public void setLength(int i) 
@@ -126,12 +126,23 @@ public class BinaryString
 		if( pos > usedLen ) pos = usedLen;
 	}*/
 
+	
+	public int getSize() {
+		return mem.length;
+	}
+	
 	public void setSize(int size)
 	{
 		if(size <= mem.length)
 			TryContract(size);
 		else
-			tryExtend(size-pos);
+		{
+			//tryExtend(size-pos);
+			
+			int ext = size - mem.length; //Math.max(size - (mem.length-pos), ALLOC_STEP );
+			mem = Arrays.copyOf(mem, size);
+			Arrays.fill(mem, mem.length-ext, mem.length, ' '); 
+		}
 	}
 
 	/**
@@ -155,6 +166,7 @@ public class BinaryString
 		
 		int ext = Math.max(size - (mem.length-pos), ALLOC_STEP );
 		mem = Arrays.copyOf(mem, ext + mem.length);
+		Arrays.fill(mem, mem.length-ext, mem.length, ' '); 
 	}
 	
 	
@@ -319,6 +331,7 @@ public class BinaryString
 	public ArrayPtr<Character> getPointer() {
 		return new ArrayPtr<Character>(mem);
 	}
+
 
 
 

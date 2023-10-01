@@ -76,18 +76,19 @@ public class UndoStackItem implements UndoDefs
 
     
     
-    public UndoStackItem pushString(String s) {
-		pushData( s );
+    //public UndoStackItem pushString(String s) {
+    public UndoStackItem pushString(CharSequence s) {
+		pushData( s.toString() );
 		return this;
 	}
 
-    public UndoStackItem pushString(String s, int count) {
-		pushData( s.substring(0, count) );
+    public UndoStackItem pushString(CharSequence s, int count) {
+		pushData( s.toString().substring(0, count) );
 		return this;
 	}
 
-    public UndoStackItem pushString(String s, int start, int count) {
-		pushData( s.substring(start, start+count) );
+    public UndoStackItem pushString(CharSequence s, int start, int count) {
+		pushData( s.toString().substring(start, start+count) );
 		return this;
 	}
 

@@ -27,6 +27,8 @@ import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
 import ru.dz.jfte.c.BitOps;
 import ru.dz.jfte.c.ByteArrayPtr;
+import ru.dz.jfte.c.CString;
+import ru.dz.jfte.c.CStringPtr;
 import ru.dz.jfte.undo.UndoDefs;
 import ru.dz.jfte.undo.UndoOperation;
 import ru.dz.jfte.undo.UndoRedoController;
@@ -196,9 +198,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return false;
 	}
 
-	boolean FreeUndo() {
-		return true;
-	}
+	
 
 	boolean Modify()  {
 		if (BFI(this, BFI_ReadOnly)) 
@@ -618,7 +618,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	public boolean DelLine(int Row) { return DelLine(Row, false); }	
+	public boolean DelLine(int Row) { return DelLine(Row, true); }	
 
 	boolean DelLine(int Row, boolean DoMark) {
 		int VLine;
@@ -684,7 +684,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	public boolean InsLine(int Row, int DoAppend) {
-		return InsLine(Row, DoAppend, false);
+		return InsLine(Row, DoAppend, true);
 	}	
 
 	boolean InsLine(int Row, int DoAppend, boolean DoMark) {
@@ -708,7 +708,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		} else {
 			VLine = VCount;
 		}
-		ELine L = new ELine("");
+		//ELine L = new ELine("");
 		//if (L == 0) return false;
 		
 		getSlot().pushInt(Row).pushOp( UndoOperation.ucInsLine );
@@ -727,7 +727,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		if (RGap != Row)
 			if (MoveRGap(Row) == false) return false;
-		LL[RGap] = L;
+		LL[RGap] = new ELine("");
 		RGap++;
 		RCount++;
 		//    printf("-- %d G:C:A :: %d - %d - %d\n", Row, RGap, RCount, RAllocated);
@@ -751,10 +751,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	public boolean DelChars(int Row, int Ofs, int ACount) {
-
-
-		//   printf("DelChars: %d:%d %d\n", Row, Ofs, ACount);
+	public boolean DelChars(int Row, int Ofs, int ACount) 
+	{
 		if (Row < 0) return false;
 		if (Row >= RCount) return false;
 		ELine L = RLine(Row);
@@ -801,9 +799,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	public boolean InsChars(int Row, int Ofs, int ACount, String Buffer) {
-		//   printf("InsChars: %d:%d %d\n", Row, Ofs, ACount);
-
+	public boolean InsChars(int Row, int Ofs, int ACount, String Buffer) 
+	{
 		assert(Row >= 0 && Row < RCount && Ofs >= 0);
 		ELine L = RLine(Row);
 
@@ -820,9 +817,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			pushOp( UndoOperation.ucInsChars);
 		
 		L.Allocate(L.getCount() + ACount);
-		if (L.getCount() > Ofs)
+		if (L.getSize() > Ofs)
 			//memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
-			L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs);
+			L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs - 1); // [dz] added -1 - was error in orig code?
 		if (Buffer == null) 
 			//memset(L.Chars + Ofs, ' ', ACount);
 			L.memset(Ofs, ' ', ACount);
@@ -887,7 +884,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	boolean DelText(int Row, int Col, int ACount) {
-		return DelText(Row, Col, ACount, false);
+		return DelText(Row, Col, ACount, true);
 	}
 
 	boolean DelText(int Row, int Col, int ACount, boolean DoMark) {
@@ -920,12 +917,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	public boolean InsText(int Row, int Col, int ACount, String ABuffer) {
-		return InsText(Row, Col, ACount, ABuffer, false );
+		return InsText(Row, Col, ACount, ABuffer, true );
 	}	
+	
 	boolean InsText(int Row, int Col, int ACount, String ABuffer, boolean DoMark) {
 		int B, L;
 
-		//   printf("InsText: %d:%d %d\n", Row, Col, ACount);
 		assert(Row >= 0 && Row < RCount && Col >= 0 && ACount >= 0);
 		if (ACount == 0) return true;
 		if (!Modify()) return false;
@@ -939,7 +936,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (UnTabPoint(Row, Col) == false) return false;
 		B = CharOffset(RLine(Row), Col);
 		if (InsChars(Row, B, ACount, ABuffer) == false) return false;
-		//   printf("OK\n");
+
 		return true;
 	}
 
@@ -1107,7 +1104,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			return Offset;
 		} else {
 			//String p = L.Chars;
-			ArrayPtr<Character> p = L.getPointer();
+			//ArrayPtr<Character> p = L.getPointer();
+			CStringPtr p = L.getPointer();
 			int Len = L.getCount();
 			int Pos = 0;
 			int Ofs = Offset;
@@ -1150,7 +1148,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			int Pos = 0;
 			int Ofs = 0;
 			//String p = L.Chars;
-			ArrayPtr<Character> p = L.getPointer();
+			//ArrayPtr<Character> p = L.getPointer();
+			CStringPtr p = L.getPointer();
 			int Len = L.getCount();
 
 			while (Len > 0) {
@@ -2221,7 +2220,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			X = RLine(L);
 
 			LLen = X.getCount();
-			BinaryString P = X.Chars;
+			//BinaryString P = X.Chars;
+			CString P = X.Chars;
 			//int Ppos = 0;
 			Start = 0;
 			End = LLen;
@@ -3279,9 +3279,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return InsertString(""+aCh, 1);
 	}
 
-	boolean InsertString(String aStr, int aCount) {
-		int P;
-		int C, L;
+	boolean InsertString(String aStr, int aCount) 
+	{
 		int Y = VToR(CP.Row);
 
 		if (iBFI(this, BFI_InsertKillBlock) == 1)
@@ -3293,18 +3292,23 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (CP.Col < LineLen())
 				if (KillChar() == false)
 					return false;
+		
 		if (InsText(Y, CP.Col, aCount, aStr) == false)
 			return false;
-		C = CP.Col;
-		L = VToR(CP.Row);
-		P = CharOffset(RLine(L), C);
+		
+		int C = CP.Col;
+		int L = VToR(CP.Row);
+		int P = CharOffset(RLine(L), C);
 		P += aCount;
 		C = ScreenPos(RLine(L), P);
+
 		if (SetPos(C, CP.Row) == false)
 			return false;
+		
 		if (BFI(this, BFI_Trim))
 			if (TrimLine(L) == false)
 				return false;
+		
 		/* TODO #ifdef CONFIG_WORDWRAP
 	    if (BFI(this, BFI_WordWrap) == 2) {
 	        if (DoWrap(0) == false) return false;
@@ -3375,7 +3379,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (Row < 0) return 0;
 		if (Row >= RCount) return 0;
 		P = RLine(Row).getCount();
-		BinaryString PC = RLine(Row).Chars;
+		//BinaryString PC = RLine(Row).Chars;
+		CString PC = RLine(Row).Chars;
 
 		for (I = 0; I < P; I++) {
 			if (PC.charAt(I) == ' ') Ind++;
@@ -3678,7 +3683,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean ToggleInsert() { TOGGLE(BFI_Insert);  return true; }
 	boolean ToggleExpandTabs() { TOGGLE_R(BFI_ExpandTabs);  return true; }
 	boolean ToggleShowTabs() { TOGGLE_R(BFI_ShowTabs);  return true; }
-	boolean ToggleUndo() { FreeUndo(); TOGGLE(BFI_Undo);  return true; }
+	boolean ToggleUndo() {  TOGGLE(BFI_Undo);  return true; }
 	boolean ToggleReadOnly() { TOGGLE(BFI_ReadOnly);  return true; }
 	boolean ToggleKeepBackups() { TOGGLE(BFI_KeepBackups);  return true; }
 	boolean ToggleMatchCase() { TOGGLE(BFI_MatchCase);  return true; }
@@ -5203,7 +5208,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					//    LL[l].Count--;
 					if(LL[l].charAt(llen-1) == strip)
 						//LL[l].Chars = LL[l].Chars.substring(0, llen-1);
-						LL[l].Chars.TryContract(llen-1);
+						//LL[l].Chars.TryContract(llen-1);
+						LL[l].Chars.setSize(llen-1);
 				}
 			}
 		}

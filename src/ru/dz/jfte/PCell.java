@@ -2,6 +2,7 @@ package ru.dz.jfte;
 
 import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
+import ru.dz.jfte.c.ICString;
 
 /**
  * Cell pointer
@@ -119,7 +120,9 @@ public class PCell extends ArrayPtr<Long>
 	}
 
 	*/
-	public void MoveMem(int Pos, int Width, BinaryString src, int srcPos, int Attr, int Count) {
+	//public void MoveMem(int Pos, int Width, BinaryString src, int srcPos, int Attr, int Count) 
+	public void MoveMem(int Pos, int Width, ICString src, int srcPos, int Attr, int Count) 
+	{
 		PCell p = new PCell(this);
 
 		//BinaryString src = new BinaryString(asrc);
