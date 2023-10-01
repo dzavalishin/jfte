@@ -922,5 +922,10 @@ public static String SlashDir(String Path)
 	}
 
 
+	public static String getHomeDir() {
+		return System.getProperty("user.home");
+	}
+
+
 	
 }

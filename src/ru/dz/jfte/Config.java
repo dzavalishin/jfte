@@ -27,7 +27,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	static String PrintDevice = "\\DEV\\PRN";
 	//#endif
 	static String CompileCommand = "make";
-	static int KeepHistory = 0;
+	static boolean KeepHistory = false;
 	static int LoadDesktopOnEntry = 0;
 	static boolean SaveDesktopOnExit = false;
 	static String WindowFont = "";
@@ -823,7 +823,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		case FLAG_SelectPathname:    SelectPathname = number; break;
 		case FLAG_ShowMenuBar:       GFrame.ShowMenuBar = b; break;
 		case FLAG_ShowToolBar:       GFrame.ShowToolBar = b; break;
-		case FLAG_KeepHistory:       KeepHistory = number; break;
+		case FLAG_KeepHistory:       KeepHistory = b; break;
 		case FLAG_LoadDesktopOnEntry: LoadDesktopOnEntry = number; break;
 		case FLAG_SaveDesktopOnExit: SaveDesktopOnExit = b; break;
 		case FLAG_KeepMessages:      KeepMessages = number; break;

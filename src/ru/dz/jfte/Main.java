@@ -9,12 +9,14 @@ import java.nio.charset.Charset;
 
 public class Main implements MainConst
 {
-	static String ConfigFileName = null;
-
 	public static final Charset charset = Charset.forName("US-ASCII"); // TODO charset - ASCII?
-
 	public static final boolean DEBUG_EDITOR = false;
 
+	
+	static String ConfigFileName = null;
+	static String HistoryFileName = "";
+
+	
 	static void Usage() {
 		System.out.print(usage);
 	}

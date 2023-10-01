@@ -736,39 +736,37 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         return 0;
     }
 
-    /* TOD #ifdef CONFIG_HISTORY
-    void DoLoadHistoryOnEntry(String [] argv) {
-        if (HistoryFileName[0] == 0) {
-    #ifdef UNIX
+    void DoLoadHistoryOnEntry() {
+        if (Main.HistoryFileName.isBlank()) {
+    /*#ifdef UNIX
             ExpandPath("~/.fte-history", HistoryFileName);
-    #else
-            JustDirectory(argv[0], HistoryFileName);
-            strcat(HistoryFileName, "fte.his");
-    #endif
+    #else */
+        	Main.HistoryFileName = Console.getHomeDir() + "/" + MainConst.HISTORY_NAME;
+            //JustDirectory(argv[0], Main.HistoryFileName);
+            //strcat(Main.HistoryFileName, "fte.his");
+    //#endif
         } else {
-            char p[256];
+            //char p[256];
 
-            ExpandPath(HistoryFileName, p);
-            if (IsDirectory(p)) {
-                Slash(p, 1);
-                strcat(p, HISTORY_NAME);
+            String[] p = {""};
+            
+			Console.ExpandPath(Main.HistoryFileName, p);
+            if (Console.IsDirectory(p[0])) {
+            	p[0] = Console.Slash(p[0], 1);
             }
-            strcpy(HistoryFileName, p);
+            Main.HistoryFileName =  p + MainConst.HISTORY_NAME;
         }
 
-        if (KeepHistory && FileExists(HistoryFileName))
-            LoadHistory(HistoryFileName);
+        if (Config.KeepHistory && Console.FileExists(Main.HistoryFileName))
+        	InputHistory.LoadHistory(Main.HistoryFileName);
     }
 
     void DoSaveHistoryOnExit() {
-        if (KeepHistory && HistoryFileName[0] != 0)
-            SaveHistory(HistoryFileName);
-
-        // since we are exiting, free history
-        ClearHistory();
+        if (Config.KeepHistory && !Main.HistoryFileName.isBlank())
+        	InputHistory.SaveHistory(Main.HistoryFileName);
     }
-    #endif */
 
+    
     ExResult CmdLoadFiles(String [] argv) 
     {
         boolean QuoteNext = false;
@@ -903,11 +901,9 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
         EditorInit();
 
-    /* TODO #ifdef CONFIG_HISTORY
-        DoLoadHistoryOnEntry(argc, argv);
-    #endif
+        DoLoadHistoryOnEntry();
 
-    #ifdef CONFIG_DESKTOP
+    /* TODO #ifdef CONFIG_DESKTOP
         DoLoadDesktopOnEntry(argc, argv);
     #endif */
 
@@ -934,11 +930,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     }
 
     void Stop() {
-    /** TODO #ifdef CONFIG_HISTORY
         DoSaveHistoryOnExit();
-    #endif */
-
-
         super.Stop();
     }
 

@@ -45,5 +45,8 @@ public interface MainConst
 	
 	// TODO ver 
 	public static final long VERNUM = 0x00490401L; 
+
+	public static final String HISTORY_VER = "jFTE History 1\n";
+	public static final String HISTORY_NAME = ".fte-history";
 	
 }
