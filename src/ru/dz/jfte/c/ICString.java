@@ -77,7 +77,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	void memmove(int destPos, byte[] src, int srcPos, int size);
 	
 	void memset( char data, int size ); 
-	void memset( char data, int start, int size );
+	void memset( int start, char data, int size );
 	
 	void strcat( CharSequence src );
 	void strncat( CharSequence src, int len );
@@ -141,6 +141,16 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	String toString();
 
 	CStringPtr toPointer();
+
+	
+	// -------------------------------------------------------------------
+	// substring
+	// -------------------------------------------------------------------
+
+
+	CString substring(int startPos, int endPos);
+
+	CString substring(int startPos);
 	
 
 	// -------------------------------------------------------------------

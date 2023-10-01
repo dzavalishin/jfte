@@ -17,13 +17,20 @@ import java.util.Arrays;
 public class CString extends AbstractCString 
 {
 	
+	public CString() {
+		super(0,null);
+	}
+	
 	
 	public CString(int size) {
 		super(size,null);
 	}
 	
-	
-	
+	public CString(int size, char fill) {
+		super(size,null);
+		Arrays.fill(mem, fill);
+	}
+
 	public CString(CharSequence src) {
 		super(src.length(),null);
 		memmove(src,src.length());
@@ -80,6 +87,11 @@ public class CString extends AbstractCString
 	protected void reSize(int size) {
 		mem = Arrays.copyOf(mem, shift+size);
 	}
+
+
+
+
+
 	
 	
 

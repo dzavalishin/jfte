@@ -159,7 +159,7 @@ class TestCString {
 		cs.memset( '%', 3 ); 
 		assertEquals("%%%defxyz", cs.toString());
 
-		cs.memset( '*', 6, 3 ); 
+		cs.memset( 6, '*', 3 ); 
 		assertEquals("%%%def***", cs.toString());
 	}	
 
@@ -439,7 +439,7 @@ class TestCString {
 		p.memset( '%', 3 ); 
 		assertEquals("ab%%%fxyz", cs.toString());
 
-		p.memset( '*', 4, 3 ); 
+		p.memset( 4, '*', 3 ); 
 		assertEquals("ab%%%f***", cs.toString());
 	}	
 
@@ -530,7 +530,17 @@ class TestCString {
 		
 	}	
 	
+
 	
+	
+	@Test
+	void testSubstring() {
+		CString cs;
+		CStringPtr p;
+
+		// TODO testSubstring testSubstringPtr 
+		
+	}
 	
 }
 

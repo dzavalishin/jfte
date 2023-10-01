@@ -33,6 +33,10 @@ public abstract class AbstractCString implements ICString
 
 
 
+	public CStringPtr getPointer() {
+		return new CStringPtr(this);
+	}
+
 	// -------------------------------------------------------------------
 	// CharSequence
 	// -------------------------------------------------------------------
@@ -117,6 +121,9 @@ public abstract class AbstractCString implements ICString
 		reSize(Math.max( owner.mem.length, size) );		
 	}
 
+	public int getSize() {
+		return length();
+	}
 
 	// -------------------------------------------------------------------
 	// Copy
@@ -245,7 +252,7 @@ public abstract class AbstractCString implements ICString
 	}
 
 	@Override
-	public void memset(char data, int start, int size) {
+	public void memset(int start, char data, int size) {
 		Arrays.fill(mem, start+shift, start+size+shift, data);
 
 	}
@@ -311,8 +318,18 @@ public abstract class AbstractCString implements ICString
 
 
 	private int charCmp(CharSequence src, int n) {
-		int uc1 = (char)( 0xFF & charAt(n));
-		int uc2 = (char)( 0xFF & src.charAt(n));
+		int uc1 = (char)( 0xFFFF & charAt(n));
+		int uc2 = (char)( 0xFFFF & src.charAt(n));
+
+		if(uc1 < uc2) return -1;
+		if(uc1 > uc2) return 1;
+
+		return 0;
+	}
+
+	private int charICmp(CharSequence src, int n) {
+		char uc1 = Character.toUpperCase(charAt(n));
+		char uc2 = Character.toUpperCase(src.charAt(n));
 
 		if(uc1 < uc2) return -1;
 		if(uc1 > uc2) return 1;
@@ -328,6 +345,34 @@ public abstract class AbstractCString implements ICString
 		return 0;
 	} */
 
+	// TODO test memcmp(pos...) memicmp
+	public int memcmp(int pos, CharSequence src, int len) {
+		if (len == 0)	         
+			return 0;
+
+		int n = pos;
+		
+		while (n < len && charAt(n) == src.charAt(n)) 
+			if (n == 0)
+				return 0;
+
+		return charCmp(src, n);		
+	}
+	
+	public int memicmp(int pos, CharSequence src, int len) {
+		if (len == 0)	         
+			return 0;
+
+		int n = pos; 
+		
+		while (n < len && Character.toUpperCase(charAt(n)) == Character.toUpperCase(src.charAt(n))) 
+			if (n == 0)
+				return 0;
+
+		return charICmp(src, n);		
+	}
+
+	
 	// -------------------------------------------------------------------
 	// Search
 	// -------------------------------------------------------------------
@@ -475,10 +520,14 @@ public abstract class AbstractCString implements ICString
 	// -------------------------------------------------------------------
 
 
-
-
+	@Override
 	public CString substring(int startPos, int endPos) {
 		return new CString( this, startPos, endPos - startPos );
+	}
+
+	@Override
+	public CString substring(int startPos) {
+		return new CString( this, startPos, length()-startPos );
 	}
 
 
@@ -529,5 +578,82 @@ public abstract class AbstractCString implements ICString
 		setSize(size);
 	}
 
+	// -------------------------------------------------------------------
+	// CopyIn
+	// -------------------------------------------------------------------
 
+	public void copyIn(int toPos, CharSequence src, int srcPos, int len) {
+		memmove( toPos, src, srcPos, len );
+	}
+
+	public void copyIn(int toPos, CharSequence data) {
+		copyIn(toPos, data, 0, data.length());
+	}	
+
+	public void copyIn(int toPos, CharSequence data, int len) {
+		copyIn(toPos, data, 0, len);
+	}	
+
+	
+	// -------------------------------------------------------------------
+	// TODO add to IArrayPtr
+	// -------------------------------------------------------------------
+
+	
+	// --------------------------------------------------------------
+	// Read/write
+	// --------------------------------------------------------------
+	
+	
+	public void write( int pos, char b )
+	{
+		mem[ pos + shift ] = b;
+	}
+	
+	/**
+	 * Write character
+	 * @param shift from current ptr pos
+	 * @param b data to write
+	 */
+	public void w( int shift, char b )
+	{
+		write(shift,b);
+	}
+	
+	public char read( int pos )
+	{
+		return mem[ pos + shift ];
+	}
+	
+	public char r( int shift )
+	{
+		return read( shift );
+	}
+
+	public char r()
+	{
+		return read(0);
+	}
+	
+	/**
+	 * Read char as unsigned int
+	 * @param shift position to read from
+	 * @return Integer 0..255
+	 */
+	public int ur( int shift )
+	{
+		return 0xFFFF & read( shift );
+	}
+
+	
+	
+	
+	
 }
+
+
+
+
+
+
+
