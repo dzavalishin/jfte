@@ -78,7 +78,7 @@ public class CString extends AbstractCString
 	
 	@Override
 	protected void reSize(int size) {
-		mem = Arrays.copyOf(mem, pos+size);
+		mem = Arrays.copyOf(mem, shift+size);
 	}
 	
 	

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import ru.dz.jfte.c.CString;
+import ru.dz.jfte.c.CStringPtr;
 import ru.dz.jfte.c.CStringTokenizer;
 
 /**
@@ -50,6 +51,8 @@ class TestCString {
 		cs = new CString( "zyxel".toCharArray(), 3 );
 		assertEquals("el", cs.toString());
 		assertEquals(2, cs.length());
+		
+		
 	}
 
 	
@@ -233,8 +236,297 @@ class TestCString {
 		assertEquals( "xyz", t.next().toString() );
 		assertEquals( "abc", t.next().toString() );
 		
+	}	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@Test
+	void testPtrNew() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyzabc");
+		assertEquals( 12, cs.length() );
+		
+		p = new CStringPtr(cs);		
+		assertEquals( "abcdefxyzabc", p.toString() );
+		assertEquals( 12, p.length() );
+
+		p = new CStringPtr(cs,2);
+		assertEquals( "cdefxyzabc", p.toString() );
+		assertEquals( 10, p.length() );
+
+		{
+		char [] ca = "defxyzabc".toCharArray();
+
+		p = new CStringPtr(ca);
+		assertEquals( "defxyzabc", p.toString() );
+		assertEquals( 9, p.length() );
+
+		p = new CStringPtr(ca,2);
+		assertEquals( "fxyzabc", p.toString() );
+		assertEquals( 7, p.length() );
+		}
+
+		//assertThrows(null, null)		
+		
+		cs = new CString(0);
+		p = new CStringPtr(cs,2);
+		assertEquals(0, cs.length());
+		assertEquals("", cs.toString());
+		//assertEquals(0, cs.getSize());
+
+		
+		cs = new CString("abc");
+		p = new CStringPtr(cs,2);
+		assertEquals("c", p.toString());
+		
+		cs = new CString("abcdefxyz", 3, 3);
+		p = new CStringPtr(cs,2);
+		assertEquals("f", p.toString());
+
+		
+		cs = new CString( "zyz".getBytes());
+		p = new CStringPtr(cs,2);
+		assertEquals("z", p.toString());
+		assertEquals(1, p.length());
+
+		cs = new CString( "zyzdefzyz".getBytes(), 3, 2);
+		p = new CStringPtr(cs,2);
+		assertEquals("", p.toString());
+		assertEquals(0, p.length());
+
+		cs = new CString( "zyxel".toCharArray() );
+		p = new CStringPtr(cs,2);
+		assertEquals("xel", p.toString());
+		assertEquals(3, cs.length());
+		
+		cs = new CString( "zyxel".toCharArray(), 3 );
+		p = new CStringPtr(cs,2);
+		assertEquals("", p.toString());
+		assertEquals(0, p.length());
+		
+	}
+
+	
+
+	@Test
+	void testCharSequencePtr()
+	{
+		CString cs;
+		CStringPtr p;
+		
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);
+		
+		assertEquals('z', p.charAt(6));
+		
+		assertTrue( p.compareTo(new CString("ddefxyz")) < 0 );
+		assertTrue( new CString("ddefxyz").compareTo(p) > 0 );
+
+		assertEquals(7, p.length());
+		
+	}
+	
+	@Test
+	void testStrCpyPtr() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);		
+		
+		p.strcpy("aaa\0");  
+		
+		assertEquals(9, cs.length());
+		assertEquals(5, cs.strlen());
+
+		assertEquals(7, p.length());
+		assertEquals(3, p.strlen());
+		
+		assertEquals("abaaa\0xyz", cs.toString());
+		assertEquals("aaa\0xyz", p.toString());
+
+		
+		
+		p.strncpy("bba\0", 2);  
+
+		assertEquals(7, p.length());
+		assertEquals(3, p.strlen());
+
+		assertEquals("bba\0xyz", cs.toString());
+
+		
+		
+		p.strcpy("ee\0".getBytes());  
+	
+		assertEquals(7, p.length());
+		assertEquals(2, p.strlen());
+
+		assertEquals("abee\0\0efxyz", cs.toString());
+		assertEquals("ee\0\0efxyz", p.toString());
+
+		
+		
+		p.strcpy("eeaacc__uu".getBytes(), 2, 4);  
+		
+		assertEquals(7, cs.length());
+		assertEquals(7, cs.strlen());
+
+		assertEquals("aaccefxyz", p.toString());
+		
+
+		
+		p.strcpy(6, 3);  
+		
+		assertEquals(9, cs.length());
+		assertEquals(9, cs.strlen());
+
+		assertEquals("xyzcefxyz", cs.toString());
+
 		
 	}	
+	
+
+	@Test
+	void testMemCpyPtr() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);		
+		
+		
+		p.memcpy("---", 1);
+		assertEquals("ab-defxyz", cs.toString());
+		assertEquals("-defxyz", p.toString());
+		
+		p.memmove("###", 2);
+		assertEquals("ab##efxyz", cs.toString());
+		assertEquals("##efxyz", p.toString());
+
+		p.memmove( 2, "aaaqqq", 3, 2); 
+		assertEquals("abqqefxyz", cs.toString());
+
+		p.memmove( 5, "z-!xel".toCharArray(), 1, 2); 
+		assertEquals("abqqefx-!", cs.toString());
+
+		p.memmove( 1, "zyz".getBytes(), 1, 2); 
+		assertEquals("abqyefx-!", cs.toString());
+		
+		p.memmove( 0, 5, 2); 
+		assertEquals("ab-efx-!", cs.toString());
+	}	
+
+	
+	@Test
+	void testMemSetPtr() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);		
+
+		p.memset( '%', 3 ); 
+		assertEquals("ab%%%fxyz", cs.toString());
+
+		p.memset( '*', 4, 3 ); 
+		assertEquals("ab%%%f***", cs.toString());
+	}	
+
+
+	@Test
+	void testStrCatPtr() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);		
+
+		p.strcat( "123" ); 
+		assertEquals("abcdefxyz123", cs.toString());
+
+		p.strncat( "789", 2 ); 
+		assertEquals("abcdefxyz12378", cs.toString());
+	}	
+	
+
+	
+	@Test
+	void testCmpPtr() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyz");
+		p = new CStringPtr(cs,2);		
+		
+		assertTrue( p.strcmp(new CString("ddefxyz")) < 0 );
+		assertTrue( p.strcmp(new CString("adefxyz")) > 0 );
+		assertTrue( p.strcmp(new CString("cdefxyz")) == 0 );
+
+		assertTrue( p.strncmp(new CString("ddefxyz"), 3) < 0 );
+		assertTrue( p.strncmp(new CString("cefxyz"), 3) > 0 );
+		assertTrue( p.strncmp(new CString("cde==="), 3) == 0 );
+		
+		assertTrue( p.strncmp(new CString("cde---"), 3) == 0 );
+		assertTrue( p.strncmp(new CString("cd\0"), 3) != 0 );
+
+		cs = new CString("xxab\0aa");
+		p = new CStringPtr(cs,2);		
+		assertTrue( p.strncmp(new CString("ab\0bb"), 3) == 0 );		
+		assertTrue( p.memcmp(new CString("ab\0bb"), 4) != 0 );
+	}	
+
+	
+	@Test
+	void testSearch() {
+		CString cs;
+		CStringPtr p;
+
+		cs = new CString("abcdefxyzabc");
+
+		assertEquals( 3, cs.strchr('d') );
+
+		assertEquals( 1, cs.strchr('b') );
+		assertEquals( 10, cs.strrchr('b') );
+
+		cs = new CString("abcdef\0yzabc");
+		assertEquals( 1, cs.strrchr('b') );
+		assertEquals( -1, cs.strchr('z') );
+		assertEquals( 8, cs.memchr('z', cs.length()) );
+
+		assertEquals( 9, cs.strchr('a', 7) );
+		assertEquals( -1, cs.strchr('a', 1) );
+		
+		assertEquals( 6, cs.strlen() );
+		assertEquals( 12, cs.length() );
+
+		assertEquals( 1, cs.strstr("bc") );
+		assertEquals( -1, cs.strstr("bcz") );
+		
+		
+		
+		cs = new CString("abc:def/xyz,abc");		
+		CStringTokenizer t = cs.strtok(":/,");
+		
+		assertTrue(t.hasNext());
+		assertEquals( "abc", t.next().toString() );
+		assertEquals( "def", t.next().toString() );
+		assertEquals( "xyz", t.next().toString() );
+		assertEquals( "abc", t.next().toString() );
+		
+	}	
+	
+	
 	
 }
 

@@ -16,11 +16,11 @@ public class CStringPtr extends AbstractCString
 {
 	
 	public CStringPtr(AbstractCString src) {
-		super(src.mem, src.pos, src);
+		super(src.mem, src.shift, src);
 	}
 
 	public CStringPtr(AbstractCString src, int pos) {
-		super(src.mem, src.pos + pos, src);
+		super(src.mem, src.shift + pos, src);
 	}
 	
 	
