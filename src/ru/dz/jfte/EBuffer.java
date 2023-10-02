@@ -6662,7 +6662,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExFindRepeat:          return FindRepeat(State);
 	    case ExFindRepeatOnce:      return FindRepeatOnce(State);
 	    case ExFindRepeatReverse:   return FindRepeatReverse(State);
-	    /* TODO search
+
 	    case ExSearch:              return Search(State);
 	    case ExSearchB:             return SearchB(State);
 	    case ExSearchRx:            return SearchRx(State);
@@ -6670,7 +6670,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExSearchAgainB:        return SearchAgainB(State);
 	    case ExSearchReplace:       return SearchReplace(State);
 	    case ExSearchReplaceB:      return SearchReplaceB(State);
-	    case ExSearchReplaceRx:     return SearchReplaceRx(State); //*/
+	    case ExSearchReplaceRx:     return SearchReplaceRx(State); 
+	    
 	    case ExInsertChar:          return InsertChar(State);
 	    case ExTypeChar:            return TypeChar(State);
 	    case ExChangeMode:          return ChangeMode(State);
@@ -7780,7 +7781,93 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 	
 	
+	boolean Search(ExState State)          { return Search(State, null, 0, 1); }
+	boolean SearchB(ExState State)         { return Search(State, null, SEARCH_BACK, 1); }
+	boolean SearchRx(ExState State)        { return Search(State, null, SEARCH_RE, 1); }
+	boolean SearchAgain(ExState State)     { return SearchAgain(State, 0); }
+	boolean SearchAgainB(ExState State)    { return SearchAgain(State, SEARCH_BACK); }
+	boolean SearchReplace(ExState State)   { return SearchReplace(State, null, null, 0); }
+	boolean SearchReplaceB(ExState State)  { return SearchReplace(State, null, null, SEARCH_BACK); }
+	boolean SearchReplaceRx(ExState State) { return SearchReplace(State, null, null, SEARCH_RE); }
 
+	
+	
+	boolean Search(ExState State, String aString, int Options, int CanResume) {
+	    //char find[MAXSEARCH+1] = "";
+	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+	    int Next = 0;
+	    int erc = 0;
+	    //int Changed;
+	    String [] find = {""};
+
+	    if (aString != null)
+	        find[0] = aString;
+	    else
+	        if (State.GetStrParam(View, find) == 0)
+	            if ((erc = View.MView.Win.GetStr("Find", find, HIST_SEARCH)) == 0) return false;
+	    
+	    if (find[0].isBlank()) return false;
+
+	    if (erc == 2)
+	        Case ^= SEARCH_NCASE;
+
+	    //if (Changed == 0 && CanResume)
+	    //    Next |= SEARCH_NEXT;
+
+	    LSearch.ok = 0;
+	    LSearch.strSearch = find[0];
+	    LSearch.Options = Case | Next | (Options & ~SEARCH_NCASE);
+	    LSearch.ok = 1;
+
+	    return LSearch.Find(this);
+	}
+	
+	
+	boolean SearchAgain(ExState State, int Options) {
+	    if (LSearch.ok == 0) return false;
+	    LSearch.Options |= SEARCH_NEXT;
+	    if ((Options & SEARCH_BACK) != (LSearch.Options & SEARCH_BACK))
+	        LSearch.Options ^= SEARCH_BACK;
+
+	    return LSearch.Find(this);
+	}
+	
+	
+	
+	boolean SearchReplace(ExState State, String aString, String aReplaceString, int Options) {
+		String [] find = {""};
+		String [] replace = {""};
+	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+
+	    if (aString != null)
+	        find[0] = aString;
+	    else
+	        if (State.GetStrParam(View, find) == 0)
+	            if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
+	    
+	    if(find[0].isBlank()) return false;
+	    
+	    if (aReplaceString!=null)
+	        replace[0] = aReplaceString;
+	    else
+	        if (State.GetStrParam(View, replace) == 0)
+	            if (View.MView.Win.GetStr("Replace", replace, HIST_SEARCH) == 0) return false;
+
+	    LSearch.ok = 0;
+	    LSearch.strSearch = find[0];
+	    LSearch.strReplace= replace[0];
+	    LSearch.Options = Case | (Options & ~SEARCH_NCASE) | SEARCH_ALL | SEARCH_REPLACE;
+	    LSearch.ok = 1;
+
+	    return LSearch.Find(this);
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

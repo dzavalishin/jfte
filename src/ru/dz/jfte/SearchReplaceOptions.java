@@ -38,7 +38,7 @@ public class SearchReplaceOptions implements GuiDefs, ModeDefs
 		return doFind();
     }    
     
-    boolean doFind() 
+    private boolean doFind() 
     {
     	//SearchReplaceOptions opt = this;
     	
