@@ -228,7 +228,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         return rc;
     }
 
-    int Choice(int Flags, String Title, int NSel, String ... choices /*, format, args */)  {
+    int Choice(int Flags, String Title, int NSel, Object ... choices /*, format, args */)  {
 
         if ((GFrame.HaveGUIDialogs & GUIDLG_CHOICE) != 0 && Config.GUIDialogs != 0) {
             return DLGPickChoice(this, Title, NSel, choices, Flags);

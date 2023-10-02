@@ -521,5 +521,9 @@ public class BitOps {
 		return Character.isAlphabetic(i);
 	}
 
+	public static int atoi(String num) {
+		return Integer.parseInt(num);
+	}
+
 	
 }

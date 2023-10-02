@@ -16,7 +16,7 @@ public class ExChoice extends ExView implements ColorDefs
 
 	
     
-    ExChoice(String ATitle, int NSel, String... choice) 
+    ExChoice(String ATitle, int NSel, Object... choice) 
     {
     	String msg;
         int i;
@@ -32,17 +32,17 @@ public class ExChoice extends ExView implements ColorDefs
         SOpt = new String[NSel];
         
         for (i = 0; i < NSel; i++) {
-            SOpt[i] = choice[i];
+            SOpt[i] = choice[i].toString();
             lChoice += PCell.CStrLen(SOpt[i]) + 1;
         }
         
-        fmt = choice[i++];
+        fmt = choice[i++].toString();
         int nPrintParms = choice.length - i;
         String [] pp = new String[nPrintParms];
 
         int ppi = 0;
         for (; i < choice.length; i++, ppi++ )
-            pp[ppi] = choice[i];
+            pp[ppi] = choice[i].toString();
         
         Prompt = String.format(fmt, pp);
     }
