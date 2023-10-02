@@ -45,7 +45,6 @@ public interface GuiDefs {
 
 	static final int  MAXSEARCH = 512;
 
-	static final String DESKTOP_NAME = ".fte-desktop";
 	
 	
 	

@@ -48,5 +48,6 @@ public interface MainConst
 
 	public static final String HISTORY_VER = "jFTE History 1\n";
 	public static final String HISTORY_NAME = ".fte-history";
+	public static final String DESKTOP_NAME = ".fte-desktop";
 	
 }

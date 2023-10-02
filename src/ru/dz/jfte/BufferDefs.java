@@ -46,6 +46,9 @@ public interface BufferDefs {
 
 
 
+	final static int   ccUp       = 0;
+	final static int   ccDown     = 1;
+	final static int   ccToggle   = 2;
 
 
 

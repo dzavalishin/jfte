@@ -18,7 +18,6 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
     static final int  RUN_ASYNC = 1;
     
     static int LastEventChar = -1;
-    static String [] DesktopFileName = {""};
 
     
     EGUI(String [] argv, int XSize, int YSize)
@@ -76,8 +75,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         case ExDesktopSaveAs:           return DesktopSaveAs(State, view);
         
         case ExDesktopSave:
-            if (!DesktopFileName[0].isBlank())
-                return ExResult.ofBool( SaveDesktop(DesktopFileName[0]) );
+            if (!Main.DesktopFileName.isBlank())
+                return ExResult.ofBool( SaveDesktop(Main.DesktopFileName) );
             return ExResult.ErFAIL;
         
         case ExChangeKeys:
@@ -461,16 +460,19 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                 break;
         }
 
-        if (Config.SaveDesktopOnExit && !DesktopFileName[0].isBlank())
-            SaveDesktop(DesktopFileName[0]);
+        if (Config.SaveDesktopOnExit && !Main.DesktopFileName.isBlank())
+            SaveDesktop(Main.DesktopFileName);
         else if (Config.LoadDesktopMode == 2) {       // Ask about saving?
             GxView gx = View.MView.Win;
 
+        	String dfn[] = {""};
+
             if (gx.GetStr("Save desktop As",
-                           DesktopFileName,
+            		dfn,
                            HIST_DEFAULT) != 0)
             {
-                SaveDesktop(DesktopFileName[0]);
+            	Main.DesktopFileName = dfn[0];
+                SaveDesktop(Main.DesktopFileName);
             }
         }
 
@@ -565,13 +567,17 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         return ExResult.ErFAIL;
     }
 
-    ExResult DesktopSaveAs(ExState State, GxView view) {
-        if (State.GetStrParam(null, DesktopFileName) == 0)
-            if (view.GetFile("Save Desktop", DesktopFileName, HIST_PATH, GF_SAVEAS) == 0)
+    ExResult DesktopSaveAs(ExState State, GxView view) 
+    {
+    	String dfn[] = {""};
+        if (State.GetStrParam(null, dfn) == 0)
+            if (view.GetFile("Save Desktop", dfn, HIST_PATH, GF_SAVEAS) == 0)
                 return ExResult.ErFAIL;
 
-        if (!DesktopFileName[0].isBlank())
-            return ExResult.ofBool(SaveDesktop(DesktopFileName[0]));
+        Main.DesktopFileName = dfn[0];
+        
+        if (!Main.DesktopFileName.isBlank())
+            return ExResult.ofBool(SaveDesktop(Main.DesktopFileName));
 
         return ExResult.ErFAIL;
     }
@@ -648,20 +654,26 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         default:
             //** 0: try curdir then "homedir"..
             //         fprintf(stderr, "ld: Mode 0\n");
-            if (Console.FileExists(DESKTOP_NAME))
-            	Console.ExpandPath(DESKTOP_NAME, DesktopFileName);
+            if (Console.FileExists(MainConst.DESKTOP_NAME))
+            {
+            	String [] dfn = {""};
+            	Console.ExpandPath(MainConst.DESKTOP_NAME, dfn);
+            	Main.DesktopFileName = dfn[0];
+            }
             else {
                 //** Use homedir,
     //#ifdef UNIX
     //            ExpandPath("~/" DESKTOP_NAME, DesktopFileName);
     //#else
-            	// TODO argv[0] is not prog path
+            	// TO DO argv[0] is not prog path
             	//Console.JustDirectory(argv[0], DesktopFileName);
-            	DesktopFileName [0] = Console.directory(argv[0]); 
-                DesktopFileName [0] += DESKTOP_NAME;
+            	//DesktopFileName [0] = Console.directory(argv[0]); 
+            	//DesktopFileName [0] += MainConst.DESKTOP_NAME
+                
+                Main.DesktopFileName = Console.getHomeDir() + "/" + MainConst.DESKTOP_NAME; 
     //#endif
             }
-            return Console.FileExists(DesktopFileName[0]);
+            return Console.FileExists(Main.DesktopFileName);
 
             /* TODO findDesktop
         case 1:
@@ -672,19 +684,19 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
             for (;;) {
                 //** Try current location,
-                String pe = new String(DesktopFileName[0]);
-                DesktopFileName[0] = Console.Slash(DesktopFileName[0], 1);      // Add appropriate slash
-                DesktopFileName[0] += DESKTOP_NAME;
+                String pe = new String(Main.DesktopFileName);
+                Main.DesktopFileName = Console.Slash(Main.DesktopFileName, 1);      // Add appropriate slash
+                Main.DesktopFileName += DESKTOP_NAME;
 
                 //fprintf(stderr, "ld: Mode 1 (trying %s)\n", DesktopFileName);
-                if (Console.FileExists(DesktopFileName[0])) {
+                if (Console.FileExists(Main.DesktopFileName)) {
                     //fprintf(stderr, "ld: Mode 1 (using %s)\n", DesktopFileName);
                     return true;
                 }
 
                 //** Not found. Remove added stuff, then go level UP,
                 //*pe = 0;
-                DesktopFileName[0] = pe;
+                Main.DesktopFileName = pe;
 
                 // Remove the current part,
                 String p = SepRChr(DesktopFileName);
@@ -705,17 +717,17 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
 
     void DoLoadDesktopOnEntry(String []argv) {
-        if (DesktopFileName[0].isBlank())
+        if (Main.DesktopFileName.isBlank())
             findDesktop(argv);
 
-        if (!DesktopFileName[0].isBlank()) {
-            if (Console.IsDirectory(DesktopFileName[0])) {
-            	DesktopFileName[0] = Console.Slash(DesktopFileName[0], 1);
-                DesktopFileName[0] += DESKTOP_NAME;
+        if (!Main.DesktopFileName.isBlank()) {
+            if (Console.IsDirectory(Main.DesktopFileName)) {
+            	Main.DesktopFileName = Console.Slash(Main.DesktopFileName, 1);
+                Main.DesktopFileName += MainConst.DESKTOP_NAME;
             }
 
-            if (Config.LoadDesktopOnEntry != 0 && Console.FileExists(DesktopFileName[0]))
-                LoadDesktop(DesktopFileName[0]);
+            if (Config.LoadDesktopOnEntry != 0 && Console.FileExists(Main.DesktopFileName))
+                LoadDesktop(Main.DesktopFileName);
         }
     }
 

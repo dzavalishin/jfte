@@ -722,6 +722,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		/*TODO #else ConfigRecompile
         strcat(command, ConfigFileName);
     #endif */
+		// TODO Run conf compiler directly?
 		return Compile(command);
 	}
 

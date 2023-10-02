@@ -15,6 +15,7 @@ public class Main implements MainConst
 	
 	static String ConfigFileName = null;
 	static String HistoryFileName = "";
+    static String DesktopFileName = "";
 
 	
 	static void Usage() {
@@ -201,21 +202,16 @@ public class Main implements MainConst
 	                    LoadDesktopOnEntry = 1;
 	                }
 	#endif */
-	    			/* TODO #ifdef CONFIG_HISTORY
+
 	            } else if (aa1 == 'H') {
-	                strcpy(HistoryFileName, argv[Arg] + 2);
-	                if (HistoryFileName[0] == 0) {
-	                    KeepHistory = 0;
-	                } else {
-	                    KeepHistory = 1;
-	                }
-	#endif */
+	                HistoryFileName =  argv[Arg].substring(2);
+	                    Config.KeepHistory = HistoryFileName.isBlank();
 	    		}
 	    	} else {
 	    		if (Config.LoadDesktopOnEntry == 2) {
 	    			Config.LoadDesktopOnEntry = 0;
 	    			Config.SaveDesktopOnExit = false;
-	    			EGUI.DesktopFileName[0] = "";
+	    			DesktopFileName = "";
 	    		}
 	    	}
 	    }

@@ -99,9 +99,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	final static int   ccUp       = 0;
-	final static int   ccDown     =1;
-	final static int   ccToggle   =2;
 
 	static SearchReplaceOptions LSearch;
 	static int suspendLoads = 0;
@@ -1996,11 +1993,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		Rehilit(VToR(CP.Row));
 
-		/* TODO hilit
 		if (BFI(this, BFI_AutoHilitParen)) {
 			if (Match.Row == -1 && Match.Col == -1)
 				HilitMatchBracket();
-		} */
+		}
 
 		//    if ((Window == WW) && (MinRedraw == -1))
 		//        MaxRedraw = MinRedraw = VToR(CP.Row);
@@ -5057,7 +5053,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            Msg(S_INFO, "New file %s.", AFileName);
 	        }
 	        Loaded = true;
-	        return 0;
+	        return false;
 	    }
 		 */
 		
@@ -5938,7 +5934,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        fp = fopen(PrintDevice, "w");
 	    if (fp == NULL) {
 	        Msg(S_ERROR, "Error printing %s to %s.", FileName, PrintDevice);
-	        return 0;
+	        return false;
 	    }*/
 
 		//BChars = 0;
@@ -6190,7 +6186,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    int Color = hcPlain_Normal;
 	    //int i; 
 	    //int len = Line.getCount(); 
-	    //char *p = Line.Chars;
+	    //String p = Line.Chars;
 	    //int pp = 0;
 	    int NC = 0, C = 0; 
 	    //int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
@@ -6412,11 +6408,16 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	@Override
 	ExResult ExecCommand(ExCommands Command, ExState State) {
-		return doExecCommand(Command, State) ? ExResult.ErOK : ExResult.ErFAIL;
+		try {
+			return doExecCommand(Command, State) ? ExResult.ErOK : ExResult.ErFAIL;
+		} catch (ExecException e) {
+	        Msg(S_ERROR, "Fail: ", e.getMessage());
+	        return ExResult.ErFAIL;
+		}
 	}
 	
 	
-	private boolean doExecCommand(ExCommands Command, ExState State) 
+	private boolean doExecCommand(ExCommands Command, ExState State) throws ExecException 
 	{
 	    switch (Command) {
 	    case ExMoveUp:                return MoveUp();
@@ -6549,9 +6550,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExBlockMarkStream:       return BlockMarkStream();
 	    case ExBlockMarkLine:         return BlockMarkLine();
 	    case ExBlockMarkColumn:       return BlockMarkColumn();
-	 // TODO case ExBlockCaseUp:           return BlockCaseUp();
-	 // TODO case ExBlockCaseDown:         return BlockCaseDown();
-	 // TODO case ExBlockCaseToggle:       return BlockCaseToggle();
+	    case ExBlockCaseUp:           return BlockCaseUp();
+	    case ExBlockCaseDown:         return BlockCaseDown();
+	    case ExBlockCaseToggle:       return BlockCaseToggle();
 	    case ExBlockExtendBegin:      return BlockExtendBegin();
 	    case ExBlockExtendEnd:        return BlockExtendEnd();
 	    case ExBlockReIndent:         return BlockReIndent();
@@ -6574,7 +6575,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExBlockPasteStream:      return BlockPasteStream();
 	    case ExBlockPasteLine:        return BlockPasteLine();
 	    case ExBlockPasteColumn:      return BlockPasteColumn();
-	    // TODO case ExShowPosition:          return ShowPosition();
+	    case ExShowPosition:   		  return ShowPosition();
 	    /* TODO fold
 	    case ExFoldCreate:            return FoldCreate(VToR(CP.Row));
 	    case ExFoldDestroy:           return FoldDestroy(VToR(CP.Row));
@@ -6603,12 +6604,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	//#else
 	        return false; //ErFAIL;
 	//#endif
-		    /* TODO edit cmds
 
 	    case ExSearchWordPrev:        return SearchWord(SEARCH_BACK | SEARCH_NEXT);
 	    case ExSearchWordNext:        return SearchWord(SEARCH_NEXT);
 	    case ExHilitMatchBracket:     return HilitMatchBracket();
-	    */
 	    case ExToggleAutoIndent:      return ToggleAutoIndent();
 	    case ExToggleInsert:          return ToggleInsert();
 	    case ExToggleExpandTabs:      return ToggleExpandTabs();
@@ -6681,12 +6680,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	 // TODO case ExChangeRightMargin:   return ChangeRightMargin(State);
 	    case ExASCIITable:
 	        return ASCIITable(State);
-	    /*
-	    /* TODO edit cmds
 	    case ExCharTrans:           return CharTrans(State);
 	    case ExLineTrans:           return LineTrans(State);
 	    case ExBlockTrans:          return BlockTrans(State);
-		*/
+
 	/* TODO #ifdef CONFIG_TAGS
 	    case ExTagFind:             return FindTag(State);
 	    case ExTagFindWord:         return FindTagWord(State);
@@ -6866,7 +6863,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case mvFileBaseName:
 	        {
 	            String [] buf = {null};
-	            //char *dot, *dot2;
+	            //String dot, *dot2;
 
 	            Console.JustFileName(FileName, buf);
 
@@ -7039,7 +7036,352 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	
 	
 	
+
 	
+	
+	boolean ShowPosition() {
+	    int CLine, NLines;
+	    int CAct, NAct;
+	    int CColumn, NColumns;
+	    int CCharPos, NChars;
+
+	    if (View == null)
+	        return false;
+
+	    CLine = CP.Row + 1;
+	    NLines = VCount;
+	    CAct = VToR(CP.Row) + 1;
+	    NAct = RCount;
+	    CColumn = CP.Col + 1;
+	    NColumns = LineLen(CP.Row);
+	    CCharPos = CharOffset(VLine(CP.Row), CP.Col) + 1;
+	    NChars = VLine(CP.Row).getCount();
+
+
+	/*#ifdef CONFIG_UNDOREDO
+	    int NN = -1;
+	    if (US.UndoPtr > 0)
+	        NN = US.Top[US.UndoPtr - 1];
+	#endif */
+	    Msg(S_INFO,
+	        "L%d/%d G%d/%d/%d A%d/%d C%d/%d P%d/%d "+
+	/*#ifdef CONFIG_UNDOREDO
+	        "U%d/%d/%d "
+	#endif */
+	        "H%d/%d/%d",
+	        CLine, NLines,
+	        RGap, RCount, RAllocated,
+	        CAct, NAct,
+	        CColumn, NColumns,
+	        CCharPos, NChars,
+	/*#ifdef CONFIG_UNDOREDO
+	        US.UndoPtr, US.Num, NN,
+	#endif */
+	        StartHilit, MinRedraw, MaxRedraw);
+	    return true;
+	}
+	
+	
+
+	
+	
+	boolean SearchWord(int SearchFlags) 
+	{
+	    //char word[MAXSEARCH + 1];
+		StringBuilder word = new StringBuilder();
+		
+	    ELine L = VLine(CP.Row);
+	    int P, len = 0;
+	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+
+	    P = CharOffset(L, CP.Col);
+	    
+	    while ((P > 0) && ((ChClass(L.Chars.charAt(P - 1)) == 1) || (L.Chars.charAt(P - 1) == '_')))
+	        P--;
+	    
+	    while ( /*len < int(sizeof(word)) &&*/ P < L.getCount() && (ChClass(L.Chars.charAt(P)) == 1 || L.Chars.charAt(P) == '_'))
+	        word.append( L.Chars.charAt(P++) );
+	    
+	    if (len == 0)
+	        return false;
+
+	    return FindStr(word.toString(), len, Case | SearchFlags | SEARCH_WORD);
+	}
+	
+	
+	
+
+	boolean HilitMatchBracket() {
+	    EPoint M = CP;
+
+	    if (View == null)
+	        return false;
+
+	    int Min = VToR(GetVPort().TP.Row);
+	    int Max = GetVPort().TP.Row + GetVPort().Rows;
+	    if (Max >= VCount)
+	        Max = RCount;
+	    else
+	        Max = VToR(Max);
+	    if (Min < 0)
+	        Min = 0;
+	    if (Max < Min)
+	        return false;
+	    
+	    if (GetMatchBrace(M, Min, Max, false)) {
+	        Match = M;
+	        MatchLen = 1;
+	        MatchCount = 1;
+	        Draw(Match.Row, Match.Row);
+	        return true;
+	    }
+	    return false;
+	}
+	
+	
+	
+	
+	boolean GetMatchBrace(EPoint M, int MinLine, int MaxLine, boolean show) {
+	    int [] StateLen = {0};
+	    //hsState *StateMap = 0;
+	    byte [][] StateMap = new byte[1][];
+	    int Pos;
+	    ELine L = VLine(M.Row);
+	    int dir = 0;
+	    //hsState State;
+	    char Ch1, Ch2;
+	    int CountX = 0;
+	    int StateRow = -1;
+
+	    M.Row = VToR(CP.Row);
+
+	    Pos = CharOffset(L, M.Col);
+	    if (Pos >= L.getCount()) return false;
+	    switch(L.Chars.charAt(Pos)) {
+	    case '{': dir = +1; Ch1 = '{'; Ch2 = '}'; break;
+	    case '[': dir = +1; Ch1 = '['; Ch2 = ']'; break;
+	    case '<': dir = +1; Ch1 = '<'; Ch2 = '>'; break;
+	    case '(': dir = +1; Ch1 = '('; Ch2 = ')'; break;
+	    case '}': dir = -1; Ch1 = '}'; Ch2 = '{'; break;
+	    case ']': dir = -1; Ch1 = ']'; Ch2 = '['; break;
+	    case '>': dir = -1; Ch1 = '>'; Ch2 = '<'; break;
+	    case ')': dir = -1; Ch1 = ')'; Ch2 = '('; break;
+	    default:
+	        return false;
+	    }
+	    //StateMap = 0;
+	    if (!GetMap(M.Row, StateLen, StateMap)) return false;
+	    byte State = StateMap[0][Pos];
+	    StateRow = M.Row;
+
+	    while (M.Row >= MinLine && M.Row < MaxLine) {
+	        while (Pos >= 0 && Pos < L.getCount()) {
+	            if (L.Chars.charAt(Pos) == Ch1 || L.Chars.charAt(Pos) == Ch2) {
+	                // update syntax state if needed
+	                if (StateRow != M.Row) {
+	                    StateMap[0] = null;
+	                    GetMap(M.Row, StateLen, StateMap);
+	                    if (StateMap[0] == null) return false;
+	                    StateRow = M.Row;
+	                }
+	                if (StateMap[0][Pos] == State) {
+	                    if (L.Chars.charAt(Pos) == Ch1) CountX++;
+	                    if (L.Chars.charAt(Pos) == Ch2) CountX--;
+	                    if (CountX == 0) {
+	                        M.Col = ScreenPos(L, Pos);
+	                        return true;
+	                    }
+	                }
+	            }
+	            Pos += dir;
+	        }
+	        M.Row += dir;
+	        if (M.Row >= 0 && M.Row < RCount) {
+	            L = RLine(M.Row);
+	            Pos = (dir == 1) ? 0 : (L.getCount() - 1);
+	        }
+	    }
+	    
+	    if (show)
+	        Msg(S_INFO, "No match (%d missing).", CountX);
+
+	    return false;
+	}
+
+	boolean MatchBracket() {
+	    EPoint M = CP;
+
+	    if (GetMatchBrace(M, 0, RCount, true))
+	        return SetPosR(M.Col, M.Row);
+	    return false;
+	}
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+	boolean BlockTrans(TransTable tab) 
+	{
+	    int L, I, B, E;
+	    ELine LL;
+
+	    if(tab == null) return false;
+
+	    if (!CheckBlock()) return false;
+	    if (RCount == 0) return false;
+
+	    for (L = BB.Row; L <= BE.Row; L++) {
+	        LL = RLine(L);
+	        B = 0;
+	        E = 0;
+	        switch (BlockMode) {
+	        case bmLine:
+	            if (L == BE.Row)
+	                E = 0;
+	            else
+	                E = LL.getCount();
+	            break;
+	        case bmColumn:
+	            if (L == BE.Row)
+	                E = 0;
+	            else {
+	                B = CharOffset(LL, BB.Col);
+	                E = CharOffset(LL, BE.Col);
+	            }
+	            break;
+	        case bmStream:
+	            if (L == BB.Row && L == BE.Row) {
+	                B = CharOffset(LL, BB.Col);
+	                E = CharOffset(LL, BE.Col);
+	            } else if (L == BB.Row) {
+	                B = CharOffset(LL, BB.Col);
+	                E = LL.getCount();
+	            } else if (L == BE.Row) {
+	                B = 0;
+	                E = CharOffset(LL, BE.Col);
+	            } else {
+	                B = 0;
+	                E = LL.getCount();
+	            }
+	            break;
+	        }
+	        if (B > LL.getCount())
+	            B = LL.getCount();
+	        if (E > LL.getCount())
+	            E = LL.getCount();
+	        if (E > B) {
+	            if (!ChgChars(L, B, E - B, null)) return false;
+	            for (I = B; I < E; I++)
+	                LL.Chars.w(I, tab.t[0xFF & LL.Chars.r(I)] );
+	        }
+	    }
+	    Draw(BB.Row, BE.Row);
+	    return true;
+	}
+
+	boolean CharTrans(TransTable tab) 
+	{
+		if(tab == null) return false;
+
+		ELine L = VLine(CP.Row);
+	    int P = CharOffset(L, CP.Col);
+
+	    if (P >= L.getCount()) return false;
+	    if (!ChgChars(CP.Row, P, 1, null)) return false;
+	    //L.Chars[P] = tab[(char)L.Chars[P]];
+	    L.Chars.w(P, tab.t[0xFF & L.Chars.r(P)] );
+
+	    return true;
+	}
+
+	boolean LineTrans(TransTable tab) 
+	{
+		if(tab == null) return false;
+		
+	    ELine L = VLine(CP.Row);
+	    int I;
+
+	    if (L.getCount() > 0) {
+	        if (!ChgChars(CP.Row, 0, L.getCount(), null)) return false;
+	        for (I = 0; I < L.getCount(); I++)
+	        {
+	            //L.Chars[I] = tab[(unsigned char)L.Chars[I]];
+                L.Chars.w(I, tab.t[0xFF & L.Chars.r(I)] );
+	        }
+	    }
+	    return true;
+	}
+
+	boolean CharCaseUp() {
+	    return CharTrans(TransTable.MakeTrans(ccUp));
+	}
+
+	boolean CharCaseDown() {
+	    return CharTrans(TransTable.MakeTrans(ccDown));
+	}
+
+	boolean CharCaseToggle() {
+	    return CharTrans(TransTable.MakeTrans(ccToggle));
+	}
+
+	boolean LineCaseUp() {
+	    return LineTrans(TransTable.MakeTrans(ccUp));
+	}
+
+	boolean LineCaseDown() {
+	    return LineTrans(TransTable.MakeTrans(ccDown));
+	}
+
+	boolean LineCaseToggle()  {
+	    return LineTrans(TransTable.MakeTrans(ccToggle));
+	}
+
+	boolean BlockCaseUp() {
+	    return BlockTrans(TransTable.MakeTrans(ccUp));
+	}
+
+	boolean BlockCaseDown() {
+	    return BlockTrans(TransTable.MakeTrans(ccDown));
+	}
+
+	boolean BlockCaseToggle() {
+	    return BlockTrans(TransTable.MakeTrans(ccToggle));
+	}
+
+
+	boolean CharTrans(ExState State) throws ExecException {
+	    return CharTrans(TransTable.GetTrans(State,View));
+	}
+
+	boolean LineTrans(ExState State) throws ExecException {
+	    return LineTrans(TransTable.GetTrans(State,View));
+	}
+
+	boolean BlockTrans(ExState State) throws ExecException {
+	    return BlockTrans(TransTable.GetTrans(State,View));
+	}
 	
 	
 	

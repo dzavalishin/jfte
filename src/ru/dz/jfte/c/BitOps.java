@@ -509,5 +509,17 @@ public class BitOps {
 		return s1.compareTo(s2);
 	}
 
+	public static char toupper(int i) {
+		return Character.toUpperCase((char)i);
+	}
+
+	public static char tolower(int i) {
+		return Character.toLowerCase((char)i);
+	}
+
+	public static boolean isalpha(char i) {
+		return Character.isAlphabetic(i);
+	}
+
 	
 }
