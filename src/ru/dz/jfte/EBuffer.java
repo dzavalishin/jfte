@@ -6628,15 +6628,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExToggleShowBookmarks:   return ToggleShowBookmarks();
 	    case ExSetLeftMargin:         return SetLeftMargin();
 	    case ExSetRightMargin:        return SetRightMargin();
-	    /* TODO edit cmds
+	    //* TODO edit cmds
 
-	    case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
+	    //case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
 
 	        // stuff with UI
 	    case ExMoveToLine:          return MoveToLine(State);
 	    case ExMoveToColumn:        return MoveToColumn(State);
-	    case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
-	    */
+	    //case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
+	    
 
 	    case ExPlaceBookmark:       return PlaceBookmark(State);
 	    case ExRemoveBookmark:      return RemoveBookmark(State);
@@ -8033,6 +8033,43 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	
 	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	boolean MoveToLine(ExState State) {
+	    int [] No = {0};
+
+	    if (State.GetIntParam(View, No) == 0) {
+	        String []  Num = {""};
+
+	        Num[0] = String.format( "%d", VToR(CP.Row) + 1);
+	        if (View.MView.Win.GetStr("Goto Line", Num, HIST_POSITION) == 0)
+	            return false;
+	        No[0] = BitOps.atoi(Num[0]);
+	    }
+	    return SetNearPosR(CP.Col, No[0] - 1);
+	}
+
+	boolean MoveToColumn(ExState State) {
+	    int [] No = {0};
+
+	    if (State.GetIntParam(View, No) == 0) {
+	        String []  Num = {""};
+
+	        Num[0] = String.format( "%d", CP.Col + 1);
+	        if (View.MView.Win.GetStr("Goto Column", Num, HIST_POSITION) == 0) return false;
+	        No[0] = BitOps.atoi(Num[0]);
+	    }
+	    return SetNearPos(No[0] - 1, CP.Row);
+	}
 	
 	
 	
