@@ -54,7 +54,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean AutoExtend = false;
 	boolean Loaded = false;
 
-	//UndoStack US = new UndoStack();
 	UndoRedoController us = new UndoRedoController(this); 
 
 	BasicFileAttributes FileStatus = null;
@@ -93,7 +92,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	String [] WordList = null;
 	int WordCount = 0;
 
-	SyntaxProc HilitProc;
+	SyntaxProc HilitProc = null;
 	int StartHilit, EndHilit;
 
 
@@ -1629,14 +1628,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			ELine L = RLine(Row);
 			int ECol = 0;
 
+			int [] ecp = {0};
 			if (Row > 0) State = RLine(Row - 1).StateE;
 			else State = 0;
-			/* TODO #ifdef CONFIG_SYNTAX_HILIT
-	        if (BFI(this, BFI_HilitOn) == 1 && HilitProc != 0)
-	            HilitProc(this, Row, B, C, W, L, State, 0, &ECol);
+			///* TODO #ifdef CONFIG_SYNTAX_HILIT
+	        if (BFI(this, BFI_HilitOn) && HilitProc != null)
+	            HilitProc.proc(this, Row, B, C, W, L, State, null, ecp);
 	        else
-	#endif */
-			int [] ecp = {0};
+	//#endif */
 			Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
 			ECol = ecp[0];
 
