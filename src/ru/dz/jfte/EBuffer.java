@@ -1499,11 +1499,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			StateMap[0] = new int[StateLen[0]];
 			if (StateMap[0] == null) return false;
 
-			/* TODO #ifdef CONFIG_SYNTAX_HILIT
-	        if (BFI(this, BFI_HilitOn) == 1 && HilitProc != 0)
-	            HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
+	        if (BFI(this, BFI_HilitOn) && HilitProc != null)
+	            //HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
+	        	HilitProc.proc(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
 	        else
-	#endif */
 			Hilit_Plain(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
 			if (L.StateE != State) {
 				L.StateE = State;
@@ -1576,12 +1575,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			else
 				State = 0;
 
-			/* TODO hilit
-			if (BFI(this, BFI_HilitOn) && HilitProc != null) {
-				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, 0, ECol);
-			} else*/ {
+			if (BFI(this, BFI_HilitOn) && HilitProc != null)
+				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, null, ECol);
+			else 
 				Hilit_Plain(this, StartHilit, null, 0, 0, L, State, null, ECol);
-			} 
+ 
 			if (L.StateE != State) {
 				HilitX = 1;
 				L.StateE = State;
@@ -1631,12 +1629,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			int [] ecp = {0};
 			if (Row > 0) State = RLine(Row - 1).StateE;
 			else State = 0;
-			///* TODO #ifdef CONFIG_SYNTAX_HILIT
+
 	        if (BFI(this, BFI_HilitOn) && HilitProc != null)
 	            HilitProc.proc(this, Row, B, C, W, L, State, null, ecp);
 	        else
-	//#endif */
-			Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
+	        	Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
 			ECol = ecp[0];
 
 			if (L.StateE != State) {
