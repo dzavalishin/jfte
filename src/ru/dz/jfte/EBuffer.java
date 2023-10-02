@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -3275,6 +3276,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return InsertString(""+aCh, 1);
 	}
 
+	boolean InsertString(String aStr) 
+	{
+		return InsertString(aStr, aStr.length()); 
+	}
+	
 	boolean InsertString(String aStr, int aCount) 
 	{
 		int Y = VToR(CP.Row);
@@ -6484,14 +6490,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExKillBlock:             return KillBlock();
 	    case ExBackSpace:             return BackSpace();
 	    case ExDelete:                return Delete();
-	    /* TODO editod cmds
+
 	    case ExCharCaseUp:            return CharCaseUp();
 	    case ExCharCaseDown:          return CharCaseDown();
 	    case ExCharCaseToggle:        return CharCaseToggle();
 	    case ExLineCaseUp:            return LineCaseUp();
 	    case ExLineCaseDown:          return LineCaseDown();
 	    case ExLineCaseToggle:        return LineCaseToggle();
-	    */
+
 	    case ExLineInsert:            return LineInsert();
 	    case ExLineAdd:               return LineAdd();
 	    case ExLineSplit:             return LineSplit();
@@ -6565,13 +6571,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExUndo:                  return Undo();
 	    case ExRedo:                  return Redo();
 
-	    // TODO case ExMatchBracket:          return MatchBracket();
+	    case ExMatchBracket:          return MatchBracket();
 	    case ExMovePrevPos:           return MovePrevPos();
 	    case ExMoveSavedPosCol:       return MoveSavedPosCol();
 	    case ExMoveSavedPosRow:       return MoveSavedPosRow();
 	    case ExMoveSavedPos:          return MoveSavedPos();
 	    case ExSavePos:               return SavePos();
-	 // TODO case ExCompleteWord:          return CompleteWord();
+	 // TODO 
+	    case ExCompleteWord:          return CompleteWord();
 	    case ExBlockPasteStream:      return BlockPasteStream();
 	    case ExBlockPasteLine:        return BlockPasteLine();
 	    case ExBlockPasteColumn:      return BlockPasteColumn();
@@ -6696,11 +6703,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExIndentFunction:      return IndentFunction();
 	    case ExMoveFunctionPrev:    return MoveFunctionPrev();
 	    case ExMoveFunctionNext:    return MoveFunctionNext();
-	    /* TODO edit cmds
+
 	    case ExInsertDate:          return InsertDate(State);
 	    case ExInsertUid:           return InsertUid();
 	    case ExShowHelpWord:        return ShowHelpWord(State);
-	    */
+
 	    }
 
 	    return super.ExecCommand(Command, State) == ExResult.ErOK;
@@ -8071,6 +8078,119 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    return SetNearPos(No[0] - 1, CP.Row);
 	}
 	
+	
+	boolean CompleteWord() {
+		return View.MView.Win.ICompleteWord(View) != 0; // TODO ret code?
+	}
+	
+	
+
+
+	
+	
+	
+	
+	
+	
+	// these two will probably be replaced in the future
+	boolean InsertDate(ExState State) {
+		/*
+	    //char strArg[128] = "";
+	    //char buf[128], *p;
+
+	    time_t t;
+
+	    //time(&t);
+
+	    if (State.GetStrParam(View, strArg, sizeof(strArg))) {
+	        //struct tm *tt = localtime(&t);
+	        //strftime(buf, sizeof(buf), strArg, tt);
+	        //buf[sizeof(buf) - 1] = 0;
+	    } else {
+	        //** 012345678901234567890123
+	        //** Wed Jan 02 02:23:54 1991
+	        //p = ctime(&t);
+	        sprintf(buf, "%.10s %.4s", p, p + 20);
+	    }
+	    //puts(buf);
+
+	    return InsertString(buf, strlen(buf));
+	    */
+		return InsertString( new Date().toString() );
+	}
+
+
+	boolean InsertUid() 
+	{
+	    String p = System.getenv("USER");
+	    if (p == null) p = System.getenv("NAME");
+	    if (p == null) p = System.getenv("ID");
+	    // mostly for Windows.  Why they can't just be standard, I don't know...
+	    if (p == null) p = System.getenv("USERNAME");
+	    if (p == null) {
+	        Msg(S_INFO, "User ID not set ($USER).");
+	        //return 0;
+	        p = (String )"UNKNOWN USER";
+	    }
+	    return InsertString(p);
+	}
+
+	boolean ShowHelpWord(ExState State) 
+	{
+		// TODO ShowHelpWord
+		return false;
+		/*
+	    //** Code for BlockSelectWord to find the word under the cursor,
+	    String achr = "+-_."; // these are accepted characters
+	    //char    buf[128];
+	    int     Y = VToR(CP.Row);
+	    ELine  L = RLine(Y);
+	    int     P;
+
+	    StringBuilder buf = new StringBuilder();
+	    
+	    P = CharOffset(L, CP.Col);
+
+	    // fix \b for the case of CATBS
+	    for(int i = 0; i < P; i++) {
+	        //printf("%d - %d  %d   %c %c\n", i, P, L.Chars.charAt(i),
+	        //L.Chars.charAt(i), L.Chars.charAt(P));
+	        if ((L.Chars.charAt(i) == '\b') && (P < (L.getCount() - 2)))
+	            P += 2;
+	    }
+	    //int len = 0;
+	    if (P < L.getCount()) 
+	    {
+	        // To start of word,
+	    	
+	        while ((P > 0)
+	               && ((L.Chars.charAt(P - 1) == '\b') || BitOps.isalnum(L.Chars.charAt(P - 1))
+	                   || (achr.indexOf( L.Chars.charAt(P - 1)) >= 0)))
+	            P--; // '_' for underline is hidden in achr
+	        
+	        if ((P < (L.getCount() - 1)) && (L.Chars.charAt(P) == '\b'))
+	            P++;
+	        
+	        // To end of word,
+	        
+	        while( P < L.getCount()) {
+	            if (((P + 1) < L.getCount()) && (L.Chars.charAt(P + 1) == '\b'))
+	                P += 2;
+	            else if (BitOps.isalnum(L.Chars.charAt(P))
+	                     || (achr.indexOf( L.Chars.charAt(P)) >= 0 ) )
+	                buf.append(  L.Chars.charAt(P++) );
+	            else
+	                break;
+	        }
+	    }
+	    //printf("Word: %s\n", buf);
+	    //if (buf[0] == 0) {
+	    //    Msg(INFO, "No valid word under the cursor.");
+	    //    return 0;
+	    //}
+	    return View.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() );
+	    */
+	}
 	
 	
 }
