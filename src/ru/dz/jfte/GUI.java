@@ -136,7 +136,7 @@ public abstract class GUI implements GuiDefs, EventDefs
 			NextEvent.What = evNone;
 		}
 
-		frames.Update(); // TODO delete?
+		frames.Update(); // [dz] added by me. delete?  no, black screen.
 
 		if (E.What == evNone &&
 				( (E = Console.ConGetEvent(evMouse | evCommand | evKeyboard, 0, true)) == null ||

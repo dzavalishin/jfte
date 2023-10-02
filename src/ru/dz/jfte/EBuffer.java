@@ -2054,60 +2054,104 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean GetHilitWord(int len, String str, int /*ChColor*/ []clr, int IgnCase) {
 		//String p;
 
-		/* TODO GetHilitWord
-		if (Mode == null || Mode.fColorize == 0)
+		//* TODO GetHilitWord
+		if (Mode == null || Mode.fColorize == null)
 			return false;
 
 		if (len >= CK_MAXLEN)
 			return false;
 
-		/* TODO #ifdef CONFIG_WORD_HILIT
+		//* TODO #ifdef CONFIG_WORD_HILIT
 	    {
-	        char s[CK_MAXLEN + 1];
-	        s[CK_MAXLEN] = 0;
-	        memcpy(s, str, len);
-	        s[len] = 0;
+	        //char s[CK_MAXLEN + 1];
+	        //s[CK_MAXLEN] = 0;
+	        //memcpy(s, str, len);
+	        String s = str.substring(0, len);
+	        //s[len] = 0;
 	        if (HilitFindWord(s)) {
-	            clr = hcPlain_HilitWord;
+	            clr[0] = hcPlain_HilitWord;
 	            return true;
 	        }
 	    }
-	#endif * /
-		if (len < 1) return false;
-		p = Mode.fColorize.Keywords.key[len];
-		if (IgnCase) {
-			while (p && p[0]) {
-				if (strnicmp(p, str, len) == 0) {
-					clr = p[len];
+	//#endif * /
+		
+	    if (len < 1) return false;
+		byte[] b = Mode.fColorize.Keywords.key[len];
+		int p = 0;
+		if (IgnCase!=0) {
+			while(p < b.length) 
+			{
+				String kw = new String( b, p, len );
+				//if (strnicmp(p, str, len) == 0) 
+				if(kw.equalsIgnoreCase(str)) 
+				{
+					clr[0] = b[p+len];
 					return true;
 				}
 				p += len + 1;
 			}
 		} else {
-			while (p && p[0]) {
-				if (memcmp(p, str, len) == 0) {
-					clr = p[len];
+			while(p < b.length) 
+			{
+				String kw = new String( b, p, len );
+				//if (memcmp(p, str, len) == 0) 
+				if(kw.equals(str)) 
+				{
+					clr[0] = b[p+len];
 					return true;
 				}
 				p += len + 1;
 			}
 		}
+		
 		if (len < 128) {
 			//char s[128];
 
-			memcpy(s, str, len);
-			s[len] = 0;
-			if (BFI(this, BFI_HilitTags)&&TagDefined(s)) {
+			//memcpy(s, str, len);
+			//s[len] = 0;
+	        String s = str.substring(0, len);
+
+	        /* TODO TagDefined
+			if( BFI(this, BFI_HilitTags) && TagDefined(s) ) {
 				//clr = 0x0A;
-				clr = Mode.fColorize.Colors[CLR_HexNumber];
+				clr[0] = Mode.fColorize.Colors[CLR_HexNumber];
 				return true;
-			}
+			} */
 		}
-		 */
+		 //*/
 		return false;
 	}
 
 
+	
+	boolean HilitFindWord(String Word) 
+	{
+	    for (int i = 0; i < WordCount; i++) 
+	    {
+	        if (BFI(this, BFI_MatchCase)) {
+	            //if (strcmp(Word, WordList[i]) == 0) return 1;
+	        	if(WordList[i].equals(Word)) return true;
+	        } else {
+	            //if (stricmp(Word, WordList[i]) == 0) return 1;
+	        	if(WordList[i].equalsIgnoreCase(Word)) return true;
+	        }
+	    }
+	    
+	    return false;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 
@@ -6513,12 +6557,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExInsertTab:             return InsertTab();
 		case ExInsertSpace:           return InsertSpace();
 		case ExWrapPara:
-			// TODO #ifdef CONFIG_WORDWRAP
-			//        return WrapPara();
-			//#else
+			        return WrapPara();
 			//return ExResult.ErFAIL;
-			return false;
-			//#endif
+			//return false;
+
 		case ExInsPrevLineChar:       return InsPrevLineChar();
 		case ExInsPrevLineToEol:      return InsPrevLineToEol();
 		case ExLineDuplicate:         return LineDuplicate();

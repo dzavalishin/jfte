@@ -275,7 +275,7 @@ public interface ModeDefs {
 
 
 	// Macro variables
-	public static final int  mvFilePath = 1;      // TODO enum = 1,  // directory + name + extension 
+	public static final int  mvFilePath = 1;      // directory + name + extension 
 	public static final int  mvFileName = 2;      // name + extension 
 	public static final int  mvFileDirectory = 3; // directory + '/' 
 	public static final int  mvFileBaseName = 4;  // without the last extension 

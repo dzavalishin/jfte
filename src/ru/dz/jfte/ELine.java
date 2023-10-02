@@ -94,7 +94,6 @@ public class ELine
 	int usedLength() { return Chars.usedLength(); } 
 
 
-	// TODO ELine getCount
 	//int getCount() { return Chars.usedLength(); } 
 	int getCount() { return Chars.getSize(); } // TODO is it ok?
 

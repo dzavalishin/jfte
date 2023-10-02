@@ -199,7 +199,6 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		case ExDirGoUp:
 			SearchLen = 0;
 			Msg(S_INFO, "");
-			// TODO FmChDir(SDOT SDOT);
 			FmChDir("..");
 			return ExResult.ErOK;
 
