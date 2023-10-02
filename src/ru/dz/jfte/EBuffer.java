@@ -146,9 +146,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		StartHilit = 0;
 		EndHilit = -1;
 		HilitProc = null;
-		
+
 		//if (Mode != null && Mode.fColorize != null)
-			// TODO HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+		// TODO HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
 
 		InsertLine(CP,0,null); /* there should always be at least one line in the edit buffer */
 		Flags = (Mode.Flags);
@@ -184,7 +184,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		WordCount = 0;
 		WordList = null;
-		
+
 		rlst.Count = 0;
 		rlst.Lines = null;
 
@@ -196,7 +196,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return false;
 	}
 
-	
+
 
 	boolean Modify()  {
 		if (BFI(this, BFI_ReadOnly)) 
@@ -204,7 +204,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Msg(S_ERROR, "File is read-only.");
 			return false;
 		}
-		
+
 		if (Modified == 0) 
 		{
 			if ((FileName != null) && FileOk) 
@@ -410,10 +410,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		} */
 
 		//for (int b = 0; b < BMCount; b++)			UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
-		
+
 		for( EBookmark bm : BMarks.values() )
 			UpdateMark(bm.BM, Type, Row, Col, Rows, Cols);
-			
+
 
 		if (OldBB.Row != BB.Row) {
 			int MinL = Math.min(OldBB.Row, BB.Row);
@@ -481,8 +481,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (BFI(this, BFI_Undo) && BFI(this, BFI_UndoMoves))
 			getSlot().pushPosition(CP);
-		
-		
+
+
 		if (AutoExtend) {
 			BlockExtendBegin();
 			AutoExtend = true;
@@ -640,11 +640,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		assert(VLine != -1);
 
 		getSlot().
-			pushString(RLine(Row).Chars).
-			//pushInt(RLine(Row).getCount().
-			pushInt(Row).
-			pushOp( UndoOperation.ucDelLine );
-		
+		pushString(RLine(Row).Chars).
+		//pushInt(RLine(Row).getCount().
+		pushInt(Row).
+		pushOp( UndoOperation.ucDelLine );
+
 		if (DoMark)
 			UpdateMarker(umDelete, Row, 0, 1, 0);
 
@@ -708,9 +708,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		//ELine L = new ELine("");
 		//if (L == 0) return false;
-		
+
 		getSlot().pushInt(Row).pushOp( UndoOperation.ucInsLine );
-		
+
 		if (DoMark)
 			UpdateMarker(umInsert, Row, 0, 1, 0);
 		Draw(Row, -1);
@@ -774,11 +774,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		#endif */
 
 		getSlot().
-			pushString( L.Chars, Ofs, ACount ).
-			pushInt(Ofs).
-			pushInt(Row).
-			pushOp( UndoOperation.ucDelChars);
-		
+		pushString( L.Chars, Ofs, ACount ).
+		pushInt(Ofs).
+		pushInt(Row).
+		pushOp( UndoOperation.ucDelChars);
+
 		/*
 		if (L.getCount() > Ofs + ACount)
 			memmove(L.Chars + Ofs, L.Chars + Ofs + ACount, L.getCount() - Ofs - ACount);
@@ -809,11 +809,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (!Modify()) return false;
 
 		getSlot().
-			pushInt(Row).
-			pushInt(Ofs).
-			pushInt(ACount).
-			pushOp( UndoOperation.ucInsChars);
-		
+		pushInt(Row).
+		pushInt(Ofs).
+		pushInt(ACount).
+		pushOp( UndoOperation.ucInsChars);
+
 		L.Allocate(L.getCount() + ACount);
 		if (L.getSize() > Ofs)
 			//memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
@@ -867,15 +867,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (!Modify()) return false;
 
 		getSlot().
-			pushString(L.Chars, Ofs, ACount).
-			pushInt(Ofs).
-			pushInt(Row).
-			pushOp( UndoOperation.ucDelChars).
-			pushInt(Row).
-			pushInt(Ofs).
-			pushInt(ACount).
-			pushOp( UndoOperation.ucInsChars);
-		
+		pushString(L.Chars, Ofs, ACount).
+		pushInt(Ofs).
+		pushInt(Row).
+		pushOp( UndoOperation.ucDelChars).
+		pushInt(Row).
+		pushInt(Ofs).
+		pushInt(ACount).
+		pushOp( UndoOperation.ucInsChars);
+
 		Hilit(Row);
 		Draw(Row, Row);
 		return true;
@@ -917,7 +917,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	public boolean InsText(int Row, int Col, int ACount, String ABuffer) {
 		return InsText(Row, Col, ACount, ABuffer, true );
 	}	
-	
+
 	boolean InsText(int Row, int Col, int ACount, String ABuffer, boolean DoMark) {
 		int B, L;
 
@@ -1486,7 +1486,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	boolean GetMap(int Row, int []StateLen, byte /*hsState*/ [][]StateMap) {
+	boolean GetMap(int Row, int []StateLen, int /*hsState*/ [][]StateMap) {
 		int/*hlState*/ State = 0;
 
 		Rehilit(Row);
@@ -1497,7 +1497,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			ELine L = RLine(Row);
 			int [] ECol = {0};
 
-			StateMap[0] = new byte[StateLen[0]];
+			StateMap[0] = new int[StateLen[0]];
 			if (StateMap[0] == null) return false;
 
 			/* TODO #ifdef CONFIG_SYNTAX_HILIT
@@ -1505,13 +1505,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
 	        else
 	#endif */
-			// TODO Hilit_Plain(this, Row, 0, 0, StateLen[0], L, State, StateMap[0], ECol);
-			//        if (L.StateE != State) {
-			//            L.StateE = State;
-			//        }
+			Hilit_Plain(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
+			if (L.StateE != State) {
+				L.StateE = State;
+			}
 		} else {
 			StateLen[0] = 1;
-			StateMap[0] = new byte[1];
+			StateMap[0] = new int[1];
 			//if (*StateMap == 0) return false;
 			StateMap[0][0] = (byte)(State & 0xFF);
 		}
@@ -1580,9 +1580,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			/* TODO hilit
 			if (BFI(this, BFI_HilitOn) && HilitProc != null) {
 				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, 0, ECol);
-			} else {
-				Hilit_Plain(this, StartHilit, 0, 0, 0, L, State, 0, ECol);
-			} */
+			} else*/ {
+				Hilit_Plain(this, StartHilit, null, 0, 0, L, State, null, ECol);
+			} 
 			if (L.StateE != State) {
 				HilitX = 1;
 				L.StateE = State;
@@ -1932,29 +1932,29 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 							CurColumn + 1,
 							//                    CurPos + 1,
 							(BFI(this, BFI_Insert)) ? 'I' : ' ',
-							(BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
-							//  (BFI(this, BFI_ExpandTabs))?'T':' ',
-							(BFI(this, BFI_MatchCase)) ? 'C' : ' ',
-							AutoExtend ?
-								(
-										(BlockMode == bmStream) ? 's' :
-										(BlockMode == bmLine) ? 'l' : 'c'
-								) :
-								(
-										(BlockMode == bmStream) ? 'S' :
-										(BlockMode == bmLine) ? 'L': 'C'
-								),
-							/* TODO #ifdef CONFIG_WORDWRAP
+									(BFI(this, BFI_AutoIndent)) ? 'A' : ' ',
+											//  (BFI(this, BFI_ExpandTabs))?'T':' ',
+											(BFI(this, BFI_MatchCase)) ? 'C' : ' ',
+													AutoExtend ?
+															(
+																	(BlockMode == bmStream) ? 's' :
+																		(BlockMode == bmLine) ? 'l' : 'c'
+																	) :
+																		(
+																				(BlockMode == bmStream) ? 'S' :
+																					(BlockMode == bmLine) ? 'L': 'C'
+																				),
+																		/* TODO #ifdef CONFIG_WORDWRAP
 	                        (BFI(this, BFI_WordWrap) == 3) ? 't' :
 	                        (BFI(this, BFI_WordWrap) == 2) ? 'W' :
 	                        (BFI(this, BFI_WordWrap) == 1) ? 'w' :
 	                        ' ',
 							#endif */
-							//                    (BFI(this, BFI_Undo))?'U':' ',
-							//                    (BFI(this, BFI_Trim))?'E':' ',
-							//                    (Flags.KeepBackups)?'B':' ',
-							Mode.fName,
-							(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
+																		//                    (BFI(this, BFI_Undo))?'U':' ',
+																		//                    (BFI(this, BFI_Trim))?'E':' ',
+																		//                    (Flags.KeepBackups)?'B':' ',
+																		Mode.fName,
+																		(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
 							);
 
 					int l = s.length();
@@ -3173,48 +3173,48 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 	boolean InsertChar(ExState State) {
-	    char Ch;
-	    int [] No = {0};
+		char Ch;
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	    	/*
+		if (State.GetIntParam(View, No) == 0) {
+			/*
 	        TEvent E;
 	        E.What = evKeyDown;
 	        E.Key.Code = View.MView.Win.GetChar("Quote Char:");
 	        if (!GetCharFromEvent(E, Ch)) return false;
 	        No = Ch;
-	        */
-	    	TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar("Quote Char:") );	    	
-	        No[0] = E.GetChar();
-	    }
+			 */
+			TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar("Quote Char:") );	    	
+			No[0] = E.GetChar();
+		}
 
-	    Ch = (char)No[0];
-	    if (Ch < 0 || Ch > 255) return false;
-	    return InsertChar(Ch);
+		Ch = (char)No[0];
+		if (Ch < 0 || Ch > 255) return false;
+		return InsertChar(Ch);
 	}
 
 	boolean TypeChar(ExState State) {
-	    char Ch;
-	    int [] No = {0};
+		char Ch;
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) 
-	    {
-	    	/*
+		if (State.GetIntParam(View, No) == 0) 
+		{
+			/*
 	        TEvent E;
 	        E.What = evKeyDown;
 	        E.Key.Code = View.MView.Win.GetChar(0);
 	        if (!GetCharFromEvent(E, Ch)) return false;
-	        */
-	    	TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar(null) );	    	
-	        No[0] = E.GetChar();
-	    }
+			 */
+			TKeyEvent E = new TKeyEvent(evKeyDown, (char) View.MView.Win.GetChar(null) );	    	
+			No[0] = E.GetChar();
+		}
 
-	    Ch = (char)No[0];
-	    if (Ch < 0 || Ch > 255) return false;
-	    return TypeChar(Ch);
+		Ch = (char)No[0];
+		if (Ch < 0 || Ch > 255) return false;
+		return TypeChar(Ch);
 	}
 
-	
+
 	boolean InsertChar(char aCh) {
 		return InsertString(""+aCh, 1);
 	}
@@ -3280,7 +3280,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	{
 		return InsertString(aStr, aStr.length()); 
 	}
-	
+
 	boolean InsertString(String aStr, int aCount) 
 	{
 		int Y = VToR(CP.Row);
@@ -3294,10 +3294,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (CP.Col < LineLen())
 				if (KillChar() == false)
 					return false;
-		
+
 		if (InsText(Y, CP.Col, aCount, aStr) == false)
 			return false;
-		
+
 		int C = CP.Col;
 		int L = VToR(CP.Row);
 		int P = CharOffset(RLine(L), C);
@@ -3306,11 +3306,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		if (SetPos(C, CP.Row) == false)
 			return false;
-		
+
 		if (BFI(this, BFI_Trim))
 			if (TrimLine(L) == false)
 				return false;
-		
+
 		/* TODO #ifdef CONFIG_WORDWRAP
 	    if (BFI(this, BFI_WordWrap) == 2) {
 	        if (DoWrap(0) == false) return false;
@@ -4084,7 +4084,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		getSlot().pushPosition(CP);
 
-		
+
 		switch (BlockMode) {
 		case bmLine:
 			Y = VToR(CP.Row);
@@ -4981,7 +4981,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	
+
 	boolean LoadFrom(String AFileName) {
 
 		int SaveUndo = iBFI(this, BFI_Undo);
@@ -5043,11 +5043,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		BinaryString m = new BinaryString();
 
-		
+
 		int strip = iBFI(this, BFI_StripChar);
 		int lchar = iBFI(this, BFI_LineChar);
 		int margin = iBFI(this, BFI_LoadMargin);
-		
+
 		FileOk = false;
 		/* TODO Loaded
 	    fd = open(AFileName, O_RDONLY | O_BINARY, 0);
@@ -5062,14 +5062,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        return false;
 	    }
 		 */
-		
+
 		if(!Console.FileExists(AFileName))
 		{
-            Msg(S_INFO, "New file %s.", AFileName);
-	        Loaded = true;
-	        return true;
+			Msg(S_INFO, "New file %s.", AFileName);
+			Loaded = true;
+			return true;
 		}
-		
+
 		Loading = true;
 		Clear();
 		BlockUnmark();
@@ -5077,11 +5077,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		BFI_SET(this, BFI_ReadOnly, 0);
 
 		boolean first = true;
-		
+
 		while (true) 
 		{
 			char cFileBuffer[] = new char[RWBUFSIZE];
-			
+
 			len = reader.read(cFileBuffer);
 			if( len <= 0 )
 				break;
@@ -5365,9 +5365,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    }
 	    folds/bookmarks */
-		
+
 		if (!SetPosR(0, 0)) return false; // TODO exeption?
-		
+
 		return true;
 
 	}
@@ -5552,28 +5552,28 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 
 	        bindex = 0; blen = 0;
-	        */
+			 */
 
-    		String book = "BOOK";
-	        if (iBFI(this, BFI_SaveBookmarks) == 1 || iBFI(this, BFI_SaveBookmarks) == 2) {
-	        	//int bindex;
-	    		//String [] bname = {""};
-	    		//EPoint [] bpos = {new EPoint()};
-	        	
-	            //blen = 4;     // Just after "BOOK"
-	            
-	            List<EBookmark> bl = GetUserBookmarkForLine(l);
-	            
-	            for(EBookmark b: bl) {
-	                // Skip too long bookmarks
-	                //if (strlen(bname) > 256 || blen + strlen(bname) + 6 + 6 > sizeof(book)) continue;
-	                book += String.format("%04x%02x%s", b.BM.Col, b.Name.length(), b.Name );
-	            }
-	            blen = book.length();
-	            if (!bl.isEmpty()) {
-	            	book += String.format( "x%04xb", blen);
-	            } else blen = 0;      // Signal, that no bookmarks were saved
-	        }
+			String book = "BOOK";
+			if (iBFI(this, BFI_SaveBookmarks) == 1 || iBFI(this, BFI_SaveBookmarks) == 2) {
+				//int bindex;
+				//String [] bname = {""};
+				//EPoint [] bpos = {new EPoint()};
+
+				//blen = 4;     // Just after "BOOK"
+
+				List<EBookmark> bl = GetUserBookmarkForLine(l);
+
+				for(EBookmark b: bl) {
+					// Skip too long bookmarks
+					//if (strlen(bname) > 256 || blen + strlen(bname) + 6 + 6 > sizeof(book)) continue;
+					book += String.format("%04x%02x%s", b.BM.Col, b.Name.length(), b.Name );
+				}
+				blen = book.length();
+				if (!bl.isEmpty()) {
+					book += String.format( "x%04xb", blen);
+				} else blen = 0;      // Signal, that no bookmarks were saved
+			}
 
 
 			// what - write at 1 = beginning / 2 = end of line
@@ -5591,19 +5591,19 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    if (fwrite(fold, 1, foldlen, fp) != foldlen) goto fail;
 	                    ByteCount += foldlen;
 	                } */
-					
+
 					/*
 	                if (BFI(this, BFI_SaveBookmarks) == what && blen) {
 	                    if (fwrite(book, 1, blen, fp) != blen) goto fail;
 	                    ByteCount += blen;
 	                }
 					 */
-	                if (iBFI(this, BFI_SaveBookmarks) == what && blen != 0) {
-	                    //if (fwrite(book, 1, blen, fp) != blen) goto fail;
+					if (iBFI(this, BFI_SaveBookmarks) == what && blen != 0) {
+						//if (fwrite(book, 1, blen, fp) != blen) goto fail;
 						writer.write(book);
-	                    ByteCount += blen;
-	                }
-					
+						ByteCount += blen;
+					}
+
 					if (len_end!=0) {
 						//if (fwrite(BFS(this, BFS_CommentEnd), 1, len_end, fp) != len_end) goto fail;
 						writer.write(BFS(this, BFS_CommentEnd), 0, len_end);
@@ -6007,10 +6007,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				if (!Modify ()) return result;   // Never try to save to read-only
 
 				getSlot().
-					pushInt(prev.Row).
-					pushInt(prev.Col).
-					pushString(n).
-					pushOp( UndoOperation.ucPlaceUserBookmark);
+				pushInt(prev.Row).
+				pushInt(prev.Col).
+				pushString(n).
+				pushOp( UndoOperation.ucPlaceUserBookmark);
 			}
 		}
 		return result;
@@ -6037,11 +6037,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            if (PushUChar(ucRemoveUserBookmark) == 0) return 0;
 	#endif */
 				getSlot().
-					pushInt(p.Row).
-					pushInt(p.Col).
-					pushString(n).
-					pushOp( UndoOperation.ucRemoveUserBookmark);
-				
+				pushInt(p.Row).
+				pushInt(p.Col).
+				pushString(n).
+				pushOp( UndoOperation.ucRemoveUserBookmark);
+
 			}
 		}
 		return result;
@@ -6119,20 +6119,20 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	@Override
 	EViewPort CreateViewPort(EView V) {
-	    V.Port = new EEditPort(this, V);
-	    AddView(V);
+		V.Port = new EEditPort(this, V);
+		AddView(V);
 
-	    if (!Loaded && suspendLoads == 0) {
-	        Load();
+		if (!Loaded && suspendLoads == 0) {
+			Load();
 
-	/* TODO #ifdef CONFIG_OBJ_MESSAGES
+			/* TODO #ifdef CONFIG_OBJ_MESSAGES
 	        if (CompilerMsgs)
 	            CompilerMsgs.FindFileErrors(this);
 	#endif
@@ -6140,9 +6140,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (CvsDiffView) CvsDiffView.FindFileLines(this);
 	#endif */
 
-	        EMarkIndex.markIndex.retrieveForBuffer(this);
+			EMarkIndex.markIndex.retrieveForBuffer(this);
 
-	/* #ifdef CONFIG_HISTORY
+			/* #ifdef CONFIG_HISTORY
 	        int r, c;
 
 	        if (RetrieveFPos(FileName, r, c) == 1)
@@ -6155,53 +6155,53 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (BFI (this,BFI_SaveBookmarks)==3) RetrieveBookmarks(this);
 	#endif
 	#endif */
-	    }
-	    return V.Port;
+		}
+		return V.Port;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
-	    //ChColor *Colors = BF.Mode.fColorize.Colors;
-	    // TODO int[] Colors = BF.Mode.fColorize.Colors;
-	    //HILIT_VARS(Colors[CLR_Normal], Line);
 
-	    //PCLI BPtr; 
-	    int BPos; 
-	    // TOD int /*ChColor*/ Color = Colors[CLR_Normal];
-	    int Color = hcPlain_Normal;
-	    //int i; 
-	    //int len = Line.getCount(); 
-	    //String p = Line.Chars;
-	    //int pp = 0;
-	    int NC = 0, C = 0; 
-	    //int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
-	    //boolean ExpandTabs = EBuffer.BFI(BF, BFI_ExpandTabs);
-	    
-	    
-	/*#ifdef CONFIG_WORD_HILIT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
+		//ChColor *Colors = BF.Mode.fColorize.Colors;
+		// TODO int[] Colors = BF.Mode.fColorize.Colors;
+		//HILIT_VARS(Colors[CLR_Normal], Line);
+
+		//PCLI BPtr; 
+		int BPos; 
+		// TOD int /*ChColor*/ Color = Colors[CLR_Normal];
+		int Color = hcPlain_Normal;
+		//int i; 
+		//int len = Line.getCount(); 
+		//String p = Line.Chars;
+		//int pp = 0;
+		int NC = 0, C = 0; 
+		//int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
+		//boolean ExpandTabs = EBuffer.BFI(BF, BFI_ExpandTabs);
+
+
+		/*#ifdef CONFIG_WORD_HILIT
 	    int j = 0;
-	    
+
 	    if (BF.Mode.fColorize.Keywords.TotalCount > 0 ||
 	        BF.WordCount > 0)
 	    { //* words have to be hilited, go slow 
@@ -6236,354 +6236,354 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    } else
 	#endif */
-	    /* TOD if (ExpandTabs) { // use slow mode 
+		/* TOD if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
 	            IF_TAB() else {
 	                ColorNext();
 	            }
 	        }
 	    } else */ { /* fast mode */
-	        if (Pos < Line.getCount()) {
-	            if (Pos + Width < Line.getCount()) {
-	                if (B != null) 
-	                	//B.MoveMem(0, Width, Line.Chars + Pos, Color, Width);
-	                	B.MoveMem(0, Width, Line.Chars, Pos, Color, Width);
-	                if (StateMap != null)
-	                    //memset(StateMap, State, Line.getCount());
-	                	Arrays.fill(StateMap, 0, Line.getCount(), State);
+	    	if (Pos < Line.getCount()) {
+	    		if (Pos + Width < Line.getCount()) {
+	    			if (B != null) 
+	    				//B.MoveMem(0, Width, Line.Chars + Pos, Color, Width);
+	    				B.MoveMem(0, Width, Line.Chars, Pos, Color, Width);
+	    			if (StateMap != null)
+	    				//memset(StateMap, State, Line.getCount());
+	    				Arrays.fill(StateMap, 0, Line.getCount(), State);
 
-	            } else {
-	                if (B != null) 
-	                    //B.MoveMem(0, Width, Line.Chars, + Pos, Color, Line.getCount() - Pos);
-	                    B.MoveMem(0, Width, Line.Chars, Pos, Color, Line.getCount() - Pos);
-	                if (StateMap != null)
-	                	Arrays.fill(StateMap, 0, Line.getCount(), State);
-	                    //memset(StateMap, State, Line.getCount());
-	            }
-	        }
-	        C = Line.getCount();
+	    		} else {
+	    			if (B != null) 
+	    				//B.MoveMem(0, Width, Line.Chars, + Pos, Color, Line.getCount() - Pos);
+	    				B.MoveMem(0, Width, Line.Chars, Pos, Color, Line.getCount() - Pos);
+	    			if (StateMap != null)
+	    				Arrays.fill(StateMap, 0, Line.getCount(), State);
+	    			//memset(StateMap, State, Line.getCount());
+	    		}
+	    	}
+	    	C = Line.getCount();
 	    }
 	    ECol[0] = C;
 	    State = 0;
 	    return 0;
 	}
-	
 
 
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	boolean ScrollLeft(ExState State) {
-	    int [] Cols = {0};
+		int [] Cols = {0};
 
-	    if (State.GetIntParam(View, Cols) == 0)
-	        Cols[0] = 8;
-	    return ScrollLeft(Cols[0]);
+		if (State.GetIntParam(View, Cols) == 0)
+			Cols[0] = 8;
+		return ScrollLeft(Cols[0]);
 	}
 
 	boolean ScrollRight(ExState State) {
-	    int [] Cols = {0};
+		int [] Cols = {0};
 
-	    if (State.GetIntParam(View, Cols) == 0)
-	        Cols[0] = 8;
-	    return ScrollRight(Cols[0]);
+		if (State.GetIntParam(View, Cols) == 0)
+			Cols[0] = 8;
+		return ScrollRight(Cols[0]);
 	}
 
 	boolean ScrollDown(ExState State) {
-	    int [] Rows = {0};
+		int [] Rows = {0};
 
-	    if (State.GetIntParam(View, Rows) == 0)
-	        Rows[0] = 1;
-	    return ScrollDown(Rows[0]);
+		if (State.GetIntParam(View, Rows) == 0)
+			Rows[0] = 1;
+		return ScrollDown(Rows[0]);
 	}
 
 	boolean ScrollUp(ExState State) {
-	    int [] Rows = {0};
+		int [] Rows = {0};
 
-	    if (State.GetIntParam(View, Rows) == 0)
-	        Rows[0] = 1;
-	    return ScrollUp(Rows[0]);
+		if (State.GetIntParam(View, Rows) == 0)
+			Rows[0] = 1;
+		return ScrollUp(Rows[0]);
 	}
-	
-	
-	
+
+
+
 	boolean InsertString(ExState State) {
-	    //char strbuf[1024] = "";
+		//char strbuf[1024] = "";
 		String [] strbuf = {null};
 
-	    if (State.GetStrParam(View, strbuf) == 0) {
-	        if (View.MView.Win.GetStr("Insert String", strbuf, HIST_DEFAULT) == 0)
-	            return false;
-	    }
-	    return InsertString(strbuf[0], strbuf[0].length());
+		if (State.GetStrParam(View, strbuf) == 0) {
+			if (View.MView.Win.GetStr("Insert String", strbuf, HIST_DEFAULT) == 0)
+				return false;
+		}
+		return InsertString(strbuf[0], strbuf[0].length());
 	}
-	
+
 	boolean ChangeMode(ExState State) {
-	    //char Mode[32] = "";
+		//char Mode[32] = "";
 		String [] Mode = {null};
 
-	    if (State.GetStrParam(View, Mode ) == 0)
-	        if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
-	        	return false;
+		if (State.GetStrParam(View, Mode ) == 0)
+			if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
+				return false;
 
-	    boolean rc = ChangeMode(Mode[0]);
-	    FullRedraw();
-	    return rc;
+		boolean rc = ChangeMode(Mode[0]);
+		FullRedraw();
+		return rc;
 	}
-	
-	
+
+
 	// TODO [dz] "Mode" must be "Flags"?
 	boolean ChangeFlags(ExState State) {
-	    //char Mode[32] = "";
+		//char Mode[32] = "";
 		String [] Mode = {null};
 
-	    if (State.GetStrParam(View, Mode) == 0)
-	        if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
-	        	return false;
+		if (State.GetStrParam(View, Mode) == 0)
+			if (View.MView.Win.GetStr("Mode", Mode, HIST_SETUP) == 0) 
+				return false;
 
-	    boolean rc = ChangeFlags(Mode[0]);
-	    FullRedraw();
-	    return rc;
+		boolean rc = ChangeFlags(Mode[0]);
+		FullRedraw();
+		return rc;
 	}
-	
-	
-	
+
+
+
 	boolean FileSaveAs(String FName) {
-	    String [] Name = {null};
+		String [] Name = {null};
 
-	    if (Console.ExpandPath(FName, Name) == -1) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
-	        return false;
-	    }
-	    if (Console.FindFile(Name[0]) == null) {
-	        if (Console.FileExists(Name[0])) {
-	            switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
-	                           2,
-	                           "&Overwrite",
-	                           "&Cancel",
-	                           "%s", Name[0]))
-	            {
-	            case 0:
-	                break;
-	            case 1:
-	            case -1:
-	            default:
-	                return false;
+		if (Console.ExpandPath(FName, Name) == -1) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
+			return false;
+		}
+		if (Console.FindFile(Name[0]) == null) {
+			if (Console.FileExists(Name[0])) {
+				switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
+						2,
+						"&Overwrite",
+						"&Cancel",
+						"%s", Name[0]))
+				{
+				case 0:
+					break;
+				case 1:
+				case -1:
+				default:
+					return false;
 
-	            }
-	        }
-	        //free(FileName);
-	        FileName = Name[0];
-	        UpdateTitle();
-	        return Save();
-	    } else {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name[0]);
-	        return false;
-	    }
+				}
+			}
+			//free(FileName);
+			FileName = Name[0];
+			UpdateTitle();
+			return Save();
+		} else {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name[0]);
+			return false;
+		}
 	}
-	
+
 	boolean ASCIITable(ExState State) {
-	    int rc = View.MView.Win.PickASCII();
-	    if (rc != -1)
-	        return InsertChar((char)rc);
+		int rc = View.MView.Win.PickASCII();
+		if (rc != -1)
+			return InsertChar((char)rc);
 
-	    return true;
+		return true;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	@Override
 	EEventMap GetEventMap() {
-	    return EEventMap.FindActiveMap(Mode);
+		return EEventMap.FindActiveMap(Mode);
 	}
-	
-	
+
+
 	@Override
 	ExResult ExecCommand(ExCommands Command, ExState State) {
 		try {
 			return doExecCommand(Command, State) ? ExResult.ErOK : ExResult.ErFAIL;
 		} catch (ExecException e) {
-	        Msg(S_ERROR, "Fail: ", e.getMessage());
-	        return ExResult.ErFAIL;
+			Msg(S_ERROR, "Fail: ", e.getMessage());
+			return ExResult.ErFAIL;
 		}
 	}
-	
-	
+
+
 	private boolean doExecCommand(ExCommands Command, ExState State) throws ExecException 
 	{
-	    switch (Command) {
-	    case ExMoveUp:                return MoveUp();
-	    case ExMoveDown:              return MoveDown();
-	    case ExMoveLeft:              return MoveLeft();
-	    case ExMoveRight:             return MoveRight();
-	    case ExMovePrev:              return MovePrev();
-	    case ExMoveNext:              return MoveNext();
-	    case ExMoveWordLeft:          return MoveWordLeft();
-	    case ExMoveWordRight:         return MoveWordRight();
-	    case ExMoveWordPrev:          return MoveWordPrev();
-	    case ExMoveWordNext:          return MoveWordNext();
-	    case ExMoveWordEndLeft:       return MoveWordEndLeft();
-	    case ExMoveWordEndRight:      return MoveWordEndRight();
-	    case ExMoveWordEndPrev:       return MoveWordEndPrev();
-	    case ExMoveWordEndNext:       return MoveWordEndNext();
-	    case ExMoveWordOrCapLeft:     return MoveWordOrCapLeft();
-	    case ExMoveWordOrCapRight:    return MoveWordOrCapRight();
-	    case ExMoveWordOrCapPrev:     return MoveWordOrCapPrev();
-	    case ExMoveWordOrCapNext:     return MoveWordOrCapNext();
-	    case ExMoveWordOrCapEndLeft:  return MoveWordOrCapEndLeft();
-	    case ExMoveWordOrCapEndRight: return MoveWordOrCapEndRight();
-	    case ExMoveWordOrCapEndPrev:  return MoveWordOrCapEndPrev();
-	    case ExMoveWordOrCapEndNext:  return MoveWordOrCapEndNext();
-	    case ExMoveLineStart:         return MoveLineStart();
-	    case ExMoveLineEnd:           return MoveLineEnd();
-	    case ExMovePageStart:         return MovePageStart();
-	    case ExMovePageEnd:           return MovePageEnd();
-	    case ExMovePageUp:            return MovePageUp();
-	    case ExMovePageDown:          return MovePageDown();
-	    case ExMovePageLeft:          return MovePageLeft();
-	    case ExMovePageRight:         return MovePageEnd();
-	    case ExMoveFileStart:         return MoveFileStart();
-	    case ExMoveFileEnd:           return MoveFileEnd();
-	    case ExMoveBlockStart:        return MoveBlockStart();
-	    case ExMoveBlockEnd:          return MoveBlockEnd();
-	    case ExMoveFirstNonWhite:     return MoveFirstNonWhite();
-	    case ExMoveLastNonWhite:      return MoveLastNonWhite();
-	    case ExMovePrevEqualIndent:   return MovePrevEqualIndent();
-	    case ExMoveNextEqualIndent:   return MoveNextEqualIndent();
-	    case ExMovePrevTab:           return MovePrevTab();
-	    case ExMoveNextTab:           return MoveNextTab();
-	    case ExMoveTabStart:          return MoveTabStart();
-	    case ExMoveTabEnd:            return MoveTabEnd();
-	    case ExMoveLineTop:           return MoveLineTop();
-	    case ExMoveLineCenter:        return MoveLineCenter();
-	    case ExMoveLineBottom:        return MoveLineBottom();
-	    case ExMoveBeginOrNonWhite:   return MoveBeginOrNonWhite();
-	    case ExMoveBeginLinePageFile: return MoveBeginLinePageFile();
-	    case ExMoveEndLinePageFile:   return MoveEndLinePageFile();
-	    case ExScrollLeft:            return ScrollLeft(State);
-	    case ExScrollRight:           return ScrollRight(State);
-	    case ExScrollDown:            return ScrollDown(State);
-	    case ExScrollUp:              return ScrollUp(State);
-	    case ExKillLine:              return KillLine();
-	    case ExKillChar:              return KillChar();
-	    case ExKillCharPrev:          return KillCharPrev();
-	    case ExKillWord:              return KillWord();
-	    case ExKillWordPrev:          return KillWordPrev();
-	    case ExKillWordOrCap:         return KillWordOrCap();
-	    case ExKillWordOrCapPrev:     return KillWordOrCapPrev();
-	    case ExKillToLineStart:       return KillToLineStart();
-	    case ExKillToLineEnd:         return KillToLineEnd();
-	    case ExKillBlock:             return KillBlock();
-	    case ExBackSpace:             return BackSpace();
-	    case ExDelete:                return Delete();
+		switch (Command) {
+		case ExMoveUp:                return MoveUp();
+		case ExMoveDown:              return MoveDown();
+		case ExMoveLeft:              return MoveLeft();
+		case ExMoveRight:             return MoveRight();
+		case ExMovePrev:              return MovePrev();
+		case ExMoveNext:              return MoveNext();
+		case ExMoveWordLeft:          return MoveWordLeft();
+		case ExMoveWordRight:         return MoveWordRight();
+		case ExMoveWordPrev:          return MoveWordPrev();
+		case ExMoveWordNext:          return MoveWordNext();
+		case ExMoveWordEndLeft:       return MoveWordEndLeft();
+		case ExMoveWordEndRight:      return MoveWordEndRight();
+		case ExMoveWordEndPrev:       return MoveWordEndPrev();
+		case ExMoveWordEndNext:       return MoveWordEndNext();
+		case ExMoveWordOrCapLeft:     return MoveWordOrCapLeft();
+		case ExMoveWordOrCapRight:    return MoveWordOrCapRight();
+		case ExMoveWordOrCapPrev:     return MoveWordOrCapPrev();
+		case ExMoveWordOrCapNext:     return MoveWordOrCapNext();
+		case ExMoveWordOrCapEndLeft:  return MoveWordOrCapEndLeft();
+		case ExMoveWordOrCapEndRight: return MoveWordOrCapEndRight();
+		case ExMoveWordOrCapEndPrev:  return MoveWordOrCapEndPrev();
+		case ExMoveWordOrCapEndNext:  return MoveWordOrCapEndNext();
+		case ExMoveLineStart:         return MoveLineStart();
+		case ExMoveLineEnd:           return MoveLineEnd();
+		case ExMovePageStart:         return MovePageStart();
+		case ExMovePageEnd:           return MovePageEnd();
+		case ExMovePageUp:            return MovePageUp();
+		case ExMovePageDown:          return MovePageDown();
+		case ExMovePageLeft:          return MovePageLeft();
+		case ExMovePageRight:         return MovePageEnd();
+		case ExMoveFileStart:         return MoveFileStart();
+		case ExMoveFileEnd:           return MoveFileEnd();
+		case ExMoveBlockStart:        return MoveBlockStart();
+		case ExMoveBlockEnd:          return MoveBlockEnd();
+		case ExMoveFirstNonWhite:     return MoveFirstNonWhite();
+		case ExMoveLastNonWhite:      return MoveLastNonWhite();
+		case ExMovePrevEqualIndent:   return MovePrevEqualIndent();
+		case ExMoveNextEqualIndent:   return MoveNextEqualIndent();
+		case ExMovePrevTab:           return MovePrevTab();
+		case ExMoveNextTab:           return MoveNextTab();
+		case ExMoveTabStart:          return MoveTabStart();
+		case ExMoveTabEnd:            return MoveTabEnd();
+		case ExMoveLineTop:           return MoveLineTop();
+		case ExMoveLineCenter:        return MoveLineCenter();
+		case ExMoveLineBottom:        return MoveLineBottom();
+		case ExMoveBeginOrNonWhite:   return MoveBeginOrNonWhite();
+		case ExMoveBeginLinePageFile: return MoveBeginLinePageFile();
+		case ExMoveEndLinePageFile:   return MoveEndLinePageFile();
+		case ExScrollLeft:            return ScrollLeft(State);
+		case ExScrollRight:           return ScrollRight(State);
+		case ExScrollDown:            return ScrollDown(State);
+		case ExScrollUp:              return ScrollUp(State);
+		case ExKillLine:              return KillLine();
+		case ExKillChar:              return KillChar();
+		case ExKillCharPrev:          return KillCharPrev();
+		case ExKillWord:              return KillWord();
+		case ExKillWordPrev:          return KillWordPrev();
+		case ExKillWordOrCap:         return KillWordOrCap();
+		case ExKillWordOrCapPrev:     return KillWordOrCapPrev();
+		case ExKillToLineStart:       return KillToLineStart();
+		case ExKillToLineEnd:         return KillToLineEnd();
+		case ExKillBlock:             return KillBlock();
+		case ExBackSpace:             return BackSpace();
+		case ExDelete:                return Delete();
 
-	    case ExCharCaseUp:            return CharCaseUp();
-	    case ExCharCaseDown:          return CharCaseDown();
-	    case ExCharCaseToggle:        return CharCaseToggle();
-	    case ExLineCaseUp:            return LineCaseUp();
-	    case ExLineCaseDown:          return LineCaseDown();
-	    case ExLineCaseToggle:        return LineCaseToggle();
+		case ExCharCaseUp:            return CharCaseUp();
+		case ExCharCaseDown:          return CharCaseDown();
+		case ExCharCaseToggle:        return CharCaseToggle();
+		case ExLineCaseUp:            return LineCaseUp();
+		case ExLineCaseDown:          return LineCaseDown();
+		case ExLineCaseToggle:        return LineCaseToggle();
 
-	    case ExLineInsert:            return LineInsert();
-	    case ExLineAdd:               return LineAdd();
-	    case ExLineSplit:             return LineSplit();
-	    case ExLineJoin:              return LineJoin();
-	    case ExLineNew:               return LineNew();
-	    case ExLineIndent:            return LineIndent();
-	    case ExLineTrim:              return LineTrim();
-	    case ExLineCenter:            return LineCenter() != 0;
-	    case ExInsertSpacesToTab:
-	        {
-	            int [] no = {0};
+		case ExLineInsert:            return LineInsert();
+		case ExLineAdd:               return LineAdd();
+		case ExLineSplit:             return LineSplit();
+		case ExLineJoin:              return LineJoin();
+		case ExLineNew:               return LineNew();
+		case ExLineIndent:            return LineIndent();
+		case ExLineTrim:              return LineTrim();
+		case ExLineCenter:            return LineCenter() != 0;
+		case ExInsertSpacesToTab:
+		{
+			int [] no = {0};
 
-	            if(State.GetIntParam(View, no) == 0)
-	                no[0] = 0;
-	            return InsertSpacesToTab(no[0]);
-	        }
-	    case ExInsertTab:             return InsertTab();
-	    case ExInsertSpace:           return InsertSpace();
-	    case ExWrapPara:
-	// TODO #ifdef CONFIG_WORDWRAP
-	//        return WrapPara();
-	//#else
-	        //return ExResult.ErFAIL;
-	        return false;
-	//#endif
-	    case ExInsPrevLineChar:       return InsPrevLineChar();
-	    case ExInsPrevLineToEol:      return InsPrevLineToEol();
-	    case ExLineDuplicate:         return LineDuplicate();
-	    case ExBlockBegin:            return BlockBegin();
-	    case ExBlockEnd:              return BlockEnd();
-	    case ExBlockUnmark:           return BlockUnmark();
-	    case ExBlockCut:              return BlockCut(false);
-	    case ExBlockCopy:             return BlockCopy(false);
-	    case ExBlockCutAppend:        return BlockCut(true);
-	    case ExBlockCopyAppend:       return BlockCopy(true);
-	    case ExClipClear:             return ClipClear();
-	    case ExBlockPaste:            return BlockPaste();
-	    case ExBlockKill:             return BlockKill();
-	    case ExBlockIndent:
-	        {
-	            int saved_persistence = iBFI(this, BFI_PersistentBlocks);
-	            BFI_SET(this, BFI_PersistentBlocks, 1);
-	            boolean ret_code = BlockIndent();
-	            BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
-	            return ret_code;
-	        }
-	    case ExBlockUnindent:
-	        {
-	            int saved_persistence = iBFI(this, BFI_PersistentBlocks);
-	            BFI_SET(this, BFI_PersistentBlocks, 1);
-	            boolean ret_code = BlockUnindent();
-	            BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
-	            return ret_code ;
-	        }
-	    case ExBlockClear:            return BlockClear();
-	    case ExBlockMarkStream:       return BlockMarkStream();
-	    case ExBlockMarkLine:         return BlockMarkLine();
-	    case ExBlockMarkColumn:       return BlockMarkColumn();
-	    case ExBlockCaseUp:           return BlockCaseUp();
-	    case ExBlockCaseDown:         return BlockCaseDown();
-	    case ExBlockCaseToggle:       return BlockCaseToggle();
-	    case ExBlockExtendBegin:      return BlockExtendBegin();
-	    case ExBlockExtendEnd:        return BlockExtendEnd();
-	    case ExBlockReIndent:         return BlockReIndent();
-	    case ExBlockSelectWord:       return BlockSelectWord();
-	    case ExBlockSelectLine:       return BlockSelectLine();
-	    case ExBlockSelectPara:       return BlockSelectPara();
-	    case ExBlockUnTab:            return BlockUnTab();
-	    case ExBlockEnTab:            return BlockEnTab();
+			if(State.GetIntParam(View, no) == 0)
+				no[0] = 0;
+			return InsertSpacesToTab(no[0]);
+		}
+		case ExInsertTab:             return InsertTab();
+		case ExInsertSpace:           return InsertSpace();
+		case ExWrapPara:
+			// TODO #ifdef CONFIG_WORDWRAP
+			//        return WrapPara();
+			//#else
+			//return ExResult.ErFAIL;
+			return false;
+			//#endif
+		case ExInsPrevLineChar:       return InsPrevLineChar();
+		case ExInsPrevLineToEol:      return InsPrevLineToEol();
+		case ExLineDuplicate:         return LineDuplicate();
+		case ExBlockBegin:            return BlockBegin();
+		case ExBlockEnd:              return BlockEnd();
+		case ExBlockUnmark:           return BlockUnmark();
+		case ExBlockCut:              return BlockCut(false);
+		case ExBlockCopy:             return BlockCopy(false);
+		case ExBlockCutAppend:        return BlockCut(true);
+		case ExBlockCopyAppend:       return BlockCopy(true);
+		case ExClipClear:             return ClipClear();
+		case ExBlockPaste:            return BlockPaste();
+		case ExBlockKill:             return BlockKill();
+		case ExBlockIndent:
+		{
+			int saved_persistence = iBFI(this, BFI_PersistentBlocks);
+			BFI_SET(this, BFI_PersistentBlocks, 1);
+			boolean ret_code = BlockIndent();
+			BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
+			return ret_code;
+		}
+		case ExBlockUnindent:
+		{
+			int saved_persistence = iBFI(this, BFI_PersistentBlocks);
+			BFI_SET(this, BFI_PersistentBlocks, 1);
+			boolean ret_code = BlockUnindent();
+			BFI_SET(this, BFI_PersistentBlocks, saved_persistence);
+			return ret_code ;
+		}
+		case ExBlockClear:            return BlockClear();
+		case ExBlockMarkStream:       return BlockMarkStream();
+		case ExBlockMarkLine:         return BlockMarkLine();
+		case ExBlockMarkColumn:       return BlockMarkColumn();
+		case ExBlockCaseUp:           return BlockCaseUp();
+		case ExBlockCaseDown:         return BlockCaseDown();
+		case ExBlockCaseToggle:       return BlockCaseToggle();
+		case ExBlockExtendBegin:      return BlockExtendBegin();
+		case ExBlockExtendEnd:        return BlockExtendEnd();
+		case ExBlockReIndent:         return BlockReIndent();
+		case ExBlockSelectWord:       return BlockSelectWord();
+		case ExBlockSelectLine:       return BlockSelectLine();
+		case ExBlockSelectPara:       return BlockSelectPara();
+		case ExBlockUnTab:            return BlockUnTab();
+		case ExBlockEnTab:            return BlockEnTab();
 
-	    case ExUndo:                  return Undo();
-	    case ExRedo:                  return Redo();
+		case ExUndo:                  return Undo();
+		case ExRedo:                  return Redo();
 
-	    case ExMatchBracket:          return MatchBracket();
-	    case ExMovePrevPos:           return MovePrevPos();
-	    case ExMoveSavedPosCol:       return MoveSavedPosCol();
-	    case ExMoveSavedPosRow:       return MoveSavedPosRow();
-	    case ExMoveSavedPos:          return MoveSavedPos();
-	    case ExSavePos:               return SavePos();
-	 // TODO 
-	    case ExCompleteWord:          return CompleteWord();
-	    case ExBlockPasteStream:      return BlockPasteStream();
-	    case ExBlockPasteLine:        return BlockPasteLine();
-	    case ExBlockPasteColumn:      return BlockPasteColumn();
-	    case ExShowPosition:   		  return ShowPosition();
-	    /* TODO fold
+		case ExMatchBracket:          return MatchBracket();
+		case ExMovePrevPos:           return MovePrevPos();
+		case ExMoveSavedPosCol:       return MoveSavedPosCol();
+		case ExMoveSavedPosRow:       return MoveSavedPosRow();
+		case ExMoveSavedPos:          return MoveSavedPos();
+		case ExSavePos:               return SavePos();
+		// TODO 
+		case ExCompleteWord:          return CompleteWord();
+		case ExBlockPasteStream:      return BlockPasteStream();
+		case ExBlockPasteLine:        return BlockPasteLine();
+		case ExBlockPasteColumn:      return BlockPasteColumn();
+		case ExShowPosition:   		  return ShowPosition();
+		/* TODO fold
 	    case ExFoldCreate:            return FoldCreate(VToR(CP.Row));
 	    case ExFoldDestroy:           return FoldDestroy(VToR(CP.Row));
 	    case ExFoldDestroyAll:        return FoldDestroyAll();
@@ -6599,247 +6599,247 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    case ExMoveFoldTop:           return MoveFoldTop();
 	    case ExMoveFoldPrev:          return MoveFoldPrev();
 	    case ExMoveFoldNext:          return MoveFoldNext();
-	    */
-	    case ExFileSave:              return Save();
-	    case ExFilePrint:             return FilePrint();
-	    // TODO case ExBlockPrint:            return BlockPrint();
-	    case ExBlockTrim:             return BlockTrim();
-	    case ExFileTrim:              return FileTrim();
-	    case ExHilitWord:
-	// TODO #ifdef CONFIG_WORD_HILIT
-	//        return HilitWord();
-	//#else
-	        return false; //ErFAIL;
-	//#endif
+		 */
+		case ExFileSave:              return Save();
+		case ExFilePrint:             return FilePrint();
+		// TODO case ExBlockPrint:            return BlockPrint();
+		case ExBlockTrim:             return BlockTrim();
+		case ExFileTrim:              return FileTrim();
+		case ExHilitWord:
+			// TODO #ifdef CONFIG_WORD_HILIT
+			//        return HilitWord();
+			//#else
+			return false; //ErFAIL;
+			//#endif
 
-	    case ExSearchWordPrev:        return SearchWord(SEARCH_BACK | SEARCH_NEXT);
-	    case ExSearchWordNext:        return SearchWord(SEARCH_NEXT);
-	    case ExHilitMatchBracket:     return HilitMatchBracket();
-	    case ExToggleAutoIndent:      return ToggleAutoIndent();
-	    case ExToggleInsert:          return ToggleInsert();
-	    case ExToggleExpandTabs:      return ToggleExpandTabs();
-	    case ExToggleShowTabs:        return ToggleShowTabs();
-	    case ExToggleUndo:            return ToggleUndo();
-	    case ExToggleReadOnly:        return ToggleReadOnly();
-	    case ExToggleKeepBackups:     return ToggleKeepBackups();
-	    case ExToggleMatchCase:       return ToggleMatchCase();
-	    case ExToggleBackSpKillTab:   return ToggleBackSpKillTab();
-	    case ExToggleDeleteKillTab:   return ToggleDeleteKillTab();
-	    case ExToggleSpaceTabs:       return ToggleSpaceTabs();
-	    case ExToggleIndentWithTabs:  return ToggleIndentWithTabs();
-	    case ExToggleBackSpUnindents: return ToggleBackSpUnindents();
-	    case ExToggleWordWrap:        return ToggleWordWrap();
-	    case ExToggleTrim:            return ToggleTrim();
-	    case ExToggleShowMarkers:     return ToggleShowMarkers();
-	    case ExToggleHilitTags:       return ToggleHilitTags();
-	    case ExToggleShowBookmarks:   return ToggleShowBookmarks();
-	    case ExSetLeftMargin:         return SetLeftMargin();
-	    case ExSetRightMargin:        return SetRightMargin();
-	    //* TODO edit cmds
+		case ExSearchWordPrev:        return SearchWord(SEARCH_BACK | SEARCH_NEXT);
+		case ExSearchWordNext:        return SearchWord(SEARCH_NEXT);
+		case ExHilitMatchBracket:     return HilitMatchBracket();
+		case ExToggleAutoIndent:      return ToggleAutoIndent();
+		case ExToggleInsert:          return ToggleInsert();
+		case ExToggleExpandTabs:      return ToggleExpandTabs();
+		case ExToggleShowTabs:        return ToggleShowTabs();
+		case ExToggleUndo:            return ToggleUndo();
+		case ExToggleReadOnly:        return ToggleReadOnly();
+		case ExToggleKeepBackups:     return ToggleKeepBackups();
+		case ExToggleMatchCase:       return ToggleMatchCase();
+		case ExToggleBackSpKillTab:   return ToggleBackSpKillTab();
+		case ExToggleDeleteKillTab:   return ToggleDeleteKillTab();
+		case ExToggleSpaceTabs:       return ToggleSpaceTabs();
+		case ExToggleIndentWithTabs:  return ToggleIndentWithTabs();
+		case ExToggleBackSpUnindents: return ToggleBackSpUnindents();
+		case ExToggleWordWrap:        return ToggleWordWrap();
+		case ExToggleTrim:            return ToggleTrim();
+		case ExToggleShowMarkers:     return ToggleShowMarkers();
+		case ExToggleHilitTags:       return ToggleHilitTags();
+		case ExToggleShowBookmarks:   return ToggleShowBookmarks();
+		case ExSetLeftMargin:         return SetLeftMargin();
+		case ExSetRightMargin:        return SetRightMargin();
+		//* TODO edit cmds
 
-	    //case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
+		//case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
 
-	        // stuff with UI
-	    case ExMoveToLine:          return MoveToLine(State);
-	    case ExMoveToColumn:        return MoveToColumn(State);
-	    //case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
-	    
+		// stuff with UI
+		case ExMoveToLine:          return MoveToLine(State);
+		case ExMoveToColumn:        return MoveToColumn(State);
+		//case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
 
-	    case ExPlaceBookmark:       return PlaceBookmark(State);
-	    case ExRemoveBookmark:      return RemoveBookmark(State);
-	    case ExGotoBookmark:        return GotoBookmark(State);
-	    case ExPlaceGlobalBookmark: return PlaceGlobalBookmark(State);
-	    case ExPushGlobalBookmark:  return PushGlobalBookmark();
-	    case ExInsertString:        return InsertString(State);
-	    
-	    ///* TODO edit cmds
-	    case ExSelfInsert:          return SelfInsert(State);
-	    case ExFileReload:          return FileReload(State);
-	    // TODO case ExFileSaveAs:          return FileSaveAs(State);
-	    case ExFileWriteTo:         return FileWriteTo(State);
-	    case ExBlockRead:           return BlockRead(State);
-	    case ExBlockReadStream:     return BlockReadStream(State);
-	    case ExBlockReadLine:       return BlockReadLine(State);
-	    case ExBlockReadColumn:     return BlockReadColumn(State);
-	    case ExBlockWrite:          return BlockWrite(State);
-	    case ExBlockSort:           return BlockSort(0);
-	    case ExBlockSortReverse:    return BlockSort(1);
-	    case ExFind:                return Find(State);
-	    case ExFindReplace:         return FindReplace(State);
-	    case ExFindRepeat:          return FindRepeat(State);
-	    case ExFindRepeatOnce:      return FindRepeatOnce(State);
-	    case ExFindRepeatReverse:   return FindRepeatReverse(State);
 
-	    case ExSearch:              return Search(State);
-	    case ExSearchB:             return SearchB(State);
-	    case ExSearchRx:            return SearchRx(State);
-	    case ExSearchAgain:         return SearchAgain(State);
-	    case ExSearchAgainB:        return SearchAgainB(State);
-	    case ExSearchReplace:       return SearchReplace(State);
-	    case ExSearchReplaceB:      return SearchReplaceB(State);
-	    case ExSearchReplaceRx:     return SearchReplaceRx(State); 
-	    
-	    case ExInsertChar:          return InsertChar(State);
-	    case ExTypeChar:            return TypeChar(State);
-	    case ExChangeMode:          return ChangeMode(State);
-	    case ExChangeKeys:          return ChangeKeys(State);
-	    case ExChangeFlags:         return ChangeFlags(State);
-	    case ExChangeTabSize:       return ChangeTabSize(State);
-	    case ExChangeLeftMargin:    return ChangeLeftMargin(State);
-	    case ExChangeRightMargin:   return ChangeRightMargin(State);
-	    case ExASCIITable:			return ASCIITable(State);
-	    case ExCharTrans:           return CharTrans(State);
-	    case ExLineTrans:           return LineTrans(State);
-	    case ExBlockTrans:          return BlockTrans(State);
+		case ExPlaceBookmark:       return PlaceBookmark(State);
+		case ExRemoveBookmark:      return RemoveBookmark(State);
+		case ExGotoBookmark:        return GotoBookmark(State);
+		case ExPlaceGlobalBookmark: return PlaceGlobalBookmark(State);
+		case ExPushGlobalBookmark:  return PushGlobalBookmark();
+		case ExInsertString:        return InsertString(State);
 
-	/* TODO #ifdef CONFIG_TAGS
+		///* TODO edit cmds
+		case ExSelfInsert:          return SelfInsert(State);
+		case ExFileReload:          return FileReload(State);
+		// TODO case ExFileSaveAs:          return FileSaveAs(State);
+		case ExFileWriteTo:         return FileWriteTo(State);
+		case ExBlockRead:           return BlockRead(State);
+		case ExBlockReadStream:     return BlockReadStream(State);
+		case ExBlockReadLine:       return BlockReadLine(State);
+		case ExBlockReadColumn:     return BlockReadColumn(State);
+		case ExBlockWrite:          return BlockWrite(State);
+		case ExBlockSort:           return BlockSort(0);
+		case ExBlockSortReverse:    return BlockSort(1);
+		case ExFind:                return Find(State);
+		case ExFindReplace:         return FindReplace(State);
+		case ExFindRepeat:          return FindRepeat(State);
+		case ExFindRepeatOnce:      return FindRepeatOnce(State);
+		case ExFindRepeatReverse:   return FindRepeatReverse(State);
+
+		case ExSearch:              return Search(State);
+		case ExSearchB:             return SearchB(State);
+		case ExSearchRx:            return SearchRx(State);
+		case ExSearchAgain:         return SearchAgain(State);
+		case ExSearchAgainB:        return SearchAgainB(State);
+		case ExSearchReplace:       return SearchReplace(State);
+		case ExSearchReplaceB:      return SearchReplaceB(State);
+		case ExSearchReplaceRx:     return SearchReplaceRx(State); 
+
+		case ExInsertChar:          return InsertChar(State);
+		case ExTypeChar:            return TypeChar(State);
+		case ExChangeMode:          return ChangeMode(State);
+		case ExChangeKeys:          return ChangeKeys(State);
+		case ExChangeFlags:         return ChangeFlags(State);
+		case ExChangeTabSize:       return ChangeTabSize(State);
+		case ExChangeLeftMargin:    return ChangeLeftMargin(State);
+		case ExChangeRightMargin:   return ChangeRightMargin(State);
+		case ExASCIITable:			return ASCIITable(State);
+		case ExCharTrans:           return CharTrans(State);
+		case ExLineTrans:           return LineTrans(State);
+		case ExBlockTrans:          return BlockTrans(State);
+
+		/* TODO #ifdef CONFIG_TAGS
 	    case ExTagFind:             return FindTag(State);
 	    case ExTagFindWord:         return FindTagWord(State);
 	#endif */
 
-	    // TODO case ExSetCIndentStyle:     return SetCIndentStyle(State);
+		// TODO case ExSetCIndentStyle:     return SetCIndentStyle(State);
 
-	    case ExBlockMarkFunction:   return BlockMarkFunction();
-	    case ExIndentFunction:      return IndentFunction();
-	    case ExMoveFunctionPrev:    return MoveFunctionPrev();
-	    case ExMoveFunctionNext:    return MoveFunctionNext();
+		case ExBlockMarkFunction:   return BlockMarkFunction();
+		case ExIndentFunction:      return IndentFunction();
+		case ExMoveFunctionPrev:    return MoveFunctionPrev();
+		case ExMoveFunctionNext:    return MoveFunctionNext();
 
-	    case ExInsertDate:          return InsertDate(State);
-	    case ExInsertUid:           return InsertUid();
-	    case ExShowHelpWord:        return ShowHelpWord(State);
+		case ExInsertDate:          return InsertDate(State);
+		case ExInsertUid:           return InsertUid();
+		case ExShowHelpWord:        return ShowHelpWord(State);
 
-	    }
+		}
 
-	    return super.ExecCommand(Command, State) == ExResult.ErOK;
+		return super.ExecCommand(Command, State) == ExResult.ErOK;
 	}
 
-	
+
 	@Override
 	boolean CanQuit() {
-	    return Modified == 0;
+		return Modified == 0;
 	}
 
 	@Override
 	int ConfQuit(GxView V, int multiFile) {
-	    if (Modified!=0) {
-	        if (multiFile!=0) {
-	            switch (V.Choice(GPC_ERROR,
-	                              "File Modified",
-	                              5,
-	                              "&Save",
-	                              "&As",
-	                              "A&ll",
-	                              "&Discard",
-	                              "&Cancel",
-	                              "%s", FileName))
-	            {
-	            case 0: /* Save */
-	                if (!Save()) return 0;
-	                break;
-	            case 1: /* As */
-	                {
-	                    String [] FName = {FileName};
-	                    //strcpy(FName, FileName);
-	                    if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
-	                    if (FileSaveAs(FName[0])) return 0;
-	                }
-	                break;
-	            case 2: /* Save all */
-	                return -2;
-	            case 3: /* Discard */
-	                break;
-	            case 4: /* Cancel */
-	            case -1:
-	            default:
-	                return 0;
-	            }
-	        }else {
-	            switch (V.Choice(GPC_ERROR,
-	                              "File Modified",
-	                              4,
-	                              "&Save",
-	                              "&As",
-	                              "&Discard",
-	                              "&Cancel",
-	                              "%s", FileName))
-	            {
-	            case 0: /* Save */
-	                if (!Save()) return 0;
-	                break;
-	            case 1: /* As */
-	                {
-	                    String [] FName = {FileName};
-	                    //char FName[MAXPATH];
-	                    //strcpy(FName, FileName);
-	                    if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
-	                    if (!FileSaveAs(FName[0])) return 0;
-	                }
-	                break;
-	            case 2: /* Discard */
-	                break;
-	            case 3: /* Cancel */
-	            case -1:
-	            default:
-	                return 0;
-	            }
-	        }
-	    }
-	    return 1;
+		if (Modified!=0) {
+			if (multiFile!=0) {
+				switch (V.Choice(GPC_ERROR,
+						"File Modified",
+						5,
+						"&Save",
+						"&As",
+						"A&ll",
+						"&Discard",
+						"&Cancel",
+						"%s", FileName))
+				{
+				case 0: /* Save */
+					if (!Save()) return 0;
+					break;
+				case 1: /* As */
+				{
+					String [] FName = {FileName};
+					//strcpy(FName, FileName);
+					if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
+					if (FileSaveAs(FName[0])) return 0;
+				}
+				break;
+				case 2: /* Save all */
+					return -2;
+				case 3: /* Discard */
+					break;
+				case 4: /* Cancel */
+				case -1:
+				default:
+					return 0;
+				}
+			}else {
+				switch (V.Choice(GPC_ERROR,
+						"File Modified",
+						4,
+						"&Save",
+						"&As",
+						"&Discard",
+						"&Cancel",
+						"%s", FileName))
+				{
+				case 0: /* Save */
+					if (!Save()) return 0;
+					break;
+				case 1: /* As */
+				{
+					String [] FName = {FileName};
+					//char FName[MAXPATH];
+					//strcpy(FName, FileName);
+					if (V.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0) return 0;
+					if (!FileSaveAs(FName[0])) return 0;
+				}
+				break;
+				case 2: /* Discard */
+					break;
+				case 3: /* Cancel */
+				case -1:
+				default:
+					return 0;
+				}
+			}
+		}
+		return 1;
 	}
-	
+
 
 	@Override
 	String GetName() { return FileName; }
-	
+
 	@Override
 	String GetPath() { 
 		//String [] APath = {null};
 		//Console.JustDirectory(FileName, APath);
 		//return APath[0]; 
-		
+
 		return Console.directory(FileName);
-		}
-	
+	}
+
 	@Override
 	String GetInfo() { 
-	    String []  buf = {null};
-	    //char winTitle[256] = {0};
-	    String winTitle = "";
+		String []  buf = {null};
+		//char winTitle[256] = {0};
+		String winTitle = "";
 
-	    Console.JustFileName(FileName, buf);
-	    if (buf[0] == null || buf[0].isBlank()) // if there is no filename, try the directory name.
-	    	Console.JustLastDirectory(FileName, buf);
+		Console.JustFileName(FileName, buf);
+		if (buf[0] == null || buf[0].isBlank()) // if there is no filename, try the directory name.
+			Console.JustLastDirectory(FileName, buf);
 
-	    if (buf[0] == null || buf[0].isBlank()) // if there is a file/dir name, stick it in here.
-	        winTitle += buf + " - ";
+		if (buf[0] == null || buf[0].isBlank()) // if there is a file/dir name, stick it in here.
+			winTitle += buf + " - ";
 
-	    winTitle += FileName;
+		winTitle += FileName;
 
-	    return String.format(
-	            "%2d %04d:%03d%c%-150s ",
-	            ModelNo,
-	            1 + CP.Row, 1 + CP.Col,
-	            Modified!=0 ? '*': ' ',
-	            winTitle);
+		return String.format(
+				"%2d %04d:%03d%c%-150s ",
+				ModelNo,
+				1 + CP.Row, 1 + CP.Col,
+				Modified!=0 ? '*': ' ',
+						winTitle);
 
 	}
-	
+
 
 	@Override
 	void GetTitle(String [] ATitle, String [] ASTitle) 
 	{ 
-	    String []  buf = {null};
+		String []  buf = {null};
 
-	    ATitle[0] = FileName;
+		ATitle[0] = FileName;
 
-    	Console.JustFileName(FileName, buf);
-    	if (buf[0] == null || buf[0].isBlank())    	
-	        ASTitle[0] = FileName;
-	    else 
-	        ASTitle[0] = buf[0];
+		Console.JustFileName(FileName, buf);
+		if (buf[0] == null || buf[0].isBlank())    	
+			ASTitle[0] = FileName;
+		else 
+			ASTitle[0] = buf[0];
 	}
 
-	
+
 	@Override
 	void DeleteRelated() {
 		if (Routines!=null) {
@@ -6847,66 +6847,66 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Routines = null;
 		}
 	}
-	
+
 
 	@Override
 	int GetStrVar(int var, String [] str) 
 	{
-	    //puts("variable EBuffer\x7");
-	    switch (var) {
-	    case mvFilePath:
-	        //puts("variable FilePath\x7");
-	        str[0] = FileName;
-	        return 1;
+		//puts("variable EBuffer\x7");
+		switch (var) {
+		case mvFilePath:
+			//puts("variable FilePath\x7");
+			str[0] = FileName;
+			return 1;
 
-	    case mvFileName:
-	        Console.JustFileName(FileName, str);
-	        return 1;
+		case mvFileName:
+			Console.JustFileName(FileName, str);
+			return 1;
 
-	    case mvFileDirectory:
-	    	//Console.JustDirectory(FileName, str);
-	    	str[0] = Console.directory(FileName);
-	        return 1;
-	        
-	    case mvFileBaseName:
-	        {
-	            String [] buf = {null};
-	            //String dot, *dot2;
+		case mvFileDirectory:
+			//Console.JustDirectory(FileName, str);
+			str[0] = Console.directory(FileName);
+			return 1;
 
-	            Console.JustFileName(FileName, buf);
+		case mvFileBaseName:
+		{
+			String [] buf = {null};
+			//String dot, *dot2;
 
-	            //File f = new File(buf[0]);
-	            //Path.of(buf[0]).
-	            
-	            int pointPos = buf[0].lastIndexOf('.');
-	            if(pointPos < 0)
-	            	str[0] = buf[0];
-	            else
-	            	str[0] = buf[0].substring(0, pointPos);
-	            /*
+			Console.JustFileName(FileName, buf);
+
+			//File f = new File(buf[0]);
+			//Path.of(buf[0]).
+
+			int pointPos = buf[0].lastIndexOf('.');
+			if(pointPos < 0)
+				str[0] = buf[0];
+			else
+				str[0] = buf[0].substring(0, pointPos);
+			/*
 	            dot = strchr(buf, '.');
 	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
 	                dot = dot2;
 	            if (dot)
-	                *dot = 0;
+			 *dot = 0;
 	            strcpy(str, buf);
-	            */
-	        }
-	        return 1;
+			 */
+		}
+		return 1;
 
-	    case mvFileExtension:
-	        {
-	            String [] buf = {null};
+		case mvFileExtension:
+		{
+			String [] buf = {null};
 
-	            Console.JustFileName(FileName, buf);
+			Console.JustFileName(FileName, buf);
 
-	            int pointPos = buf[0].lastIndexOf('.');
-	            if(pointPos < 0)
-	            	str[0] = buf[0];
-	            else
-	            	str[0] = buf[0].substring(pointPos+1);
-	            
-	            /*
+			int pointPos = buf[0].lastIndexOf('.');
+			if(pointPos < 0)
+				str[0] = buf[0];
+			else
+				str[0] = buf[0].substring(pointPos+1);
+
+			/*
 	            dot = strchr(buf, '.');
 	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
 	                dot = dot2;
@@ -6914,79 +6914,79 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                strcpy(str, dot);
 	            else
 	                str[0] = 0;
-	            */
-	        }
-	        return 1;
+			 */
+		}
+		return 1;
 
-	    case mvChar:
-	    case mvWord:
-	    case mvLine:
-	        return 0;
-	    }
-	    
-	    return super.GetStrVar(var, str);
+		case mvChar:
+		case mvWord:
+		case mvLine:
+			return 0;
+		}
+
+		return super.GetStrVar(var, str);
 	}
 
 	@Override
 	int GetIntVar(int var, int []value) {
-	    switch (var) {
-	    case mvCurRow: value[0] = VToR(CP.Row) + 1; return 1;
-	    case mvCurCol: value[0] = CP.Col; return 1;
-	    }
-	    return super.GetIntVar(var, value);
+		switch (var) {
+		case mvCurRow: value[0] = VToR(CP.Row) + 1; return 1;
+		case mvCurCol: value[0] = CP.Col; return 1;
+		}
+		return super.GetIntVar(var, value);
 	}
-	
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean CanUndo() {
-	    if (!BFI(this, BFI_Undo)) return false;
-	    return us.CanUndo();
+		if (!BFI(this, BFI_Undo)) return false;
+		return us.CanUndo();
 	}
 
 	boolean CanRedo() {
-	    if (!BFI(this, BFI_Undo)) return false;
-	    return us.CanRedo();
+		if (!BFI(this, BFI_Undo)) return false;
+		return us.CanRedo();
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	void PushBlockData() {
 		getSlot().
-		    pushInt(BB.Col).
-		    pushInt(BB.Row).
-		    pushInt(BE.Col).
-		    pushInt(BE.Row).
-		    pushInt(BlockMode).
-		    pushOp( UndoOperation.ucBlock);
+		pushInt(BB.Col).
+		pushInt(BB.Row).
+		pushInt(BE.Col).
+		pushInt(BE.Row).
+		pushInt(BlockMode).
+		pushOp( UndoOperation.ucBlock);
 	}
 
 
@@ -6995,13 +6995,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	UndoStackItem getSlot() 
 	{
 
-	    UndoStackItem ret = us.getRecordSlot();
-	    
-	    // turned off? caller will write to not saved item
-	    if( (!BFI(this, BFI_Undo)))
-	    	ret.setDisabled(); 
-	    
-    	return ret;
+		UndoStackItem ret = us.getRecordSlot();
+
+		// turned off? caller will write to not saved item
+		if( (!BFI(this, BFI_Undo)))
+			ret.setDisabled(); 
+
+		return ret;
 	}
 
 
@@ -7010,303 +7010,303 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean Redo() 
 	{
-	    if (!BFI(this, BFI_Undo)) return false;
-	    
-	    if (!us.CanRedo()) {
-	        Msg(S_INFO, "Nothing to redo.");
-	        return false;
-	    }
-	    
-	    return us.redo();
+		if (!BFI(this, BFI_Undo)) return false;
+
+		if (!us.CanRedo()) {
+			Msg(S_INFO, "Nothing to redo.");
+			return false;
+		}
+
+		return us.redo();
 	}
 
 	boolean Undo() {	    
-	    if (!BFI(this, BFI_Undo)) return false;
-	    
-	    if(!us.CanUndo()) {
-	        Msg(S_INFO, "Nothing to undo.");
-	        return false;
-	    }
-	    
-	    return us.undo();
+		if (!BFI(this, BFI_Undo)) return false;
+
+		if(!us.CanUndo()) {
+			Msg(S_INFO, "Nothing to undo.");
+			return false;
+		}
+
+		return us.undo();
 	}
-	
-	
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
 
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean ShowPosition() {
-	    int CLine, NLines;
-	    int CAct, NAct;
-	    int CColumn, NColumns;
-	    int CCharPos, NChars;
+		int CLine, NLines;
+		int CAct, NAct;
+		int CColumn, NColumns;
+		int CCharPos, NChars;
 
-	    if (View == null)
-	        return false;
+		if (View == null)
+			return false;
 
-	    CLine = CP.Row + 1;
-	    NLines = VCount;
-	    CAct = VToR(CP.Row) + 1;
-	    NAct = RCount;
-	    CColumn = CP.Col + 1;
-	    NColumns = LineLen(CP.Row);
-	    CCharPos = CharOffset(VLine(CP.Row), CP.Col) + 1;
-	    NChars = VLine(CP.Row).getCount();
+		CLine = CP.Row + 1;
+		NLines = VCount;
+		CAct = VToR(CP.Row) + 1;
+		NAct = RCount;
+		CColumn = CP.Col + 1;
+		NColumns = LineLen(CP.Row);
+		CCharPos = CharOffset(VLine(CP.Row), CP.Col) + 1;
+		NChars = VLine(CP.Row).getCount();
 
 
-	/*#ifdef CONFIG_UNDOREDO
+		/*#ifdef CONFIG_UNDOREDO
 	    int NN = -1;
 	    if (US.UndoPtr > 0)
 	        NN = US.Top[US.UndoPtr - 1];
 	#endif */
-	    Msg(S_INFO,
-	        "L%d/%d G%d/%d/%d A%d/%d C%d/%d P%d/%d "+
-	/*#ifdef CONFIG_UNDOREDO
+		Msg(S_INFO,
+				"L%d/%d G%d/%d/%d A%d/%d C%d/%d P%d/%d "+
+						/*#ifdef CONFIG_UNDOREDO
 	        "U%d/%d/%d "
 	#endif */
-	        "H%d/%d/%d",
-	        CLine, NLines,
-	        RGap, RCount, RAllocated,
-	        CAct, NAct,
-	        CColumn, NColumns,
-	        CCharPos, NChars,
+	"H%d/%d/%d",
+	CLine, NLines,
+	RGap, RCount, RAllocated,
+	CAct, NAct,
+	CColumn, NColumns,
+	CCharPos, NChars,
 	/*#ifdef CONFIG_UNDOREDO
 	        US.UndoPtr, US.Num, NN,
 	#endif */
-	        StartHilit, MinRedraw, MaxRedraw);
-	    return true;
+	StartHilit, MinRedraw, MaxRedraw);
+		return true;
 	}
-	
-	
 
-	
-	
+
+
+
+
 	boolean SearchWord(int SearchFlags) 
 	{
-	    //char word[MAXSEARCH + 1];
+		//char word[MAXSEARCH + 1];
 		StringBuilder word = new StringBuilder();
-		
-	    ELine L = VLine(CP.Row);
-	    int P, len = 0;
-	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
 
-	    P = CharOffset(L, CP.Col);
-	    
-	    while ((P > 0) && ((ChClass(L.Chars.charAt(P - 1)) == 1) || (L.Chars.charAt(P - 1) == '_')))
-	        P--;
-	    
-	    while ( /*len < int(sizeof(word)) &&*/ P < L.getCount() && (ChClass(L.Chars.charAt(P)) == 1 || L.Chars.charAt(P) == '_'))
-	        word.append( L.Chars.charAt(P++) );
-	    
-	    if (len == 0)
-	        return false;
+		ELine L = VLine(CP.Row);
+		int P, len = 0;
+		int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
 
-	    return FindStr(word.toString(), len, Case | SearchFlags | SEARCH_WORD);
+		P = CharOffset(L, CP.Col);
+
+		while ((P > 0) && ((ChClass(L.Chars.charAt(P - 1)) == 1) || (L.Chars.charAt(P - 1) == '_')))
+			P--;
+
+		while ( /*len < int(sizeof(word)) &&*/ P < L.getCount() && (ChClass(L.Chars.charAt(P)) == 1 || L.Chars.charAt(P) == '_'))
+			word.append( L.Chars.charAt(P++) );
+
+		if (len == 0)
+			return false;
+
+		return FindStr(word.toString(), len, Case | SearchFlags | SEARCH_WORD);
 	}
-	
-	
-	
+
+
+
 
 	boolean HilitMatchBracket() {
-	    EPoint M = CP;
+		EPoint M = CP;
 
-	    if (View == null)
-	        return false;
+		if (View == null)
+			return false;
 
-	    int Min = VToR(GetVPort().TP.Row);
-	    int Max = GetVPort().TP.Row + GetVPort().Rows;
-	    if (Max >= VCount)
-	        Max = RCount;
-	    else
-	        Max = VToR(Max);
-	    if (Min < 0)
-	        Min = 0;
-	    if (Max < Min)
-	        return false;
-	    
-	    if (GetMatchBrace(M, Min, Max, false)) {
-	        Match = M;
-	        MatchLen = 1;
-	        MatchCount = 1;
-	        Draw(Match.Row, Match.Row);
-	        return true;
-	    }
-	    return false;
+		int Min = VToR(GetVPort().TP.Row);
+		int Max = GetVPort().TP.Row + GetVPort().Rows;
+		if (Max >= VCount)
+			Max = RCount;
+		else
+			Max = VToR(Max);
+		if (Min < 0)
+			Min = 0;
+		if (Max < Min)
+			return false;
+
+		if (GetMatchBrace(M, Min, Max, false)) {
+			Match = M;
+			MatchLen = 1;
+			MatchCount = 1;
+			Draw(Match.Row, Match.Row);
+			return true;
+		}
+		return false;
 	}
-	
-	
-	
-	
+
+
+
+
 	boolean GetMatchBrace(EPoint M, int MinLine, int MaxLine, boolean show) {
-	    int [] StateLen = {0};
-	    //hsState *StateMap = 0;
-	    byte [][] StateMap = new byte[1][];
-	    int Pos;
-	    ELine L = VLine(M.Row);
-	    int dir = 0;
-	    //hsState State;
-	    char Ch1, Ch2;
-	    int CountX = 0;
-	    int StateRow = -1;
+		int [] StateLen = {0};
+		//hsState *StateMap = 0;
+		int [][] StateMap = new int[1][];
+		int Pos;
+		ELine L = VLine(M.Row);
+		int dir = 0;
+		//hsState State;
+		char Ch1, Ch2;
+		int CountX = 0;
+		int StateRow = -1;
 
-	    M.Row = VToR(CP.Row);
+		M.Row = VToR(CP.Row);
 
-	    Pos = CharOffset(L, M.Col);
-	    if (Pos >= L.getCount()) return false;
-	    switch(L.Chars.charAt(Pos)) {
-	    case '{': dir = +1; Ch1 = '{'; Ch2 = '}'; break;
-	    case '[': dir = +1; Ch1 = '['; Ch2 = ']'; break;
-	    case '<': dir = +1; Ch1 = '<'; Ch2 = '>'; break;
-	    case '(': dir = +1; Ch1 = '('; Ch2 = ')'; break;
-	    case '}': dir = -1; Ch1 = '}'; Ch2 = '{'; break;
-	    case ']': dir = -1; Ch1 = ']'; Ch2 = '['; break;
-	    case '>': dir = -1; Ch1 = '>'; Ch2 = '<'; break;
-	    case ')': dir = -1; Ch1 = ')'; Ch2 = '('; break;
-	    default:
-	        return false;
-	    }
-	    //StateMap = 0;
-	    if (!GetMap(M.Row, StateLen, StateMap)) return false;
-	    byte State = StateMap[0][Pos];
-	    StateRow = M.Row;
+		Pos = CharOffset(L, M.Col);
+		if (Pos >= L.getCount()) return false;
+		switch(L.Chars.charAt(Pos)) {
+		case '{': dir = +1; Ch1 = '{'; Ch2 = '}'; break;
+		case '[': dir = +1; Ch1 = '['; Ch2 = ']'; break;
+		case '<': dir = +1; Ch1 = '<'; Ch2 = '>'; break;
+		case '(': dir = +1; Ch1 = '('; Ch2 = ')'; break;
+		case '}': dir = -1; Ch1 = '}'; Ch2 = '{'; break;
+		case ']': dir = -1; Ch1 = ']'; Ch2 = '['; break;
+		case '>': dir = -1; Ch1 = '>'; Ch2 = '<'; break;
+		case ')': dir = -1; Ch1 = ')'; Ch2 = '('; break;
+		default:
+			return false;
+		}
+		//StateMap = 0;
+		if (!GetMap(M.Row, StateLen, StateMap)) return false;
+		int State = StateMap[0][Pos];
+		StateRow = M.Row;
 
-	    while (M.Row >= MinLine && M.Row < MaxLine) {
-	        while (Pos >= 0 && Pos < L.getCount()) {
-	            if (L.Chars.charAt(Pos) == Ch1 || L.Chars.charAt(Pos) == Ch2) {
-	                // update syntax state if needed
-	                if (StateRow != M.Row) {
-	                    StateMap[0] = null;
-	                    GetMap(M.Row, StateLen, StateMap);
-	                    if (StateMap[0] == null) return false;
-	                    StateRow = M.Row;
-	                }
-	                if (StateMap[0][Pos] == State) {
-	                    if (L.Chars.charAt(Pos) == Ch1) CountX++;
-	                    if (L.Chars.charAt(Pos) == Ch2) CountX--;
-	                    if (CountX == 0) {
-	                        M.Col = ScreenPos(L, Pos);
-	                        return true;
-	                    }
-	                }
-	            }
-	            Pos += dir;
-	        }
-	        M.Row += dir;
-	        if (M.Row >= 0 && M.Row < RCount) {
-	            L = RLine(M.Row);
-	            Pos = (dir == 1) ? 0 : (L.getCount() - 1);
-	        }
-	    }
-	    
-	    if (show)
-	        Msg(S_INFO, "No match (%d missing).", CountX);
+		while (M.Row >= MinLine && M.Row < MaxLine) {
+			while (Pos >= 0 && Pos < L.getCount()) {
+				if (L.Chars.charAt(Pos) == Ch1 || L.Chars.charAt(Pos) == Ch2) {
+					// update syntax state if needed
+					if (StateRow != M.Row) {
+						StateMap[0] = null;
+						GetMap(M.Row, StateLen, StateMap);
+						if (StateMap[0] == null) return false;
+						StateRow = M.Row;
+					}
+					if (StateMap[0][Pos] == State) {
+						if (L.Chars.charAt(Pos) == Ch1) CountX++;
+						if (L.Chars.charAt(Pos) == Ch2) CountX--;
+						if (CountX == 0) {
+							M.Col = ScreenPos(L, Pos);
+							return true;
+						}
+					}
+				}
+				Pos += dir;
+			}
+			M.Row += dir;
+			if (M.Row >= 0 && M.Row < RCount) {
+				L = RLine(M.Row);
+				Pos = (dir == 1) ? 0 : (L.getCount() - 1);
+			}
+		}
 
-	    return false;
+		if (show)
+			Msg(S_INFO, "No match (%d missing).", CountX);
+
+		return false;
 	}
 
 	boolean MatchBracket() {
-	    EPoint M = CP;
+		EPoint M = CP;
 
-	    if (GetMatchBrace(M, 0, RCount, true))
-	        return SetPosR(M.Col, M.Row);
-	    return false;
+		if (GetMatchBrace(M, 0, RCount, true))
+			return SetPosR(M.Col, M.Row);
+		return false;
 	}
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 	boolean BlockTrans(TransTable tab) 
 	{
-	    int L, I, B, E;
-	    ELine LL;
+		int L, I, B, E;
+		ELine LL;
 
-	    if(tab == null) return false;
+		if(tab == null) return false;
 
-	    if (!CheckBlock()) return false;
-	    if (RCount == 0) return false;
+		if (!CheckBlock()) return false;
+		if (RCount == 0) return false;
 
-	    for (L = BB.Row; L <= BE.Row; L++) {
-	        LL = RLine(L);
-	        B = 0;
-	        E = 0;
-	        switch (BlockMode) {
-	        case bmLine:
-	            if (L == BE.Row)
-	                E = 0;
-	            else
-	                E = LL.getCount();
-	            break;
-	        case bmColumn:
-	            if (L == BE.Row)
-	                E = 0;
-	            else {
-	                B = CharOffset(LL, BB.Col);
-	                E = CharOffset(LL, BE.Col);
-	            }
-	            break;
-	        case bmStream:
-	            if (L == BB.Row && L == BE.Row) {
-	                B = CharOffset(LL, BB.Col);
-	                E = CharOffset(LL, BE.Col);
-	            } else if (L == BB.Row) {
-	                B = CharOffset(LL, BB.Col);
-	                E = LL.getCount();
-	            } else if (L == BE.Row) {
-	                B = 0;
-	                E = CharOffset(LL, BE.Col);
-	            } else {
-	                B = 0;
-	                E = LL.getCount();
-	            }
-	            break;
-	        }
-	        if (B > LL.getCount())
-	            B = LL.getCount();
-	        if (E > LL.getCount())
-	            E = LL.getCount();
-	        if (E > B) {
-	            if (!ChgChars(L, B, E - B, null)) return false;
-	            for (I = B; I < E; I++)
-	                LL.Chars.w(I, tab.t[0xFF & LL.Chars.r(I)] );
-	        }
-	    }
-	    Draw(BB.Row, BE.Row);
-	    return true;
+		for (L = BB.Row; L <= BE.Row; L++) {
+			LL = RLine(L);
+			B = 0;
+			E = 0;
+			switch (BlockMode) {
+			case bmLine:
+				if (L == BE.Row)
+					E = 0;
+				else
+					E = LL.getCount();
+				break;
+			case bmColumn:
+				if (L == BE.Row)
+					E = 0;
+				else {
+					B = CharOffset(LL, BB.Col);
+					E = CharOffset(LL, BE.Col);
+				}
+				break;
+			case bmStream:
+				if (L == BB.Row && L == BE.Row) {
+					B = CharOffset(LL, BB.Col);
+					E = CharOffset(LL, BE.Col);
+				} else if (L == BB.Row) {
+					B = CharOffset(LL, BB.Col);
+					E = LL.getCount();
+				} else if (L == BE.Row) {
+					B = 0;
+					E = CharOffset(LL, BE.Col);
+				} else {
+					B = 0;
+					E = LL.getCount();
+				}
+				break;
+			}
+			if (B > LL.getCount())
+				B = LL.getCount();
+			if (E > LL.getCount())
+				E = LL.getCount();
+			if (E > B) {
+				if (!ChgChars(L, B, E - B, null)) return false;
+				for (I = B; I < E; I++)
+					LL.Chars.w(I, tab.t[0xFF & LL.Chars.r(I)] );
+			}
+		}
+		Draw(BB.Row, BE.Row);
+		return true;
 	}
 
 	boolean CharTrans(TransTable tab) 
@@ -7314,127 +7314,127 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if(tab == null) return false;
 
 		ELine L = VLine(CP.Row);
-	    int P = CharOffset(L, CP.Col);
+		int P = CharOffset(L, CP.Col);
 
-	    if (P >= L.getCount()) return false;
-	    if (!ChgChars(CP.Row, P, 1, null)) return false;
-	    //L.Chars[P] = tab[(char)L.Chars[P]];
-	    L.Chars.w(P, tab.t[0xFF & L.Chars.r(P)] );
+		if (P >= L.getCount()) return false;
+		if (!ChgChars(CP.Row, P, 1, null)) return false;
+		//L.Chars[P] = tab[(char)L.Chars[P]];
+		L.Chars.w(P, tab.t[0xFF & L.Chars.r(P)] );
 
-	    return true;
+		return true;
 	}
 
 	boolean LineTrans(TransTable tab) 
 	{
 		if(tab == null) return false;
-		
-	    ELine L = VLine(CP.Row);
-	    int I;
 
-	    if (L.getCount() > 0) {
-	        if (!ChgChars(CP.Row, 0, L.getCount(), null)) return false;
-	        for (I = 0; I < L.getCount(); I++)
-	        {
-	            //L.Chars[I] = tab[(unsigned char)L.Chars[I]];
-                L.Chars.w(I, tab.t[0xFF & L.Chars.r(I)] );
-	        }
-	    }
-	    return true;
+		ELine L = VLine(CP.Row);
+		int I;
+
+		if (L.getCount() > 0) {
+			if (!ChgChars(CP.Row, 0, L.getCount(), null)) return false;
+			for (I = 0; I < L.getCount(); I++)
+			{
+				//L.Chars[I] = tab[(unsigned char)L.Chars[I]];
+				L.Chars.w(I, tab.t[0xFF & L.Chars.r(I)] );
+			}
+		}
+		return true;
 	}
 
 	boolean CharCaseUp() {
-	    return CharTrans(TransTable.MakeTrans(ccUp));
+		return CharTrans(TransTable.MakeTrans(ccUp));
 	}
 
 	boolean CharCaseDown() {
-	    return CharTrans(TransTable.MakeTrans(ccDown));
+		return CharTrans(TransTable.MakeTrans(ccDown));
 	}
 
 	boolean CharCaseToggle() {
-	    return CharTrans(TransTable.MakeTrans(ccToggle));
+		return CharTrans(TransTable.MakeTrans(ccToggle));
 	}
 
 	boolean LineCaseUp() {
-	    return LineTrans(TransTable.MakeTrans(ccUp));
+		return LineTrans(TransTable.MakeTrans(ccUp));
 	}
 
 	boolean LineCaseDown() {
-	    return LineTrans(TransTable.MakeTrans(ccDown));
+		return LineTrans(TransTable.MakeTrans(ccDown));
 	}
 
 	boolean LineCaseToggle()  {
-	    return LineTrans(TransTable.MakeTrans(ccToggle));
+		return LineTrans(TransTable.MakeTrans(ccToggle));
 	}
 
 	boolean BlockCaseUp() {
-	    return BlockTrans(TransTable.MakeTrans(ccUp));
+		return BlockTrans(TransTable.MakeTrans(ccUp));
 	}
 
 	boolean BlockCaseDown() {
-	    return BlockTrans(TransTable.MakeTrans(ccDown));
+		return BlockTrans(TransTable.MakeTrans(ccDown));
 	}
 
 	boolean BlockCaseToggle() {
-	    return BlockTrans(TransTable.MakeTrans(ccToggle));
+		return BlockTrans(TransTable.MakeTrans(ccToggle));
 	}
 
 
 	boolean CharTrans(ExState State) throws ExecException {
-	    return CharTrans(TransTable.GetTrans(State,View));
+		return CharTrans(TransTable.GetTrans(State,View));
 	}
 
 	boolean LineTrans(ExState State) throws ExecException {
-	    return LineTrans(TransTable.GetTrans(State,View));
+		return LineTrans(TransTable.GetTrans(State,View));
 	}
 
 	boolean BlockTrans(ExState State) throws ExecException {
-	    return BlockTrans(TransTable.GetTrans(State,View));
+		return BlockTrans(TransTable.GetTrans(State,View));
 	}
-	
-	
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean Find(ExState State) {
-	    //char find[MAXSEARCH+1] = "";
-	    //char options[32] = "";
+		//char find[MAXSEARCH+1] = "";
+		//char options[32] = "";
 		String [] find = {""};
 		String [] options = {""};
-	    int [] popt = {0};
-		
+		int [] popt = {0};
 
-	    if (State.GetStrParam(View, find) != 0) {
-	        if (State.GetStrParam(View, options) == 0)
-	            options[0] = BFS(this, BFS_DefFindOpt);
 
-	        LSearch.ok = 0;
-	        LSearch.strSearch = find[0];
-	        LSearch.strReplace = null;
-	        LSearch.Options = 0;
-            popt[0] = LSearch.Options;
-	        if (!ParseSearchOptions(false, options[0], popt)) return false;
-            LSearch.Options = popt[0];
-	        LSearch.ok = 1;
-	    } /*else if ((Config.HaveGUIDialogs & GUIDLG_FIND) && GUIDialogs) {
+		if (State.GetStrParam(View, find) != 0) {
+			if (State.GetStrParam(View, options) == 0)
+				options[0] = BFS(this, BFS_DefFindOpt);
+
+			LSearch.ok = 0;
+			LSearch.strSearch = find[0];
+			LSearch.strReplace = null;
+			LSearch.Options = 0;
+			popt[0] = LSearch.Options;
+			if (!ParseSearchOptions(false, options[0], popt)) return false;
+			LSearch.Options = popt[0];
+			LSearch.ok = 1;
+		} /*else if ((Config.HaveGUIDialogs & GUIDLG_FIND) && GUIDialogs) {
 	        LSearch.ok = 0;
 	        LSearch.strSearch = "";
 	        LSearch.strReplace = "";
@@ -7447,51 +7447,51 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (DLGGetFind(View.MView.Win, LSearch) == 0)
 	            return false;
 	    } */ else {
-	        if (BFS(this, BFS_DefFindOpt)!=null)
-	            options[0] = BFS(this, BFS_DefFindOpt);
-	        if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
-	        if (View.MView.Win.GetStr("Options (All/Block/Cur/Delln/Glob/Igncase/Joinln/Rev/Word/regX)", options, HIST_SEARCHOPT) == 0) return false;
+	    	if (BFS(this, BFS_DefFindOpt)!=null)
+	    		options[0] = BFS(this, BFS_DefFindOpt);
+	    	if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
+	    	if (View.MView.Win.GetStr("Options (All/Block/Cur/Delln/Glob/Igncase/Joinln/Rev/Word/regX)", options, HIST_SEARCHOPT) == 0) return false;
 
-	        LSearch.ok = 0;
-	        LSearch.strSearch = find[0];
-	        LSearch.strReplace = "";
-	        LSearch.Options = 0;
-            popt[0] = LSearch.Options;
-	        if (!ParseSearchOptions(false, options[0], popt)) return false;
-            LSearch.Options = popt[0];
-	        LSearch.ok = 1;
+	    	LSearch.ok = 0;
+	    	LSearch.strSearch = find[0];
+	    	LSearch.strReplace = "";
+	    	LSearch.Options = 0;
+	    	popt[0] = LSearch.Options;
+	    	if (!ParseSearchOptions(false, options[0], popt)) return false;
+	    	LSearch.Options = popt[0];
+	    	LSearch.ok = 1;
 	    }
-	    if (LSearch.ok == 0) return false;
-	    LSearch.Options |= SEARCH_CENTER;
+		if (LSearch.ok == 0) return false;
+		LSearch.Options |= SEARCH_CENTER;
 
-	    return LSearch.Find(this);
+		return LSearch.Find(this);
 	}
 
 	boolean FindReplace(ExState State) {
-	    //char find[MAXSEARCH+1] = "";
-	    //char replace[MAXSEARCH+1] = "";
-	    //char options[32] = "";
+		//char find[MAXSEARCH+1] = "";
+		//char replace[MAXSEARCH+1] = "";
+		//char options[32] = "";
 		String [] find = {""};
 		String [] replace = {""};
 		String [] options = {""};
-	    int [] popt = {0};
+		int [] popt = {0};
 
-	    if (State.GetStrParam(View, find) != 0) {
-	        if (State.GetStrParam(View, replace) == 0)
-	            return false;
-	        if (State.GetStrParam(View, options) == 0)
-	            return false;
+		if (State.GetStrParam(View, find) != 0) {
+			if (State.GetStrParam(View, replace) == 0)
+				return false;
+			if (State.GetStrParam(View, options) == 0)
+				return false;
 
-	        LSearch.ok = 0;
-	        LSearch.strSearch =  find[0];
-	        LSearch.strReplace =  replace[0];
-	        LSearch.Options = 0;
-            popt[0] = LSearch.Options;
-	        if(!ParseSearchOptions(true, options[0], popt)) return false;
-            LSearch.Options = popt[0];
-	        LSearch.Options |= SEARCH_REPLACE;
-	        LSearch.ok = 1;
-	    } /*else if ((HaveGUIDialogs & GUIDLG_FINDREPLACE) && GUIDialogs) {
+			LSearch.ok = 0;
+			LSearch.strSearch =  find[0];
+			LSearch.strReplace =  replace[0];
+			LSearch.Options = 0;
+			popt[0] = LSearch.Options;
+			if(!ParseSearchOptions(true, options[0], popt)) return false;
+			LSearch.Options = popt[0];
+			LSearch.Options |= SEARCH_REPLACE;
+			LSearch.ok = 1;
+		} /*else if ((HaveGUIDialogs & GUIDLG_FINDREPLACE) && GUIDialogs) {
 	        LSearch.ok = 0;
 	        LSearch.strSearch = "";
 	        LSearch.strReplace = "";
@@ -7503,173 +7503,173 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (DLGGetFindReplace(View.MView.Win, LSearch) == 0)
 	            return false;
 	    } */ else {
-	        if (BFS(this, BFS_DefFindReplaceOpt)!=null)
-	            options[0] = BFS(this, BFS_DefFindReplaceOpt);
-	        if (State.GetStrParam(View, find) == 0)
-	            if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
-	        if (State.GetStrParam(View, replace) == 0)
-	            if (View.MView.Win.GetStr("Replace", replace, HIST_SEARCH) == 0) return false;
-	        if (State.GetStrParam(View, options) == 0)
-	            if (View.MView.Win.GetStr("Options (All/Block/Cur/Delln/Glob/Igncase/Joinln/Rev/Noask/Word/regX)", options, HIST_SEARCHOPT) == 0) return false;
+	    	if (BFS(this, BFS_DefFindReplaceOpt)!=null)
+	    		options[0] = BFS(this, BFS_DefFindReplaceOpt);
+	    	if (State.GetStrParam(View, find) == 0)
+	    		if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
+	    	if (State.GetStrParam(View, replace) == 0)
+	    		if (View.MView.Win.GetStr("Replace", replace, HIST_SEARCH) == 0) return false;
+	    	if (State.GetStrParam(View, options) == 0)
+	    		if (View.MView.Win.GetStr("Options (All/Block/Cur/Delln/Glob/Igncase/Joinln/Rev/Noask/Word/regX)", options, HIST_SEARCHOPT) == 0) return false;
 
-	        LSearch.ok = 0;
-	        LSearch.strSearch = find[0];
-	        LSearch.strReplace =replace[0];
-	        LSearch.Options = 0;
-            popt[0] = LSearch.Options;
-	        if (!ParseSearchOptions(true, options[0], popt)) return false;
-            LSearch.Options = popt[0];
-	        LSearch.Options |= SEARCH_REPLACE;
-	        LSearch.ok = 1;
+	    	LSearch.ok = 0;
+	    	LSearch.strSearch = find[0];
+	    	LSearch.strReplace =replace[0];
+	    	LSearch.Options = 0;
+	    	popt[0] = LSearch.Options;
+	    	if (!ParseSearchOptions(true, options[0], popt)) return false;
+	    	LSearch.Options = popt[0];
+	    	LSearch.Options |= SEARCH_REPLACE;
+	    	LSearch.ok = 1;
 	    }
-	    if (LSearch.ok == 0) return false;
-	    LSearch.Options |= SEARCH_CENTER;
-	    
-	    //return Find(LSearch);	    
-	    return LSearch.Find(this);
+		if (LSearch.ok == 0) return false;
+		LSearch.Options |= SEARCH_CENTER;
+
+		//return Find(LSearch);	    
+		return LSearch.Find(this);
 	}
 
 	boolean FindRepeat(ExState State) {
-	    if (LSearch.ok == 0) return Find(State);
-	    LSearch.Options |= SEARCH_NEXT;
-	    LSearch.Options &= ~SEARCH_GLOBAL;
-	    //return Find(LSearch);
-	    return LSearch.Find(this);
+		if (LSearch.ok == 0) return Find(State);
+		LSearch.Options |= SEARCH_NEXT;
+		LSearch.Options &= ~SEARCH_GLOBAL;
+		//return Find(LSearch);
+		return LSearch.Find(this);
 	}
 
 	boolean FindRepeatReverse(ExState State) {
-	    if (LSearch.ok == 0) return Find(State);
-	    LSearch.Options |= SEARCH_NEXT;
-	    LSearch.Options &= ~SEARCH_GLOBAL;
-	    LSearch.Options ^= SEARCH_BACK;
-	    boolean rc = LSearch.Find(this);
-	    LSearch.Options ^= SEARCH_BACK;
-	    return rc;
+		if (LSearch.ok == 0) return Find(State);
+		LSearch.Options |= SEARCH_NEXT;
+		LSearch.Options &= ~SEARCH_GLOBAL;
+		LSearch.Options ^= SEARCH_BACK;
+		boolean rc = LSearch.Find(this);
+		LSearch.Options ^= SEARCH_BACK;
+		return rc;
 	}
 
 	boolean FindRepeatOnce(ExState State) {
-	    if (LSearch.ok == 0) return Find(State);
-	    LSearch.Options |= SEARCH_NEXT;
-	    LSearch.Options &= ~SEARCH_GLOBAL;
-	    LSearch.Options &= ~SEARCH_ALL;
-	    return LSearch.Find(this);
+		if (LSearch.ok == 0) return Find(State);
+		LSearch.Options |= SEARCH_NEXT;
+		LSearch.Options &= ~SEARCH_GLOBAL;
+		LSearch.Options &= ~SEARCH_ALL;
+		return LSearch.Find(this);
 	}
 
 
 
 	boolean ChangeKeys(ExState State) {
-	    //char Mode[32] = "";
+		//char Mode[32] = "";
 		String [] Mode = {""};
 
-	    if(0==State.GetStrParam(View, Mode))
-	        if (0==View.MView.Win.GetStr("Mode", Mode, HIST_SETUP)) return false;
+		if(0==State.GetStrParam(View, Mode))
+			if (0==View.MView.Win.GetStr("Mode", Mode, HIST_SETUP)) return false;
 
-	    boolean rc = ChangeKeys(Mode[0]);
-	    FullRedraw();
-	    return rc;
+		boolean rc = ChangeKeys(Mode[0]);
+		FullRedraw();
+		return rc;
 	}
 
 
 
 	boolean ChangeTabSize(ExState State) {
-	    int [] No = {0};
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	        //char Num[10];
+		if (State.GetIntParam(View, No) == 0) {
+			//char Num[10];
 
-	    	String [] Num = { String.format("%d", BFI(this, BFI_TabSize)) };
-	        if (View.MView.Win.GetStr("TabSize", Num, HIST_SETUP) == 0) return false;
-	        No[0] = BitOps.atoi(Num[0]);
-	    }
-	    if (No[0] < 1) return false;
-	    if (No[0] > 32) return false;
-	    BFI_SET(this, BFI_TabSize, No[0]);
-	    FullRedraw();
-	    return true;
+			String [] Num = { String.format("%d", BFI(this, BFI_TabSize)) };
+			if (View.MView.Win.GetStr("TabSize", Num, HIST_SETUP) == 0) return false;
+			No[0] = BitOps.atoi(Num[0]);
+		}
+		if (No[0] < 1) return false;
+		if (No[0] > 32) return false;
+		BFI_SET(this, BFI_TabSize, No[0]);
+		FullRedraw();
+		return true;
 	}
 
 	boolean SetIndentWithTabs(ExState State) {
-	    int [] No = {0};
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) return false;
-	    Flags.num[BFI_IndentWithTabs] = No[0] != 0 ? 1 : 0;
-	    return true;
+		if (State.GetIntParam(View, No) == 0) return false;
+		Flags.num[BFI_IndentWithTabs] = No[0] != 0 ? 1 : 0;
+		return true;
 	}
 
 	boolean ChangeRightMargin(ExState State) {
-	    //char Num[10];
-	    int [] No = {0};
+		//char Num[10];
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	    	String [] Num = { String.format("%d", iBFI(this, BFI_RightMargin) + 1) };
-	        if (View.MView.Win.GetStr("RightMargin", Num, HIST_SETUP) == 0) return false;
-	        No[0] = BitOps.atoi(Num[0]) - 1;
-	    }
-	    if (No[0] <= 1) return false;
-	    BFI_SET(this, BFI_RightMargin, No[0]);
-	    Msg(S_INFO, "RightMargin set to %d.", No[0] + 1);
-	    return true;
+		if (State.GetIntParam(View, No) == 0) {
+			String [] Num = { String.format("%d", iBFI(this, BFI_RightMargin) + 1) };
+			if (View.MView.Win.GetStr("RightMargin", Num, HIST_SETUP) == 0) return false;
+			No[0] = BitOps.atoi(Num[0]) - 1;
+		}
+		if (No[0] <= 1) return false;
+		BFI_SET(this, BFI_RightMargin, No[0]);
+		Msg(S_INFO, "RightMargin set to %d.", No[0] + 1);
+		return true;
 	}
 
 	boolean ChangeLeftMargin(ExState State) {
-	    //char Num[10];
-	    int [] No = {0};
+		//char Num[10];
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	        String [] Num = { String.format("%d", iBFI(this, BFI_LeftMargin) + 1) };
-	        if (View.MView.Win.GetStr("LeftMargin", Num, HIST_SETUP) == 0) return false;
-	        No[0] = BitOps.atoi(Num[0]) - 1;
-	    }
-	    if (No[0] < 0) return false;
-	    BFI_SET(this, BFI_LeftMargin, No[0]);
-	    Msg(S_INFO, "LeftMargin set to %d.", No[0] + 1);
-	    return true;
+		if (State.GetIntParam(View, No) == 0) {
+			String [] Num = { String.format("%d", iBFI(this, BFI_LeftMargin) + 1) };
+			if (View.MView.Win.GetStr("LeftMargin", Num, HIST_SETUP) == 0) return false;
+			No[0] = BitOps.atoi(Num[0]) - 1;
+		}
+		if (No[0] < 0) return false;
+		BFI_SET(this, BFI_LeftMargin, No[0]);
+		Msg(S_INFO, "LeftMargin set to %d.", No[0] + 1);
+		return true;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean ParseSearchOption(boolean replace, char c, int [] opt) {
-	    switch (c) {
-	    case 'a': opt[0] |= SEARCH_ALL; break;      // search all occurances
-	    case 'b': opt[0] |= SEARCH_BLOCK; break;    // search in block only
-	    case 'c': opt[0] &= ~SEARCH_NEXT; break;    // search from current position
-	    case 'd': opt[0] |= SEARCH_DELETE; break;   // delete found line
-	    case 'g': opt[0] |= SEARCH_GLOBAL; break;   // search globally
-	    case 'i': opt[0] |= SEARCH_NCASE; break;    // don't match case
-	    case 'j': opt[0] |= SEARCH_JOIN; break;     // join found line
-	    case 'r': opt[0] |= SEARCH_BACK; break;     // search reverse
-	    case 'w': opt[0] |= SEARCH_WORDBEG | SEARCH_WORDEND; break;
-	    case '<': opt[0] |= SEARCH_WORDBEG; break;
-	    case '>': opt[0] |= SEARCH_WORDEND; break;
-	    case 'x': opt[0] |= SEARCH_RE; break;       // search using regexps
-	    default:
-	        if (!replace) return false;
-	        switch (c) {
-	        case 'n': opt[0] |= SEARCH_NASK; break; // don't ask before replacing
-	        default:
-	            return false;
-	        }
-	    }
-	    return true;
+		switch (c) {
+		case 'a': opt[0] |= SEARCH_ALL; break;      // search all occurances
+		case 'b': opt[0] |= SEARCH_BLOCK; break;    // search in block only
+		case 'c': opt[0] &= ~SEARCH_NEXT; break;    // search from current position
+		case 'd': opt[0] |= SEARCH_DELETE; break;   // delete found line
+		case 'g': opt[0] |= SEARCH_GLOBAL; break;   // search globally
+		case 'i': opt[0] |= SEARCH_NCASE; break;    // don't match case
+		case 'j': opt[0] |= SEARCH_JOIN; break;     // join found line
+		case 'r': opt[0] |= SEARCH_BACK; break;     // search reverse
+		case 'w': opt[0] |= SEARCH_WORDBEG | SEARCH_WORDEND; break;
+		case '<': opt[0] |= SEARCH_WORDBEG; break;
+		case '>': opt[0] |= SEARCH_WORDEND; break;
+		case 'x': opt[0] |= SEARCH_RE; break;       // search using regexps
+		default:
+			if (!replace) return false;
+			switch (c) {
+			case 'n': opt[0] |= SEARCH_NASK; break; // don't ask before replacing
+			default:
+				return false;
+			}
+		}
+		return true;
 	}
 
 
@@ -7677,117 +7677,117 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	{
 		StringBuilder sb = new StringBuilder();	
 		int s = 0;
-		
-	    while (s < str.length()) {
-	        if (str.charAt(s) == '\\') {
-	            s++;
-	            if(s >= str.length()) return null;
-	        }
-	        sb.append(str.charAt(s++));
-	    }
-	    
-	    return sb.toString();
+
+		while (s < str.length()) {
+			if (str.charAt(s) == '\\') {
+				s++;
+				if(s >= str.length()) return null;
+			}
+			sb.append(str.charAt(s++));
+		}
+
+		return sb.toString();
 	}
 
 	boolean ParseSearchOptions(boolean replace, String str, int [] Options) {
-	    //String p = str;
-	    str.chars().forEach(c -> ParseSearchOption(replace, (char)c, Options));
-	    /*
+		//String p = str;
+		str.chars().forEach(c -> ParseSearchOption(replace, (char)c, Options));
+		/*
 	    Options = SEARCH_NEXT;
 	    while (*p) {
 	        if (ParseSearchOption(replace, *p, Options) == 0) return 0;
 	        p++;
 	    } */
-	    return true;
+		return true;
 	}
 
-	
+
 	boolean ParseSearchReplace(EBuffer B, String str, boolean replace, SearchReplaceOptions opt) {
-	    int where = 0;
-	    int len = 0;
-	    //String p = str;
-	    int [] popt = {0};
+		int where = 0;
+		int len = 0;
+		//String p = str;
+		int [] popt = {0};
 
-	    //memset(opt, 0, sizeof(opt));
-	    opt.clear();
-	    
-	    if (str == null) return false;
-	    
-	    if (replace) {
-            popt[0] = opt.Options;
-	        if (!ParseSearchOptions(replace, BFS(B, BFS_DefFindReplaceOpt), popt )) return false;
-	        opt.Options = popt[0];
-	        opt.Options |= SEARCH_REPLACE;
-	    } else {
-            popt[0] = opt.Options;
-	        if (!ParseSearchOptions(replace, BFS(B, BFS_DefFindOpt), popt)) return false;
-	        opt.Options = popt[0];
-	    }
+		//memset(opt, 0, sizeof(opt));
+		opt.clear();
 
-	    int p = 0;
-	    while (p < str.length()) {
-	        switch(str.charAt(p)) {
-	        case '\\':
-	            if (where == 0) {
-	                //opt.strSearch[len++] = str.charAt(p++);
-	                opt.strSearch += str.charAt(p++);
-	                //if (*p == 0) return 0;
-	                if( p >= str.length() ) return false;
-	                //opt.strSearch[len++] = str.charAt(p++);
-	                opt.strSearch += str.charAt(p++);
-	            } else if (where == 1) {
-	                //opt.strReplace[len++] = str.charAt(p++);
-	                opt.strReplace += str.charAt(p++);
-	                //if (*p == 0) return 0;
-	                if( p >= str.length() ) return false;
-	                //opt.strReplace[len++] = str.charAt(p++);
-	                opt.strReplace += str.charAt(p++);
-	            } else
-	                return false;
-	            break;
-	        case '/':
-	            where++;
-	            if (!replace && where == 1) where++;
-	            if (where == 2)
-	                opt.Options = SEARCH_NEXT;
-	            if (where > 2) return false;
-	            len = 0;
-	            p++;
-	            break;
-	        default:
-	            if (where == 0)
-	                //opt.strSearch[len++] = str.charAt(p++);
-	                opt.strSearch += str.charAt(p++);
-	            else if (where == 1)
-	                //opt.strReplace[len++] = str.charAt(p++);
-	            	opt.strReplace += str.charAt(p++);
-	            else {
-	                char c = str.charAt(p);
+		if (str == null) return false;
 
-	                p++;
-	                popt[0] = opt.Options;
-	                if (!ParseSearchOption(replace, c, popt)) return false;
-	    	        opt.Options = popt[0];
-	            }
-	        }
-	    }
-	    if(0 != (opt.Options & SEARCH_RE))
-	    	;
-	    else {
-	    	opt.strSearch = unquoteString(opt.strSearch); 
-	        if (opt.strSearch == null) return false;
-	        if(0 != (opt.Options & SEARCH_REPLACE))
-	        {
-	        	opt.strReplace = unquoteString(opt.strReplace);
-	            if (opt.strReplace == null) return false;
-	        }
-	    }
+		if (replace) {
+			popt[0] = opt.Options;
+			if (!ParseSearchOptions(replace, BFS(B, BFS_DefFindReplaceOpt), popt )) return false;
+			opt.Options = popt[0];
+			opt.Options |= SEARCH_REPLACE;
+		} else {
+			popt[0] = opt.Options;
+			if (!ParseSearchOptions(replace, BFS(B, BFS_DefFindOpt), popt)) return false;
+			opt.Options = popt[0];
+		}
 
-	    opt.ok = 1;
-	    return true;
+		int p = 0;
+		while (p < str.length()) {
+			switch(str.charAt(p)) {
+			case '\\':
+				if (where == 0) {
+					//opt.strSearch[len++] = str.charAt(p++);
+					opt.strSearch += str.charAt(p++);
+					//if (*p == 0) return 0;
+					if( p >= str.length() ) return false;
+					//opt.strSearch[len++] = str.charAt(p++);
+					opt.strSearch += str.charAt(p++);
+				} else if (where == 1) {
+					//opt.strReplace[len++] = str.charAt(p++);
+					opt.strReplace += str.charAt(p++);
+					//if (*p == 0) return 0;
+					if( p >= str.length() ) return false;
+					//opt.strReplace[len++] = str.charAt(p++);
+					opt.strReplace += str.charAt(p++);
+				} else
+					return false;
+				break;
+			case '/':
+				where++;
+				if (!replace && where == 1) where++;
+				if (where == 2)
+					opt.Options = SEARCH_NEXT;
+				if (where > 2) return false;
+				len = 0;
+				p++;
+				break;
+			default:
+				if (where == 0)
+					//opt.strSearch[len++] = str.charAt(p++);
+					opt.strSearch += str.charAt(p++);
+				else if (where == 1)
+					//opt.strReplace[len++] = str.charAt(p++);
+					opt.strReplace += str.charAt(p++);
+				else {
+					char c = str.charAt(p);
+
+					p++;
+					popt[0] = opt.Options;
+					if (!ParseSearchOption(replace, c, popt)) return false;
+					opt.Options = popt[0];
+				}
+			}
+		}
+		if(0 != (opt.Options & SEARCH_RE))
+			;
+		else {
+			opt.strSearch = unquoteString(opt.strSearch); 
+			if (opt.strSearch == null) return false;
+			if(0 != (opt.Options & SEARCH_REPLACE))
+			{
+				opt.strReplace = unquoteString(opt.strReplace);
+				if (opt.strReplace == null) return false;
+			}
+		}
+
+		opt.ok = 1;
+		return true;
 	}
-	
-	
+
+
 	boolean Search(ExState State)          { return Search(State, null, 0, 1); }
 	boolean SearchB(ExState State)         { return Search(State, null, SEARCH_BACK, 1); }
 	boolean SearchRx(ExState State)        { return Search(State, null, SEARCH_RE, 1); }
@@ -7797,301 +7797,301 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean SearchReplaceB(ExState State)  { return SearchReplace(State, null, null, SEARCH_BACK); }
 	boolean SearchReplaceRx(ExState State) { return SearchReplace(State, null, null, SEARCH_RE); }
 
-	
-	
+
+
 	boolean Search(ExState State, String aString, int Options, int CanResume) {
-	    //char find[MAXSEARCH+1] = "";
-	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
-	    int Next = 0;
-	    int erc = 0;
-	    //int Changed;
-	    String [] find = {""};
+		//char find[MAXSEARCH+1] = "";
+		int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+		int Next = 0;
+		int erc = 0;
+		//int Changed;
+		String [] find = {""};
 
-	    if (aString != null)
-	        find[0] = aString;
-	    else
-	        if (State.GetStrParam(View, find) == 0)
-	            if ((erc = View.MView.Win.GetStr("Find", find, HIST_SEARCH)) == 0) return false;
-	    
-	    if (find[0].isBlank()) return false;
+		if (aString != null)
+			find[0] = aString;
+		else
+			if (State.GetStrParam(View, find) == 0)
+				if ((erc = View.MView.Win.GetStr("Find", find, HIST_SEARCH)) == 0) return false;
 
-	    if (erc == 2)
-	        Case ^= SEARCH_NCASE;
+		if (find[0].isBlank()) return false;
 
-	    //if (Changed == 0 && CanResume)
-	    //    Next |= SEARCH_NEXT;
+		if (erc == 2)
+			Case ^= SEARCH_NCASE;
 
-	    LSearch.ok = 0;
-	    LSearch.strSearch = find[0];
-	    LSearch.Options = Case | Next | (Options & ~SEARCH_NCASE);
-	    LSearch.ok = 1;
+		//if (Changed == 0 && CanResume)
+		//    Next |= SEARCH_NEXT;
 
-	    return LSearch.Find(this);
+		LSearch.ok = 0;
+		LSearch.strSearch = find[0];
+		LSearch.Options = Case | Next | (Options & ~SEARCH_NCASE);
+		LSearch.ok = 1;
+
+		return LSearch.Find(this);
 	}
-	
-	
+
+
 	boolean SearchAgain(ExState State, int Options) {
-	    if (LSearch.ok == 0) return false;
-	    LSearch.Options |= SEARCH_NEXT;
-	    if ((Options & SEARCH_BACK) != (LSearch.Options & SEARCH_BACK))
-	        LSearch.Options ^= SEARCH_BACK;
+		if (LSearch.ok == 0) return false;
+		LSearch.Options |= SEARCH_NEXT;
+		if ((Options & SEARCH_BACK) != (LSearch.Options & SEARCH_BACK))
+			LSearch.Options ^= SEARCH_BACK;
 
-	    return LSearch.Find(this);
+		return LSearch.Find(this);
 	}
-	
-	
-	
+
+
+
 	boolean SearchReplace(ExState State, String aString, String aReplaceString, int Options) {
 		String [] find = {""};
 		String [] replace = {""};
-	    int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
+		int Case = BFI(this, BFI_MatchCase) ? 0 : SEARCH_NCASE;
 
-	    if (aString != null)
-	        find[0] = aString;
-	    else
-	        if (State.GetStrParam(View, find) == 0)
-	            if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
-	    
-	    if(find[0].isBlank()) return false;
-	    
-	    if (aReplaceString!=null)
-	        replace[0] = aReplaceString;
-	    else
-	        if (State.GetStrParam(View, replace) == 0)
-	            if (View.MView.Win.GetStr("Replace", replace, HIST_SEARCH) == 0) return false;
+		if (aString != null)
+			find[0] = aString;
+		else
+			if (State.GetStrParam(View, find) == 0)
+				if (View.MView.Win.GetStr("Find", find, HIST_SEARCH) == 0) return false;
 
-	    LSearch.ok = 0;
-	    LSearch.strSearch = find[0];
-	    LSearch.strReplace= replace[0];
-	    LSearch.Options = Case | (Options & ~SEARCH_NCASE) | SEARCH_ALL | SEARCH_REPLACE;
-	    LSearch.ok = 1;
+		if(find[0].isBlank()) return false;
 
-	    return LSearch.Find(this);
+		if (aReplaceString!=null)
+			replace[0] = aReplaceString;
+		else
+			if (State.GetStrParam(View, replace) == 0)
+				if (View.MView.Win.GetStr("Replace", replace, HIST_SEARCH) == 0) return false;
+
+		LSearch.ok = 0;
+		LSearch.strSearch = find[0];
+		LSearch.strReplace= replace[0];
+		LSearch.Options = Case | (Options & ~SEARCH_NCASE) | SEARCH_ALL | SEARCH_REPLACE;
+		LSearch.ok = 1;
+
+		return LSearch.Find(this);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean SelfInsert(ExState State) {
-	    if (EGUI.LastEventChar != -1)
-	        return TypeChar((char)EGUI.LastEventChar);
-	    return false;
+		if (EGUI.LastEventChar != -1)
+			return TypeChar((char)EGUI.LastEventChar);
+		return false;
 	}
-	
 
-	
+
+
 	boolean FileReload(ExState State) {
-	    if (Modified!=0) {
-	        switch (View.MView.Win.Choice(GPC_ERROR, "File Modified",
-	                       2,
-	                       "&Reload",
-	                       "&Cancel",
-	                       "%s", FileName))
-	        {
-	        case 0:
-	            break;
-	        case 1:
-	        case -1:
-	        default:
-	            return false;
-	        }
-	    }
-//	    GetNewNumber();
-	    return Reload();
+		if (Modified!=0) {
+			switch (View.MView.Win.Choice(GPC_ERROR, "File Modified",
+					2,
+					"&Reload",
+					"&Cancel",
+					"%s", FileName))
+			{
+			case 0:
+				break;
+			case 1:
+			case -1:
+			default:
+				return false;
+			}
+		}
+		//	    GetNewNumber();
+		return Reload();
 	}
-	
-	
-	
-	
-	boolean FileWriteTo(String FName) {
-	    String [] Name = {""};
 
-	    if (Console.ExpandPath(FName, Name) == -1) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
-	        return false;
-	    }
-	    if (null == Console.FindFile(Name[0])) {
-	        if (Console.FileExists(Name[0])) {
-	            switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
-	                           2,
-	                           "&Overwrite",
-	                           "&Cancel",
-	                           "%s", Name))
-	            {
-	            case 0:
-	                break;
-	            case 1:
-	            case -1:
-	            default:
-	                return false;
-	            }
-	        }
-	        return SaveTo(Name[0]);
-	    } else {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name);
-	        return false;
-	    }
+
+
+
+	boolean FileWriteTo(String FName) {
+		String [] Name = {""};
+
+		if (Console.ExpandPath(FName, Name) == -1) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
+			return false;
+		}
+		if (null == Console.FindFile(Name[0])) {
+			if (Console.FileExists(Name[0])) {
+				switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
+						2,
+						"&Overwrite",
+						"&Cancel",
+						"%s", Name))
+				{
+				case 0:
+					break;
+				case 1:
+				case -1:
+				default:
+					return false;
+				}
+			}
+			return SaveTo(Name[0]);
+		} else {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name);
+			return false;
+		}
 	}
 
 	boolean FileWriteTo(ExState State) {
-	    String [] FName = {FileName};
+		String [] FName = {FileName};
 
-	    if (State.GetStrParam(View, FName) == 0)
-	        if (View.MView.Win.GetFile("Write To", FName, HIST_PATH, GF_SAVEAS) == 0) return false;
-	    return FileWriteTo(FName[0]);
+		if (State.GetStrParam(View, FName) == 0)
+			if (View.MView.Win.GetFile("Write To", FName, HIST_PATH, GF_SAVEAS) == 0) return false;
+		return FileWriteTo(FName[0]);
 	}
 
 	boolean BlockReadX(ExState State, int blockMode) {
-	    //char Name[MAXPATH];
-	    //char FName[MAXPATH];
-	    String [] FName = {""};
-	    String [] Name = {""};
+		//char Name[MAXPATH];
+		//char FName[MAXPATH];
+		String [] FName = {""};
+		String [] Name = {""};
 
-	    //if (Console.JustDirectory(FileName, FName) == -1) return false;	    
-	    FName[0] = Console.parent(FileName);
-	    if ( FName[0] == null) return false;
-	    
-	    FName[0] = Console.SlashDir(FName[0]);
-	    if (State.GetStrParam(View, FName) == 0)
-	        if (View.MView.Win.GetFile("Read block", FName, HIST_PATH, GF_OPEN) == 0) return false;
+		//if (Console.JustDirectory(FileName, FName) == -1) return false;	    
+		FName[0] = Console.parent(FileName);
+		if ( FName[0] == null) return false;
 
-	    if (Console.ExpandPath(FName[0], Name) == -1) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName[0]);
-	        return false;
-	    }
-	    return BlockReadFrom(FName[0], blockMode);
+		FName[0] = Console.SlashDir(FName[0]);
+		if (State.GetStrParam(View, FName) == 0)
+			if (View.MView.Win.GetFile("Read block", FName, HIST_PATH, GF_OPEN) == 0) return false;
+
+		if (Console.ExpandPath(FName[0], Name) == -1) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName[0]);
+			return false;
+		}
+		return BlockReadFrom(FName[0], blockMode);
 	}
 
 	boolean BlockRead(ExState State) {
-	    return BlockReadX(State, BlockMode);
+		return BlockReadX(State, BlockMode);
 	}
 
 	boolean BlockReadStream(ExState State) {
-	    return BlockReadX(State, bmStream);
+		return BlockReadX(State, bmStream);
 	}
 
 	boolean BlockReadLine(ExState State) {
-	    return BlockReadX(State, bmLine);
+		return BlockReadX(State, bmLine);
 	}
 
 	boolean BlockReadColumn(ExState State) {
-	    return BlockReadX(State, bmColumn);
+		return BlockReadX(State, bmColumn);
 	}
 
 	boolean BlockWrite(ExState State) {
-	    //char Name[MAXPATH];
-	    //char FName[MAXPATH];
-	    boolean Append = false;
-	    String [] FName = {""};
-	    String [] Name = {""};
+		//char Name[MAXPATH];
+		//char FName[MAXPATH];
+		boolean Append = false;
+		String [] FName = {""};
+		String [] Name = {""};
 
-	    FName[0] = Console.parent(FileName);
-	    if ( FName[0] == null) return false;
-	    
-	    FName[0] = Console.SlashDir(FName[0]);
-	    if (State.GetStrParam(View, FName) == 0)
-	        if (View.MView.Win.GetFile("Write block", FName, HIST_PATH, GF_SAVEAS) == 0)
-	            return false;
+		FName[0] = Console.parent(FileName);
+		if ( FName[0] == null) return false;
 
-	    if (Console.ExpandPath(FName[0], Name) == -1) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
-	        return false;
-	    }
-	    if (null == Console.FindFile(Name[0])) {
-	        if (Console.FileExists(Name[0])) {
-	            switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
-	                           3,
-	                           "&Overwrite",
-	                           "&Append",
-	                           "&Cancel",
-	                           "%s", Name))
-	            {
-	            case 0:
-	                break;
-	            case 1:
-	                Append = true;
-	                break;
-	            case 2:
-	            case -1:
-	            default:
-	                return false;
+		FName[0] = Console.SlashDir(FName[0]);
+		if (State.GetStrParam(View, FName) == 0)
+			if (View.MView.Win.GetFile("Write block", FName, HIST_PATH, GF_SAVEAS) == 0)
+				return false;
 
-	            }
-	        }
-	    } else {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name);
-	        return false;
-	    }
-	    return BlockWriteTo(Name[0], Append);
+		if (Console.ExpandPath(FName[0], Name) == -1) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Invalid path: %s.", FName);
+			return false;
+		}
+		if (null == Console.FindFile(Name[0])) {
+			if (Console.FileExists(Name[0])) {
+				switch (View.MView.Win.Choice(GPC_ERROR, "File Exists",
+						3,
+						"&Overwrite",
+						"&Append",
+						"&Cancel",
+						"%s", Name))
+				{
+				case 0:
+					break;
+				case 1:
+					Append = true;
+					break;
+				case 2:
+				case -1:
+				default:
+					return false;
+
+				}
+			}
+		} else {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Already editing '%s.'", Name);
+			return false;
+		}
+		return BlockWriteTo(Name[0], Append);
 	}
 
-	
-	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
 	boolean MoveToLine(ExState State) {
-	    int [] No = {0};
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	        String []  Num = {""};
+		if (State.GetIntParam(View, No) == 0) {
+			String []  Num = {""};
 
-	        Num[0] = String.format( "%d", VToR(CP.Row) + 1);
-	        if (View.MView.Win.GetStr("Goto Line", Num, HIST_POSITION) == 0)
-	            return false;
-	        No[0] = BitOps.atoi(Num[0]);
-	    }
-	    return SetNearPosR(CP.Col, No[0] - 1);
+			Num[0] = String.format( "%d", VToR(CP.Row) + 1);
+			if (View.MView.Win.GetStr("Goto Line", Num, HIST_POSITION) == 0)
+				return false;
+			No[0] = BitOps.atoi(Num[0]);
+		}
+		return SetNearPosR(CP.Col, No[0] - 1);
 	}
 
 	boolean MoveToColumn(ExState State) {
-	    int [] No = {0};
+		int [] No = {0};
 
-	    if (State.GetIntParam(View, No) == 0) {
-	        String []  Num = {""};
+		if (State.GetIntParam(View, No) == 0) {
+			String []  Num = {""};
 
-	        Num[0] = String.format( "%d", CP.Col + 1);
-	        if (View.MView.Win.GetStr("Goto Column", Num, HIST_POSITION) == 0) return false;
-	        No[0] = BitOps.atoi(Num[0]);
-	    }
-	    return SetNearPos(No[0] - 1, CP.Row);
+			Num[0] = String.format( "%d", CP.Col + 1);
+			if (View.MView.Win.GetStr("Goto Column", Num, HIST_POSITION) == 0) return false;
+			No[0] = BitOps.atoi(Num[0]);
+		}
+		return SetNearPos(No[0] - 1, CP.Row);
 	}
-	
-	
+
+
 	boolean CompleteWord() {
 		return View.MView.Win.ICompleteWord(View) != 0; // TODO ret code?
 	}
-	
-	
 
 
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 	// these two will probably be replaced in the future
 	boolean InsertDate(ExState State) {
 		/*
@@ -8115,24 +8115,24 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    //puts(buf);
 
 	    return InsertString(buf, strlen(buf));
-	    */
+		 */
 		return InsertString( new Date().toString() );
 	}
 
 
 	boolean InsertUid() 
 	{
-	    String p = System.getenv("USER");
-	    if (p == null) p = System.getenv("NAME");
-	    if (p == null) p = System.getenv("ID");
-	    // mostly for Windows.  Why they can't just be standard, I don't know...
-	    if (p == null) p = System.getenv("USERNAME");
-	    if (p == null) {
-	        Msg(S_INFO, "User ID not set ($USER).");
-	        //return 0;
-	        p = (String )"UNKNOWN USER";
-	    }
-	    return InsertString(p);
+		String p = System.getenv("USER");
+		if (p == null) p = System.getenv("NAME");
+		if (p == null) p = System.getenv("ID");
+		// mostly for Windows.  Why they can't just be standard, I don't know...
+		if (p == null) p = System.getenv("USERNAME");
+		if (p == null) {
+			Msg(S_INFO, "User ID not set ($USER).");
+			//return 0;
+			p = (String )"UNKNOWN USER";
+		}
+		return InsertString(p);
 	}
 
 	boolean ShowHelpWord(ExState State) 
@@ -8148,7 +8148,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    int     P;
 
 	    StringBuilder buf = new StringBuilder();
-	    
+
 	    P = CharOffset(L, CP.Col);
 
 	    // fix \b for the case of CATBS
@@ -8162,17 +8162,17 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    if (P < L.getCount()) 
 	    {
 	        // To start of word,
-	    	
+
 	        while ((P > 0)
 	               && ((L.Chars.charAt(P - 1) == '\b') || BitOps.isalnum(L.Chars.charAt(P - 1))
 	                   || (achr.indexOf( L.Chars.charAt(P - 1)) >= 0)))
 	            P--; // '_' for underline is hidden in achr
-	        
+
 	        if ((P < (L.getCount() - 1)) && (L.Chars.charAt(P) == '\b'))
 	            P++;
-	        
+
 	        // To end of word,
-	        
+
 	        while( P < L.getCount()) {
 	            if (((P + 1) < L.getCount()) && (L.Chars.charAt(P + 1) == '\b'))
 	                P += 2;
@@ -8189,10 +8189,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    //    return 0;
 	    //}
 	    return View.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() );
-	    */
+		 */
 	}
-	
-	
+
+
 }
 
 
