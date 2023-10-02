@@ -3428,13 +3428,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	/* TODO #ifdef CONFIG_WORDWRAP
-	#define WFAIL(x) return 0	//do { puts(#x "\x7"); return -1; } while (0) 
+	//* TODO #ifdef CONFIG_WORDWRAP
+	//#define WFAIL(x) return 0	//do { puts(#x "\x7"); return -1; } while (0) 
 
 	boolean DoWrap(int WrapAll) {
 	    int L, Len, C, P, Ind;
 	    ELine LP;
-	    int Left = BFI(this, BFI_LeftMargin), Right = BFI(this, BFI_RightMargin);
+	    int Left = iBFI(this, BFI_LeftMargin), Right = iBFI(this, BFI_RightMargin);
 	    int FirstParaLine;
 	    int NoChange = 0, NoChangeX = 0;
 
@@ -3452,10 +3452,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (VToR(CP.Row) != L || L != FirstParaLine) {
 	            if (VToR(CP.Row) == L)
 	                if (CP.Col <= LineIndented(L))
-	                    if (SetPos(Left, CP.Row) == false) WFAIL(1);
+	                    if (SetPos(Left, CP.Row) == false) return false; //WFAIL(1);
 	            Ind = IndentLine(L, Left);
 	            if (VToR(CP.Row) == L)
-	                if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) WFAIL(2);
+	                if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) return false; //WFAIL(2);
 	            NoChange = 0;
 	        }
 	        Len = LineLen(L);
@@ -3494,7 +3494,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	            if (firstwordend == -1) break;
 	            if (Right - Len > firstwordend - firstwordbeg) {
-	                if (JoinLine(L, Len + 1) == false) WFAIL(3);
+	                if (JoinLine(L, Len + 1) == false) return false; //WFAIL(3);
 	                NoChange = 0;
 	                continue;
 	            } else
@@ -3512,22 +3512,22 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                continue;
 	            }
 	            C = ScreenPos(LP, P);
-	            if (SplitLine(L, C) == false) WFAIL(4);
+	            if (SplitLine(L, C) == false) return false; //WFAIL(4);
 	            IndentLine(L + 1, Left);
 	            if (L < RCount - 2 && LineLen(L + 1) == Left) {
 	                if (!IsLineBlank(L + 2)) {
-	                    if (JoinLine(L + 1, Left) == false) WFAIL(5);
+	                    if (JoinLine(L + 1, Left) == false) return false; //WFAIL(5);
 	                }
 	            }
 	            if (L == VToR(CP.Row) && CP.Col > C) {
-	                if (SetPos(Left + CP.Col - C - 1, CP.Row + 1) == false) WFAIL(6);
+	                if (SetPos(Left + CP.Col - C - 1, CP.Row + 1) == false) return false; //WFAIL(6);
 	            }
 	            NoChange = 0;
 	            L++;
 	            continue;
 	        }
 	        if (WrapAll == 0)
-	            if (NoChangeX) {
+	            if (NoChangeX!=0) {
 	                //printf("\n\nBreak OUT = %d\n\x7", L);
 	                break;
 	            }
@@ -3535,10 +3535,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        NoChangeX = NoChange;
 	    }
 	    if (WrapAll == 1)
-	        if (SetPosR(Left,
+	        if (!SetPosR(Left,
 	                    (L < RCount - 2) ? (L + 2) :
 	                    (L < RCount - 1) ? (L + 1) :
-	                    (RCount - 1)) == 0) WFAIL(7);
+	                    (RCount - 1))) return false; //WFAIL(7);
 	    return true;
 	}
 
@@ -3547,7 +3547,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        if (SetPos(CP.Col, CP.Row + 1) == false) return false;
 	    return DoWrap(1);
 	}
-	#endif */
+	//#endif */
 
 	int LineCenter() {
 		if (LineTrim() == false)
@@ -6631,9 +6631,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExToggleShowBookmarks:   return ToggleShowBookmarks();
 		case ExSetLeftMargin:         return SetLeftMargin();
 		case ExSetRightMargin:        return SetRightMargin();
-		//* TODO edit cmds
 
-		//case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
+		case ExSetIndentWithTabs:     return SetIndentWithTabs(State);
 
 		// stuff with UI
 		case ExMoveToLine:          return MoveToLine(State);
