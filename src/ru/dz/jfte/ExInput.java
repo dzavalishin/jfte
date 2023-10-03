@@ -294,7 +294,8 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 					//memmove(Line + Pos + 1, Line + Pos, strlen(Line + Pos) + 1);
 					//Line[Pos++] = Ch;
 
-					int mlen = Line.getSize() - Pos + 1;
+					//int mlen = Line.getSize() - Pos + 1;
+					int mlen = Line.getSize() - Pos - 1;
 					Line.memmove(Pos+1, Pos, mlen);
 					Line.copyIn(Pos++, ""+Ch, 1);
 

@@ -5546,7 +5546,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		//FILE *fp;
 		int l;
-		ELine L;
+		//ELine L;
 		long ByteCount = 0, OldCount = 0;
 
 		//int f;
@@ -5560,10 +5560,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		//unsigned int len_start = 0, len_end = 0;
 
-		BasicFileAttributes curr;
+		BasicFileAttributes curr = Console.stat(FileName);
 
-		if (FileOk && ((curr = Console.stat(FileName)) != null)) {
-			if (FileStatus.lastModifiedTime() != curr.lastModifiedTime() ||
+		if (FileOk && (curr != null)) 
+		{
+			if( (!FileStatus.lastModifiedTime().equals(curr.lastModifiedTime()) ) ||
 					FileStatus.size() != curr.size())
 			{
 				switch (View.MView.Win.Choice(GPC_ERROR, "File Changed on Disk",
@@ -5606,7 +5607,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (BFS(this, BFS_CommentEnd)!=null) len_end = BFS(this, BFS_CommentEnd).length();
 
 		for (l = 0; l < RCount; l++) {
-			L = RLine(l);
+			ELine L = RLine(l);
 			int foldlen = 0;
 			int blen = 0;
 			/* TODO FindFold
@@ -6429,6 +6430,17 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
+	boolean FileSaveAs(ExState State) {
+	    String [] FName = {FileName};
+
+	    if (State.GetStrParam(View, FName) == 0)
+	        if (View.MView.Win.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0)
+	            return false;
+	    
+	    return FileSaveAs(FName[0]);
+	}
+	
+	
 	boolean FileSaveAs(String FName) {
 		String [] Name = {null};
 
@@ -6453,8 +6465,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 				}
 			}
-			//free(FileName);
-			FileName = Name[0];
+
+			FileName = Name[0].trim();
 			UpdateTitle();
 			return Save();
 		} else {
@@ -6728,10 +6740,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExPushGlobalBookmark:  return PushGlobalBookmark();
 		case ExInsertString:        return InsertString(State);
 
-		///* TODO edit cmds
 		case ExSelfInsert:          return SelfInsert(State);
 		case ExFileReload:          return FileReload(State);
-		// TODO case ExFileSaveAs:          return FileSaveAs(State);
+		case ExFileSaveAs:          return FileSaveAs(State);
 		case ExFileWriteTo:         return FileWriteTo(State);
 		case ExBlockRead:           return BlockRead(State);
 		case ExBlockReadStream:     return BlockReadStream(State);

@@ -174,6 +174,12 @@ public class ELine
 		Chars.copyIn(ofs, buffer, len);		
 	}
 	
+
+	
+	@Override
+	public String toString() {
+		return Chars.toString();
+	}
 	
 }
 

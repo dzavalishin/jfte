@@ -83,19 +83,11 @@ public class EMode {
 	{
 		EMode m = Modes;
 
-		//fprintf(stderr, "Searching mode %s\n", Name);
 		while (m != null) {
 			if (Name.equals(m.fName))
-			{
 				return m;
-			}
 			m = m.fNext;
 		}
-
-		/*
-    	for( EMode m : Modes )
-    		if(m.fName.equals(Name))
-    			return m; */
 
 		return null;
 	}

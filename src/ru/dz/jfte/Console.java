@@ -694,7 +694,7 @@ public static String SlashDir(String Path)
 	    if (filecmp(p1, p2) == 0) return 1;
 	    */
 		Path p1 = Path.of(Path1).toAbsolutePath();
-		Path p2 = Path.of(Path1).toAbsolutePath();
+		Path p2 = Path.of(Path2).toAbsolutePath();
 		return p1.equals(p2);
 	    //return 0;
 	}
