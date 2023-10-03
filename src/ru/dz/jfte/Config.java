@@ -735,7 +735,8 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if ((svalue = GetCharStr(cp, obj.len)) == null) return -1;
 				svalue = GetCharStr(cp, obj.len);
 				String cl = ObjName+"."+sname;
-				// TODO if (SetColor(cl, svalue) == 0) return -1;
+				if (!ColorDefs.SetColor(cl, svalue)) 
+					throw new ConfigFormatException(cp, obj, "ReadColors: unknown color "+cl);
 			}
 			break;
 			case CF_END:
@@ -1622,7 +1623,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		//LOG << "What: " << what << " String: " << string << ENDLINE;
 		switch (what) {
 		case COL_SyntaxParser:
-			Colorize.SyntaxParser = GetHilitMode(string);
+			Colorize.SyntaxParser = Hiliter.GetHilitMode(string);
 			break;
 		default:
 			return -1;
@@ -1631,14 +1632,6 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	}
 
 
-	static int GetHilitMode(String Str) {
-		/*/ TODO HilitModes
-	    for (int i = 0; i < sizeof(HilitModes) / sizeof(HilitModes[0]); i++)
-	        if (strcmp(Str, HilitModes[i].Name) == 0)
-	            return HilitModes[i].Num;
-		 */
-		return HILIT_PLAIN;
-	}
 
 
 

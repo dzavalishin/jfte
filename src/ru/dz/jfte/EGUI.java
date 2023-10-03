@@ -914,10 +914,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
         EditorInit();
 
         DoLoadHistoryOnEntry();
-
-    /* TODO #ifdef CONFIG_DESKTOP
-        DoLoadDesktopOnEntry(argc, argv);
-    #endif */
+        DoLoadDesktopOnEntry(argv);   
 
         if (CmdLoadFiles(argv) == ExResult.ErFAIL)            return 3;
 

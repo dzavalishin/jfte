@@ -707,7 +707,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	}
 
 
-	ExResult ConfigRecompile(ExState State) {
+	ExResult ConfigRecompile(ExState State) 
+	{
 		if (Config.ConfigSourcePath == null || Main.ConfigFileName !=null) {
 			Msg(S_ERROR, "Cannot recompile (must use external configuration).");
 			return ExResult.ErFAIL;
@@ -719,9 +720,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		if (Console.ExpandPath("~/.fterc", exp) != 0)
 			return ExResult.ErFAIL;
 		command += exp[0];
-		/*TODO #else ConfigRecompile
-        strcat(command, ConfigFileName);
-    #endif */
+        command += Main.ConfigFileName;
+
 		// TODO Run conf compiler directly?
 		return Compile(command);
 	}

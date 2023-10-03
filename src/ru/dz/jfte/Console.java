@@ -29,10 +29,6 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 	}
 
 
-	static TEvent ReadConsoleEvent() { 
-		// TODO impl me
-		return null;
-	}
 
 	static int ConInit(int XSize, int YSize) {
 		// ignore size here - not really used
@@ -593,6 +589,10 @@ public static String SlashDir(String Path)
 	}
 
 
+	public static String expandPath(String Path) {		
+		return new File(Path).getAbsolutePath();
+	}
+	
 	public static int ExpandPath(String Path, String[] Expand) {		
 		Expand[0] = new File(Path).getAbsolutePath();
 		return 0;

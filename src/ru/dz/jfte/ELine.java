@@ -95,7 +95,7 @@ public class ELine
 
 
 	//int getCount() { return Chars.usedLength(); } 
-	int getCount() { return Chars.getSize(); } // TODO is it ok?
+	int getCount() { return Chars.getSize(); } 
 
 	
 	//int getCount() { return Chars.usedLength(); } 

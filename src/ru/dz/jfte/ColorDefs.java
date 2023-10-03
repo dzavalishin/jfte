@@ -58,5 +58,97 @@ public interface ColorDefs {
 	int /*ChColor*/  hcChoice_NormalChar = 0x1E;
 	
 	static final int CK_MAXLEN = 32;
+
+	
+	public static boolean SetColor(String ColorV, String Value) {
+	    //int Col;
+	    //int ColBg, ColFg;
+	    //int /*ChColor*/ C;
+
+	    //if (sscanf(Value, "%1X %1X", &ColFg, &ColBg) != 2)	        return 0;
+
+	    String[] sep = Value.split(" ");
+	    
+	    int ColFg = Integer.parseInt(sep[0],16);
+	    int ColBg = Integer.parseInt(sep[0],16);
+	    
+	    int Col = ColFg | (ColBg << 4);
+	    
+	    /*
+	    C = ChColor(Col);
+	    for (unsigned int i = 0; i < NCOLORS; i++) {
+	        if (strcmp(ColorV, Colors[i].Name) == 0) {
+	            *Colors[i].C = C;
+	            return 1;
+	        }
+	    }
+	    return 0;
+	    */
+	    
+	    /* TODO switch(ColorV)
+	    
+	    switch(ColorV)
+	    {
+	    case  "Status.Normal":     hcStatus_Normal = Col; break;
+	    case  "Status.Active":     hcStatus_Active = Col; break;
+
+	    case  "Message.Normal":    MsgColor[0] = Col; break;
+	    case  "Message.Bold":      MsgColor[1] = Col; break;
+	    case  "Message.Error":     MsgColor[2] = Col; break;
+
+	    case  "Entry.Field":       hcEntry_Field = Col; break;
+	    case  "Entry.Prompt":      hcEntry_Prompt = Col; break;
+	    case  "Entry.Selection":   hcEntry_Selection = Col; break;
+
+	    case  "LIST.Status":       hcList_Status = Col; break;
+	    case  "LIST.Normal":       hcList_Normal = Col; break;
+	    case  "LIST.Selected":     hcList_Selected = Col; break;
+	    case  "LIST.Hilited":      hcList_Hilited = Col; break;
+	    case  "LIST.HilitSelect":  hcList_HilitSelect = Col; break;
+	    case  "LIST.Marked":       hcList_Marked = Col; break;
+	    case  "LIST.MarkSelect":   hcList_MarkSelect = Col; break;
+	    case  "LIST.MarkHilit":    hcList_MarkHilit = Col; break;
+	    case  "LIST.MarkHilitSel": hcList_MarkHilitSel = Col; break;
+
+	    case  "PLAIN.Normal":      hcPlain_Normal = Col; break;
+	    case  "PLAIN.Background":  hcPlain_Background = Col; break;
+	    case  "PLAIN.Selected":    hcPlain_Selected = Col; break;
+	    case  "PLAIN.Markers":     hcPlain_Markers = Col; break;
+	    case  "PLAIN.Found":       hcPlain_Found = Col; break;
+	    case  "PLAIN.Keyword":     hcPlain_Keyword = Col; break;
+	    case  "PLAIN.Folds0":      hcPlain_Folds[0] = Col; break;
+	    case  "PLAIN.Folds1":      hcPlain_Folds[1] = Col; break;
+	    case  "PLAIN.Folds2":      hcPlain_Folds[2] = Col; break;
+	    case  "PLAIN.Folds3":      hcPlain_Folds[3] = Col; break;
+	    case  "PLAIN.Folds4":      hcPlain_Folds[4] = Col; break;
+	    case  "PLAIN.HilitWord":   hcPlain_HilitWord = Col; break;
+	    case  "PLAIN.Bookmark":    hcPlain_Bookmark = Col; break;
+
+	    case  "ScrollBar.Arrows":  hcScrollBar_Arrows = Col; break;
+	    case  "ScrollBar.Back":    hcScrollBar_Back = Col; break;
+	    case  "ScrollBar.Fore":    hcScrollBar_Fore = Col; break;
+
+	    case  "ASCII.Chars":       hcAsciiChars = Col; break;
+
+	    case  "Menu.Background":   hcMenu_Background = Col; break;
+	    case  "Menu.ActiveItem":   hcMenu_ActiveItem = Col; break;
+	    case  "Menu.ActiveChar":   hcMenu_ActiveChar = Col; break;
+	    case  "Menu.NormalItem":   hcMenu_NormalItem = Col; break;
+	    case  "Menu.NormalChar":   hcMenu_NormalChar = Col; break;
+
+	    case  "Choice.Title":      hcChoice_Title = Col; break;
+	    case  "Choice.Param":      hcChoice_Param = Col; break;
+	    case  "Choice.Background": hcChoice_Background = Col; break;
+	    case  "Choice.ActiveItem": hcChoice_ActiveItem = Col; break;
+	    case  "Choice.ActiveChar": hcChoice_ActiveChar = Col; break;
+	    case  "Choice.NormalItem": hcChoice_NormalItem = Col; break;
+	    case  "Choice.NormalChar": hcChoice_NormalChar = Col; break;
+	    
+	    default:
+	    	return false;
+	    }
+	    */
+	    return true;
+	}
 	
 }

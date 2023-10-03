@@ -144,10 +144,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		StartHilit = 0;
 		EndHilit = -1;
-		HilitProc = null;
-
-		//if (Mode != null && Mode.fColorize != null)
-		// TODO HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+		resetHiliter();
 
 		InsertLine(CP,0,null); /* there should always be at least one line in the edit buffer */
 		Flags = (Mode.Flags);
@@ -1918,6 +1915,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 						else CCharStr = "   EOF";
 					}
 
+					/*
 					String s = String.format( "%04d:%02d %c%c%c%c %.6s %c"
 							//#ifdef DOS
 							//                        " %lu "
@@ -1940,19 +1938,61 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 																				(BlockMode == bmStream) ? 'S' :
 																					(BlockMode == bmLine) ? 'L': 'C'
 																				),
-																		/* TODO #ifdef CONFIG_WORDWRAP
+																		/*  #ifdef CONFIG_WORDWRAP
 	                        (BFI(this, BFI_WordWrap) == 3) ? 't' :
 	                        (BFI(this, BFI_WordWrap) == 2) ? 'W' :
 	                        (BFI(this, BFI_WordWrap) == 1) ? 'w' :
 	                        ' ',
-							#endif */
+							#endif * /
 																		//                    (BFI(this, BFI_Undo))?'U':' ',
 																		//                    (BFI(this, BFI_Trim))?'E':' ',
 																		//                    (Flags.KeepBackups)?'B':' ',
 																		Mode.fName,
 																		(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
 							);
+							
+							*/
+					
+					String s = String.format( "%04d:%02d ",// %c%c%c%c %.6s %c"
+							ActLine + 1,
+							CurColumn + 1 );
 
+					
+					s += (BFI(this, BFI_Insert)) ? 'I' : ' ';
+					s += (BFI(this, BFI_AutoIndent)) ? 'A' : ' ';
+					s += (BFI(this, BFI_ExpandTabs))?'T':' ';
+					s += (BFI(this, BFI_MatchCase)) ? 'C' : ' ';
+					s += AutoExtend ?
+							(
+								(BlockMode == bmStream) ? 's' :
+								(BlockMode == bmLine) ? 'l' : 'c'
+							) :
+							(
+								(BlockMode == bmStream) ? 'S' :
+								(BlockMode == bmLine) ? 'L': 'C'
+							);
+
+                    s += (iBFI(this, BFI_WordWrap) == 3) ? 't' :
+                    	(iBFI(this, BFI_WordWrap) == 2) ? 'W' :
+                    		(iBFI(this, BFI_WordWrap) == 1) ? 'w' :
+                    			' ';
+
+                    s += (BFI(this, BFI_Undo))?'U':' ';
+                    s += (BFI(this, BFI_Trim))?'E':' ';
+                    // TODO s += (Flags.KeepBackups)?'B':' ';
+					
+					
+					s += " "+Mode.fName+" ";
+					s += (Modified != 0) ? '*' : 
+						(BFI(this, BFI_ReadOnly)) ? '%' : ' ';
+					
+					
+					
+					
+					
+					
+					
+					
 					int l = s.length();
 					int fw = W.Cols - l;
 					int fl = FileName.length();
@@ -3075,11 +3115,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				if (DelText(Y, CP.Col, 1) == false) return false;
 			} 
 		}
-		/* TODO #ifdef CONFIG_WORDWRAP
-	    if (BFI(this, BFI_WordWrap) == 2) {
+
+	    if (iBFI(this, BFI_WordWrap) == 2) {
 	        if (DoWrap(0) == false) return false;
 	    }
-	#endif */
+
 		if (BFI(this, BFI_Trim)) {
 			Y = VToR(CP.Row);
 			if (TrimLine(Y) == false) return false;
@@ -3104,15 +3144,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				if (DelText(Y, CP.Col, 1) == false) return false;
 		} else 
 			if (LineJoin() == false) return false;
-		/* TODO #ifdef CONFIG_WORDWRAP
-	    if (BFI(this, BFI_WordWrap) == 2) {
+
+	    if (iBFI(this, BFI_WordWrap) == 2) {
 	        if (DoWrap(0) == false) return false;
 	        if (CP.Col >= LineLen(Y))
 	            if (CP.Row < VCount - 1) {
-	                if (SetPos(BFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
+	                if (SetPos(iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
 	            }
 	    }
-	#endif */
+
 		if (BFI(this, BFI_Trim))
 			if (TrimLine(VToR(CP.Row)) == false)
 				return false;
@@ -3338,47 +3378,46 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (InsText(Y, CP.Col, aCount, aStr) == false)
 			return false;
 
-		int C = CP.Col;
-		int L = VToR(CP.Row);
-		int P = CharOffset(RLine(L), C);
-		P += aCount;
-		C = ScreenPos(RLine(L), P);
+		int Cc = CP.Col;
+		int Lr = VToR(CP.Row);
+		int Po = CharOffset(RLine(Lr), Cc);
+		Po += aCount;
+		Cc= ScreenPos(RLine(Lr), Po);
 
-		if (SetPos(C, CP.Row) == false)
+		if (SetPos(Cc, CP.Row) == false)
 			return false;
 
 		if (BFI(this, BFI_Trim))
-			if (TrimLine(L) == false)
+			if (TrimLine(Lr) == false)
 				return false;
 
-		/* TODO #ifdef CONFIG_WORDWRAP
-	    if (BFI(this, BFI_WordWrap) == 2) {
+	    if (iBFI(this, BFI_WordWrap) == 2) {
 	        if (DoWrap(0) == false) return false;
-	    } else if (BFI(this, BFI_WordWrap) == 1) {
+	    } else if (iBFI(this, BFI_WordWrap) == 1) {
 	        int P, C = CP.Col;
 	        ELine LP;
 	        int L;
 
-	        if (C > BFI(this, BFI_RightMargin)) {
+	        if (C > iBFI(this, BFI_RightMargin)) {
 	            L = CP.Row;
 
-	            C = BFI(this, BFI_RightMargin);
+	            C = iBFI(this, BFI_RightMargin);
 	            P = CharOffset(LP = RLine(L), C);
-	            while ((C > BFI(this, BFI_LeftMargin)) &&
+	            while ((C > iBFI(this, BFI_LeftMargin)) &&
 	                   ((LP.Chars.charAt(P) != ' ') &&
 	                    (LP.Chars.charAt(P) != 9)))
 	                C = ScreenPos(LP, --P);
 
-	            if (P <= BFI(this, BFI_LeftMargin)) {
-	                C = BFI(this, BFI_RightMargin);
+	            if (P <= iBFI(this, BFI_LeftMargin)) {
+	                C = iBFI(this, BFI_RightMargin);
 	            } else
 	                C = ScreenPos(LP, P);
 	            if (SplitLine(L, C) == false) return false;
-	            IndentLine(L + 1, BFI(this, BFI_LeftMargin));
-	            if (SetPos(CP.Col - C - 1 + BFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
+	            IndentLine(L + 1, iBFI(this, BFI_LeftMargin));
+	            if (SetPos(CP.Col - C - 1 + iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
 	        }
 	    }
-	#endif */
+
 		return true;
 	}
 
@@ -3472,7 +3511,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	//* TODO #ifdef CONFIG_WORDWRAP
+
 	//#define WFAIL(x) return 0	//do { puts(#x "\x7"); return -1; } while (0) 
 
 	boolean DoWrap(int WrapAll) {
@@ -3769,9 +3808,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (EMode.FindMode(AMode) != null) {
 			Mode = EMode.FindMode(AMode);
 			Flags = Mode.Flags;
-			HilitProc = null;
-			// TODO if (Mode && Mode.fColorize)
-			//	HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+			resetHiliter();
 			FullRedraw();
 			return true;
 		}
@@ -3782,9 +3819,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	boolean ChangeKeys(String AMode) {
 		if (EMode.FindMode(AMode) != null) {
 			Mode = EMode.FindMode(AMode);
-			HilitProc = null;
-			// TODO if (Mode && Mode.fColorize)
-			//	HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+			resetHiliter();
 			FullRedraw();
 			return true;
 		}
@@ -3797,9 +3832,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			EMode XMode;
 			XMode = EMode.FindMode(AMode);
 			Flags = XMode.Flags;
-			HilitProc = null;
-			// TODO if (Mode && Mode.fColorize)
-			//	HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
+			resetHiliter();
 			FullRedraw();
 			return true;
 		}
@@ -3807,6 +3840,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return false;
 	}
 
+	private void resetHiliter() {
+		HilitProc = null;
+		if(Mode != null && Mode.fColorize != null)
+			HilitProc = Hiliter.GetHilitProc(Mode.fColorize.SyntaxParser);
+	}
 
 
 
@@ -5089,7 +5127,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int margin = iBFI(this, BFI_LoadMargin);
 
 		FileOk = false;
-		/* TODO Loaded
+		/* 
 	    fd = open(AFileName, O_RDONLY | O_BINARY, 0);
 	    if (fd == -1) {
 	        if (errno != ENOENT) {
@@ -5107,7 +5145,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		{
 			Msg(S_INFO, "New file %s.", AFileName);
 			Loaded = true;
-			return true;
+	        return false;
+			//return true;
 		}
 
 		Loading = true;
@@ -5633,11 +5672,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                } */
 
 					/*
-	                if (BFI(this, BFI_SaveBookmarks) == what && blen) {
+	                if (iBFI(this, BFI_SaveBookmarks) == what && blen > 0) {
 	                    if (fwrite(book, 1, blen, fp) != blen) goto fail;
 	                    ByteCount += blen;
 	                }
-					 */
+					// */
 					if (iBFI(this, BFI_SaveBookmarks) == what && blen != 0) {
 						//if (fwrite(book, 1, blen, fp) != blen) goto fail;
 						writer.write(book);
@@ -6221,9 +6260,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
+	static int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
 		//ChColor *Colors = BF.Mode.fColorize.Colors;
-		// TODO int[] Colors = BF.Mode.fColorize.Colors;
+		//  
+		//int[] Colors = BF.Mode.fColorize.Colors;
 		//HILIT_VARS(Colors[CLR_Normal], Line);
 
 		//PCLI BPtr; 
@@ -6235,11 +6275,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		//String p = Line.Chars;
 		//int pp = 0;
 		int NC = 0, C = 0; 
-		//int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
-		//boolean ExpandTabs = EBuffer.BFI(BF, BFI_ExpandTabs);
+		int TabSize = EBuffer.iBFI(BF, BFI_TabSize); 
+		boolean ExpandTabs = EBuffer.BFI(BF, BFI_ExpandTabs);
 
 
-		/*#ifdef CONFIG_WORD_HILIT
+		/* TODO #ifdef CONFIG_WORD_HILIT
 	    int j = 0;
 
 	    if (BF.Mode.fColorize.Keywords.TotalCount > 0 ||
@@ -6276,11 +6316,21 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    } else
 	#endif */
-		/* TOD if (ExpandTabs) { // use slow mode 
+		/* TOD 
+		  if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
-	            IF_TAB() else {
-	                ColorNext();
-	            }
+	            //IF_TAB() else {	                ColorNext();	            }
+	        	
+	            if (*p == '\t' && ExpandTabs) { 
+	                NC = NextTab(C, TabSize); 
+	                if (StateMap) StateMap[i] = hsState(State);
+	                if (B) MoveChar(B, C - Pos, Width, ' ', Color, NC - C);
+	                if (BFI(BF, BFI_ShowTabs)) ColorChar();
+	                i++,len--,p++;
+	                C = NC;
+	                continue;
+	                else {	                ColorNext();	            }
+	        	
 	        }
 	    } else */ { /* fast mode */
 	    	if (Pos < Line.getCount()) {
@@ -6615,7 +6665,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExMoveSavedPosRow:       return MoveSavedPosRow();
 		case ExMoveSavedPos:          return MoveSavedPos();
 		case ExSavePos:               return SavePos();
-		// TODO 
+ 
 		case ExCompleteWord:          return CompleteWord();
 		case ExBlockPasteStream:      return BlockPasteStream();
 		case ExBlockPasteLine:        return BlockPasteLine();

@@ -6,9 +6,15 @@ import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class Main implements MainConst
 {
+	private static final Logger log = Logger.getLogger(Main.class.getName());
+	private static final String LOGGING_PROPERTIES = "/logging.properties";
+
 	public static final Charset charset = Charset.forName("US-ASCII"); // TODO charset - ASCII?
 	public static final boolean DEBUG_EDITOR = false;
 
@@ -188,20 +194,18 @@ public class Main implements MainConst
 	    			QuoteAll = true;
 	    		} else if (aa1 == '+') {
 	    			QuoteNext = true;
-	    			/* TODO #ifdef CONFIG_DESKTOP
 	            } else if (aa1 == 'D') {
-	                ExpandPath(argv[Arg] + 2, DesktopFileName);
-	                if (IsDirectory(DesktopFileName)) {
-	                    Slash(DesktopFileName, 1);
-	                    strcat(DesktopFileName, DESKTOP_NAME);
+	            	DesktopFileName = Console.expandPath(argv[Arg].substring(2));
+	                if (Console.IsDirectory(DesktopFileName)) {
+	                	DesktopFileName = Console.Slash(DesktopFileName, 1);
+	                    DesktopFileName += DESKTOP_NAME;
 	                }
-	                if (DesktopFileName[0] == 0) {
-	                    LoadDesktopOnEntry = 0;
-	                    SaveDesktopOnExit = 0;
+	                if (DesktopFileName.isBlank()) {
+	                    Config.LoadDesktopOnEntry = 0;
+	                    Config.SaveDesktopOnExit = false;
 	                } else {
-	                    LoadDesktopOnEntry = 1;
+	                	Config.LoadDesktopOnEntry = 1;
 	                }
-	#endif */
 
 	            } else if (aa1 == 'H') {
 	                HistoryFileName =  argv[Arg].substring(2);
@@ -228,6 +232,14 @@ public class Main implements MainConst
 	
 	public static void main(String[] argv) throws FontFormatException, IOException  
 	{
+		final InputStream logMode = Main.class.getResourceAsStream(LOGGING_PROPERTIES);
+		if(logMode != null)
+			LogManager.getLogManager().readConfiguration(logMode);
+		else
+			System.err.println("Can't get "+LOGGING_PROPERTIES);
+
+		log.info("Start");
+		
 		if (CmdLoadConfiguration(argv) == 0)
 			return;
 
@@ -256,11 +268,11 @@ public class Main implements MainConst
 			ge.registerFont(f);
 			
 			//System.out.println("loaded "+f.getName());
-			// TODO log.log(Level.FINE, "Got font "+fontName);
+			log.log(Level.FINE, "Got font "+fontName);
 			return f;
 		} catch(Throwable e)
 		{
-			// TODO log.log(Level.SEVERE, "Load font "+fontName, e);
+			log.log(Level.SEVERE, "Load font "+fontName, e);
 			//return null;
 			throw e;
 		}
