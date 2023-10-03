@@ -474,7 +474,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			BlockExtendBegin();
 			AutoExtend = true;
 		}
-		PrevPos = CP;
+		PrevPos = new EPoint( CP );
 		PrevPos.Row = (CP.Row < VCount) ? VToR(CP.Row) : (CP.Row - VCount + RCount);
 		CP.Row = Row;
 		CP.Col = Col;

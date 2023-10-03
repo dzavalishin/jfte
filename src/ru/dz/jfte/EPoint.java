@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class EPoint {
+public class EPoint 
+{
     int Row;
     int Col;
 
@@ -8,6 +9,11 @@ public class EPoint {
     public EPoint(int aRow) { Row = aRow; Col = 0; }
     public EPoint() { Row = Col = 0; }
 
-    public int getCol() { return Col; }
+    public EPoint(EPoint src) {
+    	Row = src.Row; 
+    	Col = src.Col;
+	}
+    
+	public int getCol() { return Col; }
     public int getRow() { return Row; }
 }

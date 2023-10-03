@@ -36,7 +36,6 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 		MatchStr = "";
 		CurStr = "";
 
-		// TODO where do we copy back?
 		//Line = ALine[0];
 		int w = 80; // TODO ConWidth(); fails for no window yet
 		//Line = new BinaryString(w,' ');
