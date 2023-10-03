@@ -142,14 +142,35 @@ public class EModel implements ModeDefs, Closeable
 	int GetContext() { return CONTEXT_NONE; }
 	EEventMap GetEventMap() { return null; }
 	int BeginMacro() { return 1; }
+	
+	/**
+	 * 
+	 * 	Shown in "Closing xxx..." message when closing model
+	 * 
+	 */
 	String GetName() { return null; }
+	
 	String GetPath() { return null; }
+	
+	/*
+	 *  Shown in buffer list
+	 */
 	String GetInfo() { return null; }
+	
+	/**
+	 * Return normal and short title (normal for window, short for icon in X)
+	 * 
+	 * @param ATitle Normal title
+	 * @param ASTitle Short title
+	 */
+
 	void GetTitle(String [] ATitle, String [] ASTitle) { ATitle[0] = null; ASTitle[0] = null; }
+	
 	void NotifyPipe(int PipeId) { }
 
 	void NotifyDelete(EModel Deleted) {
 	}
+
 	void DeleteRelated() {
 	}
 

@@ -768,6 +768,12 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		return Model.GetIntVar(var, value);
 	}
 
+	
+	
+	
+	
+	
+	
 
 	/*
 
