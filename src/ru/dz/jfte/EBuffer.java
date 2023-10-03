@@ -24,10 +24,8 @@ import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 
-import ru.dz.jfte.c.ArrayPtr;
 import ru.dz.jfte.c.BinaryString;
 import ru.dz.jfte.c.BitOps;
-import ru.dz.jfte.c.ByteArrayPtr;
 import ru.dz.jfte.c.CString;
 import ru.dz.jfte.c.CStringPtr;
 import ru.dz.jfte.undo.UndoDefs;
@@ -219,24 +217,17 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 						!FileStatus.lastModifiedTime().equals(StatBuf.lastModifiedTime()) )
 						)
 				{
-					int cr;
-					//try {
 					View.MView.Win.Choice(
 							GPC_ERROR, "Warning! Press Esc!",
 							0,
 							"File %-55.55s changed on disk!", 
 							FileName);
 
-					cr = View.MView.Win.Choice(0, "File Changed on Disk",
+					int cr = View.MView.Win.Choice(0, "File Changed on Disk",
 							2,
 							"&Modify",
 							"&Cancel",
 							"%s", FileName);
-					/*} catch(IOException e)
-					{
-						// TODO exception?
-						throw new RuntimeException("IOEx in Modify", e);
-					}*/
 
 					switch (cr)
 					{
@@ -459,11 +450,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			Mode = EMode.GetModeForName(AFileName);
 		assert(Mode != null);
 		Flags = (Mode.Flags);
-		/* TODO #ifdef CONFIG_SYNTAX_HILIT
-		HilitProc = 0;
-		if (Mode && Mode.fColorize)
-			HilitProc = GetHilitProc(Mode.fColorize.SyntaxParser);
-		#endif */
+
+		HilitProc = null;
+		if (Mode != null && Mode.fColorize != null)
+			HilitProc = Hiliter.GetHilitProc(Mode.fColorize.SyntaxParser);
+
 		UpdateTitle();
 		return FileName != null;
 	}
@@ -1496,11 +1487,11 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			StateMap[0] = new int[StateLen[0]];
 			if (StateMap[0] == null) return false;
 
-	        if (BFI(this, BFI_HilitOn) && HilitProc != null)
-	            //HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
-	        	HilitProc.proc(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
-	        else
-			Hilit_Plain(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
+			if (BFI(this, BFI_HilitOn) && HilitProc != null)
+				//HilitProc(this, Row, 0, 0, *StateLen, L, State, *StateMap, &ECol);
+				HilitProc.proc(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
+			else
+				Hilit_Plain(this, Row, null, 0, StateLen[0], L, State, StateMap[0], ECol);
 			if (L.StateE != State) {
 				L.StateE = State;
 			}
@@ -1576,7 +1567,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				HilitProc.proc(this, StartHilit, null, 0, 0, L, State, null, ECol);
 			else 
 				Hilit_Plain(this, StartHilit, null, 0, 0, L, State, null, ECol);
- 
+
 			if (L.StateE != State) {
 				HilitX = 1;
 				L.StateE = State;
@@ -1627,10 +1618,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (Row > 0) State = RLine(Row - 1).StateE;
 			else State = 0;
 
-	        if (BFI(this, BFI_HilitOn) && HilitProc != null)
-	            HilitProc.proc(this, Row, B, C, W, L, State, null, ecp);
-	        else
-	        	Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
+			if (BFI(this, BFI_HilitOn) && HilitProc != null)
+				HilitProc.proc(this, Row, B, C, W, L, State, null, ecp);
+			else
+				Hilit_Plain(this, Row, B, C, W, L, State, null, ecp);
 			ECol = ecp[0];
 
 			if (L.StateE != State) {
@@ -1950,49 +1941,49 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 																		Mode.fName,
 																		(Modified != 0)?'*':(BFI(this, BFI_ReadOnly))?'%':' '
 							);
-							
-							*/
-					
+
+					 */
+
 					String s = String.format( "%04d:%02d ",// %c%c%c%c %.6s %c"
 							ActLine + 1,
 							CurColumn + 1 );
 
-					
+
 					s += (BFI(this, BFI_Insert)) ? 'I' : ' ';
 					s += (BFI(this, BFI_AutoIndent)) ? 'A' : ' ';
 					s += (BFI(this, BFI_ExpandTabs))?'T':' ';
 					s += (BFI(this, BFI_MatchCase)) ? 'C' : ' ';
 					s += AutoExtend ?
 							(
-								(BlockMode == bmStream) ? 's' :
-								(BlockMode == bmLine) ? 'l' : 'c'
-							) :
-							(
-								(BlockMode == bmStream) ? 'S' :
-								(BlockMode == bmLine) ? 'L': 'C'
-							);
+									(BlockMode == bmStream) ? 's' :
+										(BlockMode == bmLine) ? 'l' : 'c'
+									) :
+										(
+												(BlockMode == bmStream) ? 'S' :
+													(BlockMode == bmLine) ? 'L': 'C'
+												);
 
-                    s += (iBFI(this, BFI_WordWrap) == 3) ? 't' :
-                    	(iBFI(this, BFI_WordWrap) == 2) ? 'W' :
-                    		(iBFI(this, BFI_WordWrap) == 1) ? 'w' :
-                    			' ';
+					s += (iBFI(this, BFI_WordWrap) == 3) ? 't' :
+						(iBFI(this, BFI_WordWrap) == 2) ? 'W' :
+							(iBFI(this, BFI_WordWrap) == 1) ? 'w' :
+								' ';
 
-                    s += (BFI(this, BFI_Undo))?'U':' ';
-                    s += (BFI(this, BFI_Trim))?'E':' ';
-                    // TODO s += (Flags.KeepBackups)?'B':' ';
-					
-					
+					s += (BFI(this, BFI_Undo))?'U':' ';
+					s += (BFI(this, BFI_Trim))?'E':' ';
+					// TODO s += (Flags.KeepBackups)?'B':' ';
+
+
 					s += " "+Mode.fName+" ";
 					s += (Modified != 0) ? '*' : 
 						(BFI(this, BFI_ReadOnly)) ? '%' : ' ';
-					
-					
-					
-					
-					
-					
-					
-					
+
+
+
+
+
+
+
+
 					int l = s.length();
 					int fw = W.Cols - l;
 					int fl = FileName.length();
@@ -2101,21 +2092,19 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (len >= CK_MAXLEN)
 			return false;
 
-		//* TODO #ifdef CONFIG_WORD_HILIT
-	    {
-	        //char s[CK_MAXLEN + 1];
-	        //s[CK_MAXLEN] = 0;
-	        //memcpy(s, str, len);
-	        String s = str.substring(0, len);
-	        //s[len] = 0;
-	        if (HilitFindWord(s)) {
-	            clr[0] = hcPlain_HilitWord;
-	            return true;
-	        }
-	    }
-	//#endif * /
-		
-	    if (len < 1) return false;
+		{
+			//char s[CK_MAXLEN + 1];
+			//s[CK_MAXLEN] = 0;
+			//memcpy(s, str, len);
+			String s = str.substring(0, len);
+			//s[len] = 0;
+			if (HilitFindWord(s)) {
+				clr[0] = hcPlain_HilitWord;
+				return true;
+			}
+		}
+
+		if (len < 1) return false;
 		byte[] b = Mode.fColorize.Keywords.key[len];
 		int p = 0;
 		if (IgnCase!=0) {
@@ -2143,55 +2132,55 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				p += len + 1;
 			}
 		}
-		
+
 		if (len < 128) {
 			//char s[128];
 
 			//memcpy(s, str, len);
 			//s[len] = 0;
-	        String s = str.substring(0, len);
+			String s = str.substring(0, len);
 
-	        /* TODO TagDefined
+			/* TODO TagDefined
 			if( BFI(this, BFI_HilitTags) && TagDefined(s) ) {
 				//clr = 0x0A;
 				clr[0] = Mode.fColorize.Colors[CLR_HexNumber];
 				return true;
 			} */
 		}
-		 //*/
+		//*/
 		return false;
 	}
 
 
-	
+
 	boolean HilitFindWord(String Word) 
 	{
-	    for (int i = 0; i < WordCount; i++) 
-	    {
-	        if (BFI(this, BFI_MatchCase)) {
-	            //if (strcmp(Word, WordList[i]) == 0) return 1;
-	        	if(WordList[i].equals(Word)) return true;
-	        } else {
-	            //if (stricmp(Word, WordList[i]) == 0) return 1;
-	        	if(WordList[i].equalsIgnoreCase(Word)) return true;
-	        }
-	    }
-	    
-	    return false;
+		for (int i = 0; i < WordCount; i++) 
+		{
+			if (BFI(this, BFI_MatchCase)) {
+				//if (strcmp(Word, WordList[i]) == 0) return 1;
+				if(WordList[i].equals(Word)) return true;
+			} else {
+				//if (stricmp(Word, WordList[i]) == 0) return 1;
+				if(WordList[i].equalsIgnoreCase(Word)) return true;
+			}
+		}
+
+		return false;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3116,9 +3105,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			} 
 		}
 
-	    if (iBFI(this, BFI_WordWrap) == 2) {
-	        if (DoWrap(0) == false) return false;
-	    }
+		if (iBFI(this, BFI_WordWrap) == 2) {
+			if (DoWrap(0) == false) return false;
+		}
 
 		if (BFI(this, BFI_Trim)) {
 			Y = VToR(CP.Row);
@@ -3145,13 +3134,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		} else 
 			if (LineJoin() == false) return false;
 
-	    if (iBFI(this, BFI_WordWrap) == 2) {
-	        if (DoWrap(0) == false) return false;
-	        if (CP.Col >= LineLen(Y))
-	            if (CP.Row < VCount - 1) {
-	                if (SetPos(iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
-	            }
-	    }
+		if (iBFI(this, BFI_WordWrap) == 2) {
+			if (DoWrap(0) == false) return false;
+			if (CP.Col >= LineLen(Y))
+				if (CP.Row < VCount - 1) {
+					if (SetPos(iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
+				}
+		}
 
 		if (BFI(this, BFI_Trim))
 			if (TrimLine(VToR(CP.Row)) == false)
@@ -3391,32 +3380,32 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (TrimLine(Lr) == false)
 				return false;
 
-	    if (iBFI(this, BFI_WordWrap) == 2) {
-	        if (DoWrap(0) == false) return false;
-	    } else if (iBFI(this, BFI_WordWrap) == 1) {
-	        int P, C = CP.Col;
-	        ELine LP;
-	        int L;
+		if (iBFI(this, BFI_WordWrap) == 2) {
+			if (DoWrap(0) == false) return false;
+		} else if (iBFI(this, BFI_WordWrap) == 1) {
+			int P, C = CP.Col;
+			ELine LP;
+			int L;
 
-	        if (C > iBFI(this, BFI_RightMargin)) {
-	            L = CP.Row;
+			if (C > iBFI(this, BFI_RightMargin)) {
+				L = CP.Row;
 
-	            C = iBFI(this, BFI_RightMargin);
-	            P = CharOffset(LP = RLine(L), C);
-	            while ((C > iBFI(this, BFI_LeftMargin)) &&
-	                   ((LP.Chars.charAt(P) != ' ') &&
-	                    (LP.Chars.charAt(P) != 9)))
-	                C = ScreenPos(LP, --P);
+				C = iBFI(this, BFI_RightMargin);
+				P = CharOffset(LP = RLine(L), C);
+				while ((C > iBFI(this, BFI_LeftMargin)) &&
+						((LP.Chars.charAt(P) != ' ') &&
+								(LP.Chars.charAt(P) != 9)))
+					C = ScreenPos(LP, --P);
 
-	            if (P <= iBFI(this, BFI_LeftMargin)) {
-	                C = iBFI(this, BFI_RightMargin);
-	            } else
-	                C = ScreenPos(LP, P);
-	            if (SplitLine(L, C) == false) return false;
-	            IndentLine(L + 1, iBFI(this, BFI_LeftMargin));
-	            if (SetPos(CP.Col - C - 1 + iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
-	        }
-	    }
+				if (P <= iBFI(this, BFI_LeftMargin)) {
+					C = iBFI(this, BFI_RightMargin);
+				} else
+					C = ScreenPos(LP, P);
+				if (SplitLine(L, C) == false) return false;
+				IndentLine(L + 1, iBFI(this, BFI_LeftMargin));
+				if (SetPos(CP.Col - C - 1 + iBFI(this, BFI_LeftMargin), CP.Row + 1) == false) return false;
+			}
+		}
 
 		return true;
 	}
@@ -3515,120 +3504,120 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	//#define WFAIL(x) return 0	//do { puts(#x "\x7"); return -1; } while (0) 
 
 	boolean DoWrap(int WrapAll) {
-	    int L, Len, C, P, Ind;
-	    ELine LP;
-	    int Left = iBFI(this, BFI_LeftMargin), Right = iBFI(this, BFI_RightMargin);
-	    int FirstParaLine;
-	    int NoChange = 0, NoChangeX = 0;
+		int L, Len, C, P, Ind;
+		ELine LP;
+		int Left = iBFI(this, BFI_LeftMargin), Right = iBFI(this, BFI_RightMargin);
+		int FirstParaLine;
+		int NoChange = 0, NoChangeX = 0;
 
-	    if (Left >= Right) return false;
+		if (Left >= Right) return false;
 
-	    L = VToR(CP.Row);
+		L = VToR(CP.Row);
 
-	    FirstParaLine = 0;
-	    if (L > 0)
-	        if (IsLineBlank(L - 1)) FirstParaLine = L;
+		FirstParaLine = 0;
+		if (L > 0)
+			if (IsLineBlank(L - 1)) FirstParaLine = L;
 
-	    while (L < RCount) {
-	        NoChange = 1;
+		while (L < RCount) {
+			NoChange = 1;
 
-	        if (VToR(CP.Row) != L || L != FirstParaLine) {
-	            if (VToR(CP.Row) == L)
-	                if (CP.Col <= LineIndented(L))
-	                    if (SetPos(Left, CP.Row) == false) return false; //WFAIL(1);
-	            Ind = IndentLine(L, Left);
-	            if (VToR(CP.Row) == L)
-	                if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) return false; //WFAIL(2);
-	            NoChange = 0;
-	        }
-	        Len = LineLen(L);
+			if (VToR(CP.Row) != L || L != FirstParaLine) {
+				if (VToR(CP.Row) == L)
+					if (CP.Col <= LineIndented(L))
+						if (SetPos(Left, CP.Row) == false) return false; //WFAIL(1);
+						Ind = IndentLine(L, Left);
+						if (VToR(CP.Row) == L)
+							if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) return false; //WFAIL(2);
+						NoChange = 0;
+			}
+			Len = LineLen(L);
 
-	        if (IsLineBlank(L)) break;
+			if (IsLineBlank(L)) break;
 
-	        if (Len < Right) {
-	            int firstwordbeg = -1;
-	            int firstwordend = -1;
-	            int X;
-	            ELine lp;
+			if (Len < Right) {
+				int firstwordbeg = -1;
+				int firstwordend = -1;
+				int X;
+				ELine lp;
 
-	            if (L < RCount - 1) {
-	                IndentLine(L + 1, 0);
-	                if ((ScreenPos(RLine(L + 1), RLine(L + 1).getCount()) == 0) ||
-	                    (RLine(L + 1).Chars.charAt(0) == '>') || (RLine(L + 1).Chars.charAt(0) == '<')) break;
-	            } else
-	                break;
-	            if (L + 1 >= RCount) break;
+				if (L < RCount - 1) {
+					IndentLine(L + 1, 0);
+					if ((ScreenPos(RLine(L + 1), RLine(L + 1).getCount()) == 0) ||
+							(RLine(L + 1).Chars.charAt(0) == '>') || (RLine(L + 1).Chars.charAt(0) == '<')) break;
+				} else
+					break;
+				if (L + 1 >= RCount) break;
 
-	            lp = RLine(L + 1);
-	            for (X = 0; X < lp.getCount(); X++) {
-	                if (firstwordbeg == -1 && 
-	                    ((lp.Chars.charAt(X) != ' ') && (lp.Chars.charAt(X) != '\t')))
-	                {
-	                    firstwordbeg = X;
-	                } else if (firstwordend == -1 &&
-	                           ((lp.Chars.charAt(X) == ' ' || lp.Chars.charAt(X) == '\t')))
-	                {
-	                    firstwordend = X - 1;
-	                }
-	            }
-	            if (firstwordbeg != -1)
-	                if (firstwordend == -1)
-	                    firstwordend = lp.getCount();
+				lp = RLine(L + 1);
+				for (X = 0; X < lp.getCount(); X++) {
+					if (firstwordbeg == -1 && 
+							((lp.Chars.charAt(X) != ' ') && (lp.Chars.charAt(X) != '\t')))
+					{
+						firstwordbeg = X;
+					} else if (firstwordend == -1 &&
+							((lp.Chars.charAt(X) == ' ' || lp.Chars.charAt(X) == '\t')))
+					{
+						firstwordend = X - 1;
+					}
+				}
+				if (firstwordbeg != -1)
+					if (firstwordend == -1)
+						firstwordend = lp.getCount();
 
-	            if (firstwordend == -1) break;
-	            if (Right - Len > firstwordend - firstwordbeg) {
-	                if (JoinLine(L, Len + 1) == false) return false; //WFAIL(3);
-	                NoChange = 0;
-	                continue;
-	            } else
-	                IndentLine(L + 1, Left);
-	        } else if (Len > Right) {
-	            C = Right;
-	            P = CharOffset(LP = RLine(L), C);
-	            while ((C > Left) && 
-	                   ((LP.Chars.charAt(P) != ' ') &&
-	                    (LP.Chars.charAt(P) != 9)))
-	                C = ScreenPos(LP, --P);
+				if (firstwordend == -1) break;
+				if (Right - Len > firstwordend - firstwordbeg) {
+					if (JoinLine(L, Len + 1) == false) return false; //WFAIL(3);
+					NoChange = 0;
+					continue;
+				} else
+					IndentLine(L + 1, Left);
+			} else if (Len > Right) {
+				C = Right;
+				P = CharOffset(LP = RLine(L), C);
+				while ((C > Left) && 
+						((LP.Chars.charAt(P) != ' ') &&
+								(LP.Chars.charAt(P) != 9)))
+					C = ScreenPos(LP, --P);
 
-	            if (P <= Left) {
-	                L++;
-	                continue;
-	            }
-	            C = ScreenPos(LP, P);
-	            if (SplitLine(L, C) == false) return false; //WFAIL(4);
-	            IndentLine(L + 1, Left);
-	            if (L < RCount - 2 && LineLen(L + 1) == Left) {
-	                if (!IsLineBlank(L + 2)) {
-	                    if (JoinLine(L + 1, Left) == false) return false; //WFAIL(5);
-	                }
-	            }
-	            if (L == VToR(CP.Row) && CP.Col > C) {
-	                if (SetPos(Left + CP.Col - C - 1, CP.Row + 1) == false) return false; //WFAIL(6);
-	            }
-	            NoChange = 0;
-	            L++;
-	            continue;
-	        }
-	        if (WrapAll == 0)
-	            if (NoChangeX!=0) {
-	                //printf("\n\nBreak OUT = %d\n\x7", L);
-	                break;
-	            }
-	        L++;
-	        NoChangeX = NoChange;
-	    }
-	    if (WrapAll == 1)
-	        if (!SetPosR(Left,
-	                    (L < RCount - 2) ? (L + 2) :
-	                    (L < RCount - 1) ? (L + 1) :
-	                    (RCount - 1))) return false; //WFAIL(7);
-	    return true;
+				if (P <= Left) {
+					L++;
+					continue;
+				}
+				C = ScreenPos(LP, P);
+				if (SplitLine(L, C) == false) return false; //WFAIL(4);
+				IndentLine(L + 1, Left);
+				if (L < RCount - 2 && LineLen(L + 1) == Left) {
+					if (!IsLineBlank(L + 2)) {
+						if (JoinLine(L + 1, Left) == false) return false; //WFAIL(5);
+					}
+				}
+				if (L == VToR(CP.Row) && CP.Col > C) {
+					if (SetPos(Left + CP.Col - C - 1, CP.Row + 1) == false) return false; //WFAIL(6);
+				}
+				NoChange = 0;
+				L++;
+				continue;
+			}
+			if (WrapAll == 0)
+				if (NoChangeX!=0) {
+					//printf("\n\nBreak OUT = %d\n\x7", L);
+					break;
+				}
+			L++;
+			NoChangeX = NoChange;
+		}
+		if (WrapAll == 1)
+			if (!SetPosR(Left,
+					(L < RCount - 2) ? (L + 2) :
+						(L < RCount - 1) ? (L + 1) :
+							(RCount - 1))) return false; //WFAIL(7);
+							return true;
 	}
 
 	boolean WrapPara() {
-	    while (VToR(CP.Row) < RCount - 1 && IsLineBlank(VToR(CP.Row)))
-	        if (SetPos(CP.Col, CP.Row + 1) == false) return false;
-	    return DoWrap(1);
+		while (VToR(CP.Row) < RCount - 1 && IsLineBlank(VToR(CP.Row)))
+			if (SetPos(CP.Col, CP.Row + 1) == false) return false;
+		return DoWrap(1);
 	}
 	//#endif */
 
@@ -4503,7 +4492,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//String s;
 			//writer.write(s, 0, s.length());
 
-			doBlockWriteTo(writer);
+			doBlockWriteTo(writer,AFileName);
 
 			//Msg(S_INFO, "Wrote %s, %d lines, %d bytes.", AFileName, lc, bc);
 			Msg(S_INFO, "Wrote %s", AFileName);
@@ -4519,7 +4508,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return false;
 	}	
 
-	private void doBlockWriteTo(BufferedWriter writer) throws IOException {
+	private void doBlockWriteTo(BufferedWriter writer, Object AFileName) throws IOException {
 		//int error = 0;
 		EPoint B, E;
 		int L;
@@ -4607,7 +4596,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					lc++;
 				}
 				if (bc > 65536 + oldc) {
-					// TODO Msg(S_INFO, "Writing %s, %d lines, %d bytes.", AFileName, lc, bc);
+					Msg(S_INFO, "Writing %s, %d lines, %d bytes.", AFileName, lc, bc);
 					oldc = bc;
 				}
 			}
@@ -4631,25 +4620,22 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	return false;
 	}*/
 
-	boolean BlockReadFrom(String AFileName, int blockMode) {
-		EBuffer B;
-		int savesys;
-
+	boolean BlockReadFrom(String AFileName, int blockMode) 
+	{
 		if (Console.FileExists(AFileName) == false) {
 			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "File not found: %s", AFileName);
 			return false;
 		}
 
 		EModel [] em = {(EModel)SSBuffer};
-		B = new EBuffer(0, em, AFileName);
-
-		if (B == null) return false;
-		B.SetFileName(AFileName, null);
-		if (B.Load() == false) {
-			return false;
+		
+		try( EBuffer B = new EBuffer(0, em, AFileName) )
+		{
+			B.SetFileName(AFileName, null);
+			if (B.Load() == false) return false;
 		}
 
-		savesys = Config.SystemClipboard;
+		int savesys = Config.SystemClipboard;
 		Config.SystemClipboard = 0;
 
 		boolean rc = false;
@@ -5145,7 +5131,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		{
 			Msg(S_INFO, "New file %s.", AFileName);
 			Loaded = true;
-	        return false;
+			return false;
 			//return true;
 		}
 
@@ -5995,8 +5981,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		try {
 			job.print(doc, null);
 		} catch (PrintException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			Msg(S_ERROR, "Error printing %s to %s: %s", FileName, printService.getName(), e.getMessage());
 			return false;
 		}		
@@ -6069,14 +6053,15 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	public boolean PlaceUserBookmark( String n,EPoint P) {
 		String name = "_BMK"+n;
-		boolean result;
 		EPoint prev;
 
-		if ((prev=GetBookmark(name))==null) {
-			prev.Row=-1;prev.Col=-1;
+		if ((prev=GetBookmark(name))!=null) 
+		{
+			prev.Row=-1;
+			prev.Col=-1;
 		}
 
-		result=PlaceBookmark(name, P);
+		boolean result = PlaceBookmark(name, P);
 
 		if (result) {
 			if (BFI (this,BFI_ShowBookmarks)) {
@@ -6320,7 +6305,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		  if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
 	            //IF_TAB() else {	                ColorNext();	            }
-	        	
+
 	            if (*p == '\t' && ExpandTabs) { 
 	                NC = NextTab(C, TabSize); 
 	                if (StateMap) StateMap[i] = hsState(State);
@@ -6330,7 +6315,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                C = NC;
 	                continue;
 	                else {	                ColorNext();	            }
-	        	
+
 	        }
 	    } else */ { /* fast mode */
 	    	if (Pos < Line.getCount()) {
@@ -6607,7 +6592,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExInsertTab:             return InsertTab();
 		case ExInsertSpace:           return InsertSpace();
 		case ExWrapPara:
-			        return WrapPara();
+			return WrapPara();
 			//return ExResult.ErFAIL;
 			//return false;
 
@@ -6665,7 +6650,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExMoveSavedPosRow:       return MoveSavedPosRow();
 		case ExMoveSavedPos:          return MoveSavedPos();
 		case ExSavePos:               return SavePos();
- 
+
 		case ExCompleteWord:          return CompleteWord();
 		case ExBlockPasteStream:      return BlockPasteStream();
 		case ExBlockPasteLine:        return BlockPasteLine();

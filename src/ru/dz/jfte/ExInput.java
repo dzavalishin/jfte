@@ -1,21 +1,17 @@
 package ru.dz.jfte;
 
-import ru.dz.jfte.c.ArrayPtr;
-import ru.dz.jfte.c.BinaryString;
 import ru.dz.jfte.c.CString;
 import ru.dz.jfte.c.CStringPtr;
 
 public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs 
 {
 	String Prompt;
-	//String Line;
-	//BinaryString Line = new BinaryString();
 	CString Line = new CString();
 	String MatchStr;
 	String CurStr;
 	int Pos;
 	int LPos;
-	int MaxLen = 500; // TODO need?
+	int MaxLen = 500;
 
 	Completer Comp;
 

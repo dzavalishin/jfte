@@ -6,9 +6,11 @@ import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Main implements MainConst
 {
@@ -131,18 +133,18 @@ public class Main implements MainConst
 					}
 					boolean debug_clean = argv[Arg].equals("--debugclean");
 					if (debug_clean || argv[Arg].equals("--debug")) {
-						String [] path = {""};
+						String path = Console.getHomeDir();
 						/*#ifdef UNIX
 	                    ExpandPath("~/.fte", path);
 	#else */
 						// TODO JustDirectory(argv[0], path);
-						Console.ExpandPath(".", path);
+						//Console.ExpandPath(".", path);
 						//#endif
-						path[0] = Console.Slash(path[0],1);
-						path[0] += "fte.log";
-						if (debug_clean) Console.unlink(path[0]);
+						path = Console.Slash(path,1);
+						path += "jfte.log";
+						if (debug_clean) Console.unlink(path);
 
-						// TODO globalLog.SetLogFile(path);
+						setLogFile(path);
 						//printf("Trace Log in: %s\n", path);
 					}
 					else
@@ -155,13 +157,14 @@ public class Main implements MainConst
 					Usage();
 					return 0;
 				} else if (aa1 == 'c' || aa1 == 'C') {
-					/* TODO config file if (argv[Arg][2])
+					String p = argv[Arg].substring(2);
+					if (!p.isBlank())
 	                {
-	                    Console.ExpandPath(argv[Arg] + 2, ConfigFileName);
+						ConfigFileName = Console.expandPath(p);
 	                    haveConfig = true;
 	                }
-	                else */
-					ign = true;
+	                else 
+	                	ign = true;
 				}
 			}
 		}
@@ -226,6 +229,20 @@ public class Main implements MainConst
 	}
 
 	
+	private static void setLogFile(String path) {
+	    try {
+	    	FileHandler fh = new FileHandler(path);
+	        log.addHandler(fh);
+	        SimpleFormatter formatter = new SimpleFormatter();
+	        fh.setFormatter(formatter);
+	        //log.info("My first log");
+	    } catch (SecurityException e) {
+	        e.printStackTrace();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	   	}
+	}
+
 	private static Font monoFont;
 	
 	public static Font getMonoFont() { return monoFont; }
