@@ -7,8 +7,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public class ClipData {
+	private static final Logger log = Logger.getLogger(ClipData.class.getName());
+	
 	private String data = "";
 
 	
@@ -30,8 +33,8 @@ public class ClipData {
 			data = (String) Toolkit.getDefaultToolkit()
 			        .getSystemClipboard().getData(DataFlavor.stringFlavor);
 		} catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.severe("Exception in GetClipText: "+e);
 			return false;
 		}
 		return true;

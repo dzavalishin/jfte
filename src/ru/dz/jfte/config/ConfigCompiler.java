@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import ru.dz.jfte.ConfigDefs;
 import ru.dz.jfte.Console;
@@ -20,6 +21,7 @@ import ru.dz.jfte.c.ByteArrayPtr;
 
 public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs 
 {
+	private static final Logger log = Logger.getLogger(ConfigCompiler.class.getName());
 
 	public ConfigCompiler() {
 

@@ -100,9 +100,6 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		try {	
 			allCfg = Files.readAllBytes(Path.of(CfgFileName));
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-
 			Console.DieError(1, "Error in %s exception %s\n", CfgFileName, e1.toString());
 			return false;
 		}
@@ -139,9 +136,6 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			//rc = 
 			ReadConfigFile(cp);
 		} catch (ConfigFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
 			Console.DieError(1, "Error in %s exception %s\n", CfgFileName, e.toString());
 			return false;
 		}

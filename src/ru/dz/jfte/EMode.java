@@ -3,10 +3,14 @@ package ru.dz.jfte;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class EMode {
+	private static final Logger log = Logger.getLogger(EMode.class.getName());
+
 	EMode fNext = null;
 	String fName;
 	String MatchName = null;
@@ -123,8 +127,7 @@ public class EMode {
 			try {
 				buf = Files.readString(Path.of(FileName));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.log(Level.SEVERE, "GetModeForName("+FileName+")", e);			
 			}
 
 			if(buf != null && !buf.isBlank())

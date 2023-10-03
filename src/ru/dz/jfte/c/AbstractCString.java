@@ -341,7 +341,6 @@ public abstract class AbstractCString implements ICString
 	/** TODO strcoll
 	@Override
 	public int strcoll(CharSequence src) {
-		// TODO Auto-generated method stub
 		return 0;
 	} */
 
@@ -509,7 +508,6 @@ public abstract class AbstractCString implements ICString
 	/* TODO strxfrm
 	@Override
 	public int strxfrm(CharSequence src, int len) {
-		// TODO Auto-generated method stub
 		return 0;
 	} */
 

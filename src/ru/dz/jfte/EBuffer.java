@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -35,6 +37,9 @@ import ru.dz.jfte.undo.UndoStackItem;
 
 public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs, UndoDefs 
 {
+	private static final Logger log = Logger.getLogger(EBuffer.class.getName());
+	
+	
 	String FileName = null;
 	public int Modified = 0;
 	EPoint TP = new EPoint();
@@ -208,8 +213,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				try {
 					StatBuf = Files.readAttributes( fp, BasicFileAttributes.class);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.log(Level.SEVERE, "readAttributes "+FileName, e);
 				}
 
 				if( StatBuf != null &&

@@ -1,9 +1,12 @@
 package ru.dz.jfte;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 public abstract class GUI implements GuiDefs, EventDefs 
 {
+	private static final Logger log = Logger.getLogger(GUI.class.getName());
+	
 	String []fArgv;
 	boolean doLoop = false;
 
@@ -123,8 +126,8 @@ public abstract class GUI implements GuiDefs, EventDefs
 		try {
 			doProcessEvent();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.severe("Exception in doProcessEvent: "+e);
 		}
 	}
 	void doProcessEvent() throws IOException  {

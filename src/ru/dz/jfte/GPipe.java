@@ -3,8 +3,11 @@ package ru.dz.jfte;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GPipe {
+	private static final Logger log = Logger.getLogger(GPipe.class.getName());
 
 	int id;
 
@@ -23,8 +26,7 @@ public class GPipe {
 	    try {
 			p = pb.start();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.log(Level.SEVERE, "GPipe.run("+command+")", e);
 			return false;
 		}
 
@@ -50,8 +52,7 @@ public class GPipe {
 				return TEvent.newNotifyPipeEvent(id,notify);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.log(Level.SEVERE, "GPipe.checkPipe", e);
 		}
 		return null;
 	}
@@ -133,10 +134,10 @@ public class GPipe {
 		String s;
 		try {
 			s = Pipes[id].input.readLine();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			//Pipes[id].input.close();
+		} 
+		catch (IOException e) 
+		{
+			log.log(Level.SEVERE, "ReadPipe", e);			
 			return null;
 		}
 		
@@ -160,8 +161,7 @@ public class GPipe {
 			Pipes[id].p.destroy();
 			status = Pipes[id].p.waitFor();
 		} catch (InterruptedException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.log(Level.SEVERE, "ClosePipe", e);
 		}		
 			
 		Pipes[id] = null;

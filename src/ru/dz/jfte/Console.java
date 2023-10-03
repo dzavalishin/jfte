@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -17,6 +18,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class Console implements ModeDefs, GuiDefs, EventDefs
 {
+	private static final Logger log = Logger.getLogger(Console.class.getName());
 
 	public static Completer CompletePath = new FileCompleter();
 	static int CursorVisible = 1;
@@ -319,8 +321,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 				waito.wait(10);
 				}
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				log.severe("Exception in fillEvent: "+e);
 			}
 		}
 
@@ -527,8 +528,7 @@ public static String SlashDir(String Path)
 		try {
 			attrs = Files.readAttributes(p, BasicFileAttributes.class);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.severe("Exception in stat("+fileName+"): "+e);
 			return null;
 		}
 		return attrs; 		
@@ -566,8 +566,7 @@ public static String SlashDir(String Path)
 				Process p = Runtime.getRuntime().exec(Command);
 				rc = p.waitFor();
 			} catch (InterruptedException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.severe("Exception in RunProgram("+Command+"): "+e);
 				rc = -1;
 			}
 
@@ -840,8 +839,7 @@ public static String SlashDir(String Path)
 			Files.copy(Path.of(f), Path.of(t));
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.severe("Exception in copyfile("+f+" -> "+t+"): "+e);
 			return false;
 		}
 	}
