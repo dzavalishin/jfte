@@ -322,8 +322,6 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
     
     
 
-    // TODO placeholders?
-    
     static int DLGGetFile(GView v, String Prompt,  String [] FileName, int Flags) {
         assert(1==0);
         return 0;

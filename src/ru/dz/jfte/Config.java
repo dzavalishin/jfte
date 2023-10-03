@@ -1434,7 +1434,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 			if (j == BFI_EventMap) {
 				mode.fEventMap = EEventMap.FindEventMap(string);
 			} else if (j == BFI_IndentMode) {
-				mode.Flags.num[j] = 0; // TODO GetIndentMode(string);
+				mode.Flags.num[j] = Hiliter.GetIndentMode(string);
 			} else if (j == BFS_WordChars) {
 				SetWordChars(mode.Flags.WordChars, string);
 			} else if (j == BFS_CapitalChars) {

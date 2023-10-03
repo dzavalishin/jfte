@@ -9,8 +9,8 @@ public class Hiliter implements ColorDefs, ConfigDefs, ModeDefs, GuiDefs
 	static final int hsPLAIN_Normal = 0;
 
 	/*
-	
-	
+
+
 	#ifdef NTCONSOLE 
 	#    define PCLI unsigned short
 	#else
@@ -60,11 +60,11 @@ public class Hiliter implements ColorDefs, ConfigDefs, ModeDefs, GuiDefs
 	    C = NC;\
 	    continue;\
 	    }
-	
-	*/
-	
+
+	 */
+
 	// NB! Actual Hilit_Plain is in EBuffer
-	
+
 	int Hilit_Plain(EBuffer BF, int LN, PCell B, int Pos, int Width, ELine Line, int /*hlState*/ State, int /*hsState*/ [] StateMap, int []ECol) {
 		//ChColor *Colors = BF.Mode.fColorize.Colors;
 		// TODO int[] Colors = BF.Mode.fColorize.Colors;
@@ -124,7 +124,7 @@ public class Hiliter implements ColorDefs, ConfigDefs, ModeDefs, GuiDefs
 		  if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
 	            //IF_TAB() else {	                ColorNext();	            }
-	        	
+
 	            if (*p == '\t' && ExpandTabs) { 
 	                NC = NextTab(C, TabSize); 
 	                if (StateMap) StateMap[i] = hsState(State);
@@ -134,7 +134,7 @@ public class Hiliter implements ColorDefs, ConfigDefs, ModeDefs, GuiDefs
 	                C = NC;
 	                continue;
 	                else {	                ColorNext();	            }
-	        	
+
 	        }
 	    } else */ { /* fast mode */
 	    	if (Pos < Line.getCount()) {
@@ -166,104 +166,136 @@ public class Hiliter implements ColorDefs, ConfigDefs, ModeDefs, GuiDefs
 
 
 	static int Indent_Plain(EBuffer B, int Line, int PosCursor) {
-	    int OI = B.LineIndented(Line);
-	    B.IndentLine(Line, B.LineIndented(Line - 1));
-	    if (PosCursor!=0) {
-	        int I = B.LineIndented(Line);
-	        int X = B.CP.Col;
+		int OI = B.LineIndented(Line);
+		B.IndentLine(Line, B.LineIndented(Line - 1));
+		if (PosCursor!=0) {
+			int I = B.LineIndented(Line);
+			int X = B.CP.Col;
 
-	        X = X - OI + I;
-	        if (X < I) X = I;
-	        if (X < 0) X = 0;
-	        B.SetPosR(X, Line);
-	    }
-	    return 1;
+			X = X - OI + I;
+			if (X < I) X = I;
+			if (X < 0) X = 0;
+			B.SetPosR(X, Line);
+		}
+		return 1;
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
 	static class HilitMode
 	{
 		final String Name;
 		final int Num;
 		final SyntaxProc Proc;		
 
-	    public HilitMode(String n, int id, SyntaxProc p) {
+		public HilitMode(String n, int id, SyntaxProc p) {
 			Name = n;
 			Num = id;
 			Proc = p;
 		}
 	}
-	
+
 	//private static Object oHilit_Plain;
-	
+
 	static HilitMode HilitModes[] = {
 			new HilitMode( "PLAIN", HILIT_PLAIN, EBuffer::Hilit_Plain ),
-			
+
 			/* TODO hilit proc
 			new HilitMode( "C", HILIT_C, Hilit_C ),
 			new HilitMode( "REXX", HILIT_REXX, Hilit_REXX ),
-			
-			new HilitMode( "HTML", HILIT_HTML, Hilit_HTML ),
-			
-			new HilitMode( "MAKE", HILIT_MAKE, Hilit_MAKE ),
-			
-			new HilitMode( "DIFF", HILIT_DIFF, Hilit_DIFF ),
-			
-			new HilitMode( "MERGE", HILIT_MERGE, Hilit_MERGE ),
-			
-			new HilitMode( "IPF", HILIT_IPF, Hilit_IPF ),
-			
-			new HilitMode( "Ada", HILIT_ADA, Hilit_ADA ),
-			
-			new HilitMode( "MSG", HILIT_MSG, Hilit_MSG ),
-			
-			new HilitMode( "SH", HILIT_SH, Hilit_SH ),
-			
-			new HilitMode( "PASCAL", HILIT_PASCAL, Hilit_PASCAL ),
-			
-			new HilitMode( "TEX", HILIT_TEX, Hilit_TEX ),
-			
-			new HilitMode( "FTE", HILIT_FTE, Hilit_FTE ),
-			
-			new HilitMode( "CATBS", HILIT_CATBS, Hilit_CATBS ),
-			
-			new HilitMode( "SIMPLE", HILIT_SIMPLE, Hilit_SIMPLE ),
-			*/
-			};
-	
-	
-	
-	
-	
-	static SyntaxProc GetHilitProc(int id) {
-	    for (HilitMode i : HilitModes)
-	        if (id == i.Num)
-	            return i.Proc;
 
-	    // TODO hack plain hiliter 
-	    return HilitModes[0].Proc;
-	    
-	    //return null;
+			new HilitMode( "HTML", HILIT_HTML, Hilit_HTML ),
+
+			new HilitMode( "MAKE", HILIT_MAKE, Hilit_MAKE ),
+
+			new HilitMode( "DIFF", HILIT_DIFF, Hilit_DIFF ),
+
+			new HilitMode( "MERGE", HILIT_MERGE, Hilit_MERGE ),
+
+			new HilitMode( "IPF", HILIT_IPF, Hilit_IPF ),
+
+			new HilitMode( "Ada", HILIT_ADA, Hilit_ADA ),
+
+			new HilitMode( "MSG", HILIT_MSG, Hilit_MSG ),
+
+			new HilitMode( "SH", HILIT_SH, Hilit_SH ),
+
+			new HilitMode( "PASCAL", HILIT_PASCAL, Hilit_PASCAL ),
+
+			new HilitMode( "TEX", HILIT_TEX, Hilit_TEX ),
+
+			new HilitMode( "FTE", HILIT_FTE, Hilit_FTE ),
+
+			new HilitMode( "CATBS", HILIT_CATBS, Hilit_CATBS ),
+
+			new HilitMode( "SIMPLE", HILIT_SIMPLE, Hilit_SIMPLE ),
+			 */
+	};
+
+
+
+
+
+	static SyntaxProc GetHilitProc(int id) {
+		for (HilitMode i : HilitModes)
+			if (id == i.Num)
+				return i.Proc;
+
+		// TODO hack plain hiliter 
+		return HilitModes[0].Proc;
+
+		//return null;
 	}
-	
+
 	static int GetHilitMode(String Str) {
-	    for (HilitMode i : HilitModes)
-	        if (i.Name.equals(Str))
-	            return i.Num;
-		 
+		for (HilitMode i : HilitModes)
+			if (i.Name.equals(Str))
+				return i.Num;
+
 		return HILIT_PLAIN;
 	}
-	
+
+
+
+
+
+
+
+
+
+
+
+	static int GetIndentMode(String Str) 
+	{
+		/*
+	    for (unsigned int i = 0; i < sizeof(IndentModes) / sizeof(IndentModes[0]); i++)
+	        if (strcmp(Str, IndentModes[i].Name) == 0)
+	            return IndentModes[i].Num;
+		 */
+
+		switch(Str)
+		{
+		case "C": return  INDENT_C ;
+		case "REXX": return  INDENT_REXX ;
+		case "SIMPLE": return  INDENT_REXX ;
+		case "PLAIN": return  INDENT_PLAIN ;
+
+		}
+
+		return INDENT_PLAIN;
+	}
+
+
+
 }

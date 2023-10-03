@@ -137,7 +137,7 @@ public class Main implements MainConst
 						/*#ifdef UNIX
 	                    ExpandPath("~/.fte", path);
 	#else */
-						// TODO JustDirectory(argv[0], path);
+						// TO DO JustDirectory(argv[0], path);
 						//Console.ExpandPath(".", path);
 						//#endif
 						path = Console.Slash(path,1);

@@ -11,8 +11,6 @@ public class EMode {
 	String fName;
 	String MatchName = null;
 	String MatchLine = null;
-	//RxNode MatchNameRx = null;
-	//RxNode MatchLineRx = null;
 
 	Pattern MatchNameRx = null;
 	Pattern MatchLineRx = null;
@@ -26,15 +24,12 @@ public class EMode {
 	String filename;
 
 
-	//static EMode Modes [] = new EMode [1];
+	
 	static EMode Modes = null;
 
-	/*
-    static {
-    	// TODO Modes
-    	Modes[0] = new EMode(null, null, null);
-    }*/
-
+	
+	
+	
 	EMode(EMode aMode, EEventMap Map, String aName) {
 		fName = aName;
 		fEventMap = Map;
@@ -104,7 +99,6 @@ public class EMode {
 
 	static EMode GetModeForName(String FileName)     
 	{
-		//* TODO GetModeForName
 		//    char ext[10];
 		//    char *p;
 		//int l, i;

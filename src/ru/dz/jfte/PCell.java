@@ -156,7 +156,7 @@ public class PCell extends ArrayPtr<Long>
 		PCell p = new PCell(this);
 
 		if (Pos < 0) {
-			/* TODO pos <0
+			/* TO DO pos <0
 			MaxCount += Pos;
 			Ch -= Pos;
 			Pos = 0; */

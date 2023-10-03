@@ -4,10 +4,6 @@ import java.util.Objects;
 
 /**
  * 
- * TODO ICString
- * 
- * Work in progress
- * <p>
  * Replacement for C {@code char *}  
  * 
  * @author dz
@@ -91,7 +87,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 
 	int memcmp( CharSequence src, int size ); 
 	
-	// TODO int strcoll( CharSequence src ); 
+	// int strcoll( CharSequence src ); 
 	
 	boolean equals( CharSequence src );
 
@@ -128,7 +124,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	int strpbrk( CharSequence src ); 
 	
 	
-	// TODO int strxfrm( CharSequence src, int len );
+	// int strxfrm( CharSequence src, int len );
 
 	// -------------------------------------------------------------------
 	// Export
@@ -157,7 +153,7 @@ public interface ICString extends CharSequence, Comparable<CharSequence>
 	// Impl
 	// -------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked")
     public static int compare(CharSequence cs1, CharSequence cs2) {
         if (Objects.requireNonNull(cs1) == Objects.requireNonNull(cs2)) {
             return 0;
