@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.io.File;
+
 public class ECvsLog extends EBuffer 
 {
 
@@ -19,9 +21,11 @@ public class ECvsLog extends EBuffer
 	    // Use this in Unix - it says more to user
 	    sprintf (msgFile,"/tmp/fte%d-cvs-msg",getpid ());
 	#else */
-	    tmpnam (msgFile);
+	    //tmpnam (msgFile);
+	    File tmp = File.createTempFile("Fte-Cvs-", ".txt");
+	    tmp.deleteOnExit();
 	//#endif
-	    SetFileName (msgFile,CvsLogMode);
+	    SetFileName (tmp.getAbsolutePath(),Config.CvsLogMode);
 
 	    // Preload buffer with info
 	    InsertLine (0, "");
@@ -32,22 +36,29 @@ public class ECvsLog extends EBuffer
 	    
 	    InsText( 4, 18, Directory.length(), Directory );
 	    
-	    if (OnFiles[0]) {
+	    if(!OnFiles.isBlank()) 
+	    {
 	        p=5;
 	        // Go through files - use GetFileStatus to show what to do with files
 	        // First count files
 	        int cnt=0;i=0;
+	        /*
 	        while (1) {
 	            if (OnFiles[i]==0||OnFiles[i]==' ') {
 	                while (OnFiles[i]==' ') i++;
 	                cnt++;
 	                if (!OnFiles[i]) break;
 	            } else i++;
-	        }
-	        int [] position = new int[cnt];
-	        int [] len=new int[cnt];
-	        String status=new char[cnt];
+	        }*/
+	    
+	        String[] fileList = OnFiles.split("\\s+");
+	        cnt = fileList.length;
 	        
+	        //int [] position = new int[cnt];
+	        //int [] len=new int[cnt];
+	        char [] status=new char[cnt];
+
+	        /*
 	        // Find out position and status for each file
 	        i=j=0;position[0]=0;
 	        while (1) {
@@ -63,20 +74,39 @@ public class ECvsLog extends EBuffer
 	                if (!OnFiles[i]) break;
 	                position[++j]=i;
 	            } else i++;
-	        }
+	        } */
+	        
+	        
 	        // Go through status
 	        int fAdded=0,fRemoved=0,fModified=0,fOther=0;
-	        for (i=0;i<cnt;i++) switch (status[i]) {
+	        for (i=0;i<cnt;i++) { 
+	        	
+	        	status[i]=ECvs.CvsView.GetFileStatus(fileList[i]);
+	        	
+	        	switch (status[i]) {
 	            case 'A':case 'a':fAdded++;break;
 	            case 'R':case 'r':fRemoved++;break;
 	            case 'M':case 'm':fModified++;break;
 	            default:fOther++;
 	        }
+	        }
 	        // Now list files with given status
-	        ListFiles (p,fAdded,"Added",cnt,position,len,status,OnFiles,"Aa");
-	        ListFiles (p,fRemoved,"Removed",cnt,position,len,status,OnFiles,"Rr");
-	        ListFiles (p,fModified,"Modified",cnt,position,len,status,OnFiles,"Mm");
-	        ListFiles (p,fOther,"Other",cnt,position,len,status,OnFiles,"AaRrMm",1);
+	        
+	        int [] pp = {p};
+	        
+	        /*
+	        ListFiles (pp,fAdded,"Added",cnt,position,len,status,OnFiles,"Aa", false);
+	        ListFiles (pp,fRemoved,"Removed",cnt,position,len,status,OnFiles,"Rr", false);
+	        ListFiles (pp,fModified,"Modified",cnt,position,len,status,OnFiles,"Mm", false);
+	        ListFiles (pp,fOther,"Other",cnt,position,len,status,OnFiles,"AaRrMm",true);
+			*/
+	        
+	        ListFiles (pp,fAdded,"Added",cnt,fileList,status,"Aa", false);
+	        ListFiles (pp,fRemoved,"Removed",cnt,fileList,status,"Rr", false);
+	        ListFiles (pp,fModified,"Modified",cnt,fileList,status,"Mm", false);
+	        ListFiles (pp,fOther,"Other",cnt,fileList,status,"AaRrMm",true);
+	        
+	        p = pp[0];
 	        
 	    } else {
 	        InsertLine (5,4,"CVS:");
@@ -86,7 +116,7 @@ public class ECvsLog extends EBuffer
 	    InsertLine (p,4,"CVS:");
 	    InsertLine (p+1,60,"CVS: -------------------------------------------------------");
 	    SetPos (0,0);
-	    FreeUndo ();
+	    
 	    Modified=0;
 	}
 
@@ -96,31 +126,52 @@ public class ECvsLog extends EBuffer
 	    CvsLogView=null;
 	}
 
-	void ListFiles (int [] p, int fCount, String title, int cnt, int [] position,
-	                         int []len, String status, String list, String excinc, int exc) {
+	/**
+	 * 
+	 * @param p line number
+	 * @param fCount
+	 * @param title
+	 * @param cnt
+	 * @param position
+	 * @param len
+	 * @param status
+	 * @param list
+	 * @param excinc
+	 * @param exc
+	 */
+	
+	void ListFiles (int [] p, int fCount, String title, int cnt, /*int [] position,
+	                         int []len, */String [] fileList, char [] status, /*String list,*/ String excinc, boolean exc) {
 	    if (fCount != 0) {
 	        InsertLine (p[0]++, 4, "CVS:");
 	        
 	        int i = title.length();
 	        
-	        InsertLine( p , 5, "CVS: ");
-	        InsText ( p, 5, i, title);
-	        InsText (p,i+=5,5, " file");
+	        InsertLine( p[0] , 5, "CVS: ");
+	        InsText ( p[0], 5, i, title);
+	        InsText (p[0],i+=5,5, " file");
 	        i+=5;
 	        
 	        if(fCount!=1) 
-	        	InsText (p,i++,1,"s");
+	        	InsText (p[0],i++,1,"s");
 	        
-	        InsText (p++,i,1,":");
+	        InsText (p[0]++,i,1,":");
 	        
 	        for( i=0; i < cnt; i++ )
-	            if (!!strchr (excinc,status[i])^!!exc) 
+	        {
+	        	boolean among = excinc.indexOf(status[i]) >= 0;
+	            //if (!!strchr (excinc,status[i])^!!exc) 
+	            if (among ^ exc) 
 	            {
 	                // Should be displayed
-	                InsertLine (p,9,"CVS:     ");
-	                InsText (p,9,1,status+i);InsText (p,10,1," ");
-	                InsText (p++,11,len[i],list+position[i]);
+	                InsertLine (p[0],9,"CVS:     ");
+	                InsText (p[0],9,1,""+ status[i]);InsText (p[0],10,1," ");
+	                
+	                String file = fileList[i];
+	                
+	                InsText (p[0]++,11,file.length(),file);
 	            }
+	        }
 	    }
 	}
 
@@ -158,10 +209,10 @@ public class ECvsLog extends EBuffer
 	            }
 	            Save ();
 	            // DoneCommit returns 0 if OK
-	            return !CvsView.DoneCommit (1);
+	            return (0 == ECvs.CvsView.DoneCommit (1)) ? 1 : 0;
 	            
 	        case 1: // Discard
-	            CvsView.DoneCommit (0);
+	        	ECvs.CvsView.DoneCommit (0);
 	            return 1;
 	            
 	        case 2: // Cancel

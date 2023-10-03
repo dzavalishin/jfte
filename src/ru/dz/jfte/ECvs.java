@@ -15,7 +15,7 @@ public class ECvs extends ECvsBase
 
     
 	static ECvs CvsView = null;
-
+	static final String CvsStatusChars = "?UPMCAR";
 	
 	
 	
@@ -35,7 +35,7 @@ public class ECvs extends ECvsBase
 
     @Override
     public void close() {
-        CvsView=0;
+        CvsView=null;
         RemoveLogFile ();
     }
 
@@ -87,9 +87,13 @@ public class ECvs extends ECvsBase
     }
 
     void ParseLine (String line,int len) {
-        if(len>2 && line[1]==' ' && strchr (CvsStatusChars,line[0])) {
+        //if(len > 2 && line.charAt(1)==' ' && strchr (CvsStatusChars,line[0])) 
+        if(len > 2 && line.charAt(1) == ' ' && CvsStatusChars.indexOf(line.charAt(0)) >= 0 ) 
+        {
             AddLine (line+2,-1,line,5);
-        } else AddLine (0,-1,line);
+        } 
+        else 
+        	AddLine (null,-1,line, 0);
     }
 
     int RunPipe (String ADir,String ACommand,String AOnFiles) {

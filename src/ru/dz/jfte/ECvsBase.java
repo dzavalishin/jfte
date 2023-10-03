@@ -1,6 +1,8 @@
 package ru.dz.jfte;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ECvsBase extends EList 
 {
@@ -9,7 +11,7 @@ public class ECvsBase extends EList
 	String OnFiles = null;
 	String OnFilesPos = null;
 
-	//int LineCount;
+	//int Lines.size();
 	//CvsLine [] Lines = null;
 	List<CvsLine> Lines = new ArrayList<>();
 	int Running = 0;
@@ -23,7 +25,12 @@ public class ECvsBase extends EList
 
 
 
+	static List<Pattern> CvsIgnoreRegexp = new ArrayList<>();
 
+	void AddCvsIgnoreRegexp(String regexp) 
+	{ 
+		CvsIgnoreRegexp.add(Pattern.compile(regexp));
+	}
 
 
 	ECvsBase(int createFlags, EModel [] ARoot, String title)
@@ -39,12 +46,14 @@ public class ECvsBase extends EList
 
 	void FreeLines () 
 	{
+		//int i = 0;
 		for(CvsLine l : Lines)
 		{
 			if (l.Buf != null && l.Line >= 0) {
 				// Has buffer and line == bookmark . remove it
-				l.Buf.RemoveBookmark(String.format("_CVS.%d",i) ); // TODO i = item pos in container - REDO with hash?
+				l.Buf.RemoveBookmark(String.format("_CVS.%d",Lines.indexOf(l)) ); // TODO i = item pos in container - REDO with hash?
 			}
+			//i++;
 		}
 
 		Lines.clear();;
@@ -62,10 +71,10 @@ public class ECvsBase extends EList
 		l.Status=status;
 
 		/*
-		LineCount++;
-		Lines=(CvsLine **)realloc (Lines,sizeof (CvsLine *)*LineCount);
-		Lines[LineCount-1]=l;
-		FindBuffer (LineCount-1);
+		Lines.size()++;
+		Lines=(CvsLine **)realloc (Lines,sizeof (CvsLine *)*Lines.size());
+		Lines[Lines.size()-1]=l;
+		FindBuffer (Lines.size()-1);
 		 */
 
 		Lines.add(l);
@@ -80,7 +89,7 @@ public class ECvsBase extends EList
 
 		if (l.File != null) 
 		{
-			l.Buf=0;
+			l.Buf = null;
 
 			String path = Directory;
 
@@ -93,54 +102,62 @@ public class ECvsBase extends EList
 		}
 	}
 
-	void AssignBuffer (EBuffer B,int line) 
+	void AssignBuffer (EBuffer B, int line) 
 	{
-		//char book[16];
-		EPoint P;
+		CvsLine l = Lines.get(line);
+		l.Buf=B;
 
-		Lines[line].Buf=B;
-		if (Lines[line].Line>=0) {
-			sprintf (book,"_CVS.%d",line);
+		if (l.Line >= 0) 
+		{
+			String book = String.format("_CVS.%d",line);
+			EPoint P = new EPoint();
 			P.Col=0;
-			P.Row=Lines[line].Line;
+			P.Row=l.Line;
 			if (P.Row>=B.RCount)
 				P.Row=B.RCount-1;
 			B.PlaceBookmark (book,P);
 		}
 	}
 
-	void  FindFileLines (EBuffer B) {
-		//char path[MAXPATH];
-		String pos;
-		strcpy (path,Directory);Slash (path,1);pos=path+strlen (path);
-		for (int i=0;i<LineCount;i++)
-			if (Lines[i].Buf==0&&Lines[i].File!=0) {
-				strcpy (pos,Lines[i].File);
-				if (filecmp (B.FileName,path)==0) {
-					AssignBuffer (B,i);
-				}
-			}
-	}
+	void  FindFileLines (EBuffer B) 
+	{
+		String path = Console.Slash (Directory,1);
 
-	void NotifyDelete (EModel Deleting) {
-		for (int i=0;i<LineCount;i++) {
-			if (Lines[i].Buf==Deleting) {
-				Lines[i].Buf=0;
+		for(CvsLine l : Lines)
+		{
+			if(l.Buf==null && l.File != null) 
+			{
+				String fn = path + l.File;
+				if (Console.filecmp (B.FileName,fn)==0) {
+					AssignBuffer (B,Lines.indexOf(l)); 
+				}
 			}
 		}
 	}
 
-	@Override
-	int GetLine(String Line, int max) {
+	void NotifyDelete (EModel Deleting) 
+	{
+		for(CvsLine l : Lines)
+		{
+			if (l.Buf==Deleting) 
+				l.Buf=null;
+		}		
+	}
+
+	/*
+	//@Override
+	int GetLine(String [] Line) 
+	{
 		int rc;
 		String p;
 		int l;
+		int max = 500;
 
 		//fprintf(stderr, "GetLine: %d\n", Running);
 
-		*Line = 0;
+		Line[0] = null;
 		if (Running && PipeId != -1) {
-			rc = gui.ReadPipe(PipeId, MsgBuf + BufLen, sizeof(MsgBuf) - BufLen);
+			rc = GPipe.ReadPipe(PipeId, MsgBuf + BufLen, sizeof(MsgBuf) - BufLen);
 			//fprintf(stderr, "GetLine: ReadPipe rc = %d\n", rc);
 			if (rc == -1) {
 				ContinuePipe ();
@@ -166,7 +183,7 @@ public class ECvsBase extends EList
 			BufLen -= BufPos;
 			BufPos = 0;
 			//fprintf(stderr, "GetLine: Line Incomplete\n");
-			return 0;
+			return null;
 		} else {
 			if (l == 0)
 				return 0;
@@ -183,31 +200,52 @@ public class ECvsBase extends EList
 		//fprintf(stderr, "GetLine: Got Line\n");
 		return 1;
 	}
-
+	*/
+	
 	void ParseLine (String line,int v) {
-		AddLine (0,-1,line);
+		AddLine (null,-1,line,0);
 	}
 
-	void NotifyPipe (int APipeId) {
-		if (APipeId==PipeId) {
-			char line[1024];
-			RxMatchRes RM;
-			int i;
+	void NotifyPipe (int APipeId) 
+	{
+		if (APipeId!=PipeId)
+			return;
 
-			while (GetLine((String )line, sizeof(line))) {
-				int len=strlen (line);
-				if (len>0&&line[len-1]=='\n') line[--len]=0;
-				for (i=0;i<CvsIgnoreRegexpCount;i++)
-					if (RxExec (CvsIgnoreRegexp[i],line,len,line,&RM)==1) break;
-				if (i==CvsIgnoreRegexpCount) ParseLine (line,len);
-			}
-			if (!Running) {
-				char s[30];
+		//char line[1024];
+		//RxMatchRes RM;
+		//int i;
+		//String [] line = {""};
 
-				sprintf (s,"[done, status=%d]",ReturnCode);
-				AddLine (0,-1,s);
-			}
+		while(true) // (GetLine(line)) 
+		{
+			String line = GPipe.ReadPipe(PipeId);
+			if(line == null)
+				break;
+			/*
+			int len = line.length();
+			//if (len>0&&line[len-1]=='\n') line[--len]=0;
+			
+			for( i=0; i < CvsIgnoreRegexpCount; i++ )
+				if (RxExec (CvsIgnoreRegexp[i],line,len,line,&RM)==1) 
+					break;
+			
+			if (i==CvsIgnoreRegexpCount) ParseLine (line,len);
+			*/
+			if(!matchIgnoreRegexp(line))
+				ParseLine (line,0);
 		}
+
+		if (Running==0) {
+			AddLine (null, -1, String.format("[done, status=%d]",ReturnCode), 0);
+		}
+
+	}
+
+	private boolean matchIgnoreRegexp(String line) {
+		for( Pattern p : CvsIgnoreRegexp )
+			if( p.matcher(line).matches() ) return true;
+
+		return false;
 	}
 
 	int RunPipe (String ADir,String ACommand,String AOnFiles) {
@@ -217,38 +255,34 @@ public class ECvsBase extends EList
 		OnFiles=AOnFiles;
 
 		ReturnCode=-1;
-		Row=LineCount-1;
+		Row=Lines.size()-1;
 		OnFilesPos=OnFiles;
 
-		{
-			//char s[2*MAXPATH*4];
+		AddLine (null,-1, String.format("[running cvs in '%s']",Directory), 0);
 
-			sprintf (s,"[running cvs in '%s']",Directory);
-			AddLine (0,-1,s);
-		}
-
-		ChangeDir (Directory);
-		return ContinuePipe ();
+		Console.ChangeDir (Directory);
+		return ContinuePipe();
 	}
 
 	int ContinuePipe () {
 		//char RealCommand[2048];
 		int space;
 
-		if (!OnFilesPos) {
+		if (OnFilesPos == null) {
 			// At the end of all files, terminate
 			ClosePipe ();
 			return 0;
-		} else if (Running) {
+		} else if (Running != 0) {
 			// Already running, close the pipe and continue
-			ReturnCode=GPipe.ClosePipe (PipeId);
+			ReturnCode=GPipe.ClosePipe(PipeId);
 		} else {
 			// Not running . set to Running mode
 			Running=1;
 		}
 
 		// Make real command with some files from OnFiles, update OnFilesPos
-		strcat (strcpy (RealCommand,Command)," ");
+		String RealCommand = Command+" ";
+		/*
 		space=sizeof (RealCommand)-strlen (RealCommand)-1;
 		if (space>=strlen (OnFilesPos)) {
 			strcat (RealCommand,OnFilesPos);
@@ -267,18 +301,19 @@ public class ECvsBase extends EList
 			OnFilesPos=s+1;
 			while (*OnFilesPos==' ') OnFilesPos++;
 			if (!*OnFilesPos) OnFilesPos=NULL;
-		}
+		} */
+		RealCommand  += OnFilesPos;
+		OnFilesPos = null;
 
 		BufLen=BufPos=0;
 
 		{
 			//char s[sizeof (RealCommand)+32];
 
-			sprintf (s,"[continuing: '%s']",RealCommand);
-			AddLine (0,-1,s);
+			AddLine(null,-1,String.format("[continuing: '%s']",RealCommand), 0);
 		}
 
-		PipeId=gui.OpenPipe (RealCommand,this);
+		PipeId= GPipe.OpenPipe(RealCommand,this);
 		return 0;
 	}
 
@@ -296,30 +331,31 @@ public class ECvsBase extends EList
 
 		CvsLine l = Lines.get(Line);
 
-		if (Col<(int)strlen (l.Msg)) {
+		if( Col < l.Msg.length() ) 
+		{
 			//char str[1024];
-			int len;
+			//int len = UnTabStr(str,sizeof (str),Lines.get(Line).Msg,strlen (Lines.get(Line).Msg));
+			String str = PCell.UnTabStr(Lines.get(Line).Msg);
+			int len = str.length();
 
-			len=UnTabStr (str,sizeof (str),Lines[Line].Msg,strlen (Lines[Line].Msg));
-			
-			if (len>Col) 
+			if(len>Col) 
 				B.MoveStr(0,Width,str+Col,color,Width);
 		}
 	}
 
 	@Override
 	String FormatLine (int Line) {
-		if (Line<LineCount) 
-			return Lines[Line].Msg;
+		if( Line < Lines.size()) 
+			return Lines.get(Line).Msg;
 		else return null;
 	}
 
 	@Override
 	void UpdateList () {
-		if (LineCount<=Row||Row>=Count-1) 
-			Row=LineCount-1;
+		if (Lines.size()<=Row||Row>=Count-1) 
+			Row=Lines.size()-1;
 
-		Count=LineCount;
+		Count=Lines.size();
 
 		super.UpdateList();
 	}
@@ -331,34 +367,34 @@ public class ECvsBase extends EList
 	}
 
 	@Override
-	int CanActivate(int Line) {
-		return Line<LineCount&&Lines[Line].File;
+	boolean CanActivate(int Line) {
+		return Line < Lines.size() && Lines.get(Line).File != null;
 	}
 
 	@Override
 	boolean IsHilited (int Line) {
-		return Line < LineCount && 0 != (Lines[Line].Status&1);
+		return Line < Lines.size() && 0 != (Lines.get(Line).Status&1);
 	}
 
 	@Override
 	boolean  IsMarked (int Line) {
-		return Line < LineCount && 0 != (Lines[Line].Status&2);
+		return Line < Lines.size() && 0 != (Lines.get(Line).Status&2);
 	}
 
 	@Override
 	int Mark (int Line) {
-		if (Line<LineCount) {
-			if(0 != (Lines[Line].Status&4)) 
-				Lines[Line].Status|=2;
+		if (Line<Lines.size()) {
+			if(0 != (Lines.get(Line).Status&4)) 
+				Lines.get(Line).Status|=2;
 			return 1;
 		} else return 0;
 	}
 
 	@Override
 	int Unmark (int Line) {
-		if (Line<LineCount) {
-			if(0 != (Lines[Line].Status & 4)) 
-				Lines[Line].Status &= ~2;
+		if (Line<Lines.size()) {
+			if(0 != (Lines.get(Line).Status & 4)) 
+				Lines.get(Line).Status &= ~2;
 			return 1;
 		} 
 		else 
@@ -383,26 +419,27 @@ public class ECvsBase extends EList
 		return super.ExecCommand(Command, State);
 	}
 
-	@Override
-	void ShowLine (EView V, int line) 
+	//@Override
+	private void ShowLine(EView V, int line) 
 	{
-		if (line>=0&&line<LineCount&&Lines[line].File) {
-			if (Lines[line].Buf!=0) {
-				V.SwitchToModel (Lines[line].Buf);
-				if (Lines[line].Line!=-1) {
+		if(line >= 0 && line < Lines.size() && Lines.get(line).File != null) 
+		{
+			if (Lines.get(line).Buf!=null) {
+				V.SwitchToModel (Lines.get(line).Buf);
+				if (Lines.get(line).Line!=-1) {
 					//char book[16];
-					sprintf(book,"_CVS.%d",line);
-					Lines[line].Buf.GotoBookmark (book);
+					String book = String.format("_CVS.%d",line);
+					Lines.get(line).Buf.GotoBookmark (book);
 				}
 			} else {
 				//char path[MAXPATH];
-				String path = Directory;
-				path = Slash(path,1);
-				path += Lines[line].File;
+				String path = Console.Slash(Directory,1);
+				path += Lines.get(line).File;
 
-				if (FileLoad (0,path,0,V)==1) {
+				if (Console.FileLoad(0,path,null,V)) 
+				{
 					V.SwitchToModel (ActiveModel);
-					if (Lines[line].Line!=-1) ((EBuffer)ActiveModel).CenterNearPosR (0,Lines[line].Line);
+					if (Lines.get(line).Line!=-1) ((EBuffer)ActiveModel[0]).CenterNearPosR (0,Lines.get(line).Line);
 				}
 			}
 		}
@@ -425,16 +462,21 @@ public class ECvsBase extends EList
 	String GetInfo() {
 		//char format[128];
 
-		sprintf (format,"%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,MaxLen-24-strlen (Title));
-		sprintf (AInfo,format,Command);
+		//String s = String.format("%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,MaxLen-24-Title.length());
+		//return String.format(s,Command);
+
+		return String.format("%2d %04d/%03d %s (%s) ",ModelNo,Row,Count,Title,Command);
 	}
 
 	// Used to get default directory of model
 	@Override
 	String GetPath() {
+		/*
 		strncpy (APath,Directory,MaxLen);
 		APath[MaxLen-1]=0;
 		Slash (APath,0);
+		*/
+		return Console.Slash(Directory, 0);
 	}
 
 	// Normal and short title (normal for window, short for icon in X)
@@ -442,10 +484,12 @@ public class ECvsBase extends EList
 	void GetTitle(String [] ATitle, String [] ASTitle ) {
 		//char format[128];
 
-		sprintf (format,"%s: %%.%is",Title,MaxLen-4-strlen (Title));
-		sprintf (ATitle,format,Command);
-		strncpy (ASTitle,Title,SMaxLen);
-		ASTitle[SMaxLen-1]=0;
+		//String format = String.format("%s: %%.%is",Title,MaxLen-4-Title.length() );
+		//ATitle[0] = String.format(format,Command);
+		
+		ATitle[0] = String.format("%s: %s", Title, Command );
+		
+		ASTitle[0] = Title;
 	}
 
 }
