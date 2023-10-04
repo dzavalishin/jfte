@@ -189,7 +189,6 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		case ExCompilePrevError:    return CompilePrevError(State);
 		case ExCompileNextError:    return CompileNextError(State);
 
-		/* TODO cvs
         case ExCvs:                 return Cvs(State);
         case ExRunCvs:              return RunCvs(State);
         case ExViewCvs:             return ViewCvs(State);
@@ -200,7 +199,6 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
         case ExCvsCommit:           return CvsCommit(State);
         case ExRunCvsCommit:        return RunCvsCommit(State);
         case ExViewCvsLog:          return ViewCvsLog(State);
-		 */
 
 		case ExViewBuffers:         return ViewBuffers(State);
 
@@ -215,7 +213,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
         case ExTagNext:             return TagNext(this);
         case ExTagPrev:             return TagPrev(this);
         case ExTagPop:              return TagPop(this);
-        case ExTagClear:            TagClear(); return 1;
+        case ExTagClear:            TagClear(); return ExResult.ErOK;
         case ExTagLoad:             return TagLoad(State);
 		 */
 
@@ -775,252 +773,250 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	
 	
 
-	/*
+	//*
 
-    int Cvs(ExState State) {
-        static char Opts[128] = "";
-        char Options[128] = "";
+	ExResult Cvs(ExState State) {
+        //static char Opts[128] = "";
+        //char Options[128] = "";
+		String [] Options = {""};
 
-        if (CvsView != 0 && CvsView.Running) {
+        if (ECvs.CvsView != null && ECvs.CvsView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        if (State.GetStrParam(this, Options, sizeof(Options)) == 0) {
-            if (MView.Win.GetStr("CVS options", sizeof(Opts), Opts, HIST_CVS) == 0) return 0;
-            strcpy(Options, Opts);
+        if (State.GetStrParam(this, Options) == 0) {
+            if (MView.Win.GetStr("CVS options", Opts, HIST_CVS) == 0) return ExResult.ErFAIL;
+            //Options = Opts;
         } else {
-            if (MView.Win.GetStr("CVS options", sizeof(Options), Options, HIST_CVS) == 0) return 0;
+            if (MView.Win.GetStr("CVS options", Options, HIST_CVS) == 0) return ExResult.ErFAIL;
         }
-        return Cvs(Options);
+        return Cvs(Options[0]);
     }
 
-    int RunCvs(ExState State) {
-        char Options[128] = "";
+	ExResult RunCvs(ExState State) {
+        //char Options[128] = "";
+		String [] Options = {""};
 
-        if (CvsView != 0 && CvsView.Running) {
+        if (ECvs.CvsView != null && ECvs.CvsView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        State.GetStrParam(this, Options, sizeof(Options));
-        return Cvs(Options);
+        State.GetStrParam(this, Options);
+        return Cvs(Options[0]);
     }
 
-    int Cvs(String Options) {
-        String Dir = "";
+    ExResult Cvs(String Options) {
+        String [] Dir = {""};
         String Command = "";
-        String buf = "";
-        //char *OnFiles = buf;
+        String [] OnFiles  = {""};
         ECvs cvs;
 
-        if (GetDefaultDirectory(Model, Dir, sizeof(Dir)) == 0) return 0;
+        if (Console.GetDefaultDirectory(Model, Dir) == 0) return ExResult.ErFAIL;
 
-        strcpy(Command, CvsCommand);
-        strcat(Command, " ");
-        if (Options[0] != 0) {
-            strcat(Command, Options);
-            strcat(Command, " ");
+        Command = Config.CvsCommand+" ";
+        if (Options != null) {
+            Command += Options+" ";
         }
 
         switch (Model.GetContext()) {
             case CONTEXT_FILE:
-                if (JustFileName(((EBuffer)Model).FileName, OnFiles) != 0) return 0;
+                if (Console.JustFileName(((EBuffer)Model).FileName, OnFiles) != 0) return ExResult.ErFAIL;
                 break;
             case CONTEXT_CVSDIFF:
-                OnFiles = strdup(CvsDiffView.OnFiles);
+                OnFiles[0] = ECvsDiff.CvsDiffView.OnFiles;
                 break;
             case CONTEXT_CVS:
-                OnFiles = ((ECvs)Model).MarkedAsList();
-                if (!OnFiles) OnFiles = strdup(((ECvs)Model).OnFiles);
+                OnFiles[0] = ((ECvs)Model).MarkedAsList();
+                if(null == OnFiles[0]) OnFiles[0] = ((ECvs)Model).OnFiles;
                 break;
         }
 
-        if (CvsView != 0) {
-            CvsView.RunPipe(Dir, Command, OnFiles);
-            cvs = CvsView;
+        if (ECvs.CvsView != null) {
+            ECvs.CvsView.RunPipe(Dir[0], Command, OnFiles[0]);
+            cvs = ECvs.CvsView;
         } else {
-            cvs = new ECvs(0, EModel.ActiveModel, Dir, Command, OnFiles);
+            cvs = new ECvs(0, EModel.ActiveModel, Dir[0], Command, OnFiles[0]);
         }
-        if (OnFiles != buf) free(OnFiles);
+
         SwitchToModel(cvs);
-        return 1;
+        return ExResult.ErOK;
     }
 
-    int ClearCvsMessages(ExState State) {
-        if (CvsView != 0) {
-            if (CvsView.Running) {
+    ExResult ClearCvsMessages(ExState State) {
+        if (ECvs.CvsView != null) {
+            if (ECvs.CvsView.Running) {
                 Msg(S_INFO, "Running...");
-                return 0;
+                return ExResult.ErFAIL;
             } else {
-                CvsView.FreeLines();
-                CvsView.UpdateList();
-                return 1;
+                ECvs.CvsView.FreeLines();
+                ECvs.CvsView.UpdateList();
+                return ExResult.ErOK;
             }
         }
-        return 0;
+        return ExResult.ErFAIL;
     }
 
-    int ViewCvs(ExState State) {
-        if (CvsView != 0) {
-            SwitchToModel(CvsView);
-            return 1;
+    ExResult ViewCvs(ExState State) {
+        if (ECvs.CvsView != null) {
+            SwitchToModel(ECvs.CvsView);
+            return ExResult.ErOK;
         }
-        return 0;
+        return ExResult.ErFAIL;
     }
 
-    int CvsDiff(ExState State) {
-        static char Opts[128] = "";
-        char Options[128] = "";
+    ExResult CvsDiff(ExState State) {
+        //static char Opts[128] = "";
+        //char Options[128] = "";
+    	String [] Options = {""};
 
-        if (CvsDiffView != 0 && CvsDiffView.Running) {
+        if (ECvsDiff.CvsDiffView != null && ECvsDiff.CvsDiffView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        if (State.GetStrParam(this, Options, sizeof(Options)) == 0) {
-            if (MView.Win.GetStr("CVS diff options", sizeof(Opts), Opts, HIST_CVSDIFF) == 0) return 0;
-            strcpy(Options, Opts);
+        if (State.GetStrParam(this, Options) == 0) {
+            if (MView.Win.GetStr("CVS diff options", Opts, HIST_CVSDIFF) == 0) return ExResult.ErFAIL;
+            Options[0] = Opts[0];
         } else {
-            if (MView.Win.GetStr("CVS diff options", sizeof(Options), Options, HIST_CVSDIFF) == 0) return 0;
+            if (MView.Win.GetStr("CVS diff options", Options, HIST_CVSDIFF) == 0) return ExResult.ErFAIL;
         }
-        return CvsDiff(Options);
+        return CvsDiff(Options[0]);
     }
 
-    int RunCvsDiff(ExState State) {
-    	String Options = "";
+    ExResult RunCvsDiff(ExState State) {
+    	String [] Options = {""};
 
-        if (CvsDiffView != 0 && CvsDiffView.Running) {
+        if (ECvsDiff.CvsDiffView != null && ECvsDiff.CvsDiffView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        State.GetStrParam(this, Options, sizeof(Options));
-        return CvsDiff(Options);
+        State.GetStrParam(this, Options);
+        return CvsDiff(Options[0]);
     }
 
-    int CvsDiff(String Options) {
-    	String Dir = "";
+    ExResult CvsDiff(String Options) {
+    	String [] Dir = {""};
     	String Command = "";
     	String buf = "";
         //char *OnFiles = buf;
         ECvsDiff diffs;
+        String [] OnFiles = {""};
 
-        if (GetDefaultDirectory(Model, Dir, sizeof(Dir)) == 0) return 0;
+        if (Console.GetDefaultDirectory(Model, Dir) == 0) return ExResult.ErFAIL;
 
-        strcpy(Command, CvsCommand);
-        strcat(Command, " diff -c ");
-        if (Options[0] != 0) {
-            strcat(Command, Options);
-            strcat(Command, " ");
+        Command = Config.CvsCommand+" diff -c ";
+        if (Options != null) {
+            Command += Options+" ";
         }
 
         switch (Model.GetContext()) {
             case CONTEXT_FILE:
-                if (JustFileName(((EBuffer)Model).FileName, OnFiles) != 0) return 0;
+                if (Console.JustFileName(((EBuffer)Model).FileName, OnFiles) != 0) return ExResult.ErFAIL;
                 break;
             case CONTEXT_CVSDIFF:
-                OnFiles = strdup(CvsDiffView.OnFiles);
+                OnFiles[0] = ECvsDiff.CvsDiffView.OnFiles;
                 break;
             case CONTEXT_CVS:
-                OnFiles = ((ECvs)Model).MarkedAsList();
-                if (!OnFiles) OnFiles = strdup(((ECvs)Model).OnFiles);
+                OnFiles[0] = ((ECvs)Model).MarkedAsList();
+                if (null == OnFiles[0]) OnFiles[0] = ((ECvs)Model).OnFiles;
                 break;
         }
 
-        if (CvsDiffView != 0) {
-            CvsDiffView.RunPipe(Dir, Command, OnFiles);
-            diffs = CvsDiffView;
+        if (ECvsDiff.CvsDiffView != null) {
+            ECvsDiff.CvsDiffView.RunPipe(Dir[0], Command, OnFiles[0]);
+            diffs = ECvsDiff.CvsDiffView;
         } else {
-            diffs = new ECvsDiff(0, EModel.ActiveModel, Dir, Command, OnFiles);
+            diffs = new ECvsDiff(0, EModel.ActiveModel, Dir[0], Command, OnFiles[0]);
         }
-        if (OnFiles != buf) free(OnFiles);
+
         SwitchToModel(diffs);
-        return 1;
+        return ExResult.ErOK;
     }
 
-    int ViewCvsDiff(ExState State) {
-        if (CvsDiffView != 0) {
-            SwitchToModel(CvsDiffView);
-            return 1;
+    ExResult ViewCvsDiff(ExState State) {
+        if (ECvsDiff.CvsDiffView != null) {
+            SwitchToModel(ECvsDiff.CvsDiffView);
+            return ExResult.ErOK;
         }
-        return 0;
+        return ExResult.ErFAIL;
     }
 
-    static String Opts = "";
-    int CvsCommit(ExState State) {
-        String Options = "";
+    static String [] Opts = {""};
+    ExResult CvsCommit(ExState State) {
+        String [] Options = {""};
 
-        if (CvsView != 0 && CvsView.Running) {
+        if (ECvs.CvsView != null && ECvs.CvsView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        if (State.GetStrParam(this, Options, sizeof(Options)) == 0) {
-            if (MView.Win.GetStr("CVS commit options", Opts, HIST_CVSCOMMIT) == 0) return 0;
-            Options = Opts;
+        if (State.GetStrParam(this, Options) == 0) {
+            if (MView.Win.GetStr("CVS commit options", Opts, HIST_CVSCOMMIT) == 0) return ExResult.ErFAIL;
+            Options[0] = Opts[0];
         } else {
-            if (MView.Win.GetStr("CVS commit options", Options, HIST_CVSCOMMIT) == 0) return 0;
+            if (MView.Win.GetStr("CVS commit options", Options, HIST_CVSCOMMIT) == 0) return ExResult.ErFAIL;
         }
-        return CvsCommit(Options);
+        return CvsCommit(Options[0]);
     }
 
-    int RunCvsCommit(ExState State) {
-    	String Options = "";
+    ExResult RunCvsCommit(ExState State) {
+        String [] Options = {""};
 
-        if (CvsView != 0 && CvsView.Running) {
+        if (ECvs.CvsView != null && ECvs.CvsView.Running) {
             Msg(S_INFO, "Already running...");
-            return 0;
+            return ExResult.ErFAIL;
         }
 
-        State.GetStrParam(this, Options, sizeof(Options));
-        return CvsCommit(Options);
+        State.GetStrParam(this, Options);
+        return CvsCommit(Options[0]);
     }
 
-    int CvsCommit(String Options) {
-    	String Dir = "";
+    ExResult CvsCommit(String Options) {
+    	String [] Dir = {""};
     	String Command = "";
     	String buf = "";
         //char *OnFiles = buf;
         ECvs cvs;
+        String [] OnFiles = {""};
 
-        if (GetDefaultDirectory(Model, Dir, sizeof(Dir)) == 0) return 0;
+        if (Console.GetDefaultDirectory(Model, Dir) == 0) return ExResult.ErFAIL;
 
-        strcpy(Command, CvsCommand);
-        strcat(Command, " commit ");
-        if (Options[0] != 0) {
-            strcat(Command, Options);
-            strcat(Command, " ");
+        Command = Config.CvsCommand+" commit ";
+        if (Options != null) {
+            Command += Options+" ";
         }
 
         switch (Model.GetContext()) {
             case CONTEXT_FILE:
-                if (JustFileName(((EBuffer )Model).FileName, OnFiles) != 0) return 0;
+                if (Console.JustFileName(((EBuffer )Model).FileName, OnFiles) != 0) return ExResult.ErFAIL;
                 break;
             case CONTEXT_CVSDIFF:
-                OnFiles = strdup(CvsDiffView.OnFiles);
+                OnFiles[0] = ECvsDiff.CvsDiffView.OnFiles;
                 break;
             case CONTEXT_CVS:
-                OnFiles = ((ECvs )Model).MarkedAsList();
-                if (!OnFiles) OnFiles = strdup(((ECvs )Model).OnFiles);
+                OnFiles[0] = ((ECvs )Model).MarkedAsList();
+                if (null == OnFiles[0]) OnFiles[0] = ((ECvs )Model).OnFiles;
                 break;
         }
 
-        if (CvsView == 0) cvs = new ECvs(0, EModel.ActiveModel);else cvs = CvsView;
+        if (ECvs.CvsView == null) cvs = new ECvs(0, EModel.ActiveModel);else cvs = ECvs.CvsView;
         SwitchToModel(cvs);
-        cvs.RunCommit(Dir, Command, OnFiles);
-        if (OnFiles != buf) free(OnFiles);
-        return 1;
+        cvs.RunCommit(Dir[0], Command, OnFiles[0]);
+
+        return ExResult.ErOK;
     }
 
-    int ViewCvsLog(ExState State) {
-        if (CvsLogView != 0) {
-            SwitchToModel(CvsLogView);
-            return 1;
+    ExResult ViewCvsLog(ExState State) {
+        if (ECvsLog.CvsLogView != null) {
+            SwitchToModel(ECvsLog.CvsLogView);
+            return ExResult.ErOK;
         }
-        return 0;
+        return ExResult.ErFAIL;
     }
-	 */
+	// */
 
 
 };

@@ -808,7 +808,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		L.Allocate(L.getCount() + ACount);
 		if (L.getSize() > Ofs)
 			//memmove(L.Chars + Ofs + ACount, L.Chars + Ofs, L.getCount() - Ofs);
-			L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs - 1); // [dz] added -1 - was error in orig code?
+			//L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs - 1); // [dz] added -1 - was error in orig code?
+			L.memmove(Ofs + ACount, Ofs, L.getCount() - Ofs - ACount); // [dz] added -ACount - was error in orig code?
 		if (Buffer == null) 
 			//memset(L.Chars + Ofs, ' ', ACount);
 			L.memset(Ofs, ' ', ACount);

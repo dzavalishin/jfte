@@ -14,7 +14,7 @@ public class ECvsBase extends EList
 	//int Lines.size();
 	//CvsLine [] Lines = null;
 	List<CvsLine> Lines = new ArrayList<>();
-	int Running = 0;
+	boolean Running = false;
 
 	int BufLen = 0;
 	int BufPos = 0;
@@ -235,7 +235,7 @@ public class ECvsBase extends EList
 				ParseLine (line,0);
 		}
 
-		if (Running==0) {
+		if (!Running) {
 			AddLine (null, -1, String.format("[done, status=%d]",ReturnCode), 0);
 		}
 
@@ -272,12 +272,12 @@ public class ECvsBase extends EList
 			// At the end of all files, terminate
 			ClosePipe ();
 			return 0;
-		} else if (Running != 0) {
+		} else if (Running) {
 			// Already running, close the pipe and continue
 			ReturnCode=GPipe.ClosePipe(PipeId);
 		} else {
 			// Not running . set to Running mode
-			Running=1;
+			Running=true;
 		}
 
 		// Make real command with some files from OnFiles, update OnFilesPos
@@ -320,7 +320,7 @@ public class ECvsBase extends EList
 	void ClosePipe () {
 		ReturnCode = GPipe.ClosePipe(PipeId);
 		PipeId = -1;
-		Running = 0;
+		Running = false;
 	}
 
 	@Override
@@ -406,7 +406,7 @@ public class ECvsBase extends EList
 	ExResult ExecCommand(ExCommands Command, ExState State) {
 		switch (Command) {
 		case ExChildClose:
-			if (Running == 0 || PipeId == -1)
+			if (!Running || PipeId == -1)
 				break;
 			ClosePipe ();
 			AddLine(null, -1, String.format("[aborted, status=%d]", ReturnCode), 0 );
