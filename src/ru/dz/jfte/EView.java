@@ -653,8 +653,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		return ExResult.ErOK;
 	}
 
-	ExResult ViewModeMap(ExState State) {
-		///* TODO ViewModeMap
+	ExResult ViewModeMap(ExState State) 
+	{
         if (EventMapView.TheEventMapView != null)
         	EventMapView.TheEventMapView.ViewMap(GetEventMap());
         else
@@ -665,8 +665,6 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
         else
             return ExResult.ErFAIL;
         return ExResult.ErOK;
-		// */
-		return ExResult.ErFAIL;
 	}
 
 	ExResult ClearMessages() {

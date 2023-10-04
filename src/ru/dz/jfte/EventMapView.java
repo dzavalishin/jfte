@@ -1,9 +1,12 @@
 package ru.dz.jfte;
 
 import java.util.List;
+
+import ru.dz.jfte.config.ConfigCompilerDefs;
+
 import java.util.ArrayList;
 
-public class EventMapView extends EList 
+public class EventMapView extends EList implements ConfigCompilerDefs 
 {
     //String *BList;
     //int BCount = 0;
@@ -22,34 +25,40 @@ public class EventMapView extends EList
    void DumpKey(String aPrefix, EKey Key) {
        //char KeyName[128] = "";
        //char Entry[2048] = "";
-	   String KeyName;
-       String p;
+	   String [] KeyName = {""};
        int id;
        
-       if (aPrefix) {
-           KeyName = aPrefix+"_";
+       
+       KeyDefs.GetKeyName(KeyName, Key.fKey);
+
+       if (aPrefix != null) 
+           KeyName[0] = aPrefix+"_"+KeyName[0];
+       
+       String Entry = String.format("%13s   ", KeyName[0]);
+       
+       id = Key.Cmd;
+       
+       ExMacro m = ExMacro.Macros.get(id);
+       
+       for ( CommandType c : m.cmds ) 
+       {
+           String p = "";
+
+           if (c.type == CommandType.CT_COMMAND) 
+           {
+               if (c.repeat > 1)
+                   p = String.format( "%d:%s ", c.repeat, GetCommandName(c.num));
+               else
+            	   p = String.format( "%s ", GetCommandName(c.num));
+           } else if (c.type == CommandType.CT_NUMBER) {
+        	   p = String.format( "%d ", c.num);
+           } else if (c.type == CommandType.CT_STRING) {
+        	   p = String.format( "'%s' ", c.string);
+           }
+           
+           Entry += p;
        }
        
-       GetKeyName(KeyName + strlen(KeyName), Key.fKey);
-       sprintf(Entry, "%13s   ", KeyName);
-       id = Key.Cmd;
-       for (int i = 0; i < Macros[id].Count; i++) {
-           p = Entry + strlen(Entry);
-           if (Macros[id].cmds[i].type == CT_COMMAND) {
-               if (Macros[id].cmds[i].repeat > 1)
-                   sprintf(p, "%d:%s ", Macros[id].cmds[i].repeat, GetCommandName(Macros[id].cmds[i].u.num));
-               else
-                   sprintf(p, "%s ", GetCommandName(Macros[id].cmds[i].u.num));
-           } else if (Macros[id].cmds[i].type == CT_NUMBER) {
-               sprintf(p, "%ld ", Macros[id].cmds[i].u.num);
-           } else if (Macros[id].cmds[i].type == CT_STRING) {
-               sprintf(p, "'%s' ", Macros[id].cmds[i].u.string);
-           }
-           if (strlen(Entry) > 1950) {
-               strcat(Entry, "...");
-               break;
-           }
-       }
        AddLine(Entry);
    }
        
@@ -57,19 +66,22 @@ public class EventMapView extends EList
        EKey Key;
        
        Key = aKeyMap.fKeys;
-       while (Key) {
-           if (Key.fKeyMap) {
+       while (Key!=null) 
+       {
+    	   
+           /* TODO if (Key.fKeyMap) {
                //char Prefix[32] = "";
+        	   String Prefix;
                
-               if (aPrefix) {
-                   strcpy(Prefix, aPrefix);
-                   strcat(Prefix, "_");
-               }
+               if (aPrefix != null)
+                   Prefix = aPrefix+"_";
+
                GetKeyName(Prefix + strlen(Prefix), Key.fKey);
                DumpMap(Prefix, Key.fKeyMap);
-           } else {
+           } else */ {
                DumpKey(aPrefix, Key);
            }
+           
            Key = Key.fNext;
        }
    }
@@ -77,17 +89,21 @@ public class EventMapView extends EList
    void DumpEventMap(EEventMap aEventMap) {
        //char name[256];
        
-       while (aEventMap) {
-           strcpy(name, aEventMap.Name);
-           if (aEventMap.Parent) {
-               strcat(name, ": ");
-               strcat(name, aEventMap.Parent.Name);
+       while (aEventMap != null) 
+       {
+           String name = aEventMap.Name;
+           
+           if (aEventMap.Parent != null) {
+               name += ": " + aEventMap.Parent.Name;
            }
+           
            AddLine(name);
-           if (aEventMap.KeyMap)
-               DumpMap(0, aEventMap.KeyMap);
+           
+           if (aEventMap.KeyMap != null)
+               DumpMap( null, aEventMap.KeyMap);
+           
            aEventMap = aEventMap.Parent;
-           if (aEventMap != 0)
+           if (aEventMap != null)
                AddLine("");
        }
    }
@@ -107,13 +123,13 @@ public class EventMapView extends EList
 
 
    void ViewMap(EEventMap Map) {
-       FreeView();
+       //FreeView();
        DumpEventMap(EMap = Map);
    }
 
    @Override
    EEventMap GetEventMap() {
-       return FindEventMap("EVENTMAPVIEW");
+       return EEventMap.FindEventMap("EVENTMAPVIEW");
    }
 
    /*
@@ -130,14 +146,18 @@ public class EventMapView extends EList
    @Override
    void DrawLine(PCell B, int Line, int Col, int color, int Width) 
    {
-       if (Line < BCount) 
-           if (Col < int(strlen(BList[Line])))
-               MoveStr(B, 0, Width, BList[Line] + Col, color, Width);
+       if (Line < BList.size())
+       {
+    	   String l = BList.get(Line);
+    	   
+           if (Col < l.length())
+               B.MoveStr(0, Width, l + Col, color, Width);
+       }
    }
 
    @Override
    String FormatLine(int Line) {
-       return strdup(BList[Line]);
+       return BList.get(Line);
    }
 
    @Override
@@ -170,5 +190,41 @@ public class EventMapView extends EList
        ASTitle[0] = "EventMapView";
    }
 
-    
+
+   
+   
+   
+   static String GetCommandName(int Command) 
+   {
+	    if(0 != (Command & CMD_EXT)) 
+	    {
+	        Command &= ~CMD_EXT;
+	        if ((Command < 0) ||
+	            (Command >= ExMacro.Macros.size()))
+	            return "?INVALID?";
+	        
+	        ExMacro m = ExMacro.Macros.get(Command);
+	        
+	        if (m.Name != null)
+	            return m.Name;
+	        else
+	            return "?NONE?";
+	    }
+	    
+	    for (int i = 0; i < Command_Table.length; i++)
+	    {
+	        if (Command_Table[i].getCmdId() == Command)
+	            return Command_Table[i].getName();
+	    }
+	    return "?invalid?";
+	}
+   
+   
+   
+   
+   
+   
+   
+   
+   
 }

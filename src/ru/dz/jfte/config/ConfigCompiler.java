@@ -734,8 +734,8 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	{
 		for( CmdDef c : Command_Table )
 		{
-			if( c.Name.equals(Cmd) )
-				return c.CmdId;
+			if( c.getName().equals(Cmd) )
+				return c.getCmdId();
 		}
 		/*
 	    int i;

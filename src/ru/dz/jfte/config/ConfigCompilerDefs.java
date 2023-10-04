@@ -328,6 +328,20 @@ public interface ConfigCompilerDefs extends ModeDefs
 			Name = s;
 			CmdId = c.ordinal();
 		}
+
+		/**
+		 * @return the cmdId
+		 */
+		public int getCmdId() {
+			return CmdId;
+		}
+
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return Name;
+		}
 	
 	}
 	
