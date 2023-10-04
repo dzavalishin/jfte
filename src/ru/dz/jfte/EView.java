@@ -378,6 +378,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 			if (MView.Win.GetFile("Open file", FName, HIST_PATH, GF_OPEN) == 0) return ExResult.ErFAIL;
 		}
 
+		FName[0] = FName[0].strip(); // [dz] remove it - fix line edit code to have no extra spaces
+		
 		if( FName[0].length() == 0 ) return ExResult.ErFAIL;
 
 		if (Console.IsDirectory(FName[0]))

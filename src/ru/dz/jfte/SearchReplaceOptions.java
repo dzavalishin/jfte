@@ -1,5 +1,7 @@
 package ru.dz.jfte;
 
+import java.util.regex.Pattern;
+
 public class SearchReplaceOptions implements GuiDefs, ModeDefs 
 {
     int ok;
@@ -46,7 +48,7 @@ public class SearchReplaceOptions implements GuiDefs, ModeDefs
         int slen = strSearch.length();
         //int Options = opt.Options;
         int rlen = strReplace.length();
-        RxNode Rx = null;
+        Pattern Rx = null;
 
         resCount = -1;
 
@@ -57,7 +59,7 @@ public class SearchReplaceOptions implements GuiDefs, ModeDefs
         }
         
         if(0 != (Options & SEARCH_RE)) {
-            // TODO Rx = RxCompile(strSearch);
+            Rx = Pattern.compile(strSearch);
             if (Rx == null) {
                 View.MView.Win.Choice(GPC_ERROR, "Find", 1, "O&K", "Invalid regular expression.");
                 return false;
@@ -83,7 +85,7 @@ public class SearchReplaceOptions implements GuiDefs, ModeDefs
         resCount = 0;
         while (true) {
             if(0 != (Options & SEARCH_RE)) {
-                //if (FindRx(Rx, Options) == 0) return done();
+                if (b.FindRx(Rx, Options) == 0) return done();
             	return error();
             } else {
                 if (!b.FindStr(strSearch, slen, Options)) return done();

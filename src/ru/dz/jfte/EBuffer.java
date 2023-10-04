@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -35,7 +37,7 @@ import ru.dz.jfte.undo.UndoOperation;
 import ru.dz.jfte.undo.UndoRedoController;
 import ru.dz.jfte.undo.UndoStackItem;
 
-public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs, UndoDefs 
+public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs, UndoDefs, RxDefs 
 {
 	private static final Logger log = Logger.getLogger(EBuffer.class.getName());
 	
@@ -81,7 +83,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	EPoint Match = new EPoint(-1, -1);
 	int MatchLen = 0;
 	int MatchCount = 0;
-	RxMatchRes MatchRes;
+	//RxMatchRes MatchRes;
 
 	//int BMCount;
 	Map<String,EBookmark> BMarks = new HashMap<>();
@@ -103,7 +105,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	static SearchReplaceOptions LSearch;
+	static SearchReplaceOptions LSearch = new SearchReplaceOptions();
 	static int suspendLoads = 0;
 	static EBuffer SSBuffer = null; // scrap buffer (clipboard)
 
@@ -3210,15 +3212,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			int L = VToR(CP.Row);
 
 			switch (iBFI(this, BFI_IndentMode)) {
-			/* TODO #ifdef CONFIG_INDENT_C
-	        case INDENT_C: rc = Indent_C(this, L, 1); break;
-	#endif
-	#ifdef CONFIG_INDENT_REXX
-	        case INDENT_REXX: rc = Indent_REXX(this, L, 1); break;
-	#endif
-	#ifdef CONFIG_INDENT_SIMPLE
-	        case INDENT_SIMPLE: rc = Indent_SIMPLE(this, L, 1); break;
-	#endif */
+	        case INDENT_C: rc = CLanguage.Indent_C(this, L, 1); break;
+	        //case INDENT_REXX: rc = Indent_REXX(this, L, 1); break;
+	        case INDENT_SIMPLE: rc = CLanguage.Indent_SIMPLE(this, L, 1); break;
 			default: rc = Hiliter.Indent_Plain(this, L, 1); break;
 			}
 		}
@@ -8273,6 +8269,239 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		 */
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	int FindRx(Pattern rx, int Options) {
+	    int LLen, Start, End;
+	    int C, L;
+	    String P;
+	    ELine X;
+	    //RxMatchRes b;
+
+	    if(0==(Options & SEARCH_RE))
+	        return 0;
+	        
+	    if(0 != (Options & SEARCH_BACK)) { // not supported
+	        View.MView.Win.Choice(GPC_ERROR, "FindRx", 1, "O&K", "Reverse regexp search not supported.");
+	        return 0;
+	    }
+	    if (rx == null)
+	        return 0;
+
+	    if (Match.Row != -1)
+	        Draw(Match.Row, Match.Row);
+	    Match.Row = -1;
+	    Match.Col = -1;
+
+	    C = CP.Col;
+	    L = VToR(CP.Row);
+	    X = RLine(L);
+	    C = CharOffset(X, C);
+
+	    if(0 != (Options & SEARCH_NEXT)) {
+	        int CC = MatchCount != 0 ? MatchCount : 1;
+
+	        if(0 != (Options & SEARCH_BACK)) {
+	            C -= CC;
+	            if(0 != (Options & SEARCH_BLOCK)) {
+	                if (C < BB.Col && L == BB.Row)
+	                    return 0;
+	                L--;
+	                X = RLine(L);
+	                C = X.getCount();
+	                if (BlockMode == bmColumn)
+	                    if (BE.Col < C)
+	                        C = BE.Col;
+	            } else {
+	                if (C < 0 && L == 0)
+	                    return 0;
+	                L--;
+	                X = RLine(L);
+	                C = X.getCount();
+	            }
+	        } else {
+	            C += CC;
+	            if(0 != (Options & SEARCH_BLOCK)) {
+	                if (BlockMode == bmStream || BlockMode == bmLine) {
+	                    if (C >= X.getCount()) {
+	                        C = 0;
+	                        L++;
+	                        if (BlockMode == bmLine) {
+	                            if (L == BE.Row) return 0;
+	                        } else
+	                            if (L == BE.Row && (C >= BE.Col || C >= X.getCount()))
+	                                return 0;
+	                    }
+	                } else if (BlockMode == bmColumn) {
+	                    if (C >= X.getCount() || C >= BE.Col) {
+	                        C = BB.Col;
+	                        L++;
+	                        if (L == BE.Row) return 0;
+	                    }
+	                }
+	            } else {
+	                if (C >= X.getCount()) {
+	                    C = 0;
+	                    L++;
+	                    if (L == RCount) return 0;
+	                }
+	            }
+	        }
+	    }
+	    MatchLen = 0;
+	    MatchCount = 0;
+
+	    if(0 != (Options & SEARCH_BLOCK)) {
+	        if(0 != (Options & SEARCH_BACK)) {
+	            if (BlockMode == bmStream) {
+	                if (L > BE.Row) {
+	                    L = BE.Row;
+	                    C = BE.Col;
+	                }
+	                if (L == BE.Row && C > BE.Col)
+	                    C = BE.Col;
+	            } else {
+	                if (L >= BE.Row && BE.Row > 0) {
+	                    L = BE.Row - 1;
+	                    C = RLine(L).getCount();
+	                }
+	                if (BlockMode == bmColumn)
+	                    if (L == BE.Row - 1 && C >= BE.Col)
+	                        C = BE.Col;
+	            }
+	        } else {
+	            if (L < BB.Row) {
+	                L = BB.Row;
+	                C = 0;
+	            }
+	            if (L == BB.Row && C < BB.Col)
+	                C = BB.Col;
+	        }
+	    }
+
+	    while (true) {
+	        if(0 != (Options & SEARCH_BLOCK)) {
+	            if (BlockMode == bmStream) {
+	                if (L > BE.Row || L < BB.Row) break;
+	            } else
+	                if (L >= BE.Row || L < BB.Row) break;
+	        } else
+	            if (L >= RCount || L < 0) break;
+
+	        X = RLine(L);
+	        LLen = X.getCount();
+	        P = X.Chars.toString();
+	        Start = 0;
+	        End = LLen;
+
+	        if(0 != (Options & SEARCH_BLOCK)) {
+	            if (BlockMode == bmColumn) {
+	                Start = CharOffset(X, BB.Col);
+	                End = CharOffset(X, BE.Col);
+	            } else if (BlockMode == bmStream) {
+	                if (L == BB.Row)
+	                    Start = CharOffset(X, BB.Col);
+	                if (L == BE.Row)
+	                    End = CharOffset(X, BE.Col);
+	            }
+	            if (End > LLen)
+	                End = LLen;
+	        }
+	        if(0 != (Options & SEARCH_BACK)) {
+	            if (C >= End)
+	                C = End;
+	        } else {
+	            if (C < Start)
+	                C = Start;
+	        }
+
+	        if (Start <= End) 
+	        {
+	        	/*
+	            if (RxExec(rx, P + Start, End - Start, P + C, b, (Options & SEARCH_NCASE) != 0 ? 0 : RX_CASE) == 1) 
+	            {
+	                C = ScreenPos(X, b.Open[0] + Start);
+	                Match.Col = C;
+	                Match.Row = L;
+	                MatchCount = b.Close[0] - b.Open[0];
+	                MatchLen = ScreenPos(X, b.Close[0] + Start) - C;
+	                for (int mm = 0; mm < NSEXPS; mm++) {
+	                    b.Open[mm] += Start;
+	                    b.Close[mm] += Start;
+	                }
+	                MatchRes = b;
+	                if (0==(Options & SEARCH_NOPOS)) {
+	                    if(0 != (Options & SEARCH_CENTER))
+	                        CenterPosR(C, L);
+	                    else
+	                        SetPosR(C, L);
+	                }
+	                Draw(L, L);
+	                return 1;
+	            }
+	            */
+	        	
+	        	// [dz] simplified TODO RX SEARCH_NCASE
+	        	
+	        	Matcher m = rx.matcher(P.subSequence(Start, End));
+	        	if( m.find() )
+	        	{
+	                Match.Col = C;
+	                Match.Row = L;
+	                
+	                
+	                
+	                //MatchCount = b.Close[0] - b.Open[0];
+	                MatchCount = m.end(0) - m.start(0);
+	                //MatchLen = ScreenPos(X, b.Close[0] + Start) - C;
+	                MatchLen = ScreenPos(X, m.end(0) + Start) - C;
+	                
+	                /* TODO MatchRes 
+	                for (int mm = 0; mm < NSEXPS; mm++) {
+	                    b.Open[mm] += Start;
+	                    b.Close[mm] += Start;
+	                }
+	                MatchRes = b; */
+	                
+	                if (0==(Options & SEARCH_NOPOS)) {
+	                    if(0 != (Options & SEARCH_CENTER))
+	                        CenterPosR(C, L);
+	                    else
+	                        SetPosR(C, L);
+	                }
+	                Draw(L, L);
+	                return 1;
+	        	}
+	        	
+	        }
+	        C = 0;
+	        L++;
+	    }
+	    //SetPos(OC, OL);
+	    return 0;
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }
 
