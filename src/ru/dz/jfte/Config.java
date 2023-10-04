@@ -785,25 +785,24 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 		switch (what) {
 
-		/* TODO C_ params
-	    case FLAG_C_Indent:          C_Indent = number; break;
-	    case FLAG_C_BraceOfs:        C_BraceOfs = number; break;
-	    case FLAG_C_CaseOfs:         C_CaseOfs = number; break;
-	    case FLAG_C_CaseDelta:       C_CaseDelta = number; break;
-	    case FLAG_C_ClassOfs:        C_ClassOfs = number; break;
-	    case FLAG_C_ClassDelta:      C_ClassDelta = number; break;
-	    case FLAG_C_ColonOfs:        C_ColonOfs = number; break;
-	    case FLAG_C_CommentOfs:      C_CommentOfs = number; break;
-	    case FLAG_C_CommentDelta:    C_CommentDelta = number; break;
-	    case FLAG_C_FirstLevelIndent: C_FirstLevelIndent = number; break;
-	    case FLAG_C_FirstLevelWidth: C_FirstLevelWidth = number; break;
-	    case FLAG_C_Continuation:    C_Continuation = number; break;
-	    case FLAG_C_ParenDelta:      C_ParenDelta = number; break;
+	    case FLAG_C_Indent:          CLanguage.C_Indent = number; break;
+	    case FLAG_C_BraceOfs:        CLanguage.C_BraceOfs = number; break;
+	    case FLAG_C_CaseOfs:         CLanguage.C_CaseOfs = number; break;
+	    case FLAG_C_CaseDelta:       CLanguage.C_CaseDelta = number; break;
+	    case FLAG_C_ClassOfs:        CLanguage.C_ClassOfs = number; break;
+	    case FLAG_C_ClassDelta:      CLanguage.C_ClassDelta = number; break;
+	    case FLAG_C_ColonOfs:        CLanguage.C_ColonOfs = number; break;
+	    case FLAG_C_CommentOfs:      CLanguage.C_CommentOfs = number; break;
+	    case FLAG_C_CommentDelta:    CLanguage.C_CommentDelta = number; break;
+	    case FLAG_C_FirstLevelIndent: CLanguage.C_FirstLevelIndent = number; break;
+	    case FLAG_C_FirstLevelWidth: CLanguage.C_FirstLevelWidth = number; break;
+	    case FLAG_C_Continuation:    CLanguage.C_Continuation = number; break;
+	    case FLAG_C_ParenDelta:      CLanguage.C_ParenDelta = number; break;
 	    case FLAG_FunctionUsesContinuation: FunctionUsesContinuation = number; break;
 
-	    case FLAG_REXX_Indent:       REXX_Base_Indent = number; break;
-	    case FLAG_REXX_Do_Offset:    REXX_Do_Offset = number; break;
-		 */
+	    //case FLAG_REXX_Indent:       REXX_Base_Indent = number; break;
+	    //case FLAG_REXX_Do_Offset:    REXX_Do_Offset = number; break;
+		 //*/
 		case FLAG_ScreenSizeX:       ScreenSizeX = number; break;
 		case FLAG_ScreenSizeY:       ScreenSizeY = number; break;
 		case FLAG_CursorInsertStart: CursorInsSize[0] = number; break;

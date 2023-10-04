@@ -6268,11 +6268,12 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    if (BF.Mode.fColorize.Keywords.TotalCount > 0 ||
 	        BF.WordCount > 0)
 	    { //* words have to be hilited, go slow 
-	        for(i = 0; i < Line.Count;) {
+	        for(int i = 0; i < Line.getCount(); ) 
+	        {
 	            IF_TAB() else {
 	                if (isalpha(*p) || (*p == '_')) {
 	                    j = 0;
-	                    while (((i + j) < Line.Count) &&
+	                    while (((i + j) < Line.getCount()) &&
 	                           (isalnum(Line.Chars[i+j]) ||
 	                            (Line.Chars[i + j] == '_'))
 	                          ) j++;
@@ -6283,8 +6284,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    }
 	                    if (StateMap)
 	                        memset(StateMap + i, State, j);
-	                    if (B)
-	                        MoveMem(B, C - Pos, Width, Line.Chars + i, Color, j);
+	                    if (B != null)
+	                        B.MoveMem( C - Pos, Width, Line.Chars + i, Color, j);
 	                    i += j;
 	                    len -= j;
 	                    p += j;
@@ -6298,7 +6299,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            }
 	        }
 	    } else
-	#endif */
+		*/ // #endif
 		/* TOD 
 		  if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
