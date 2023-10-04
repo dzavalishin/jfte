@@ -1,6 +1,6 @@
 package ru.dz.jfte;
 
-import ru.dz.jfte.c.BitOps;
+import ru.dz.jfte.c.CString;
 
 public class CLanguage 
 {
@@ -192,8 +192,8 @@ public class CLanguage
 		}
 		//LOG << "Check against [" << What << ']' << ENDLINE;
 		if (
-				(CaseInsensitive && BitOps.memicmp(pLine + Pos, (String )What, Len) == 0) ||
-				(!CaseInsensitive && BitOps.memcmp(pLine + Pos, (String )What, Len) == 0)
+				(CaseInsensitive && CString.memicmp(pLine + Pos, (String )What, Len) == 0) ||
+				(!CaseInsensitive && CString.memcmp(pLine + Pos, (String )What, Len) == 0)
 				)
 		{
 			return true;
@@ -204,7 +204,7 @@ public class CLanguage
 		}
 	}
 
-	boolean ISNAME(char x) {
+	static boolean ISNAME(char x) {
 		return Character.isAlphabetic(x) || Character.isDigit(x) || (x == '_');
 	}
 
@@ -327,10 +327,10 @@ public class CLanguage
 					ColP[0]++;
 					if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD | SKIP_LINE) != 1)
 						return 0;
-					if (ColP[0] < B.LineChars(RowP[0]) || !FunctionUsesContinuation) {
-						//char strLeft[2] = { CharP[0], 0 };
-						//char strRight[2] = { CharP[0] == '(' ? ')' : ']', 0 };
-						I = SearchBackMatch(-1, B, Line - 1, hsC_Normal, strLeft, strRight, Pos, L);
+					if (ColP[0] < B.LineChars(RowP[0]) || 0 == FunctionUsesContinuation) {
+						char [] strLeft = { CharP[0], 0 };
+						char [] strRight = { CharP[0] == '(' ? ')' : ']', 0 };
+						I = SearchBackMatch(-1, B, Line - 1, hsC_Normal, strLeft.toString(), strRight.toString(), Pos, L);
 						I = Pos[0] + 1;
 					} else {
 						I = B.LineIndented(RowP[0]) + C_Continuation;
@@ -587,7 +587,7 @@ public class CLanguage
 		while (P < L.getCount()) {
 			if (Cnt > 0)
 				if (L.Chars.charAt(P) == ':' && (Cnt == 1 || L.Chars.charAt(P + 1) != ':')) return true;
-			if (!BitOps.isalnum(L.Chars.charAt(P)) && L.Chars.charAt(P) != '_') return false;
+			if (!CString.isalnum(L.Chars.charAt(P)) && L.Chars.charAt(P) != '_') return false;
 			Cnt++;
 			P++;
 		}
@@ -642,14 +642,14 @@ public class CLanguage
 						case ']': CountX[2]++; break;
 						}
 					}
-					if (!matchparens ||
+					if (0==matchparens ||
 							(CountX[0] == 0 && CountX[1] == 0 && CountX[2] == 0))
 					{
 						if (LOpen + Pos <= L) {
-							if (IsState(StateMap + Pos, State, LOpen)) {
-								if (memcmp(P + Pos, Open, LOpen) == 0) Count++;
+							if (IsState(StateMap, Pos, State, LOpen)) {
+								if (CString.memcmp(P + Pos, Open, LOpen) == 0) Count++;
 								if (Count == 0) {
-									if (bolOnly)
+									if (bolOnly!=0)
 										didMatch = 1;
 									else {
 										OPos[0] = B.ScreenPos(B.RLine(Row), Pos);
@@ -660,8 +660,8 @@ public class CLanguage
 								}
 							}
 							if (LClose + Pos <= L) {
-								if (IsState(StateMap + Pos, State, LClose)) {
-									if (memcmp(P + Pos, Close, LClose) == 0) Count--;
+								if (IsState(StateMap, Pos, State, LClose)) {
+									if (CString.memcmp(P + Pos, Close, LClose) == 0) Count--;
 								}
 							}
 						}
@@ -669,7 +669,7 @@ public class CLanguage
 				}
 				Pos--;
 			}
-			if (bolOnly && didMatch && CountX[1] == 0 && CountX[2] == 0) {
+			if ((0 != bolOnly) && (0!=didMatch) && CountX[1] == 0 && CountX[2] == 0) {
 				OPos[0] = 0;
 				OLine[0] = Row;
 
@@ -684,7 +684,7 @@ public class CLanguage
 	private static int FindPrevIndent(EBuffer B, int [] RowP, int [] ColP, char [] CharP, int Flags) {
 		//STARTFUNC("FindPrevIndent{h_c.cpp}");
 		//LOG << "Flags: " << hex << Flags << dec << ENDLINE;
-		int StateLen;
+		//int StateLen;
 		int [] /*hsState * */ StateMap = null;
 		String P;
 		int L;
@@ -717,7 +717,7 @@ public class CLanguage
 				//LOG << "Can't get state maps" << ENDLINE;
 				return (0);
 			}
-			StateLen = aStateLen[0];
+			//StateLen = aStateLen[0];
 			StateMap = aStateMap[0];
 			
 			if (L > 0) while (ColP[0] >= 0) {
@@ -831,8 +831,8 @@ public class CLanguage
 					}
 				} else if (StateMap[ColP[0]] == hsC_Keyword && (BolChar == ' ' || BolChar == ':')) {
 					if (L - ColP[0] >= 2 &&
-							IsState(StateMap + ColP[0], hsC_Keyword, 2) &&
-							memcmp(P + ColP[0], "if", 2) == 0)
+							IsState(StateMap, ColP[0], hsC_Keyword, 2) &&
+							CString.memcmp(P + ColP[0], "if", 2) == 0)
 					{
 						//puts("\nif");
 						if (Count[3] > 0)
@@ -846,8 +846,8 @@ public class CLanguage
 						}
 					}
 					if (L - ColP[0] >= 4 &&
-							IsState(StateMap + ColP[0], hsC_Keyword, 4) &&
-							memcmp(P + ColP[0], "else", 4) == 0)
+							IsState(StateMap, ColP[0], hsC_Keyword, 4) &&
+							CString.memcmp(P + ColP[0], "else", 4) == 0)
 					{
 						//puts("\nelse\x7");
 						if(0 != (Flags & FIND_ELSE)) {
@@ -863,8 +863,8 @@ public class CLanguage
 
 						if (0 != (Flags & FIND_FOR) &&
 								L - ColP[0] >= 3 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 3) &&
-								memcmp(P + ColP[0], "for", 3) == 0)
+								IsState(StateMap, ColP[0], hsC_Keyword, 3) &&
+								CString.memcmp(P + ColP[0], "for", 3) == 0)
 						{
 							CharP[0] = 'f';
 
@@ -872,8 +872,8 @@ public class CLanguage
 						}
 						if (0 != (Flags & FIND_WHILE) &&
 								L - ColP[0] >= 5 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 5) &&
-								memcmp(P + ColP[0], "while", 5) == 0)
+								IsState(StateMap, ColP[0], hsC_Keyword, 5) &&
+								CString.memcmp(P + ColP[0], "while", 5) == 0)
 						{
 							CharP[0] = 'w';
 
@@ -881,8 +881,8 @@ public class CLanguage
 						}
 						if (0 != (Flags & FIND_SWITCH) &&
 								L - ColP[0] >= 6 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 6) &&
-								memcmp(P + ColP[0], "switch", 6) == 0)
+								IsState(StateMap, ColP[0], hsC_Keyword, 6) &&
+								CString.memcmp(P + ColP[0], "switch", 6) == 0)
 						{
 							CharP[0] = 's';
 
@@ -890,11 +890,11 @@ public class CLanguage
 						}
 						if ((0 != (Flags & FIND_CASE) || (BolChar == ':')) &&
 								(L - ColP[0] >= 4 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 4) &&
-								memcmp(P + ColP[0], "case", 4) == 0) ||
+								IsState(StateMap, ColP[0], hsC_Keyword, 4) &&
+								CString.memcmp(P + ColP[0], "case", 4) == 0) ||
 								((L - ColP[0] >= 7) &&
-										IsState(StateMap + ColP[0], hsC_Keyword, 7) &&
-										memcmp(P + ColP[0], "default", 7) == 0))
+										IsState(StateMap, ColP[0], hsC_Keyword, 7) &&
+										CString.memcmp(P + ColP[0], "default", 7) == 0))
 						{
 							CharP[0] = 'c';
 							if (BolChar == ':') {
@@ -907,8 +907,8 @@ public class CLanguage
 						}
 						if ((0 != (Flags & FIND_CLASS) || (BolChar == ':')) &&
 								(L - ColP[0] >= 5 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 5) &&
-								memcmp(P + ColP[0], "class", 5) == 0))
+								IsState(StateMap, ColP[0], hsC_Keyword, 5) &&
+								CString.memcmp(P + ColP[0], "class", 5) == 0))
 						{
 							CharP[0] = 'l';
 							if (BolChar == ':') {
@@ -921,14 +921,14 @@ public class CLanguage
 						}
 						if ((0 != (Flags & FIND_CLASS) || (BolChar == ':')) &&
 								((L - ColP[0] >= 6 &&
-								IsState(StateMap + ColP[0], hsC_Keyword, 6) &&
-								memcmp(P + ColP[0], "public", 6) == 0) ||
+								IsState(StateMap, ColP[0], hsC_Keyword, 6) &&
+								CString.memcmp(P + ColP[0], "public", 6) == 0) ||
 										((L - ColP[0] >= 7) &&
-												IsState(StateMap + ColP[0], hsC_Keyword, 7) &&
-												memcmp(P + ColP[0], "private", 7) == 0) ||
+												IsState(StateMap, ColP[0], hsC_Keyword, 7) &&
+												CString.memcmp(P + ColP[0], "private", 7) == 0) ||
 										((L - ColP[0] >= 9) &&
-												IsState(StateMap + ColP[0], hsC_Keyword, 9) &&
-												memcmp(P + ColP[0], "protected", 9) == 0)))
+												IsState(StateMap, ColP[0], hsC_Keyword, 9) &&
+												CString.memcmp(P + ColP[0], "protected", 9) == 0)))
 						{
 							CharP[0] = 'p';
 							if (BolChar == ':') {
@@ -963,7 +963,7 @@ public class CLanguage
 	private static int SkipWhite(EBuffer B, int Bottom, int []Row, int []Col, int Flags) {
 		String P;
 		int L;
-		int StateLen;
+		//int StateLen;
 		int [] /*hsState * */ StateMap;
 		int Count[] = { 0, 0, 0 };
 
@@ -982,7 +982,7 @@ public class CLanguage
 			int [] aStateLen = {0};
 			if (!B.GetMap(Row[0], aStateLen, aStateMap))
 				return 0;
-			StateLen = aStateLen[0];
+			//StateLen = aStateLen[0];
 			StateMap = aStateMap[0];
 
 			if (L > 0)
@@ -1044,12 +1044,27 @@ public class CLanguage
 	    return true;
 	}
 	
-	int IsState(int [] /*hsState * */Buf, int /*hsState*/ State, int Len) {
-	    int I;
-
-	    for(I = 0; I < Len; I++)
-	        if (Buf[I] != State) return 0;
-	    return 1;
+	static boolean IsState(int [] /*hsState * */Buf, int /*hsState*/ State, int Len) {
+	    for(int I = 0; I < Len; I++)
+	        if (Buf[I] != State) return false;
+	    return true;
 	}
 
+	static boolean IsState(int [] /*hsState * */Buf, int start, int /*hsState*/ State, int Len) {
+	    for(int I = start; I < start+Len; I++)
+	        if (Buf[I] != State) return false;
+	    return true;
+	}
+	
 }
+
+
+
+
+
+
+
+
+
+
+

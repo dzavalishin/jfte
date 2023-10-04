@@ -541,6 +541,36 @@ class TestCString {
 		// TODO testSubstring testSubstringPtr 
 		
 	}
+
+	@Test
+	void testStaticCmp() {
+		assertTrue( CString.memcmp("aaa", "aba", 3) < 0 );
+		assertTrue( CString.memcmp("aba", "aaa", 3) > 0 );
+		assertTrue( CString.memcmp("aba", "aba", 3) == 0 );
+
+		assertTrue( CString.memcmp("abaA", "abaC", 3) == 0 );
+
+		
+		assertTrue( CString.memicmp("aaa", "aba", 3) < 0 );
+		assertTrue( CString.memicmp("aAa", "aba", 3) < 0 );
+		assertTrue( CString.memicmp("aaa", "aBa", 3) < 0 );
+		assertTrue( CString.memicmp("aAa", "aBa", 3) < 0 );
+		
+		assertTrue( CString.memicmp("aba", "aaa", 3) > 0 );
+		assertTrue( CString.memicmp("aBa", "aaa", 3) > 0 );
+		assertTrue( CString.memicmp("aba", "aAa", 3) > 0 );
+		assertTrue( CString.memicmp("aBa", "aAa", 3) > 0 );
+		
+		assertTrue( CString.memicmp("aba", "aba", 3) == 0 );
+		assertTrue( CString.memicmp("aBa", "aba", 3) == 0 );
+		assertTrue( CString.memicmp("aba", "aBa", 3) == 0 );
+		assertTrue( CString.memicmp("aBa", "aBa", 3) == 0 );
+
+		assertTrue( CString.memicmp("aBaA", "abaC", 3) == 0 );
+		
+	}
+	
+	
 	
 }
 

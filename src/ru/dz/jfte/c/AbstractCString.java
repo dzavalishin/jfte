@@ -317,6 +317,26 @@ public abstract class AbstractCString implements ICString
 	}
 
 
+	protected static int charICmp(char c1, char c2) {
+		int uc1 = Character.toUpperCase((char)( 0xFFFF & c1));
+		int uc2 = Character.toUpperCase((char)( 0xFFFF & c2));
+
+		if(uc1 < uc2) return -1;
+		if(uc1 > uc2) return 1;
+
+		return 0;
+	}
+	
+	protected static int charCmp(char c1, char c2) {
+		int uc1 = (char)( 0xFFFF & c1);
+		int uc2 = (char)( 0xFFFF & c2);
+
+		if(uc1 < uc2) return -1;
+		if(uc1 > uc2) return 1;
+
+		return 0;
+	}
+	
 	private int charCmp(CharSequence src, int n) {
 		int uc1 = (char)( 0xFFFF & charAt(n));
 		int uc2 = (char)( 0xFFFF & src.charAt(n));

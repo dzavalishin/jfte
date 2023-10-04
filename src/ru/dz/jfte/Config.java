@@ -798,7 +798,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	    case FLAG_C_FirstLevelWidth: CLanguage.C_FirstLevelWidth = number; break;
 	    case FLAG_C_Continuation:    CLanguage.C_Continuation = number; break;
 	    case FLAG_C_ParenDelta:      CLanguage.C_ParenDelta = number; break;
-	    case FLAG_FunctionUsesContinuation: FunctionUsesContinuation = number; break;
+	    case FLAG_FunctionUsesContinuation: CLanguage.FunctionUsesContinuation = number; break;
 
 	    //case FLAG_REXX_Indent:       REXX_Base_Indent = number; break;
 	    //case FLAG_REXX_Do_Offset:    REXX_Do_Offset = number; break;

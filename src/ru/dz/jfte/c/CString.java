@@ -91,8 +91,52 @@ public class CString extends AbstractCString
 
 
 
+	// -------------------------------------------------------------------
+	// Static string funcs
+	// -------------------------------------------------------------------
+
+	public static boolean isalnum(char c) {
+		return Character.isAlphabetic(c) || Character.isDigit(c);
+	}
+	
 
 	
+	public static int memcmp(String s1, String s2, int len) {
+		return memcmp( s1, 0, s2, len);
+	}
+
+	public static int memcmp(CharSequence s1, int s1pos, CharSequence s2, int len) {
+		if (len == 0)	         
+			return 0;
+
+		int n = 0;
+		
+		while (n < len && s1.charAt(n+s1pos) == s2.charAt(n))
+			n++;
+		
+		if(n >= len) return 0;
+		
+		return charCmp(s1.charAt(n+s1pos), s2.charAt(n));		
+	}
+
+
+	public static int memicmp(String s1, String s2, int len) {
+		return memicmp( s1, 0, s2, len);
+	}
+
+	public static int memicmp(CharSequence s1, int s1pos, CharSequence s2, int len) {
+		if (len == 0)	         
+			return 0;
+
+		int n = 0;
+		
+		while (n < len && s1.charAt(n+s1pos) == s2.charAt(n))
+			n++;
+		
+		if(n >= len) return 0;
+		
+		return charICmp(s1.charAt(n+s1pos), s2.charAt(n));		
+	}
 	
 
 	
