@@ -1,9 +1,13 @@
 package ru.dz.jfte;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ECvsLog extends EBuffer 
 {
+	private static final Logger log = Logger.getLogger(ECvsLog.class.getName());
 
 	static ECvsLog CvsLogView = null;
 	
@@ -22,8 +26,15 @@ public class ECvsLog extends EBuffer
 	    sprintf (msgFile,"/tmp/fte%d-cvs-msg",getpid ());
 	#else */
 	    //tmpnam (msgFile);
-	    File tmp = File.createTempFile("Fte-Cvs-", ".txt");
-	    tmp.deleteOnExit();
+	    File tmp;
+		try {
+			tmp = File.createTempFile("Fte-Cvs-", ".txt");
+		    tmp.deleteOnExit();
+		} catch (IOException e) {
+			log.log( Level.SEVERE,  "temp file", e);
+			// TODO RuntimeException
+			throw new RuntimeException("temp file", e);
+		}
 	//#endif
 	    SetFileName (tmp.getAbsolutePath(),Config.CvsLogMode);
 

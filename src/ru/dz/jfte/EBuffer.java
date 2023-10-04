@@ -3988,7 +3988,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (RCount == 0) return false;
 		if (SSBuffer == null) return false;
 		if (Append) {
-			if (Config.SystemClipboard!=0)
+			if (Config.SystemClipboard)
 				ClipData.GetPMClip();
 		} else
 			SSBuffer.Clear();
@@ -4044,7 +4044,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					return false;
 			break;
 		}
-		if (Config.SystemClipboard!=0)
+		if (Config.SystemClipboard)
 			ClipData.PutPMClip();
 		return true;
 	}
@@ -4068,7 +4068,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		EPoint B = new EPoint(), E = new EPoint();
 		int L, BL;
 
-		if (Config.SystemClipboard!=0)
+		if (Config.SystemClipboard)
 			ClipData.GetPMClip();
 
 		if (SSBuffer == null) return false;
@@ -4228,7 +4228,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		if (SSBuffer == null)
 			return false;
 		SSBuffer.Clear();
-		if (Config.SystemClipboard!=0)
+		if (Config.SystemClipboard)
 			ClipData.PutPMClip();
 		return true;
 	}
@@ -4639,8 +4639,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (B.Load() == false) return false;
 		}
 
-		int savesys = Config.SystemClipboard;
-		Config.SystemClipboard = 0;
+		boolean savesys = Config.SystemClipboard;
+		Config.SystemClipboard = false;
 
 		boolean rc = false;
 
@@ -5514,10 +5514,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 			Msg(S_INFO, "Wrote %s.", AFileName);
 			if (!BFI(this, BFI_KeepBackups)
-					/* TODO #ifdef CONFIG_OBJ_CVS
 		        // No backups for CVS logs
-		        || this == CvsLogView
-		#endif */
+		        || this == ECvsLog.CvsLogView
 					) {
 				Console.unlink(ABackupName[0]);
 			}
@@ -6198,32 +6196,26 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		V.Port = new EEditPort(this, V);
 		AddView(V);
 
-		if (!Loaded && suspendLoads == 0) {
+		if (!Loaded && suspendLoads == 0) 
+		{
 			Load();
 
-			/* TODO #ifdef CONFIG_OBJ_MESSAGES
-	        if (CompilerMsgs)
-	            CompilerMsgs.FindFileErrors(this);
-	#endif
-	#ifdef CONFIG_OBJ_CVS
-	        if (CvsDiffView) CvsDiffView.FindFileLines(this);
-	#endif */
+	        if (EMessages.CompilerMsgs != null)
+	        	EMessages.CompilerMsgs.FindFileErrors(this);
+
+	        if (ECvsDiff.CvsDiffView != null) ECvsDiff.CvsDiffView.FindFileLines(this);
 
 			EMarkIndex.markIndex.retrieveForBuffer(this);
 
-			/* #ifdef CONFIG_HISTORY
-	        int r, c;
+	        int [] r = {0}, c = {0};
 
-	        if (RetrieveFPos(FileName, r, c) == 1)
-	            SetNearPosR(c, r);
+	        if (FPosHistory.RetrieveFPos(FileName, r, c))
+	            SetNearPosR(c[0], r[0]);
 	        //printf("setting to c:%d r:%d f:%s", c, r, FileName);
 	        V.Port.GetPos();
 	        V.Port.ReCenter = 1;
 
-	#ifdef CONFIG_BOOKMARKS
-	        if (BFI (this,BFI_SaveBookmarks)==3) RetrieveBookmarks(this);
-	#endif
-	#endif */
+	        if (iBFI (this,BFI_SaveBookmarks)==3) FPosHistory.RetrieveBookmarks(this);
 		}
 		return V.Port;
 	}

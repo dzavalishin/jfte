@@ -12,7 +12,7 @@ import ru.dz.jfte.c.ByteArrayPtr;
 
 public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs 
 {
-	static int SystemClipboard = 0;
+	static boolean SystemClipboard = false;
 	static int ScreenSizeX = -1, ScreenSizeY = -1;
 	static int ScrollBarWidth = 1;
 	static int CursorInsSize[] = { 90, 100 };
@@ -810,7 +810,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		case FLAG_CursorInsertEnd:   CursorInsSize[1] = number; break;
 		case FLAG_CursorOverStart:   CursorOverSize[0] = number; break;
 		case FLAG_CursorOverEnd:     CursorOverSize[1] = number; break;
-		case FLAG_SysClipboard:      SystemClipboard = number; break;
+		case FLAG_SysClipboard:      SystemClipboard = b; break;
 		case FLAG_OpenAfterClose:    OpenAfterClose = number; break;
 		case FLAG_ShowVScroll:       GFrame.ShowVScroll = b; break; 
 		case FLAG_ShowHScroll:       GFrame.ShowHScroll = b; break;

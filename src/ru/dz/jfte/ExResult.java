@@ -10,4 +10,9 @@ public enum ExResult {
 	static ExResult ofBoolean(boolean b) {
 		return b ? ErOK : ErFAIL;
 	}
+
+	/*
+	ExResult ofInt(int rc) {
+		return rc != 0 ? ErOK : ErFAIL;
+	}*/
 }

@@ -234,7 +234,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                         break;
                     }
                     //            Window.Buffer.Redraw();
-                    if (Config.SystemClipboard!=0) {
+                    if (Config.SystemClipboard) {
                         Buffer.NextCommand();
                         Buffer.BlockCopy(false);
                     }
@@ -281,7 +281,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                 View.MView.MouseCaptured = false;
                 if (event.Buttons == 1) {
                     if (View.MView.MouseMoved)
-                        if (Config.SystemClipboard!=0) {
+                        if (Config.SystemClipboard) {
                             Buffer.NextCommand();
                             Buffer.BlockCopy(false);
                         }
@@ -299,7 +299,7 @@ public class EEditPort extends EViewPort implements Closeable, EventDefs, KeyDef
                     }
                 }
                 if (event.Buttons == 4) {
-                    if (Config.SystemClipboard!=0) {
+                    if (Config.SystemClipboard) {
                         Buffer.NextCommand();
                         if (event.KeyMask == 0)
                             Buffer.BlockPasteStream();

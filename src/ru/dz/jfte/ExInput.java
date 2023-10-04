@@ -193,7 +193,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 			{
 				int len;
 
-				if (Config.SystemClipboard != 0)
+				if (Config.SystemClipboard)
 					ClipData.GetPMClip();
 
 				if (EBuffer.SSBuffer == null) break;

@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Logger;
 
+import ru.dz.jfte.c.BitOps;
+
 /**
  * 
  * All the OS dependent stuff is here
@@ -920,6 +922,31 @@ public static String SlashDir(String Path)
 
 	public static String getHomeDir() {
 		return System.getProperty("user.home");
+	}
+
+
+
+	public static boolean SameDir(String D1, String D2) 
+	{
+	    if (D1 == null || D2 == null) return false;
+	    
+	    D1 = Slash(D1,0);
+	    D2 = Slash(D2,0);
+	    
+	    //int l1 = D1.length();
+	    //int l2 = D2.length();
+
+    	return 0 == BitOps.strcmp(D1,D2);
+	    
+	    
+	    /*
+	    if (l1<l2) 
+	    	return BitOps.strncmp(D1,D2,l1)==0 && BitOps.strcmp(D2.substring(l1),SSLASH)==0;	    
+	    else if (l1==l2) 
+	    	return 0 == BitOps.strcmp(D1,D2);
+	    else 
+	    	return strncmp (D1,D2,l2)==0&&strcmp (D1+l1,SSLASH)==0;
+	    	*/
 	}
 
 

@@ -8,7 +8,7 @@ package ru.dz.jfte;
  *
  */
 
-public class ECvs extends ECvsBase 
+public class ECvs extends ECvsBase implements GuiDefs 
 {
     String LogFile = null;
     int Commiting = 0;
@@ -98,7 +98,7 @@ public class ECvs extends ECvsBase
 
     int RunPipe (String ADir,String ACommand,String AOnFiles) {
         Commiting=0;
-        if (!SameDir (Directory,ADir)) FreeLines ();
+        if (!Console.SameDir (Directory,ADir)) FreeLines ();
         return super.RunPipe (ADir,ACommand,AOnFiles);
     }
 
@@ -113,7 +113,7 @@ public class ECvs extends ECvsBase
     }
 
     int RunCommit (String ADir,String ACommand,String AOnFiles) {
-        if (!SameDir (Directory,ADir)) FreeLines ();
+        if (!Console.SameDir (Directory,ADir)) FreeLines ();
 
         Command=ACommand;
         Directory=ADir;

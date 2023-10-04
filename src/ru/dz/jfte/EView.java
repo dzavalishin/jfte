@@ -425,8 +425,8 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	}
 
 	ExResult ToggleSysClipboard(ExState State) {
-		Config.SystemClipboard = Config.SystemClipboard != 0 ? 0 : 1;
-		Msg(S_INFO, "SysClipboard is now %s.", Config.SystemClipboard != 0 ? "ON" : "OFF");
+		Config.SystemClipboard = !Config.SystemClipboard;
+		Msg(S_INFO, "SysClipboard is now %s.", Config.SystemClipboard ? "ON" : "OFF");
 		return ExResult.ErOK;
 	}
 
