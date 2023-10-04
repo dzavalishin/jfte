@@ -421,7 +421,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				throw new ConfigFormatException(cp, obj, "ReadObject");
 
 				//break;
-				/// TODO return -1;
+				/// TO DO return -1;
 			}
 		}
 		//return -1;
@@ -625,7 +625,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//System.err.printf("unk obj type %d in ReadCommands\n", obj.type);
 				//cp.c.shift(obj.len);
 				//break;
-				// TODO return -1;
+				// TO DO return -1;
 			}
 		}
 		//return -1;
@@ -702,7 +702,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//System.err.printf("unk obj type %d in ReadMenu\n", obj.type);
 				//cp.c.shift(obj.len);
 				//break;
-				// TODO return -1;
+				// TO DO return -1;
 			}
 		}
 		//return -1;
@@ -742,7 +742,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//System.err.printf("unk obj type %d in ReadColors\n", obj.type);
 				//cp.c.shift(obj.len);
 				//break;
-				// TODO return -1;
+				// TO DO return -1;
 			}
 		}
 		//return -1;
@@ -1419,11 +1419,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	static int SetModeString(EMode mode, int what, String string) {
 		int j = what;
 
-		//#ifdef CONFIG_SYNTAX_HILIT
 		if (j == BFI_Colorizer) {
 			mode.fColorize = EColorize.FindColorizer(string);
 		} else
-			//#endif
 			if (j == BFI_EventMap) {
 				mode.fEventMap = EEventMap.FindEventMap(string);
 			} else if (j == BFI_IndentMode) {
@@ -1434,9 +1432,9 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				SetWordChars(mode.Flags.CapitalChars, string);
 			} else if (j == BFS_FileNameRx) {
 				mode.MatchName = string;
-				mode.MatchNameRx = null; // TODO RxCompile(string);
+				mode.MatchNameRx = Pattern.compile(string);
 				try {
-					mode.MatchNameRx = Pattern.compile(string,Pattern.CASE_INSENSITIVE); // TODO RxCompile(string);
+					mode.MatchNameRx = Pattern.compile(string,Pattern.CASE_INSENSITIVE);
 				} catch(PatternSyntaxException e)
 				{
 					// TODO PatternSyntaxException
@@ -1446,7 +1444,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				mode.MatchLine = string;
 				mode.MatchLineRx = null;
 				try {
-				mode.MatchLineRx = Pattern.compile(string); // TODO RxCompile(string);
+				mode.MatchLineRx = Pattern.compile(string);
 				} catch(PatternSyntaxException e)
 				{
 					// TODO PatternSyntaxException

@@ -654,17 +654,18 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	}
 
 	ExResult ViewModeMap(ExState State) {
-		/* TODO ViewModeMap
-        if (TheEventMapView != null)
-            TheEventMapView.ViewMap(GetEventMap());
+		///* TODO ViewModeMap
+        if (EventMapView.TheEventMapView != null)
+        	EventMapView.TheEventMapView.ViewMap(GetEventMap());
         else
             new EventMapView(0, EModel.ActiveModel, GetEventMap());
-        if (TheEventMapView != 0)
-            SwitchToModel(TheEventMapView);
+        
+        if (EventMapView.TheEventMapView != null)
+            SwitchToModel(EventMapView.TheEventMapView);
         else
             return ExResult.ErFAIL;
         return ExResult.ErOK;
-		 */
+		// */
 		return ExResult.ErFAIL;
 	}
 

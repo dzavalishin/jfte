@@ -9,19 +9,19 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
     	super(createFlags, ARoot, "Routines");
     	
         Buffer = AB;
-        if (Buffer.rlst.Count == 0)
+        if (Buffer.rlst.lines.isEmpty())
             Buffer.ScanForRoutines();
         Row = 0;
         int Row = Buffer.VToR(Buffer.CP.Row);
-        for (int i = Buffer.rlst.Count - 1; i >= 0; --i)
-            if (Row >= Buffer.rlst.Lines[i]) {
+        for (int i = Buffer.rlst.lines.size() - 1; i >= 0; --i)
+            if (Row >= Buffer.rlst.lines.get(i).line) {
                 Row = i;
                 break;
             }
         {
             SetTitle(String.format("Routines %s: %d",
                     Buffer.FileName,
-                    Buffer.rlst.Count));
+                    Buffer.rlst.lines.size()));
         }
     };
 
@@ -40,9 +40,9 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
             return ExResult.ErOK;
 
         case ExActivateInOtherWindow:
-            if (Row < Buffer.rlst.Count) {
+            if (Row < Buffer.rlst.Count()) {
                 View.Next.SwitchToModel(Buffer);
-                Buffer.CenterPosR(0, Buffer.rlst.Lines[Row], 0);
+                Buffer.CenterPosR(0, Buffer.rlst.lines.get(Row).line, 0);
                 return ExResult.ErOK;
             }
             return ExResult.ErFAIL;
@@ -54,9 +54,10 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
     }
         
     @Override
-    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) {
-        if (Buffer.RLine(Buffer.rlst.Lines[Line]).getCount() > Col) {
-            String str = PCell.UnTabStr( Buffer.RLine(Buffer.rlst.Lines[Line]).Chars.toString() );
+    void DrawLine(PCell B, int Line, int Col, int /*ChColor*/ color, int Width) 
+    {
+        if (Buffer.RLine(Buffer.rlst.lines.get(Line).line).getCount() > Col) {
+            String str = PCell.UnTabStr( Buffer.RLine(Buffer.rlst.lines.get(Line).line).Chars.toString() );
             int len = str.length();
                         
             if (len > Col)
@@ -67,7 +68,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
     @Override
     String FormatLine(int Line) {
         //char *p = 0;
-        ELine L = Buffer.RLine(Buffer.rlst.Lines[Line]);
+        ELine L = Buffer.RLine(Buffer.rlst.lines.get(Line).line);
         /*
         p = (char *) malloc(L.Count + 1);
         if (p) {
@@ -79,9 +80,9 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
 
     @Override
     int Activate(int No) {
-        if (No < Buffer.rlst.Count) {
+        if (No < Buffer.rlst.Count()) {
             View.SwitchToModel(Buffer);
-            Buffer.CenterPosR(0, Buffer.rlst.Lines[No], 0);
+            Buffer.CenterPosR(0, Buffer.rlst.lines.get(No).line, 0);
             return 1;
         }
         return 0;
@@ -96,7 +97,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
 
     @Override
     void UpdateList() {
-        Count = Buffer.rlst.Count;
+        Count = Buffer.rlst.Count();
     }
 
     @Override

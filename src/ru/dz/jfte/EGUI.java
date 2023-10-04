@@ -967,7 +967,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 			switch(M.GetContext()) {
 			case CONTEXT_FILE:
 
-				// TODO if (M != CvsLogView)
+			if (M != ECvsLog.CvsLogView)
 			{
 				EBuffer B = (EBuffer )M;
 				w.write( String.format("F|%d|%s\n", B.ModelNo, B.FileName) );

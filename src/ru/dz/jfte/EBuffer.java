@@ -172,7 +172,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		Clear();
 
-		rlst.Lines = null;
 		DeleteRelated();
 	} 
 
@@ -186,8 +185,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		WordCount = 0;
 		WordList = null;
 
-		rlst.Count = 0;
-		rlst.Lines = null;
+		rlst.lines.clear();
 
 		LL = null;
 		RCount = RAllocated = RGap = 0;
@@ -383,13 +381,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//V = V.NextView;
 		}
 
-		for (int i = 0; i < rlst.Count && rlst.Lines != null; i++) {
+		for ( RoutineDef l : rlst.lines) {
 			EPoint M = new EPoint();
 
 			M.Col = 0;
-			M.Row = rlst.Lines[i];
+			M.Row = l.line;
 			UpdateMark(M, Type, Row, Col, Rows, Cols);
-			rlst.Lines[i] = M.Row;
+			l.line = M.Row;
 		}
 
 		/* TODO FF
@@ -1975,18 +1973,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 							(iBFI(this, BFI_WordWrap) == 1) ? 'w' :
 								' ';
 
-					s += (BFI(this, BFI_Undo))?'U':' ';
-					s += (BFI(this, BFI_Trim))?'E':' ';
-					// TODO s += (Flags.KeepBackups)?'B':' ';
+					s += (BFI(this, BFI_Undo))?'U':' '; // Turned off in orig code
+					s += (BFI(this, BFI_Trim))?'E':' ';// Turned off in orig code
+					//s += (Flags.KeepBackups)?'B':' ';// Turned off in orig code
 
 
 					s += " "+Mode.fName+" ";
 					s += (Modified != 0) ? '*' : 
 						(BFI(this, BFI_ReadOnly)) ? '%' : ' ';
-
-
-
-
 
 
 
@@ -2381,43 +2375,37 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	//#ifdef CONFIG_OBJ_ROUTINE
 	boolean ScanForRoutines() {
-		return false; // TODO ScanForRoutines
-
-		/*
-	    RxNode regx;
 	    int line;
-	    RxMatchRes res;
+	    //RxMatchRes res;
 
 	    if (BFS(this, BFS_RoutineRegexp) == null) {
 	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
 	        return false;
 	    }
-	    regx = RxCompile(BFS(this, BFS_RoutineRegexp));
-	    if (regx == 0) {
+	    Pattern regx = Pattern.compile(BFS(this, BFS_RoutineRegexp));
+	    if (regx == null) {
 	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to compile regexp '%s'", BFS(this, BFS_RoutineRegexp));
 	        return false;
 	    }
 
-	    if (rlst.Lines) {
-	        //free(rlst.Lines);
-	        rlst.Lines = 0;
-	    }
-	    rlst.Lines = 0;
-	    rlst.getCount() = 0;
+        rlst.lines.clear();
 
 	    Msg(S_BUSY, "Matching %s", BFS(this, BFS_RoutineRegexp));
 	    for (line = 0; line < RCount; line++) {
 	    	ELine L = RLine(line);
-	        if (RxExec(regx, L.Chars, L.getCount(), L.Chars, res) == 1) {
-	            rlst.getCount()++;
-	            //rlst.Lines =  realloc((void *) rlst.Lines, sizeof(int) * (rlst.getCount() | 0x1F));
-	            rlst.Lines[rlst.getCount() - 1] = line;
-	            Msg(S_BUSY, "Routines: %d", rlst.getCount());
+	    	
+	    	Matcher m = regx.matcher(L.Chars);
+	    	
+	        //if (RxExec(regx, L.Chars, L.getCount(), L.Chars, res) == 1)
+	    	if(m.find())
+	        {
+	            rlst.lines.add( new RoutineDef(line) );
+	            Msg(S_BUSY, "Routines: %d", rlst.lines.size());
 	        }
 	    }
 	    //RxFree(regx);
 	    return true;
-		 */
+		// */
 	}
 	//#endif
 
@@ -6597,10 +6585,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		case ExInsertTab:             return InsertTab();
 		case ExInsertSpace:           return InsertSpace();
-		case ExWrapPara:
-			return WrapPara();
-			//return ExResult.ErFAIL;
-			//return false;
+		case ExWrapPara:			  return WrapPara();
 
 		case ExInsPrevLineChar:       return InsPrevLineChar();
 		case ExInsPrevLineToEol:      return InsPrevLineToEol();
