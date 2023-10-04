@@ -1,8 +1,12 @@
 package ru.dz.jfte;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+
+import ru.dz.jfte.c.BitOps;
 
 public class EMessages extends EList implements Closeable 
 {
@@ -179,7 +183,7 @@ public class EMessages extends EList implements Closeable
 			ErrList = new Error[1];
 		else
 			ErrList = Arrays.copyOf(ErrList, ErrCount);
-		
+
 		ErrList[ErrCount - 1] = p;
 		ErrList[ErrCount - 1].Buf = null;
 		FindErrorFile(ErrCount - 1);
@@ -221,6 +225,21 @@ public class EMessages extends EList implements Closeable
 		ErrCount = 0;
 		ErrList = null;
 		BufLen = BufPos = 0;
+	}
+
+	String GetLine() 
+	{
+		if (Running && PipeId != -1) {
+			String p = GPipe.ReadPipe(PipeId);
+			//fprintf(stderr, "GetLine: ReadPipe rc = %d\n", rc);
+			if (p == null) {
+				ReturnCode = GPipe.ClosePipe(PipeId);
+				PipeId = -1;
+				Running = false;
+			}
+			return p;
+		}
+		return null;
 	}
 
 	int GetLine(String [] Line, int maxim) {
@@ -377,17 +396,297 @@ public class EMessages extends EList implements Closeable
 	}
 
 
-	
+
+	@Override
 	String GetInfo() {
-	    return String.format( 
-	            "%2d %04d/%03d Messages: %d (%s) ",
-	            ModelNo,
-	            Row, Count,
-	            MatchCount,
-	            Command);
+		return String.format( 
+				"%2d %04d/%03d Messages: %d (%s) ",
+				ModelNo,
+				Row, Count,
+				MatchCount,
+				Command);
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+	int Compile(String Command) {
+		return 0;
+	}
+
+
+
+	@Override
+	void DrawLine(PCell B, int Line, int Col, int color, int Width) 
+	{
+		if (Line < ErrCount)
+		{
+			if (Col < ErrList[Line].text.length() ) 
+			{
+				//char str[1024];
+				int len;
+				String str = PCell.UnTabStr( ErrList[Line].text );
+				len = str.length(); 
+
+				if (len > Col)
+					B.MoveStr(0, Width, str + Col, color, Width);
+			}
+		}
+	}
+
+	@Override
+	String FormatLine(int Line) {
+		String p;
+		if (Line < ErrCount)
+			p = ErrList[Line].text;
+		else
+			p = null;
+		return p;
+	}
+
+	@Override
+	boolean IsHilited(int Line) {
+		return (Line >= 0 && Line < ErrCount) ? 0 != ErrList[Line].hilit : false;
+	}
+
+	@Override
+	void UpdateList() {
+		Count = ErrCount;
+		super.UpdateList();
+	}
+
+	@Override
+	int Activate(int No) {
+		//assert(No == Row);
+		//Row = No;
+		ShowError(View, Row);
+		return 1;
+	}
+
+	@Override
+	boolean CanActivate(int Line) {
+		boolean ok = false;
+		if (Line < ErrCount)
+			if (ErrList[Line].file != null || ErrList[Line].line != -1) 
+				ok = true;
+		return ok;
+	}
+
+	@Override
+	void NotifyPipe(int APipeId) {
+		//fprintf(stderr, "Got notified");
+		if (APipeId == PipeId)
+			GetErrors();
+	}
+
+	@Override
+	String GetName() {
+		return "Messages";
+	}
+
+
+	@Override
+	String GetPath() {
+		return Console.Slash(Directory, 0);
+	}
+
+	@Override
+	void GetTitle(String [] ATitle, String [] ASTitle) {
+		ATitle[0] = "Messages: "+ Command;
+		ASTitle[0] = "Messages";
+	}
+
+
+
+
+
+	static final String t1 = "entering directory";
+	static final String t2 = "leaving directory";
+
+	void GetErrors() {
+		//char line[4096];
+		RxMatchRes RM;
+		//int retc;
+		int i, n;
+		boolean didmatch = false;
+		boolean WasRunning = Running;
+		//char fn[256];
+		String line; 
+
+		//fprintf(stderr, "Reading pipe\n");
+		while( (line =GetLine()) != null ) 
+		{
+			didmatch = false;
+			for (CRegexpDef r : CRegexpDef.CRegexp) 
+			{
+				Matcher m = r.rx.matcher(line);
+				
+				if (!m.matches())
+					continue;
+				
+				//int ngrp = m.groupCount();
+				
+				{
+					String file = "";
+
+					String fn = m.group(r.RefFile);					
+					String ln = m.group(r.RefLine);
+					String msg = m.group(r.RefMsg);
+
+
+					if (Console.IsFullPath(fn))
+						file = fn;
+					else {
+						String fn1;
+						if (curr_dir == null)
+							fn1 = Directory;
+						else
+							fn1 = curr_dir.name;
+						fn1 = Console.Slash(fn1, 1);
+						fn1 += fn;
+						
+						/*
+						Console.ExpandPath(fn1);
+						if (ExpandPath(fn1, fn2) == 0)
+							file = fn2;
+						else
+							file = fn1;
+							*/
+						file = new File(fn1).getAbsolutePath();
+					}
+					AddError(file, Integer.parseInt(ln), msg.isEmpty() ? null : msg, line, 1);
+					didmatch = true;
+					MatchCount++;
+					break;
+				}
+			}
+			
+			/* TODO check for gnumake 'entering directory'
+			if (!didmatch)
+			{
+				AddError(null, -1, null, line);
+				//** Quicky: check for gnumake 'entering directory'
+				//** make[x]: entering directory `xxx'
+				//** make[x]: leaving...
+				//static char t1[] = "entering directory";
+				//static char t2[] = "leaving directory";
+				//char*   pin;
+
+				int pin = line.indexOf("]:");
+				if( pin  >= 0)
+				{
+					//** It *is* some make line.. Check for 'entering'..
+					pin += 2;
+
+					//while(*pin != ':' && *pin != 0) pin++;
+					//pin++;
+					while (line.charAt(pin) == ' ')
+						pin++;
+					if (BitOps.strnicmp(line.substring(pin), t1, t1.length()) == 0) {  // Entering?
+						//** Get the directory name from the line,
+						pin += t1.length();
+						getWord(fn, pin);
+						//dbg("entering %s", fn);
+
+						if (fn[0]) {
+							//** Indeedy entering directory! Link in list,
+							aDir a = new aDir();
+							a.name= fn;
+							a.next = curr_dir;
+							curr_dir = a;
+						}
+					} else if (BitOps.strnicmp(pin, t2, t2.length()) == 0) {  // Leaving?
+						pin += t2.length();
+						getWord(fn, pin);                   // Get dirname,
+						//dbg("leaving %s", fn);
+
+						//aDir *a;
+
+						aDir a = curr_dir;
+						if (a != null)
+							curr_dir = curr_dir.next;       // Remove from stack,
+						if (a != null && stricmp(a.name, fn) == 0) {
+							//** Pop this item.
+							//free(a.name);
+							//delete a;
+						} else {
+							//** Mismatch filenames . error, and revoke stack.
+							//dbg("mismatch on %s", fn);
+							AddError(null, -1, null, "fte: mismatch in directory stack!?");
+
+							//** In this case we totally die the stack..
+							while(a != null)
+							{
+								a = curr_dir;
+								if (a != null)
+									curr_dir = curr_dir.next;
+							}
+						}
+					}
+				}
+			}
+			
+			//*/
+		}
+		//fprintf(stderr, "Reading Stopped\n");
+		if (!Running && WasRunning) 
+			AddError(null, -1, null, String.format("[done, status=%d]", ReturnCode));
+
+		//UpdateList();
+		//NeedsUpdate = 1;
+	}
+
 	
 	
+	
+	/*
+	String getWord(char* dest, char*& pin)
+	{
+	    char *pout, *pend;
+	    char ch, ec;
+	    
+	    while (*pin == ' ' || *pin == '\t')
+	        pin++;
+
+	    pout = dest;
+	    pend = dest + 256 - 1;
+	    if (*pin == '\'' || *pin == '"' || *pin == '`') {
+	        ec = *pin++;
+	        if (ec == '`')
+	            ec = '\'';
+	        for (;;) {
+	            ch  = *pin++;
+	            if (ch == '`')
+	                ch = '\'';
+	            if (ch == ec || ch == 0)
+	                break;
+	            
+	            if (pout < pend)
+	                *pout++ = ch;
+	        }
+	        if (ch == 0)
+	            pin--;
+	    } else {
+	        for(;;) {
+	            ch  = *pin++;
+	            if (ch == ' ' || ch == '\t' || ch == 0)
+	                break;
+	            if (pout < pend) *pout++ = ch;
+	        }
+	    }
+	    *pout = 0;
+	}
+	*/
+
+
 }
 
 

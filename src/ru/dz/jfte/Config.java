@@ -346,24 +346,24 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 
 			case CF_COMPRX:
 			{
-				long file, line, msg;
+				//long file, line, msg;
 				String regexp;
 
 				//if (GetObj(cp, len) != CF_INT) return -1;
 				GetAssertObj(cp, CF_INT);
-				file =GetNum(cp);
+				int file =GetNum(cp);
 				//if (GetObj(cp, len) != CF_INT) return -1;
 				GetAssertObj(cp, CF_INT);
-				line = GetNum(cp);
+				int line = GetNum(cp);
 				//if (GetObj(cp, len) != CF_INT) return -1;
 				GetAssertObj(cp, CF_INT);
-				msg = GetNum(cp);
+				int msg = GetNum(cp);
 				//if (GetObj(cp, len) != CF_REGEXP) return -1;
 				obj = GetAssertObj(cp, CF_REGEXP);
 				//if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
 				regexp = GetCharStr(cp, obj.len);
 
-				// TODO if (AddCRegexp(file, line, msg, regexp) == 0) return -1;
+				CRegexpDef.AddCRegexp(file, line, msg, regexp);
 			}
 			break;
 
@@ -376,7 +376,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				//if ((regexp = GetCharStr(cp, obj.len)) == null) return -1;
 				regexp = GetCharStr(cp, obj.len);
 
-				// TODO if (AddCvsIgnoreRegexp(regexp) == 0) return -1;
+				ECvsBase.AddCvsIgnoreRegexp(regexp);
 			}
 			break;
 

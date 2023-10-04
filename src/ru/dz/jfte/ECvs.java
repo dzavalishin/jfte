@@ -121,7 +121,7 @@ public class ECvs extends ECvsBase implements GuiDefs
 
         RemoveLogFile();
         // Disallow any CVS command while commiting
-        Running=1;
+        Running=true;
 
         // Create message buffer
         ECvsLog cvslog=new ECvsLog (0,ActiveModel,Directory,OnFiles);
@@ -135,7 +135,7 @@ public class ECvs extends ECvsBase implements GuiDefs
 
 
     int DoneCommit (int commit) {
-        Running=0;
+        Running=false;
         // Remove line with link to log
         //LineCount--;
         Lines.remove(Lines.size()-1);
@@ -185,7 +185,7 @@ public class ECvs extends ECvsBase implements GuiDefs
     // If running, can't be closed without asking
     @Override
     boolean CanQuit () {
-        return 0 == Running;
+        return !Running;
     }
 
     // Ask user if we can close this model
@@ -198,7 +198,7 @@ public class ECvs extends ECvsBase implements GuiDefs
                 EView.ActiveView.DeleteModel(ECvsLog.CvsLogView);
             } else return 0;
         }
-        if (Running!=0) {
+        if (Running) {
             // CVS command in progress
             switch (V.Choice (GPC_ERROR,"CVS command is running",2,"&Kill","&Cancel","")) {
                 case 0: // Kill

@@ -27,7 +27,7 @@ public class ECvsBase extends EList
 
 	static List<Pattern> CvsIgnoreRegexp = new ArrayList<>();
 
-	void AddCvsIgnoreRegexp(String regexp) 
+	static void AddCvsIgnoreRegexp(String regexp) 
 	{ 
 		CvsIgnoreRegexp.add(Pattern.compile(regexp));
 	}
