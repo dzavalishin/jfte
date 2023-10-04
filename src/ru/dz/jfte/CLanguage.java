@@ -100,7 +100,7 @@ public class CLanguage
 							StateMap[0] == hsC_CPP_String1 || StateMap[0] == hsC_CPP_String2 ||
 							StateMap[0] == hsC_CPP_ABrace)
 					{
-						I = IndentCPP(B, Line, StateLen, 0);
+						I = IndentCPP(B, Line, StateLen, null);
 					} else {
 						I = IndentNormal(B, Line, StateLen, StateMap);
 						if ((StateMap[0] == hsC_Comment
@@ -236,7 +236,8 @@ public class CLanguage
 	static int IndentNormal(EBuffer B, int Line, int StateLen, int [] /*hsState * */  StateMap) {
 		//STARTFUNC("IndentNormal{h_c.cpp}");
 		int I = 0;
-		int Pos, L;
+		int [] Pos = {0};
+		int [] L = {0};
 
 		if (LookAt(B, Line, 0, "case", hsC_Keyword) ||
 				LookAt(B, Line, 0, "default", hsC_Keyword))
@@ -260,20 +261,20 @@ public class CLanguage
 			if (C_ParenDelta >= 0)
 				return I + C_ParenDelta;
 			else
-				return Pos;
+				return Pos[0];
 		} else if (LookAt(B, Line, 0, "]", hsC_Normal, 0)) {
 			I = SearchBackMatch(-1, B, Line - 1, hsC_Normal, "[", "]", Pos, L);
 			if (C_ParenDelta >= 0)
 				return I + C_ParenDelta;
 			else
-				return Pos;
+				return Pos[0];
 		} else {
-			char CharP = ' ';
+			char [] CharP = {' '};
 			// char FirstCharP = ' ';
-			int RowP = Line;
-			int ColP = -1;
-			int PrevRowP = RowP;
-			int PrevColP = ColP;
+			int [] RowP = {Line};
+			int [] ColP = {-1};
+			int [] PrevRowP = { RowP[0] };
+			int [] PrevColP = { ColP[0] };
 			int FirstRowP;
 			int FirstColP;
 			int ContinuationIndent = 0;
@@ -281,7 +282,7 @@ public class CLanguage
 			if (SkipWhite(B, Line, PrevRowP, PrevColP, SKIP_BACK) != 1)
 				return 0;
 
-			PrevColP++;
+			PrevColP[0]++;
 			//LOG << "PrevRowP=" << PrevRowP << ", PrevColP=" << PrevColP << ENDLINE;
 
 			if (FindPrevIndent(B, RowP, ColP, CharP,
@@ -297,7 +298,7 @@ public class CLanguage
 					FIND_COMMA |
 					FIND_ENDBLOCK) != 1)
 			{
-				if (RowP != PrevRowP)
+				if (RowP[0] != PrevRowP[0])
 					ContinuationIndent = C_Continuation;
 				I = 0;
 				if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
@@ -307,15 +308,15 @@ public class CLanguage
 				return I + ContinuationIndent;
 			}
 
-			FirstRowP = RowP;
-			FirstColP = ColP;
+			FirstRowP = RowP[0];
+			FirstColP = ColP[0];
 			// FirstCharP = CharP;
 
 			//LOG << "FirstRowP=" << FirstRowP << ", FirstColP=" << FirstColP <<			", CharP=" << BinChar(CharP) << ENDLINE;
 
-			switch (CharP) {
+			switch (CharP[0]) {
 			case 'c':
-				I = B.LineIndented(RowP) + C_Continuation;
+				I = B.LineIndented(RowP[0]) + C_Continuation;
 				return I;
 
 			case '(':
@@ -323,35 +324,35 @@ public class CLanguage
 				if (C_ParenDelta >= 0) {
 					I = B.LineIndented(FirstRowP) + C_ParenDelta;
 				} else {
-					ColP++;
+					ColP[0]++;
 					if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD | SKIP_LINE) != 1)
 						return 0;
-					if (ColP < B.LineChars(RowP) || !FunctionUsesContinuation) {
-						//char strLeft[2] = { CharP, 0 };
-						//char strRight[2] = { CharP == '(' ? ')' : ']', 0 };
+					if (ColP[0] < B.LineChars(RowP[0]) || !FunctionUsesContinuation) {
+						//char strLeft[2] = { CharP[0], 0 };
+						//char strRight[2] = { CharP[0] == '(' ? ')' : ']', 0 };
 						I = SearchBackMatch(-1, B, Line - 1, hsC_Normal, strLeft, strRight, Pos, L);
-						I = Pos + 1;
+						I = Pos[0] + 1;
 					} else {
-						I = B.LineIndented(RowP) + C_Continuation;
+						I = B.LineIndented(RowP[0]) + C_Continuation;
 					}
 				}
 				return I;
 
 			case '{':
-				ColP++;
-				if (((PrevRowP != RowP) ||
-						((PrevRowP == RowP) && (PrevColP != ColP)))
-						&& FirstRowP != PrevRowP)
+				ColP[0]++;
+				if (((PrevRowP[0] != RowP[0]) ||
+						((PrevRowP[0] == RowP[0]) && (PrevColP[0] != ColP[0])))
+						&& FirstRowP != PrevRowP[0])
 					ContinuationIndent = C_Continuation;
-				ColP--; ColP--;
+				ColP[0]--; ColP[0]--;
 				if (SkipWhite(B, Line, RowP, ColP, SKIP_BACK | SKIP_TOBOL | SKIP_MATCH) != 1)
 					return 0;
-				I = B.LineIndented(RowP);
+				I = B.LineIndented(RowP[0]);
 				if (B.LineIndented(FirstRowP) <= C_FirstLevelWidth)
 					I += C_FirstLevelIndent;
 				else
 					I += C_Indent;
-				//PRINTF(("'{' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+				//PRINTF(("'{' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP[0]));
 
 				if (LookAt(B, Line, 0, "{", hsC_Normal, 0))
 					I -= C_BraceOfs;
@@ -363,17 +364,17 @@ public class CLanguage
 				I = B.LineIndented(FirstRowP);
 				return I;
 			case '}':
-				ColP++;
-				ColP++;
+				ColP[0]++;
+				ColP[0]++;
 				/*---nobreak---*/
 			case ';':
-				ColP--;
+				ColP[0]--;
 				if (FindPrevIndent(B, RowP, ColP, CharP,
-						((CharP == ',') ? FIND_COMMA | FIND_COLON :
+						((CharP[0] == ',') ? FIND_COMMA | FIND_COLON :
 							//(CharP == ';') ? FIND_SEMICOLON | FIND_COLON :
 							FIND_SEMICOLON | FIND_COLON)) != 1)
 				{
-					if (FirstRowP != PrevRowP)
+					if (FirstRowP != PrevRowP[0])
 						ContinuationIndent = C_Continuation;
 					I = 0;
 					if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
@@ -382,27 +383,27 @@ public class CLanguage
 					}
 					return I + ContinuationIndent;
 				}
-				//PRINTF(("';' Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+				//PRINTF(("';' Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP));
 
 				//LOG << "  CharP now: " << BinChar(CharP) << ENDLINE;
-				switch (CharP) {
+				switch (CharP[0]) {
 				case ',':
 				case ';':
 				case '{':
 				case ':':
-					ColP++;
+					ColP[0]++;
 					if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
 						return 0;
-					//ColP--;
+					//ColP[0]--;
 					//if (SkipWhite(B, RowP, ColP, SKIP_BACK) != 1)
-					//if (CharP == ':') {
+					//if (CharP[0] == ':') {
 					//    I -= C_ColonOfs;
 					//}
-					//PRINTF(("';' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
-					I = B.LineIndented(RowP);
-					if (((PrevRowP != RowP) ||
-							((PrevRowP == RowP) && (PrevColP != ColP)))
-							&& FirstRowP != PrevRowP)
+					//PRINTF(("';' indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP[0]));
+					I = B.LineIndented(RowP[0]);
+					if (((PrevRowP[0] != RowP[0]) ||
+							((PrevRowP[0] == RowP[0]) && (PrevColP[0] != ColP[0])))
+							&& FirstRowP != PrevRowP[0])
 						ContinuationIndent = C_Continuation;
 
 					if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
@@ -410,26 +411,26 @@ public class CLanguage
 						ContinuationIndent = 0;
 					}
 					if (LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I -= 0; //C_BraceOfs;
 					else if (LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& !LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& !LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I += C_BraceOfs;
 					else if (!LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I -= C_BraceOfs;
 					break;
 				case '(':
-					ColP++;
+					ColP[0]++;
 					if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD | SKIP_LINE) != 1)
 						return 0;
-					I = B.ScreenPos(B.RLine(RowP), ColP);
+					I = B.ScreenPos(B.RLine(RowP[0]), ColP[0]);
 					break;
 				default:
-					I = B.LineIndented(RowP);
+					I = B.LineIndented(RowP[0]);
 					break;
 				}
-				//PRINTF(("';' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+				//PRINTF(("';' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
 
 				//            else
 				//            if (LookAt(B, Line, 0, "{", hsC_Normal, 0))
@@ -438,91 +439,91 @@ public class CLanguage
 				return I + ContinuationIndent;
 
 			case ':':
-				ColP--;
+				ColP[0]--;
 				if (FindPrevIndent(B, RowP, ColP, CharP, FIND_SEMICOLON | FIND_COLON | FIND_QUESTION | FIND_CLASS | FIND_CASE) != 1) {
-					if (FirstRowP != PrevRowP)
+					if (FirstRowP != PrevRowP[0])
 						ContinuationIndent = C_Continuation;
 					return 0 + ContinuationIndent;
 				}
 
 				//PRINTF(("':' Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
 
-				switch (CharP) {
+				switch (CharP[0]) {
 				case ':':
 					//ColP++;
 					/*if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
 	                 return 0;
-	                 I = B.LineIndented(RowP);// - C_ColonOfs;
-	                 PRINTF(("':' 0 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+	                 I = B.LineIndented(RowP[0]);// - C_ColonOfs;
+	                 PRINTF(("':' 0 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
 	                 break;*/
 				case '{':
 				case ';':
-					ColP++;
+					ColP[0]++;
 					if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
 						return 0;
-					I = B.LineIndented(RowP);
-					//PRINTF(("!!! FirstRowP=%d, PrevRowP=%d, RowP=%d, I=%d\n", FirstRowP, PrevRowP, RowP, I));
+					I = B.LineIndented(RowP[0]);
+					//PRINTF(("!!! FirstRowP=%d, PrevRowP=%d, RowP=%d, I=%d\n", FirstRowP, PrevRowP, RowP[0], I));
 					//PRINTF(("!!! FirstColP=%d, PrevColP=%d, ColP=%d\n", FirstColP, PrevColP, ColP));
-					if (CheckLabel(B, RowP))
+					if (CheckLabel(B, RowP[0]))
 						I -= C_ColonOfs;
-					else if (PrevRowP == RowP && FirstRowP == PrevRowP && FirstColP + 1 == PrevColP)
+					else if (PrevRowP[0] == RowP[0] && FirstRowP == PrevRowP[0] && FirstColP + 1 == PrevColP[0])
 						I += C_Continuation;
 					if (LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I -= 0;//C_BraceOfs;
 					else if (LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& !LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& !LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I += C_BraceOfs;
 					else if (!LookAt(B, Line, 0, "{", hsC_Normal, 0)
-							&& LookAt(B, RowP, ColP, "{", hsC_Normal, 0))
+							&& LookAt(B, RowP[0], ColP[0], "{", hsC_Normal, 0))
 						I -= C_BraceOfs;
-					//PRINTF(("':' 1 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+					//PRINTF(("':' 1 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
 					break;
 				case 'p':
-					ColP++;
+					ColP[0]++;
 					//if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
 					//                    return 0;
-					I = B.LineIndented(RowP) + C_ClassDelta;
+					I = B.LineIndented(RowP[0]) + C_ClassDelta;
 					//                if (FirstRowP == RowP) {
 					//                    I += C_ClassDelta;
 					///                if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
 					///                    I += C_Indent - C_BraceOfs;
 					///                }
 					//                }
-					//PRINTF(("':' 2 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+					//PRINTF(("':' 2 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP[0]));
 					break;
 				case 'l':
-					ColP++;
-					I = B.LineIndented(RowP) + C_BraceOfs;
+					ColP[0]++;
+					I = B.LineIndented(RowP[0]) + C_BraceOfs;
 					//C_ClassOfs + C_ClassDelta;
 					break;
 				case 'c':
-					ColP++;
-					//                if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD) != 1)
+					ColP[0]++;
+					//                if (SkipWhite(B, Line, RowP[0], ColP, SKIP_FORWARD) != 1)
 					//                    return 0;
-					I = B.LineIndented(RowP) + C_CaseDelta;
-					//                if (FirstRowP == RowP) {
+					I = B.LineIndented(RowP[0]) + C_CaseDelta;
+					//                if (FirstRowP == RowP[0]) {
 					//                    I += C_CaseDelta;
 					///                if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
 					///                        I += C_Indent - C_BraceOfs;
 					///                }
 					//                }
 
-					//PRINTF(("':' 3 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+					//PRINTF(("':' 3 indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
 					break;
 				default:
-					I = B.LineIndented(RowP);
+					I = B.LineIndented(RowP[0]);
 					break;
 				}
-				if (((PrevRowP != RowP) ||
-						((PrevRowP == RowP) && (PrevColP != ColP)))
-						&& FirstRowP != PrevRowP)
+				if (((PrevRowP[0] != RowP[0]) ||
+						((PrevRowP[0] == RowP[0]) && (PrevColP[0] != ColP[0])))
+						&& FirstRowP != PrevRowP[0])
 					ContinuationIndent = C_Continuation;
 				if (LookAt(B, Line, 0, "{", hsC_Normal, 0)) {
 					//I -= C_Indent - C_BraceOfs;
 					ContinuationIndent = 0;
 				}
-				//PRINTF(("':' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+				//PRINTF(("':' -- indent : Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
 				return I + ContinuationIndent;
 
 			case 'i':
@@ -530,31 +531,32 @@ public class CLanguage
 			case 'f':
 			case 'e':
 			case 'w':
-				I = B.LineIndented(RowP);
-				switch (CharP) {
-				case 'i': ColP += 2; break; // if
-				case 'f': ColP += 3; break; // for
-				case 'e': ColP += 4; break; // else
-				case 'w': ColP += 5; break; // while
-				case 's': ColP += 6; break;
+				I = B.LineIndented(RowP[0]);
+				switch (CharP[0]) {
+				case 'i': ColP[0] += 2; break; // if
+				case 'f': ColP[0] += 3; break; // for
+				case 'e': ColP[0] += 4; break; // else
+				case 'w': ColP[0] += 5; break; // while
+				case 's': ColP[0] += 6; break;
 				}
-				//PRINTF(("'ifews' -- indent 1: Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
-				if (SkipWhite(B, Line, RowP, ColP,
-						SKIP_FORWARD | (CharP != 'e' ? SKIP_MATCH : 0)) != 1)
+				//PRINTF(("'ifews' -- indent 1: Line=%d, RowP=%d, ColP[0]=%d, CharP=%c\n", Line, RowP[0], ColP, CharP[0]));
+				
+				if (SkipWhite(B, Line, RowP, ColP, SKIP_FORWARD | (CharP[0] != 'e' ? SKIP_MATCH : 0)) != 1)
 					return 0;
-				if (RowP >= Line) {
-					RowP = Line;
-					ColP = -1;
+				
+				if (RowP[0] >= Line) {
+					RowP[0] = Line;
+					ColP[0] = -1;
 				} else
-					ColP--;
+					ColP[0]--;
 				if (SkipWhite(B, Line, RowP, ColP, SKIP_BACK) != 1)
 					return 0;
-				ColP++;
-				//PRINTF(("'ifews' -- indent 2: Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP, CharP));
+				ColP[0]++;
+				//PRINTF(("'ifews' -- indent 2: Line=%d, RowP=%d, ColP=%d, CharP=%c\n", Line, RowP, ColP[0], CharP[0]));
 
-				if (((PrevRowP != RowP) ||
-						((PrevRowP == RowP) && (PrevColP != ColP)))
-						&& FirstRowP != PrevRowP)
+				if (((PrevRowP[0] != RowP[0]) ||
+						((PrevRowP[0] == RowP[0]) && (PrevColP[0] != ColP[0])))
+						&& FirstRowP != PrevRowP[0])
 					ContinuationIndent = C_Continuation;
 
 				I += C_Indent;
@@ -572,24 +574,24 @@ public class CLanguage
 		return 0;
 	}
 
-	static int CheckLabel(EBuffer B, int Line) {
+	static boolean CheckLabel(EBuffer B, int Line) {
 		ELine L = B.RLine(Line);
 		int P = B.CharOffset(L, B.LineIndented(Line));
 		int Cnt = 0;
 
 		if (Line > 0 && B.RLine(Line - 1).StateE != hsC_Normal)
-			return 0;
+			return false;
 
 		while ((P < L.getCount()) &&
 				(L.Chars.charAt(P) == ' ' || L.Chars.charAt(P) == 9)) P++;
 		while (P < L.getCount()) {
 			if (Cnt > 0)
-				if (L.Chars.charAt(P) == ':' && (Cnt == 1 || L.Chars.charAt(P + 1) != ':')) return 1;
-			if (!BitOps.isalnum(L.Chars.charAt(P)) && L.Chars.charAt(P) != '_') return 0;
+				if (L.Chars.charAt(P) == ':' && (Cnt == 1 || L.Chars.charAt(P + 1) != ':')) return true;
+			if (!BitOps.isalnum(L.Chars.charAt(P)) && L.Chars.charAt(P) != '_') return false;
 			Cnt++;
 			P++;
 		}
-		return 0;
+		return false;
 	}
 
 
@@ -722,7 +724,7 @@ public class CLanguage
 				//LOG << "ColP[0]: " << ColP[0] << " State: " << (int)StateMap[ColP[0]] << ENDLINE;
 				if (StateMap[ColP[0]] == hsC_Normal) {
 					//LOG << "CharP[0]: " << BinChar(P[ColP[0]]) << " BolChar: " << BinChar(BolChar) <<	                    " BolRow: " << BolRow <<	                    " BolCol: " << BolCol <<	                    ENDLINE;
-					switch (CharP[0] = P[ColP[0]]) {
+					switch (CharP[0] = P.charAt(ColP[0])) {
 					case '{':
 						if (BolChar == ':' || BolChar == ',') {
 							CharP[0] = BolChar;
@@ -756,7 +758,7 @@ public class CLanguage
 
 							return (1);
 						}
-						if (isZeroArray(Count) && (Flags & FIND_ENDBLOCK)) {
+						if (isZeroArray(Count) && 0 != (Flags & FIND_ENDBLOCK)) {
 
 							return (1);
 						}
@@ -783,16 +785,16 @@ public class CLanguage
 						Count[2]++;
 						break;
 					case ':':
-						if (ColP[0] >= 1 && P[ColP[0] - 1] == ':') { // skip ::
+						if (ColP[0] >= 1 && P.charAt(ColP[0] - 1) == ':') { // skip ::
 							ColP[0] -= 2;
 							continue;
 						}
 					case ',':
 					case ';':
 						if (isZeroArray(Count) && BolChar == ' ') {
-							if ((CharP[0] == ';' && (Flags & FIND_SEMICOLON))
-									|| (CharP[0] == ',' && (Flags & FIND_COMMA))
-									|| (CharP[0] == ':' && (Flags & FIND_COLON))) {
+							if ((CharP[0] == ';' && 0 != (Flags & FIND_SEMICOLON))
+									|| (CharP[0] == ',' && 0 != (Flags & FIND_COMMA))
+									|| (CharP[0] == ':' && 0 !=(Flags & FIND_COLON))) {
 								BolChar = CharP[0];
 								BolCol = ColP[0];
 								BolRow = RowP[0];
@@ -835,7 +837,7 @@ public class CLanguage
 						//puts("\nif");
 						if (Count[3] > 0)
 							Count[3]--;
-						if (Flags & FIND_IF) {
+						if(0 != (Flags & FIND_IF)) {
 							if (isZeroArray(Count)) {
 								CharP[0] = 'i';
 
@@ -848,7 +850,7 @@ public class CLanguage
 							memcmp(P + ColP[0], "else", 4) == 0)
 					{
 						//puts("\nelse\x7");
-						if (Flags & FIND_ELSE) {
+						if(0 != (Flags & FIND_ELSE)) {
 							if (isZeroArray(Count)) {
 								CharP[0] = 'e';
 
@@ -859,7 +861,7 @@ public class CLanguage
 					}
 					if (isZeroArray(Count)) {
 
-						if ((Flags & FIND_FOR) &&
+						if (0 != (Flags & FIND_FOR) &&
 								L - ColP[0] >= 3 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 3) &&
 								memcmp(P + ColP[0], "for", 3) == 0)
@@ -868,7 +870,7 @@ public class CLanguage
 
 							return (1);
 						}
-						if ((Flags & FIND_WHILE) &&
+						if (0 != (Flags & FIND_WHILE) &&
 								L - ColP[0] >= 5 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 5) &&
 								memcmp(P + ColP[0], "while", 5) == 0)
@@ -877,7 +879,7 @@ public class CLanguage
 
 							return (1);
 						}
-						if ((Flags & FIND_SWITCH) &&
+						if (0 != (Flags & FIND_SWITCH) &&
 								L - ColP[0] >= 6 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 6) &&
 								memcmp(P + ColP[0], "switch", 6) == 0)
@@ -886,7 +888,7 @@ public class CLanguage
 
 							return (1);
 						}
-						if (((Flags & FIND_CASE) || (BolChar == ':')) &&
+						if ((0 != (Flags & FIND_CASE) || (BolChar == ':')) &&
 								(L - ColP[0] >= 4 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 4) &&
 								memcmp(P + ColP[0], "case", 4) == 0) ||
@@ -903,7 +905,7 @@ public class CLanguage
 							
 							return (1);
 						}
-						if (((Flags & FIND_CLASS) || (BolChar == ':')) &&
+						if ((0 != (Flags & FIND_CLASS) || (BolChar == ':')) &&
 								(L - ColP[0] >= 5 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 5) &&
 								memcmp(P + ColP[0], "class", 5) == 0))
@@ -917,7 +919,7 @@ public class CLanguage
 
 							return (1);
 						}
-						if (((Flags & FIND_CLASS) || (BolChar == ':')) &&
+						if ((0 != (Flags & FIND_CLASS) || (BolChar == ':')) &&
 								((L - ColP[0] >= 6 &&
 								IsState(StateMap + ColP[0], hsC_Keyword, 6) &&
 								memcmp(P + ColP[0], "public", 6) == 0) ||
@@ -972,8 +974,8 @@ public class CLanguage
 		assert (Col[0] >= -1 && Col[0] <= L) ;
 
 		while (Row[0] >= 0 && Row[0] < B.RCount) {
-			P = B.RLine(Row[0]).Chars;
-			L = B.RLine(Row[0]).Count;
+			P = B.RLine(Row[0]).Chars.toString();
+			L = B.RLine(Row[0]).getCount();
 			StateMap = null;
 
 			int [][] aStateMap = new int[1][];
@@ -985,16 +987,16 @@ public class CLanguage
 
 			if (L > 0)
 				for ( ; Col[0] >= 0 && Col[0] < L;
-						Col[0] += ((Flags & SKIP_BACK) ? -1 : +1)) {
-					if (P[Col[0]] == ' ' || P[Col[0]] == '\t')
+						Col[0] += (0 != (Flags & SKIP_BACK) ? -1 : +1)) {
+					if (P.charAt(Col[0]) == ' ' || P.charAt(Col[0]) == '\t')
 						continue;
 					if (StateMap[Col[0]] != hsC_Normal &&
 							StateMap[Col[0]] != hsC_Keyword &&
 							StateMap[Col[0]] != hsC_String1 &&
 							StateMap[Col[0]] != hsC_String2)
 						continue;
-					if (StateMap[Col[0]] == hsC_Normal && (Flags & SKIP_MATCH)) {
-						switch (P[Col[0]]) {
+					if (StateMap[Col[0]] == hsC_Normal && 0 != (Flags & SKIP_MATCH)) {
+						switch (P.charAt(Col[0])) {
 						case '{': Count[0]--; continue;
 						case '}': Count[0]++; continue;
 						case '(': Count[1]--; continue;
@@ -1004,18 +1006,18 @@ public class CLanguage
 						}
 					}
 					if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0
-							&& !(Flags & SKIP_TOBOL)) {
+							&& 0 == (Flags & SKIP_TOBOL)) {
 
 						return 1;
 					}
 				}
 
-			if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0 && (Flags & SKIP_TOBOL))
+			if (Count[0] == 0 && Count[1] == 0 && Count[2] == 0 && 0 != (Flags & SKIP_TOBOL))
 				return 1;
-			if (Flags & SKIP_LINE) {
+			if(0 !=  (Flags & SKIP_LINE)) {
 				return 1;
 			}
-			if (Flags & SKIP_BACK) {
+			if(0 !=  (Flags & SKIP_BACK)) {
 				Row[0]--;
 				if (Row[0] >= 0) {
 					L = B.RLine(Row[0]).getCount();
@@ -1033,7 +1035,7 @@ public class CLanguage
 
 	
 	
-	boolean isZeroArray(int [] Count)
+	static boolean isZeroArray(int [] Count)
 	{
 	    for ( int i = 0; i < Count.length; ++i)
 	        if (Count[i] != 0)
@@ -1042,5 +1044,12 @@ public class CLanguage
 	    return true;
 	}
 	
+	int IsState(int [] /*hsState * */Buf, int /*hsState*/ State, int Len) {
+	    int I;
+
+	    for(I = 0; I < Len; I++)
+	        if (Buf[I] != State) return 0;
+	    return 1;
+	}
 
 }
