@@ -864,47 +864,7 @@ public static String SlashDir(String Path)
 	
 	
 	
-	
-	static int TagLoad(String FileName) { /*FOLD00*/
-		return 0;
-		/*
-	    if (TagsAdd(FileName) == 0)
-	        return 0;
-	    ClearTagStack();
-	    if (TagFilesLoaded) {
-	        if (TagsLoad(TagFileCount - 1) == -1) {
-	            return 0;
-	        }
-	        if (SortTags() == -1) {
-	            TagClear();
-	            return 0;
-	        }
-	    }
-	    return 1;
-	    */
-	}
 
-
-	/*
-	private static int LoadTagFiles() { 
-	    int i;
-
-	    assert(TagFilesLoaded == 0);
-	    for (i = 0; i < TagFileCount; i++)
-	        if (TagsLoad(i) == -1) {
-	            TagClear();
-	            return 0;
-	        }
-	    if (SortTags() == -1) {
-	        TagClear();
-	        return 0;
-	    }
-	    TagFilesLoaded = 1;
-	    return 1;
-	} */
-	
-	
-	
 	
 	
 	

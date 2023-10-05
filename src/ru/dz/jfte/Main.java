@@ -17,7 +17,7 @@ public class Main implements MainConst
 	private static final Logger log = Logger.getLogger(Main.class.getName());
 	private static final String LOGGING_PROPERTIES = "/logging.properties";
 
-	public static final Charset charset = Charset.forName("US-ASCII"); // TODO charset - ASCII?
+	public static final Charset charset = Charset.defaultCharset(); // Charset.forName("US-ASCII"); // TODO charset - ASCII?
 	public static final boolean DEBUG_EDITOR = false;
 
 	

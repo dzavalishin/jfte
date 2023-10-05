@@ -1,18 +1,15 @@
 package ru.dz.jfte;
 
-import java.util.List;
-
-import ru.dz.jfte.c.CString;
-import ru.dz.jfte.c.CStringPtr;
-
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+
+import ru.dz.jfte.c.CString;
+import ru.dz.jfte.c.CStringPtr;
 
 public class Tags implements ModeDefs 
 {
@@ -81,7 +78,8 @@ public class Tags implements ModeDefs
 	    return TagPos;
 	}*/
 
-	static int AddTag(String Tag, String FileName, String TagBase, int Line, String StrFind) { /*FOLD00*/
+	static void AddTag(String Tag, String FileName, String TagBase, int Line, String StrFind) 
+	{
 		TagData td = new TagData();
 
 		td.Tag = Tag;
@@ -91,7 +89,6 @@ public class Tags implements ModeDefs
 		td.StrFind = StrFind;
 
 		TagD.add(td);
-		return 0;
 	}
 
 	/*
@@ -148,9 +145,13 @@ public class Tags implements ModeDefs
 	    if (size != sb.st_size)
 	        return -1;
 		 */
-		String stags;
+
 		try {
-			stags = Files.readString(Path.of(TagFiles.get(id)), Main.charset);
+			List<String> lines = Files.readAllLines(Path.of(TagFiles.get(id)), Main.charset);
+			for( String line : lines )
+			{
+				loadLine(line, TagFiles.get(id));
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -168,9 +169,6 @@ public class Tags implements ModeDefs
 	        }
 	    }*/
 
-		CString tags = new CString(stags);
-
-		CStringPtr p = tags.getPointer();
 		//String e = tags + sb.st_size;
 		//CStringPtr e = new CStringPtr( )
 
@@ -241,7 +239,54 @@ public class Tags implements ModeDefs
 		return 0;
 	}
 
-	int TagsAdd(String FileName) { /*FOLD00*/
+	private static void loadLine(String s, String TagFile) 
+	{
+		// Comment
+		if(s.charAt(0) == '!')
+			return;
+		
+		String [] part = s.split("\t");
+
+		String MTag = part[0];
+		String MFile = part[1];
+		String LLine = part[2];
+
+		if(LLine.charAt(0) == '/')
+		{
+			StringBuilder sb = new StringBuilder();
+			
+			int p = 1;
+			while (p < LLine.length()) 
+			{
+				char c = LLine.charAt(p++);
+				if (c == '\\') {
+					if (p < LLine.length())
+						sb.append(LLine.charAt(p++));
+				} 
+				else if (c == '^' || c == '$') continue;
+				else if (c == '/')
+					break;
+				else
+					sb.append(c);
+			}
+            //AddTag(MTag, MFile, TagFiles[id], -1, sb.toString());
+            AddTag(MTag, MFile, TagFile, -1, sb.toString());
+
+		}
+		else
+		{
+			int cpos = LLine.indexOf(';');
+			
+			if(cpos >= 0)
+				LLine = LLine.substring(0, cpos); 
+			
+			int line = Integer.parseInt(LLine);
+
+			AddTag(MTag, MFile, TagFile, line, null);
+		}
+	}
+
+	static int TagsAdd(String FileName) { /*FOLD00*/
 		TagFiles.add(FileName);
 		return 1;
 	}
@@ -257,20 +302,22 @@ public class Tags implements ModeDefs
 		TStack = null;	    
 	}
 
-	int TagLoad(String FileName) { /*FOLD00*/
+	static ExResult TagLoad(String FileName) 
+	{
 		if (TagsAdd(FileName) == 0)
-			return 0;
+			return ExResult.ErFAIL;
+
 		ClearTagStack();
 		if (TagFilesLoaded) {
 			if (TagsLoad(TagFiles.size() - 1) == -1) 
-				return 0;
-			
+				return ExResult.ErFAIL;
+
 			if (SortTags() == -1) {
 				TagClear();
-				return 0;
+				return ExResult.ErFAIL;
 			}
 		}
-		return 1;
+		return ExResult.ErOK;
 	}
 
 	static int LoadTagFiles() { /*FOLD00*/
@@ -411,7 +458,7 @@ public class Tags implements ModeDefs
 					return 0;
 				TagPosition = TStack.TagPos;
 
-				return TagNext(View);
+				return TagNext(View) == ExResult.ErOK ? 1 : 0; // TODO right?
 			}
 		}
 
@@ -516,39 +563,39 @@ public class Tags implements ModeDefs
 		return 0; // tag not found
 	}
 
-	int TagNext(EView View) { /*FOLD00*/
+	public static ExResult TagNext(EView View) { /*FOLD00*/
 
 		if (CurrentTag == null || TagPosition == -1) {
-			return 0;
+			return ExResult.ErFAIL;
 		}
 
 		if (TagPosition < CTags - 1 && CString.strcmp(CurrentTag, TagD.get(TagI[TagPosition + 1]).Tag) == 0) {
 			TagPosition++;
 			if (GotoTag(TagPosition, View) == 0)
-				return 0;
-			return 1;
+				return ExResult.ErFAIL;
+			return ExResult.ErOK;
 		}
 		View.Msg(S_INFO, "No next match for tag.");
-		return 0;
+		return ExResult.ErFAIL;
 	}
 
-	int TagPrev(EView View) { /*FOLD00*/
+	public static ExResult TagPrev(EView View) { /*FOLD00*/
 		if (CurrentTag == null || TagPosition == -1) {
 			View.Msg(S_INFO, "No current tag.");
-			return 0;
+			return ExResult.ErFAIL;
 		}
 
 		if (TagPosition > 0 && CString.strcmp(CurrentTag, TagD.get(TagI[TagPosition - 1]).Tag) == 0) {
 			TagPosition--;
 			if (GotoTag(TagPosition, View) == 0)
-				return 0;
-			return 1;
+				return ExResult.ErFAIL;
+			return ExResult.ErOK;
 		}
 		View.Msg(S_INFO, "No previous match for tag.");
-		return 0;
+		return ExResult.ErFAIL;
 	}
 
-	int TagPop(EView View) { /*FOLD00*/
+	static ExResult TagPop(EView View) { /*FOLD00*/
 		TagStack T = TStack;
 
 		if (T != null) {
@@ -558,14 +605,19 @@ public class Tags implements ModeDefs
 			TagPosition = T.TagPos;
 
 			if (GotoFilePos(View, T.FileName, T.Line, T.Col) == 0) {
-				return 0;
+				return ExResult.ErFAIL;
 			}
-			return 1;
+			return ExResult.ErOK;
 		}
 		View.Msg(S_INFO, "Tag stack empty.");
-		return 0;
+		return ExResult.ErFAIL;
 	}
 
 
+	/*
+	public static void main(String[] args) {
+		TagLoad("P:/phantomuserland/tags");
+		LoadTagFiles();
+	} */
 
 }

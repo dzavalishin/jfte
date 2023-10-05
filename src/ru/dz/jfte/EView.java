@@ -209,13 +209,13 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		case ExViewModeMap:         return ViewModeMap(State);
 		case ExClearMessages:       return ClearMessages();
 
-		/* TODO tags
-        case ExTagNext:             return TagNext(this);
-        case ExTagPrev:             return TagPrev(this);
-        case ExTagPop:              return TagPop(this);
-        case ExTagClear:            TagClear(); return ExResult.ErOK;
+		///* TODO tags
+        case ExTagNext:             return Tags.TagNext(this);
+        case ExTagPrev:             return Tags.TagPrev(this);
+        case ExTagPop:              return Tags.TagPop(this);
+        case ExTagClear:            Tags.TagClear(); return ExResult.ErOK;
         case ExTagLoad:             return TagLoad(State);
-		 */
+		// */
 
 		case ExShowHelp:            return Console.SysShowHelp(State, null);
 		case ExConfigRecompile:     return ConfigRecompile(State);
@@ -680,7 +680,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 	}
 
 
-	int TagLoad(ExState State) {
+	ExResult TagLoad(ExState State) {
 		String Tag[] = {""};
 		String FullTag[] = {""};
 
@@ -690,19 +690,20 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 			pTagFile = "tags";
 		}
 		if (Console.ExpandPath(pTagFile, Tag) == -1)
-			return 0;
+			return ExResult.ErFAIL;
+		
 		if (State.GetStrParam(this, Tag) == 0)
-			if (MView.Win.GetFile("Load tags", Tag, HIST_TAGFILES, GF_OPEN) == 0) return 0;
+			if (MView.Win.GetFile("Load tags", Tag, HIST_TAGFILES, GF_OPEN) == 0) return ExResult.ErFAIL;
 
 		if (Console.ExpandPath(Tag[0], FullTag) == -1)
-			return 0;
+			return ExResult.ErFAIL;
 
 		if (!Console.FileExists(FullTag[0])) {
 			Msg(S_INFO, "Tag file '%s' not found.", FullTag);
-			return 0;
+			return ExResult.ErFAIL;
 		}
 
-		return Console.TagLoad(FullTag[0]);
+		return Tags.TagLoad(FullTag[0]);
 	}
 
 
