@@ -313,7 +313,7 @@ public class ECvsBase extends EList
 			AddLine(null,-1,String.format("[continuing: '%s']",RealCommand), 0);
 		}
 
-		PipeId= GPipe.OpenPipe(RealCommand,this);
+		PipeId= GPipe.OpenPipe(RealCommand,".",this);
 		return 0;
 	}
 

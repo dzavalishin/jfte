@@ -12,7 +12,7 @@ public class EEventMap extends KeyMapper implements ModeDefs
 
 	//EKeyMap KeyMap;
 
-	// TODO 100
+
 	String [] Menu = new String[100]; // main + local    
 	EAbbrev [] abbrev = new EAbbrev [100];
 

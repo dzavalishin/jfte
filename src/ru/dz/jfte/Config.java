@@ -20,7 +20,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 	static int OpenAfterClose = 1;
 	static int SelectPathname = 0;
 	static String DefaultModeName = "";
-	RxNode CompletionFilter = null;
+	static Pattern CompletionFilter = null;
 	//#if defined(DOS) || defined(DOSP32)
 	//char Prstatic intDevice[MAXPATH] = "PRN";
 	//#else
@@ -852,14 +852,21 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 		case FLAG_WindowFont: WindowFont = string; break;
 		case FLAG_HelpCommand: HelpCommand = string; break;
 		case FLAG_GUICharacters:
-			// TODO AppendGUICharacters (string); 
+			//  AppendGUICharacters (string); // seems to be not needed anymore 
 			break;
 		case FLAG_CvsCommand: CvsCommand = string; break;
 		case FLAG_CvsLogMode: CvsLogMode = string; break;
-		//CompletionFilter
+
 		case FLAG_CompletionFilter: 
-			// TODO if ((CompletionFilter = RxCompile(string)) == NULL) return -1; break;
+			try { CompletionFilter = Pattern.compile(string); } 
+			catch(PatternSyntaxException e) 
+			{ 
+				System.err.printf("CompletionFilter regexp failed: %d = '%s'\n", what, string);
+				return 0;
+				//return -1; 
+			}			
 			break;
+			
 		default:
 			System.err.printf("Unknown global string: %d = '%s'\n", what, string);
 			return 0;
@@ -1137,7 +1144,7 @@ public class Config implements ConfigDefs, ModeDefs, GuiDefs, ColorDefs
 				if (wordChars != null && !wordChars.isBlank()) {
 					//Colorize.hm.LastState().wordChars = (String )malloc(256/8);
 					//assert(Colorize.hm.LastState().wordChars != NULL);
-					Colorize.hm.LastState().wordChars = new char[32]; // TODO 32
+					Colorize.hm.LastState().wordChars = new char[32];
 					//SetWordChars(Colorize.hm.LastState().wordChars.toCharArray(), wordChars);
 					SetWordChars(Colorize.hm.LastState().wordChars, wordChars);
 				}

@@ -6,7 +6,7 @@ public class EBufferFlags implements ModeDefs
 {
 	int num[] = new int [BFI_COUNT];
 	String str[] = new String[BFS_COUNT];
-	char WordChars[] = new char[32]; // TODO 32
+	char WordChars[] = new char[32]; 
 	char CapitalChars[] = null;
 
 	EBufferFlags(int [] n, String [] s, char [] w, char [] c)

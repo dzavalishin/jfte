@@ -1717,9 +1717,6 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 		try {
 			allCfg = Files.readAllBytes(Path.of(Cfg[0]));
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-
 			Console.DieError(1, "Error in %s exception %s\n", Cfg, e1.toString());
 			return false;
 		}
