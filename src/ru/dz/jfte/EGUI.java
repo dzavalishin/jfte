@@ -831,9 +831,9 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 						Mode = argv[Arg].substring(2);
 					}
 				} else if (aa1 == 'T') {
-					// TODO TagsAdd(argv[Arg] + 2);
+					Tags.TagsAdd(argv[Arg].substring(2) );
 				} else if (aa1 == 't') {
-					// TODO TagGoto(EView.ActiveView, argv[Arg] + 2);
+					Tags.TagGoto(EView.ActiveView, argv[Arg].substring(2));
 				} else {
 					Console.DieError(2, "Invalid command line option %s", argv[Arg]);
 					return ExResult.ErFAIL;
@@ -985,7 +985,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 				break;
 		}
 
-		// TODO TagsSave(fp);
+		Tags.TagsSave(w);
 		EMarkIndex.markIndex.saveToDesktop(w);
 
 		w.close();
@@ -1008,11 +1008,9 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
 	boolean doLoadDesktop(BufferedReader r) throws IOException 
 	{
-		//char line[512];
-		//String p, []e;
 		int FLCount = 0;
 
-		// TODO TagClear();
+		Tags.TagClear();
 
 		String line = r.readLine();
 
@@ -1062,8 +1060,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 			} else {
 
 				if (c0 == 'T' && c1 == '|') { // tag file
-					// TODO TagsAdd(line + 2);
-				} /* TODO else if (c0 == 'M' && c1 == '|') { // mark
+					Tags.TagsAdd(line.substring(2));
+				} /* TODO else if (c0 == 'M' && c1 == '|') { // TODO mark
                     String name;
                     String file;
                     EPoint P;

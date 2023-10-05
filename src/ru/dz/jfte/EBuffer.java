@@ -2141,14 +2141,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			//s[len] = 0;
 			String s = str.substring(0, len);
 
-			/* TODO TagDefined
-			if( BFI(this, BFI_HilitTags) && TagDefined(s) ) {
+			if( BFI(this, BFI_HilitTags) && Tags.TagDefined(s) ) 
+			{
 				//clr = 0x0A;
 				clr[0] = Mode.fColorize.Colors[CLR_HexNumber];
 				return true;
-			} */
+			} 
 		}
-		//*/
+
 		return false;
 	}
 

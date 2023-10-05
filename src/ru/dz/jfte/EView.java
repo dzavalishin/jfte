@@ -209,13 +209,11 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		case ExViewModeMap:         return ViewModeMap(State);
 		case ExClearMessages:       return ClearMessages();
 
-		///* TODO tags
         case ExTagNext:             return Tags.TagNext(this);
         case ExTagPrev:             return Tags.TagPrev(this);
         case ExTagPop:              return Tags.TagPop(this);
         case ExTagClear:            Tags.TagClear(); return ExResult.ErOK;
         case ExTagLoad:             return TagLoad(State);
-		// */
 
 		case ExShowHelp:            return Console.SysShowHelp(State, null);
 		case ExConfigRecompile:     return ConfigRecompile(State);

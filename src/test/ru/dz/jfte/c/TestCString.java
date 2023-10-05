@@ -567,9 +567,41 @@ class TestCString {
 		assertTrue( CString.memicmp("aBa", "aBa", 3) == 0 );
 
 		assertTrue( CString.memicmp("aBaA", "abaC", 3) == 0 );
+
 		
+		assertTrue( CString.memcmp("__aaa", 2, "aba", 3) < 0 );
+		assertTrue( CString.memcmp("!aba", 1, "aaa", 3) > 0 );
+		assertTrue( CString.memcmp("---aba", 3, "aba", 3) == 0 );
+		
+		assertTrue( CString.memicmp("##aBaA", 2, "abaC", 3) == 0 );
+
+		assertTrue( CString.strcmp("aaa", "aba") < 0 );
+		assertTrue( CString.strcmp("aba", "aaa") > 0 );
+		assertTrue( CString.strcmp("aba", "aba") == 0 );
+	
+		assertTrue( CString.strcmp("aba!", "aba") > 0 );
+		assertTrue( CString.strcmp("aba", "aba!") < 0 );
+
+		assertTrue( CString.strncmp("aaa#", "aba!", 3) < 0 );
+		assertTrue( CString.strncmp("aba$", "aaa@", 3) > 0 );
+		assertTrue( CString.strncmp("aba%", "aba*", 3) == 0 );
+	
+		assertTrue( CString.strncmp("aba!", "aba#", 3) == 0 );
+	
 	}
 	
+
+	@Test
+	void testStaticCharTypes() {
+		
+		assertTrue( CString.isalnum('f') );
+		assertTrue( CString.isalnum('щ') );
+		assertTrue( CString.isalnum('4') );
+		
+		assertFalse( CString.isalnum('&') );
+		assertFalse( CString.isalnum('[') );
+		assertFalse( CString.isalnum(';') );
+	}	
 	
 	
 }

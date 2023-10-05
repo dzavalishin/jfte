@@ -176,7 +176,7 @@ public class Tags implements ModeDefs
 		//int TagL, FileL/*, LineL*/;
 		//int MTag, MFile;
 
-		/* TODO tags
+		/* 
 
 	    while (p < e) {
 	        LTag = p;
@@ -291,7 +291,7 @@ public class Tags implements ModeDefs
 		return 1;
 	}
 
-	void TagsSave(BufferedWriter w) throws IOException { /*FOLD00*/
+	static void TagsSave(BufferedWriter w) throws IOException { /*FOLD00*/
 		for (String f : TagFiles)
 			w.write("T|"+f+"\n");
 	}
@@ -406,7 +406,7 @@ public class Tags implements ModeDefs
 		return 1;
 	}
 
-	int TagGoto(EView View, String Tag) 
+	static int TagGoto(EView View, String Tag) 
 	{
 		if (!TagFilesLoaded)
 			if (LoadTagFiles() == 0)
@@ -491,30 +491,30 @@ public class Tags implements ModeDefs
 		return 0; // tag not found
 	}
 
-	int TagDefined(String Tag) {
+	public static boolean TagDefined(String Tag) {
 		int L = 0, R = CTags, M, cmp;
 
 		if (!TagFilesLoaded) // !!! always?
 			if (LoadTagFiles() == 0)
-				return 0;
+				return false;
 
 		if (CTags == 0)
-			return 0;
+			return false;
 
 		while (L < R) {
 			M = (L + R) / 2;
 			cmp = CString.strcmp(Tag, TagD.get(TagI[M]).Tag);
 			if (cmp == 0)
-				return 1;
+				return true;
 			else if (cmp < 0)
 				R = M;
 			else
 				L = M + 1;
 		}
-		return 0; // tag not found
+		return false; // tag not found
 	}
 
-	int TagComplete(String [] Words, int [] WordsPos, int WordsMax, String Tag) 
+	public static int TagComplete(String [] Words, int [] WordsPos, int WordsMax, String Tag) 
 	{
 		if ((Tag == null) || (Words == null) || (WordsPos[0] >= WordsMax))
 			return 0;
@@ -595,7 +595,7 @@ public class Tags implements ModeDefs
 		return ExResult.ErFAIL;
 	}
 
-	static ExResult TagPop(EView View) { /*FOLD00*/
+	public static ExResult TagPop(EView View) { /*FOLD00*/
 		TagStack T = TStack;
 
 		if (T != null) {
