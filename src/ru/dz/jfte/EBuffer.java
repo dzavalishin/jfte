@@ -8199,9 +8199,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean ShowHelpWord(ExState State) 
 	{
-		// TODO ShowHelpWord
-		return false;
-		/*
 	    //** Code for BlockSelectWord to find the word under the cursor,
 	    String achr = "+-_."; // these are accepted characters
 	    //char    buf[128];
@@ -8226,7 +8223,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        // To start of word,
 
 	        while ((P > 0)
-	               && ((L.Chars.charAt(P - 1) == '\b') || BitOps.isalnum(L.Chars.charAt(P - 1))
+	               && ((L.Chars.charAt(P - 1) == '\b') || CString.isalnum(L.Chars.charAt(P - 1))
 	                   || (achr.indexOf( L.Chars.charAt(P - 1)) >= 0)))
 	            P--; // '_' for underline is hidden in achr
 
@@ -8238,7 +8235,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        while( P < L.getCount()) {
 	            if (((P + 1) < L.getCount()) && (L.Chars.charAt(P + 1) == '\b'))
 	                P += 2;
-	            else if (BitOps.isalnum(L.Chars.charAt(P))
+	            else if (CString.isalnum(L.Chars.charAt(P))
 	                     || (achr.indexOf( L.Chars.charAt(P)) >= 0 ) )
 	                buf.append(  L.Chars.charAt(P++) );
 	            else
@@ -8246,12 +8243,14 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        }
 	    }
 	    //printf("Word: %s\n", buf);
-	    //if (buf[0] == 0) {
-	    //    Msg(INFO, "No valid word under the cursor.");
-	    //    return 0;
-	    //}
-	    return View.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() );
-		 */
+	    
+	    if (buf.isEmpty()) {
+	        Msg(S_INFO, "No valid word under the cursor.");
+	        return false;
+	    }
+	    
+	    return Console.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() ) == ExResult.ErOK;
+		// */
 	}
 
 	

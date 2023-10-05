@@ -217,7 +217,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
         case ExTagLoad:             return TagLoad(State);
 		 */
 
-		case ExShowHelp:            return Console.SysShowHelp(State, 0);
+		case ExShowHelp:            return Console.SysShowHelp(State, null);
 		case ExConfigRecompile:     return ConfigRecompile(State);
 		case ExRemoveGlobalBookmark:return RemoveGlobalBookmark(State);
 		case ExGotoGlobalBookmark:  return GotoGlobalBookmark(State);

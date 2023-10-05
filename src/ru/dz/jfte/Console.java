@@ -909,7 +909,7 @@ public static String SlashDir(String Path)
 	
 	
 	
-	public static ExResult SysShowHelp(ExState state, int i) {
+	public static ExResult SysShowHelp(ExState state, String subject) {
 		// TODO SysShowHelp
 		return ExResult.ErFAIL;
 	}
