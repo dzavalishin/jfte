@@ -142,7 +142,7 @@ public class ConfigCompiler implements ConfigCompilerDefs, ConfigDefs
 	    
 	    cc.DefineWord("OS_JAVA");
 
-	    /* TODO	    if (strncmp(p, "-o", 2) == 0) {
+	    /* TO DO	    if (strncmp(p, "-o", 2) == 0) {
 	        p += 2;
 	        offset = atol(p);
 	        n++;

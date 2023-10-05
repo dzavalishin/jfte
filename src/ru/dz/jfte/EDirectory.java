@@ -82,7 +82,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 			
 			if (Col < s.length())
 				B.MoveStr( 0, Width, s.substring(Col), color, Width);
-				//TODO s + Col : B.MoveStr( 0, Width, s + Col, color, Width);
+				//TO DO s + Col : B.MoveStr( 0, Width, s + Col, color, Width);
 		}
 	}
 

@@ -95,16 +95,19 @@ public class CString extends AbstractCString
 	// Static string funcs
 	// -------------------------------------------------------------------
 
+	// TODO test
 	public static boolean isalnum(char c) {
 		return Character.isAlphabetic(c) || Character.isDigit(c);
 	}
 	
 
 	
+	// TODO test
 	public static int memcmp(String s1, String s2, int len) {
 		return memcmp( s1, 0, s2, len);
 	}
 
+	// TODO test
 	public static int memcmp(CharSequence s1, int s1pos, CharSequence s2, int len) {
 		if (len == 0)	         
 			return 0;
@@ -120,10 +123,12 @@ public class CString extends AbstractCString
 	}
 
 
+	// TODO test
 	public static int memicmp(String s1, String s2, int len) {
 		return memicmp( s1, 0, s2, len);
 	}
 
+	// TODO test
 	public static int memicmp(CharSequence s1, int s1pos, CharSequence s2, int len) {
 		if (len == 0)	         
 			return 0;
@@ -138,6 +143,24 @@ public class CString extends AbstractCString
 		return charICmp(s1.charAt(n+s1pos), s2.charAt(n));		
 	}
 	
+	// TODO test
+	public static int strcmp(CharSequence s1, CharSequence s2) {		
+		return CharSequence.compare(s1,s2);
+	}
 
+	// TODO test
+	public static int strncmp(CharSequence s1, CharSequence s2, int n) 
+	{
+		if (n == 0)	         return 0;
+
+		while (n-- > 0 && s1.charAt(n) == s2.charAt(n)) 
+		{
+			if (n == 0 || s1.charAt(n) == '\0')
+				return 0;
+		}
+
+		return charCmp(s1.charAt(n), s2.charAt(n));		
+	}
+	
 	
 }

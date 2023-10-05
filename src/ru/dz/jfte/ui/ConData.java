@@ -66,7 +66,7 @@ public class ConData
 				if(fixColors) g.setColor(Color.yellow); 
 				g.drawString(""+ch, xp, yp);
 
-				g.setColor(Color.darkGray); // TODO test
+				//g.setColor(Color.darkGray); // TO DO test
 				//g.drawRect(x*xCell, y*yCell, xCell, yCell);
 				//g.drawLine(x, y, x, y);
 
