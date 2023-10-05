@@ -15,8 +15,15 @@ public class GPipe {
 	boolean stopped = false;
 	Process p;
 	BufferedReader input;
+	BufferedReader err;
 
 	EModel notify;
+
+	
+	
+	static final int MAX_PIPES = 4;
+	static GPipe [] Pipes = new GPipe[MAX_PIPES];
+	
 	
 	public GPipe(int id, EModel m) {
 		this.id = id;
@@ -24,8 +31,8 @@ public class GPipe {
 	}
 	
 
-	public boolean run(String command, String directory) {
-		
+	public boolean run(String command, String directory) 
+	{	
 		command = command.trim(); // TODO remove me as cmd line editor fixed not to add spaces
 		
 		ProcessBuilder pb = new ProcessBuilder(command); 
@@ -37,18 +44,20 @@ public class GPipe {
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "GPipe.run("+command+")", e);
 			return false;
-		}
-	    
+		}	    
 	    
 		input = new BufferedReader(new 
 						InputStreamReader(p.getInputStream()));
 
+		err = new BufferedReader(new 
+				InputStreamReader(p.getErrorStream()));
+		
 		return true;
 	}
 
 	public TEvent checkPipe() {
 		try {
-			if( input.ready() || !p.isAlive() )
+			if( input.ready() || err.ready() || !p.isAlive() )
 			{
 				return TEvent.newNotifyPipeEvent(id,notify);
 			}
@@ -59,41 +68,99 @@ public class GPipe {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-	static final int MAX_PIPES = 4;
-	//#define PIPE_BUFLEN 4096
-
-	static GPipe [] Pipes = new GPipe[MAX_PIPES];
-
-
-	/**
-	 * Poor man's multithreading?
-	 * 
-	 * @return true if some pipe has data to read
-	 */
-	public static TEvent checkPipeData()
+	/*static int SetPipeView(int id, EModel  notify)
 	{
-		TEvent ret = null;
-		for(GPipe p : Pipes)
-			if(p != null && (ret = p.checkPipe()) != null)
-				return ret;
+		if (id < 0 || id > MAX_PIPES)
+			return -1;
 		
-		return null;
+		if (Pipes[id] == null)
+			return -1;
+
+		Pipes[id].notify = notify;
+		return 0;
+	}*/
+
+	
+	public String ReadPipe()
+	{
+		String s = null;
+		
+		try {
+			if(err.ready())
+				s = err.readLine();
+			else			
+				s = input.readLine();
+		} 
+		catch (IOException e) 
+		{
+			log.log(Level.SEVERE, "ReadPipe", e);			
+			stopped = true;
+			return null;
+		}
+		
+		if (s == null)
+			stopped = true;
+
+		return s;
 	}
 	
+
+	public int ClosePipe()
+	{
+		int status = -1;
+		try {
+			input.close();
+			err.close();
+			p.destroy();
+			status = p.waitFor();
+		} catch (InterruptedException | IOException e) {
+			log.log(Level.SEVERE, "ClosePipe", e);
+		}		
+			
+		return status;
+	}
+	
+
+
+	
+	// -------------------------------------------------------------------
+	// Static
+	// -------------------------------------------------------------------
+
+	public static String ReadPipe(int id)
+	{
+		if (id < 0 || id > MAX_PIPES)
+			return null;
+		
+		if (Pipes[id] == null)
+			return null;
+
+		return Pipes[id].ReadPipe();
+	}
+	
+
+	static int ClosePipe(int id)
+	{
+		if (id < 0 || id > MAX_PIPES)
+			return -1;
+		if (Pipes[id] == null)
+			return -1;
+
+		int status = Pipes[id].ClosePipe();
+		/*
+		int status = -1;
+		try {
+			Pipes[id].input.close();
+			Pipes[id].p.destroy();
+			status = Pipes[id].p.waitFor();
+		} catch (InterruptedException | IOException e) {
+			log.log(Level.SEVERE, "ClosePipe", e);
+		}		
+		*/
+		Pipes[id] = null;
+		return status;
+	}
+
 	static int OpenPipe(String Command, String directory, EModel  notify)
 	{
 		int i;
@@ -109,67 +176,23 @@ public class GPipe {
 		return -1;
 	}
 
-	static int SetPipeView(int id, EModel  notify)
+
+
+
+	/**
+	 * Poor man's multithreading?
+	 * 
+	 * @return event to dispatch if some pipe has data to read or null
+	 */
+	public static TEvent checkPipeData()
 	{
-		if (id < 0 || id > MAX_PIPES)
-			return -1;
+		TEvent ret = null;
+		for(GPipe p : Pipes)
+			if(p != null && (ret = p.checkPipe()) != null)
+				return ret;
 		
-		if (Pipes[id] == null)
-			return -1;
-
-		Pipes[id].notify = notify;
-		return 0;
+		return null;
 	}
-
-	static String ReadPipe(int id)
-	{
-		int rc;
-
-		if (id < 0 || id > MAX_PIPES)
-			return null;
-		
-		if (Pipes[id] == null)
-			return null;
-
-		
-		String s;
-		try {
-			s = Pipes[id].input.readLine();
-		} 
-		catch (IOException e) 
-		{
-			log.log(Level.SEVERE, "ReadPipe", e);			
-			return null;
-		}
-		
-		if (s == null) {
-			Pipes[id].stopped = true;
-		}
-
-		return s;
-	}
-
-	static int ClosePipe(int id)
-	{
-		if (id < 0 || id > MAX_PIPES)
-			return -1;
-		if (Pipes[id] == null)
-			return -1;
-		
-		int status = -1;
-		try {
-			Pipes[id].input.close();
-			Pipes[id].p.destroy();
-			status = Pipes[id].p.waitFor();
-		} catch (InterruptedException | IOException e) {
-			log.log(Level.SEVERE, "ClosePipe", e);
-		}		
-			
-		Pipes[id] = null;
-		return status;
-	}
-
-	
 	
 	
 }
