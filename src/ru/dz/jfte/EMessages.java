@@ -144,7 +144,7 @@ public class EMessages extends EList implements Closeable
 		}
 
 		Console.ChangeDir(Directory);
-		PipeId = GPipe.OpenPipe(Command, this);
+		PipeId = GPipe.OpenPipe(Command, Directory, this);
 		return 0;
 	}
 

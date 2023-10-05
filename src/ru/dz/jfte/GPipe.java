@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
@@ -17,37 +18,37 @@ public class GPipe {
 
 	EModel notify;
 	
+	public GPipe(int id, EModel m) {
+		this.id = id;
+		notify = m;
+	}
 	
 
-	public boolean run(String command) {
+	public boolean run(String command, String directory) {
+		
+		command = command.trim(); // TODO remove me as cmd line editor fixed not to add spaces
 		
 		ProcessBuilder pb = new ProcessBuilder(command); 
 
+		pb.directory(new File(directory));
+		
 	    try {
 			p = pb.start();
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "GPipe.run("+command+")", e);
 			return false;
 		}
-
+	    
+	    
 		input = new BufferedReader(new 
 						InputStreamReader(p.getInputStream()));
-		/*		
-        String line; 
-        while ((line = input.readLine()) != null) { 
-            System.out.println(line); 
-        } 
-    } 
-} catch (IOException e) { 
-    e.printStackTrace(); 
-} */
 
 		return true;
 	}
 
 	public TEvent checkPipe() {
 		try {
-			if( input.ready() )
+			if( input.ready() || !p.isAlive() )
 			{
 				return TEvent.newNotifyPipeEvent(id,notify);
 			}
@@ -93,14 +94,14 @@ public class GPipe {
 		return null;
 	}
 	
-	static int OpenPipe(String Command, EModel  notify)
+	static int OpenPipe(String Command, String directory, EModel  notify)
 	{
 		int i;
 
 		for (i = 0; i < MAX_PIPES; i++) {
 			if (Pipes[i] == null) {			
-				Pipes[i] = new GPipe();
-				if( !Pipes[i].run(Command) )
+				Pipes[i] = new GPipe(i, notify);
+				if( !Pipes[i].run(Command, directory) )
 					return -1;
 				return i;
 			}
