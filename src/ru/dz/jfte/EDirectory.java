@@ -1,17 +1,21 @@
 package ru.dz.jfte;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs 
 {
 
 	String Path;
-	FileInfo [] Files = null;
-	int FCount = 0;
+	//FileInfo [] Files = null;
+	//int FCount = 0;
 	int SearchLen = 0;
 	String SearchName = null;
 	int SearchPos[];
+	List<FileInfo> Files = new ArrayList<>();
 
 
 
@@ -46,39 +50,16 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		//char s[1024];
 
 		B.MoveCh( ' ', color, Width);
-		if (Files!=null && Line >= 0 && Line < FCount) 
+		if (Files!=null && Line >= 0 && Line < Files.size()) 
 		{
-			/*
-			int Year, Mon, Day, Hour, Min, Sec;
-			tm t;
-			time_t tim;
-
-			tim = Files[Line].MTime();
-			t = localtime(tim);
-
-			if (t) {
-				Year = t.tm_year + 1900;
-				Mon = t.tm_mon + 1;
-				Day = t.tm_mday;
-				Hour = t.tm_hour;
-				Min = t.tm_min;
-				Sec = t.tm_sec;
-			} else {
-				Year = Mon = Day = Hour = Min = Sec = 0;
-			}
-
-			String s = String.format(
-					" %04d/%02d/%02d %02d:%02d:%02d %8ld ",
-					Year, Mon, Day, Hour, Min, Sec,
-					Files[Line].Size());
-			*/
-	        Date modifiedDate = new Date(Files[Line].MTime());
+			FileInfo f = Files.get(Line);
+	        Date modifiedDate = new Date(f.MTime());
 	        String s = modifiedDate.toString(); // + " " + Files[Line].Size()+ " ";
 
-			String fn = Files[Line].name;
-			fn += Files[Line].isDir() ? '/' : ' ';
+			String fn = f.name;
+			fn += f.isDir() ? '/' : ' ';
 
-			s = String.format("%s %9d  %-40s", s, Files[Line].Size(), fn);
+			s = String.format("%s %9d  %-40s", s, f.Size(), fn);
 			
 			if (Col < s.length())
 				B.MoveStr( 0, Width, s.substring(Col), color, Width);
@@ -88,7 +69,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
     @Override
 	boolean IsHilited(int Line) {
-		return (Line >= 0 && Line < FCount) ? Files[Line].isDir() : false;
+		return (Line >= 0 && Line < Files.size()) ? Files.get(Line).isDir() : false;
 	}
 
 	/*
@@ -118,7 +99,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		FreeList();
 
 		Count = 0;
-		FCount = 0;
+		//FCount = 0;
 		
 		Dir[0] = Console.directory(Path);
 		if( null == Dir[0]) return;
@@ -131,6 +112,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		while ((fi = ff.FindNext()) != null) {
 			assert(fi != null);
 			if (!fi.Name().equals(".")) {
+				/*
 				//Files = (FileInfo **)realloc((void *)Files, ((FCount | 255) + 1) * sizeof(FileInfo *));
 				if(null == Files)
 					Files = new FileInfo[(FCount | 255) + 1];
@@ -138,12 +120,13 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 					Files = Arrays.copyOf(Files, (FCount | 255) + 1);
 
 				Files[FCount] = fi;
-
-				SizeCount += Files[FCount].Size();
+				*/
+				Files.add(fi);
+				SizeCount += fi.Size();
 				if (fi.isDir() && !fi.Name().equals(".."))
 					DirCount++;
 				Count++;
-				FCount++;
+				//FCount++;
 			}
 		}
 		//delete ff;
@@ -151,29 +134,32 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		{
 
 			String CTitle = String.format("%d files%c%d dirs%c%d bytes%c%-200.200s",
-					FCount, Console.ConGetDrawChar(DCH_V),
+					Files.size(), Console.ConGetDrawChar(DCH_V),
 					DirCount, Console.ConGetDrawChar(DCH_V),
 					SizeCount, Console.ConGetDrawChar(DCH_V),
 					Dir[0]);
 			SetTitle(CTitle);
 		}
-		// TODO qsort(Files, FCount, sizeof(FileInfo *), FileNameCmp);
+
+		Collections.sort(Files);
 		NeedsRedraw = 1;
 	}
 
     @Override
 	void FreeList() {
-		Files = null;
-		FCount = 0;
+		Files.clear();
+		//FCount = 0;
 	}
 
 	boolean isDir(int No) {
 		String FilePath[] = {""};
 
+		FileInfo f = Files.get(No);
+
 		//Console.JustDirectory(Path, FilePath);
 		FilePath[0] = Console.directory(Path); 
 		FilePath[0] = Console.Slash(FilePath[0], 1);
-		FilePath[0] += Files[No].name;
+		FilePath[0] += f.name;
 		return Console.IsDirectory(FilePath[0]);
 	}
 
@@ -183,10 +169,10 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		case ExActivateInOtherWindow:
 			SearchLen = 0;
 			Msg(S_INFO, "");
-			if (Files != null && Row >= 0 && Row < FCount) {
+			if (Files != null && Row >= 0 && Row < Files.size()) {
 				if (isDir(Row)) {
 				} else {
-					return FmLoad(Files[Row].name, View.Next);
+					return FmLoad(Files.get(Row).name, View.Next);
 				}
 			}
 			return ExResult.ErFAIL;
@@ -205,9 +191,9 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		case ExDirGoDown:
 			SearchLen = 0;
 			Msg(S_INFO, "");
-			if (Files!=null && Row >= 0 && Row < FCount) {
+			if (Files!=null && Row >= 0 && Row < Files.size()) {
 				if (isDir(Row)) {
-					FmChDir(Files[Row].Name());
+					FmChDir(Files.get(Row).Name());
 					return ExResult.ErOK;
 				}
 			}
@@ -234,8 +220,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		case ExDirSearchNext:
 			// Find next matching file, search is case in-sensitive while sorting is sensitive
 			if (SearchLen!=0) {
-				for (int i = Row + 1; i < FCount; i++) {
-					if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+				for (int i = Row + 1; i < Files.size(); i++) {
+					if (SearchName.equalsIgnoreCase(Files.get(i).Name())) {
 						Row = i;
 						break;
 					}
@@ -248,7 +234,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 			if (SearchLen!=0) {
 				for (int i = Row - 1; i >= 0; i--) 
 				{
-					if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+					if (SearchName.equalsIgnoreCase(Files.get(i).Name())) {
 						Row = i;
 						break;
 					}
@@ -259,7 +245,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		case ExDeleteFile:
 			SearchLen = 0;
 			Msg(S_INFO, "");
-			return FmRmDir(Files[Row].Name());
+			return FmRmDir(Files.get(Row).Name());
 		}
 		return super.ExecCommand(Command, State);
 	}
@@ -268,12 +254,12 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	int Activate(int No) {
 		SearchLen = 0;
 		Msg(S_INFO, "");
-		if (Files!=null && No >= 0 && No < FCount) {
+		if (Files!=null && No >= 0 && No < Files.size()) {
 			if (isDir(No)) {
-				FmChDir(Files[No].Name());
+				FmChDir(Files.get(No).Name());
 				return 0;
 			} else {
-				return FmLoad(Files[No].Name(), View) == ExResult.ErOK ? 1 : 0;
+				return FmLoad(Files.get(No).Name(), View) == ExResult.ErOK ? 1 : 0;
 			}
 		}
 		return 1;
@@ -321,9 +307,9 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 					//SearchName[++SearchLen] = 0;
 					Found = 0;
 					//LOG << "Comparing " << SearchName << ENDLINE;
-					for (int i = Row; i < FCount; i++) {
+					for (int i = Row; i < Files.size(); i++) {
 						//LOG << "  to . " << Files[i].Name() << ENDLINE;
-						if (SearchName.equalsIgnoreCase(Files[i].Name())) {
+						if (SearchName.equalsIgnoreCase(Files.get(i).Name())) {
 							Row = i;
 							Found = 1;
 							break;
@@ -345,13 +331,13 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 	ExResult RescanDir() {
 		String CName = "";
 
-		if (Row >= 0 && Row < FCount)
-			CName = Files[Row].Name();
+		if (Row >= 0 && Row < Files.size())
+			CName = Files.get(Row).Name();
 		Row = 0;
 		RescanList();
 		if (!CName.isBlank()) {
-			for (int i = 0; i < FCount; i++) {
-				if (Console.filecmp(Files[i].Name(), CName) == 0)
+			for (int i = 0; i < Files.size(); i++) {
+				if (Console.filecmp(Files.get(i).Name(), CName) == 0)
 				{
 					Row = i;
 					break;
@@ -385,8 +371,8 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		Row = 0;
 		RescanList();
 		if (!CName[0].isBlank()) {
-			for (int i = 0; i < FCount; i++) {
-				if (Console.filecmp(Files[i].Name(), CName[0]) == 0)
+			for (int i = 0; i < Files.size(); i++) {
+				if (Console.filecmp(Files.get(i).Name(), CName[0]) == 0)
 				{
 					Row = i;
 					break;
@@ -473,7 +459,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 		AInfo = String.format(
 				"%2d %04d/%03d %-150s",
 				ModelNo,
-				Row + 1, FCount,
+				Row + 1, Files.size(),
 				winTitle);
 		/*    sprintf(AInfo,
 	            "%2d %04d/%03d %-150s",
@@ -543,7 +529,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
     	    return String.format(
     	            "%2d %04d/%03d %-150s",
     	            ModelNo,
-    	            Row + 1, FCount,
+    	            Row + 1, Files.size(),
     	            winTitle);
     	
     }
