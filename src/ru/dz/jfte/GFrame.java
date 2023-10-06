@@ -237,7 +237,7 @@ public class GFrame implements Closeable, EventDefs
 	    if (Top == null)
 	        return 0;
 	    
-	    // TODO bug in orig FTE code if (GView.FocusCapture != null) view = view;
+	    // XXX bug in orig FTE code if (GView.FocusCapture != null) view = view;
 	    
 	    if (Active!=null)
 	        Active.Activate(false);

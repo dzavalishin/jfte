@@ -553,7 +553,7 @@ public static String SlashDir(String Path)
 
 		ConQuerySize(W, H);
 		ConHideMouse();
-		// TODO ConSuspend();
+		// XXX ConSuspend();
 
 		// TODO unix
 		if (Command == null)      // empty string = shell
@@ -572,7 +572,7 @@ public static String SlashDir(String Path)
 				rc = -1;
 			}
 
-		// TODO ConContinue();
+		// XXX ConContinue();
 		ConShowMouse();
 		ConQuerySize(W1, H1);
 

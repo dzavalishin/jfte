@@ -74,6 +74,6 @@ public interface EventDefs {
 	static final int  cmHScrollMove  = 19;
 
 	static final int  cmDroppedFile  = 30;
-	static final int  cmRenameFile   = 31;   /* TODO: in-place editing of titlebar */
+	static final int  cmRenameFile   = 31;   /* XXX: in-place editing of titlebar */
 	
 }

@@ -20,7 +20,7 @@ public interface GuiDefs {
 	static final int  GPC_ERROR   = 0x0004;
 	static final int  GPC_FATAL   = 0x0008;
 
-	static final int  SEARCH_BACK    = 0x00000001;   // reverse (TODO for regexps)
+	static final int  SEARCH_BACK    = 0x00000001;   // reverse (XXX for regexps)
 	static final int  SEARCH_RE      = 0x00000002;   // use regexp
 	static final int  SEARCH_NCASE   = 0x00000004;   // case
 	static final int  SEARCH_GLOBAL  = 0x00000008;   // start from beggining (or end if BACK)

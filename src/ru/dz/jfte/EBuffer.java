@@ -77,7 +77,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	int FCount = 0;
-	EFold [] FF = new EFold[0];
+	public EFold [] FF = new EFold[0];
 
 	EPoint Match = new EPoint(-1, -1);
 	int MatchLen = 0;
@@ -397,10 +397,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			UpdateMark(M, Type, Row, Col, Rows, Cols);
 			FF[f].line = M.Row;
 		} 
-
-		for (int b = 0; b < BMarks.size(); b++)			
-			UpdateMark(BMarks.get(b).BM, Type, Row, Col, Rows, Cols);
-
+		
 		for( EBookmark bm : BMarks.values() )
 			UpdateMark(bm.BM, Type, Row, Col, Rows, Cols);
 
@@ -5275,7 +5272,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	        int level = 0, open = 0;
 	        int l;
 	        int pos = -1, startpos;
-	        String foldnum = "00";
+	        char [] foldnum = "00".toCharArray();
 
 	        if (BFS(this, BFS_CommentStart) == null) len_start = 0;
 	        else len_start = BFS(this, BFS_CommentStart).length();
@@ -5295,23 +5292,24 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    } else {
 	                        pos = LL[l].getCount() - len_end;
 	                        // Check if line ends with end comment (if defined)
-	                        if (len_end != 0 && memcmp(LL[l].Chars + pos, BFS(this, BFS_CommentEnd), len_end) != 0) continue;
-	                        if (iBFI(this, BFI_SaveBookmarks) == 2 && pos - 10 >= 0 && LL[l].Chars[pos-1] == 'b') { // Bookmarks can be at end
-	                            char numbuf[5];
+	                        if (len_end != 0 && CString.memcmp(LL[l].Chars, pos, BFS(this, BFS_CommentEnd), len_end) != 0) continue;
+	                        if (iBFI(this, BFI_SaveBookmarks) == 2 && pos - 10 >= 0 && LL[l].Chars.charAt(pos-1) == 'b') { // Bookmarks can be at end
+	                            //char numbuf[5];
+	                        	CString numbuf = new CString(5);
 	                            int i;
 
-	                            memcpy(numbuf, LL[l].Chars + pos - 5, 4); numbuf[4] = 0;
-	                            if (1 != sscanf(numbuf, "%x", &i)) continue;
+	                            numbuf.memmove(0, LL[l].Chars, pos - 5, 4); numbuf.w(4, 0);
+	                            if (1 != sscanf(numbuf, "%x", i)) continue;
 	                            pos -= i + 6;
 	                            if (pos < 0) continue;
 	                        }
 	                        if (iBFI(this, BFI_SaveFolds) == 2 && pos - 6 >= 0 &&
-	                            (memcmp(LL[l].Chars + pos - 6, "FOLD", 4) == 0 ||
-	                             memcmp(LL[l].Chars + pos - 6, "fold", 4) == 0)) pos -= 6;
+	                            (CString.memcmp(LL[l].Chars, pos - 6, "FOLD", 4) == 0 ||
+	                            		CString.memcmp(LL[l].Chars, pos - 6, "fold", 4) == 0)) pos -= 6;
 	                        pos -= len_start;
 	                    }
 	                    // Check comment start
-	                    if (pos < 0 || (len_start != 0 && memcmp(LL[l].Chars + pos, BFS(this, BFS_CommentStart), len_start) != 0)) continue;
+	                    if (pos < 0 || (len_start != 0 && CString.memcmp(LL[l].Chars, pos, BFS(this, BFS_CommentStart), len_start) != 0)) continue;
 	                    startpos = pos;
 	                    pos += len_start;
 	                    // We have starting position after comment start
@@ -5324,21 +5322,21 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	                    // Folds come always first
 	                    if (iBFI(this, BFI_SaveFolds) == where && (pos + len_end + 6 <= LL[l].getCount())) {
-	                        if (memcmp(LL[l].Chars + pos, "FOLD", 4) == 0) {
+	                        if (CString.memcmp(LL[l].Chars, pos, "FOLD", 4) == 0) {
 	                            open = 1;
-	                        } else if (memcmp(LL[l].Chars + pos, "fold", 4) == 0) {
+	                        } else if (CString.memcmp(LL[l].Chars, pos, "fold", 4) == 0) {
 	                            open = 0;
 	                        } else
 	                            open = -1;
 	                    }
 	                    if (open != -1) {
-	                        foldnum[0] = LL[l].Chars[pos + 4];
-	                        foldnum[1] = LL[l].Chars[pos + 4 + 1];
-	                        if (1 != sscanf(foldnum, "%2d", &level))
+	                        foldnum[0] = LL[l].Chars.charAt(pos + 4);
+	                        foldnum[1] = LL[l].Chars.charAt(pos + 4 + 1);
+	                        if (1 != sscanf(foldnum, "%2d", level))
 	                            level = -1;
 
-	                        if (!isdigit(LL[l].Chars[pos + 4]) ||
-	                            !isdigit(LL[l].Chars[pos + 5]))
+	                        if (!CString.isdigit(LL[l].Chars.charAt(pos + 4)) ||
+	                            !CString.isdigit(LL[l].Chars.charAt(pos + 5)))
 	                            level = -1;
 
 	                        if (level == -1 || open >= 100) continue;
@@ -5346,41 +5344,41 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    }
 
 	                    // Now get bookmarks
-	                    if (iBFI(this, BFI_SaveBookmarks) == where && (pos + len_end + 10 <= LL[l].getCount()) && memcmp(LL[l].Chars + pos, "BOOK", 4) == 0) {
+	                    if (iBFI(this, BFI_SaveBookmarks) == where && (pos + len_end + 10 <= LL[l].getCount()) && CString.memcmp(LL[l].Chars, pos, "BOOK", 4) == 0) {
 	                        int error = 0;
 	                        int i, col, startBook;
-	                        char numbuf[5], buf[256];
+	                        //char numbuf[5], buf[256];
 
 	                        startBook = pos; pos += 4;
 	                        while (pos + len_end + 6 + 6 <= LL[l].getCount()) {
 	                            // Read column
-	                            memcpy(numbuf, LL[l].Chars + pos, 4); numbuf[4] = 0;
+	                        	CString.memcpy(numbuf, LL[l].Chars + pos, 4); numbuf[4] = 0;
 	                            pos += 4;
-	                            if (1 != sscanf(numbuf, "%x", &col)) {
+	                            if (1 != sscanf(numbuf, "%x", col)) {
 	                                error = 1; break;
 	                            }
 	                            // Read length
-	                            memcpy(numbuf, LL[l].Chars + pos, 2); numbuf[2] = 0;
+	                            CString.memcpy(numbuf, LL[l].Chars + pos, 2); numbuf[2] = 0;
 	                            pos += 2;
-	                            if (1 != sscanf(numbuf, "%x", &i)) {
+	                            if (1 != sscanf(numbuf, "%x", i)) {
 	                                error = 1; break;
 	                            }
 	                            if (pos + i + 6 + len_end > LL[l].getCount() || i == 0) {
 	                                error = 1; break;
 	                            }
 	                            if (i) {
-	                                memcpy(buf, LL[l].Chars + pos, i);
+	                            	CString.memcpy(buf, LL[l].Chars + pos, i);
 	                                pos += i;
-	                                if (PlaceUserBookmark(buf, EPoint(l, col)) == 0) goto fail;
+	                                if (!PlaceUserBookmark(buf, EPoint(l, col))) throw new IOException("PlaceUserBookmark failed");//goto fail;
 	                            }
-	                            if (LL[l].Chars[pos] == 'x') {
+	                            if (LL[l].Chars.charAt(pos) == 'x') {
 	                                // Read total length (just test for correctness)
-	                                memcpy(numbuf, LL[l].Chars + pos + 1, 4);
+	                            	CString.memcpy(numbuf, LL[l].Chars + pos + 1, 4);
 	                                numbuf[4] = 0;
-	                                if (1 != sscanf(numbuf, "%x", &i)) {
+	                                if (1 != sscanf(numbuf, "%x", i)) {
 	                                    error = 1; break;
 	                                }
-	                                if (i != pos - startBook || LL[l].Chars[pos + 5] != 'b') error = 1;
+	                                if (i != pos - startBook || LL[l].Chars.charAt(pos + 5) != 'b') error = 1;
 	                                else pos += 6;
 	                                break;
 	                            }
@@ -5391,7 +5389,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	                    // And last: check, if comment is properly terminated
 	                    if (pos + len_end > LL[l].getCount()) continue;
-	                    if (len_end != 0 && memcmp(LL[l].Chars + pos, BFS(this, BFS_CommentEnd), len_end) != 0) continue;
+	                    if (len_end != 0 && LL[l].Chars.memcmp(pos, BFS(this, BFS_CommentEnd), len_end) != 0) continue;
 	                    // Not at EOLN, but should be (comment at EOLN)
 	                    if (where == 2 && LL[l].getCount() != pos + len_end) continue;
 	                    pos += len_end;
@@ -5400,25 +5398,26 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                    if (open != -1) {
 	                        int f;
 
-	                        if (FoldCreate(l) == 0) goto fail;
+	                        if (!FoldCreate(l)) throw new IOException("FoldCreate failed");//goto fail;
 	                        f = FindFold(l);
 	                        assert(f != -1);
 	                        FF[f].level = (char)(level & 0xFF);
 	                        if (open == 0)
-	                            if (FoldClose(l) == 0) goto fail;
+	                            if (!FoldClose(l)) throw new IOException("FoldClose failed");//goto fail;
 	                    }
 	                    // Now remove parsed comment from line
-	                    memmove(LL[l].Chars + startpos,
-	                            LL[l].Chars + pos,
-	                            LL[l].getCount() - pos);
-	                    LL[l].Count -= pos - startpos;
+	                    //memmove(LL[l].Chars + startpos,	LL[l].Chars + pos, LL[l].getCount() - pos);
+	                    //LL[l].Count -= pos - startpos;
+	                    
+	                    LL[l].Chars.memmove(startpos, pos, LL[l].getCount() - pos);
+	                    LL[l].Chars.setSize( LL[l].getCount() - (pos - startpos) );
 	                }
 	            }
 	        }
 	    }
-	    folds/bookmarks */
+	    //folds/bookmarks */
 
-		if (!SetPosR(0, 0)) return false; // TODO exeption?
+		if (!SetPosR(0, 0)) return false; 
 
 		return true;
 
@@ -5590,7 +5589,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		for (l = 0; l < RCount; l++) {
 			ELine L = RLine(l);
 			int blen = 0;
-			//* TODO FindFold
+
 	        int f = FindFold(l);
 	        String fold = null;
 	        // format fold
@@ -6393,7 +6392,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	}
 
 
-	// TODO [dz] "Mode" must be "Flags"?
+	// XXX [dz] "Mode" must be "Flags"?
 	boolean ChangeFlags(ExState State) {
 		//char Mode[32] = "";
 		String [] Mode = {null};
@@ -6755,10 +6754,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExLineTrans:           return LineTrans(State);
 		case ExBlockTrans:          return BlockTrans(State);
 
-		//* TODO #ifdef CONFIG_TAGS
 	    case ExTagFind:             return FindTag(State);
 	    case ExTagFindWord:         return FindTagWord(State);
-	    //#endif */
 
 		// TODO case ExSetCIndentStyle:     return SetCIndentStyle(State);
 
@@ -8499,7 +8496,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-	int FindFold(int Line) { // optimize /*FOLD00*/
+	public int FindFold(int Line) { // optimize /*FOLD00*/
 		int f = FindNearFold(Line);
 		if (f != -1)
 			if (FF[f].line == Line)
@@ -8662,7 +8659,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		} while (w != View);
 	}
 
-	boolean FoldCreate(int Line) { /*FOLD00*/
+	public boolean FoldCreate(int Line) { /*FOLD00*/
 		int n;
 
 		if (!Modify()) return false;
@@ -8702,18 +8699,19 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		Pattern R = Pattern.compile(Regexp);
 		if (R == null) return false;
 
-		return false;
-		/*
-		ELine X;
+		//return false;
+		//*
 		int first = -1;
 		int L;
 
 		for (L = 0; L < RCount; L++) {
-			RxMatchRes RM;
+			//RxMatchRes RM;
 
-			X = RLine(L);
-			// TODO RxExec
-			if (RxExec(R, X.Chars, X.getCount(), X.Chars, RM) == 1) 
+			ELine X = RLine(L);
+			//if (RxExec(R, X.Chars, X.getCount(), X.Chars, RM) == 1)			
+			Matcher m = R.matcher(X.Chars);
+			
+			if(m.matches())
 			{
 				if (first >= 0) {
 					int i;
@@ -8752,7 +8750,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return FoldCreateByRegexp(BFS(this, BFS_RoutineRegexp));
 	}
 
-	boolean FoldDestroy(int Line) { /*FOLD00*/
+	public boolean FoldDestroy(int Line) { /*FOLD00*/
 		int f = FindFold(Line);
 
 		if (!Modify()) return false;
@@ -8791,7 +8789,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean FoldPromote(int Line) { /*FOLD00*/
+	public boolean FoldPromote(int Line) { /*FOLD00*/
 		int f = FindFold(Line);
 
 		if (!Modify()) return false;
@@ -8816,7 +8814,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean FoldDemote(int Line) { /*FOLD00*/
+	public boolean FoldDemote(int Line) { /*FOLD00*/
 		int f = FindFold(Line);
 
 		if (!Modify()) return false;
@@ -8841,7 +8839,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return true;
 	}
 
-	boolean FoldOpen(int Line) { /*FOLD00*/
+	public boolean FoldOpen(int Line) { /*FOLD00*/
 		int f = FindFold(Line);
 		int l;
 		int level, toplevel;
@@ -8924,7 +8922,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		return false;
 	}
 
-	boolean FoldClose(int Line) { /*FOLD00*/
+	public boolean FoldClose(int Line) { /*FOLD00*/
 		int f = FindNearFold(Line);
 		int l, top;
 		int level;

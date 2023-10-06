@@ -7,12 +7,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import ru.dz.jfte.c.CString;
-import ru.dz.jfte.c.CStringPtr;
 
 public class Tags implements ModeDefs 
 {
+	private static final Logger log = Logger.getLogger(Tags.class.getName());
 
 
 	static class TagData implements Comparable<TagData> 
@@ -153,8 +155,7 @@ public class Tags implements ModeDefs
 				loadLine(line, TagFiles.get(id));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.log(Level.SEVERE, "Can't read "+TagFiles.get(id), e);
 			return -1;
 		}
 

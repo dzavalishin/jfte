@@ -6,9 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class InputHistory implements MainConst 
 {
+	private static final Logger log = Logger.getLogger(InputHistory.class.getName());
+
 	//static int 		Count;
 	String	Line;
 	int		Id;
@@ -105,8 +109,7 @@ public class InputHistory implements MainConst
 		}
 		catch(IOException e)
 		{
-			// TODO catch
-			System.err.println(e);
+			log.log(Level.SEVERE, "Can't save history to "+FileName, e);
 			return false;
 		}
 		 
@@ -114,7 +117,7 @@ public class InputHistory implements MainConst
 	}
 
 	static boolean LoadHistory(String FileName) { 
-		/*
+		/* TODO LoadHistory
 	    FILE *fp;
 	    char line[2048];
 	    String p, *e;

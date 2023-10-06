@@ -20,7 +20,6 @@ public class ConFrame extends JFrame
 			@Override
 			public void keyTyped(KeyEvent e) {
 				//cc.queueEvent(e);
-				// TODO else cry aloud?
 			}
 
 			@Override

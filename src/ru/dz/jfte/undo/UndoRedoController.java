@@ -37,7 +37,7 @@ public class UndoRedoController
 
 	private EBuffer b;
 
-	
+
 	//--------------------------------------------------------------------
 	// Constructor
 	//--------------------------------------------------------------------
@@ -45,7 +45,7 @@ public class UndoRedoController
 	public UndoRedoController(EBuffer b) {
 		this.b = b;
 	}
-	
+
 	//--------------------------------------------------------------------
 	// Interface
 	//--------------------------------------------------------------------
@@ -70,20 +70,20 @@ public class UndoRedoController
 	 */
 	public UndoStackItem getRecordSlot()
 	{
-	    UndoStackItem ret = new UndoStackItem();
+		UndoStackItem ret = new UndoStackItem();
 
-	    // If we are undoing - record actions to redo stack.
-	    // Else - on undo.
-	    
-	    if(inUndo)
-	    	redoStack.push(ret);
-	    else
-	    	undoStack.push(ret);
+		// If we are undoing - record actions to redo stack.
+		// Else - on undo.
 
-	    // Allways save current position - will be played after user op
-	    ret.pushPosition(b.CP);
-	    
-	    return ret;
+		if(inUndo)
+			redoStack.push(ret);
+		else
+			undoStack.push(ret);
+
+		// Allways save current position - will be played after user op
+		ret.pushPosition(b.CP);
+
+		return ret;
 	}
 
 	public boolean undo()
@@ -153,10 +153,12 @@ public class UndoRedoController
 			switch(op)
 			{
 			case ucInsLine:
+			{
 				int Line = (Integer) i.next(); 
 				//	            printf("\tDelLine %d\n", Line);
 				if (!b.DelLine((int) Line)) return false;
-				break;
+			}
+			break;
 
 			case ucDelLine:
 			{
@@ -178,7 +180,7 @@ public class UndoRedoController
 				//	            printf("\tDelChars %d %d %d\n", Line, Col, ACount);
 				if (!b.DelChars(line, col, count)) return false;
 			}
-				break;
+			break;
 
 			case ucDelChars:
 			{
@@ -198,7 +200,7 @@ public class UndoRedoController
 				//	            printf("\tSetPos %d %d\n", Line, Col);
 				if(!b.SetPos(col, line)) return false;
 			}
-				break;
+			break;
 
 			case ucBlock: 
 			{
@@ -206,66 +208,73 @@ public class UndoRedoController
 
 				//	                printf("\tBlock\n");
 				l = (Integer) i.next(); 
-				
+
 				if (b.BlockMode != l) b.BlockRedraw();
 				b.BlockMode = l;
-				
+
 				r = (Integer) i.next();
 				c = (Integer) i.next();
 				if (!b.SetBE(new EPoint(r,c))) return false;
-				
+
 				r = (Integer) i.next();
 				c = (Integer) i.next();
 				if (!b.SetBB(new EPoint(r,c))) return false;
 			}
 			break;
 
-			/* TODO Folds
-	        case ucFoldCreate:
-	            // puts("ucFoldCreate");
-	            Line = (Integer) i.next(); 
-	            if (b.FoldDestroy(Line) == 0) return false;
-	            break;
 
-	        case ucFoldDestroy:
-	            // puts("ucFoldDestroy");
-	            {
-	                 long level;
-	                int ff;
+			case ucFoldCreate:
+				// puts("ucFoldCreate");
+			{
+				int line = (Integer) i.next(); 
+				if (!b.FoldDestroy(line)) return false;
+			}
+			break;
 
-	                Line = (Integer) i.next(); 
-	                level = (Integer) i.next(); 
-	                if (FoldCreate(Line) == 0) return false;
+			case ucFoldDestroy:
+				// puts("ucFoldDestroy");
+			{
+				int Line = (Integer) i.next(); 
+				int level = (Integer) i.next(); 
+				if (!b.FoldCreate(Line)) return false;
 
-	                ff = FindFold(Line);
-	                assert(ff != -1);
-	                FF[ff].level = ( char) level;
-	            }
-	            break;
-	        case ucFoldPromote:
-	            // puts("ucFoldPromote");
-	            Line = (Integer) i.next(); 
-	            if (b.FoldDemote(Line) == 0) return false;
-	            break;
+				int ff = b.FindFold(Line);
+				assert(ff != -1);
+				b.FF[ff].level = level;
+			}
+			break;
+			case ucFoldPromote:
+				// puts("ucFoldPromote");
+			{
+				int Line = (Integer) i.next(); 
+				if (!b.FoldDemote(Line)) return false;
+			}
+			break;
 
-	        case ucFoldDemote:
-	            // puts("ucFoldDemote");
-	            Line = (Integer) i.next(); 
-	            if (b.FoldPromote(Line) == 0) return false;
-	            break;
+			case ucFoldDemote:
+				// puts("ucFoldDemote");
+			{
+				int Line = (Integer) i.next(); 
+				if (!b.FoldPromote(Line)) return false;
+			}
+			break;
 
-	        case ucFoldOpen:
-	            // puts("ucFoldOpen");
-	            Line = (Integer) i.next(); 
-	            if (b.FoldClose(Line) == 0) return false;
-	            break;
+			case ucFoldOpen:
+				// puts("ucFoldOpen");
+			{
+				int Line = (Integer) i.next(); 
+				if (!b.FoldClose(Line)) return false;
+			}
+			break;
 
-	        case ucFoldClose:
-	            // puts("ucFoldClose");
-	            Line = (Integer) i.next(); 
-	            if (b.FoldOpen(Line) == 0) return false;
-	            break;
-			 */
+			case ucFoldClose:
+				// puts("ucFoldClose");
+			{
+				int Line = (Integer) i.next(); 
+				if (!b.FoldOpen(Line)) return false;
+			}
+			break;
+
 			case ucModified:
 				//	            printf("\tModified\n");
 				b.Modified = 0;
@@ -274,7 +283,7 @@ public class UndoRedoController
 			case ucPlaceUserBookmark:
 			{
 				//puts ("ucPlaceUserBookmark");
- 
+
 				String data = (String)  i.next();
 				//Pos -= ACount;
 				int col = (Integer) i.next(); 
@@ -290,7 +299,7 @@ public class UndoRedoController
 			case ucRemoveUserBookmark:
 			{
 				//puts("ucRemoveUserBookmark");
-				
+
 				String data = (String)  i.next();
 				//Pos -= ACount;
 				int col = (Integer) i.next(); 
