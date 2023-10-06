@@ -523,7 +523,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 		if (State.GetStrParam(EView.ActiveView, Cmd ) == 0)
 			if (view.GetStr("Run", Cmd, HIST_COMPILE) == 0) 
 				return ExResult.ErFAIL;
-		
+
 		gui.RunProgram(RUN_ASYNC, Cmd[0]);
 		return ExResult.ErOK;
 	}
@@ -967,12 +967,12 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 			switch(M.GetContext()) {
 			case CONTEXT_FILE:
 
-			if (M != ECvsLog.CvsLogView)
-			{
-				EBuffer B = (EBuffer )M;
-				w.write( String.format("F|%d|%s\n", B.ModelNo, B.FileName) );
-			}
-			break;
+				if (M != ECvsLog.CvsLogView)
+				{
+					EBuffer B = (EBuffer )M;
+					w.write( String.format("F|%d|%s\n", B.ModelNo, B.FileName) );
+				}
+				break;
 			case CONTEXT_DIRECTORY:
 			{
 				EDirectory D = (EDirectory )M;
@@ -1061,10 +1061,19 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 
 				if (c0 == 'T' && c1 == '|') { // tag file
 					Tags.TagsAdd(line.substring(2));
-				} /* TODO else if (c0 == 'M' && c1 == '|') { // TODO mark
-                    String name;
-                    String file;
-                    EPoint P;
+				} if (c0 == 'M' && c1 == '|') { 
+					EPoint P = new EPoint();
+
+					String [] ss = line.substring(2).split("|");	
+
+					// row | col | name | file  
+					
+                    String name = ss[2];
+                    String file = ss[3];
+					
+                    P.Row = Integer.parseInt(ss[0]);
+                    P.Col = Integer.parseInt(ss[0]);
+					/* TODO mark
                     //long l;
                     String e;
 
@@ -1081,13 +1090,14 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
                     while (*p && *p != '|')
                         p++;
                     if (*p == '|')
-				 *p++ = 0;
+					 *p++ = 0;
                     else
                         break;
                     file = p;
 
-                    markIndex.insert(name, file, P);
-                } */
+                    //*/
+                    EMarkIndex.markIndex.insert(name, file, P, null);
+				} 
 			}
 		}
 
