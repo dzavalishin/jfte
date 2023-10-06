@@ -98,6 +98,12 @@ public class CString extends AbstractCString
 	public static boolean isalnum(char c) {
 		return Character.isAlphabetic(c) || Character.isDigit(c);
 	}
+
+	
+	public static boolean isalpha(char c) {
+		return Character.isAlphabetic(c);
+	}
+	
 	
 
 	
@@ -159,6 +165,8 @@ public class CString extends AbstractCString
 	public static int strrchr(String chars, char c) {
 		return chars.lastIndexOf(c);
 	}
+
+
 	
 	
 }
