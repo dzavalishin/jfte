@@ -5843,28 +5843,63 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-
-
-
 	static char cr = 13;
 	static char lf = 10;
 
-	/*
 	boolean BlockPrint() {
+
+		PrintService printService =
+				PrintServiceLookup.lookupDefaultPrintService();
+
+		if(printService==null)
+		{
+			Msg(S_ERROR, "No print service found");
+			return false;
+		}
+
+		Msg(S_INFO, "Printing block to %s...", printService.getName());
+
+		DocPrintJob job = printService.createPrintJob();
+		//DocFlavor docFlavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+		//DocFlavor docFlavor = DocFlavor.INPUT_STREAM.TEXT_PLAIN_HOST;
+		DocFlavor docFlavor = DocFlavor.STRING.TEXT_PLAIN;
+
+		
+		StringWriter sw = new StringWriter();
+		boolean rc = doBlockPrint(sw);
+
+		Doc doc = new SimpleDoc( sw.toString(), docFlavor, null);
+
+		try {
+			job.print(doc, null);
+		} catch (PrintException e) {
+			Msg(S_ERROR, "Error printing block to %s: %s", printService.getName(), e.getMessage());
+			return false;
+		}		
+
+		if(rc)
+			Msg(S_INFO, "Printed block.");
+		else
+			Msg(S_ERROR, "Error printing block to %s.", printService.getName());
+
+		return rc;
+	}	
+	
+	//*
+	boolean doBlockPrint(StringWriter sw) {
 		EPoint B, E;
 		int L;
 		int A, Z;
 		ELine LL;
-		//FILE *fp;
 		int bc = 0, lc = 0;
-		int error = 0;
+		//int error = 0;
 
 		AutoExtend = false;
 		if (!CheckBlock()) return false;
 		if (RCount == 0) return false;
 		B = BB;
 		E = BE;
-		Msg(S_INFO, "Printing to %s...", PrintDevice);
+		//Msg(S_INFO, "Printing to %s...", PrintDevice);
 
 
 		for (L = B.Row; L <= E.Row; L++) {
@@ -5875,7 +5910,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			case bmLine:
 				if (L < E.Row) {
 					A = 0;
-					Z = LL.Count;
+					Z = LL.getCount();
 				}
 				break;
 			case bmColumn:
@@ -5890,10 +5925,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					Z = CharOffset(LL, E.Col);
 				} else if (L == B.Row) {
 					A = CharOffset(LL, B.Col);
-					Z = LL.Count;
+					Z = LL.getCount();
 				} else if (L < E.Row) {
 					A = 0;
-					Z = LL.Count;
+					Z = LL.getCount();
 				} else if (L == E.Row) {
 					A = 0;
 					Z = CharOffset(LL, E.Col);
@@ -5901,37 +5936,44 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				break;
 			}
 			if (A != -1 && Z != -1) {
-				if (A < LL.Count) {
-					if (Z > LL.Count)
-						Z = LL.Count;
+				if (A < LL.getCount()) {
+					if (Z > LL.getCount())
+						Z = LL.getCount();
 					if (Z > A) {
-						if ((int)(fwrite(LL.Chars + A, 1, Z - A, fp)) != Z - A) {
+						sw.write(LL.Chars.substring(A, Z).toString());
+						/*if ((int)(fwrite(LL.Chars + A, 1, Z - A, fp)) != Z - A) {
 							error++;
 							break;
-						} else
+						} else */
 							bc += Z - A;
 					}
 				}
-				if (BFI(this, BFI_AddCR) == 1)
-					if (fwrite(&cr, 1, 1, fp) != 1) {
+				if (BFI(this, BFI_AddCR))
+				{
+					sw.write(cr);
+					/*if (fwrite(&cr, 1, 1, fp) != 1) {
 						error++;
 						break;
-					} else
+					} else */
 						bc++;
-				if (BFI(this, BFI_AddLF) == 1)
-					if (fwrite(&lf, 1, 1, fp) != 1) {
+				}
+				if (BFI(this, BFI_AddLF))
+				{
+					sw.write(lf);
+					/*if (fwrite(&lf, 1, 1, fp) != 1) {
 						error++;
 						break;
-					} else {
+					} else */ {
 						bc++;
 						lc++;
 					}
+				}
 				if ((lc % 200) == 0)
 					Msg(S_INFO, "Printing, %d lines, %d bytes.", lc, bc);
 
 			}
 		}
-		if (!error) {
+		/*if (!error) {
 			fwrite("\f\n", 2, 1, fp);
 			fclose(fp);
 			Msg(S_INFO, "Printing %d lines, %d bytes.", lc, bc);
@@ -5939,9 +5981,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 		fclose(fp);
 		Msg(S_INFO, "Failed to write to %s", PrintDevice);
-		return 0;
+		return 0; */
+		return true;
 	}
-	 */
+	 //*/
 
 
 
@@ -5956,10 +5999,20 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			return false;
 		}
 
+		//Arrays.stream(
+		DocFlavor[] fs = printService.getSupportedDocFlavors();
+		
+		
+		for( DocFlavor f : fs )
+		{
+			System.out.println(f.getMediaType()+":"+f.getMimeType()+":"+f.getRepresentationClassName());
+		}
+		
 		Msg(S_INFO, "Printing %s to %s...", FileName, printService.getName());
 
 		DocPrintJob job = printService.createPrintJob();
-		DocFlavor docFlavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+		//DocFlavor docFlavor = DocFlavor.INPUT_STREAM.AUTOSENSE;
+		DocFlavor docFlavor = DocFlavor.STRING.TEXT_PLAIN;
 
 		StringWriter sw = new StringWriter();
 		boolean rc = doFilePrint(sw);
@@ -6666,7 +6719,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		// */
 		case ExFileSave:              return Save();
 		case ExFilePrint:             return FilePrint();
-		// TODO case ExBlockPrint:            return BlockPrint();
+		case ExBlockPrint:            return BlockPrint();
 		case ExBlockTrim:             return BlockTrim();
 		case ExFileTrim:              return FileTrim();
 		case ExHilitWord:
