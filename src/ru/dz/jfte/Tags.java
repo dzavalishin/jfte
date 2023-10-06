@@ -439,7 +439,7 @@ public class Tags implements ModeDefs
 		return 0; // tag not found
 	}
 
-	int TagFind(EBuffer B, EView View, String Tag) { /*FOLD00*/
+	static int TagFind(EBuffer B, EView View, String Tag) { /*FOLD00*/
 		//assert(View != 0 && Tag != 0 && B != 0);
 
 		if (!TagFilesLoaded )

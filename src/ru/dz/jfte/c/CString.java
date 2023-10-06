@@ -154,6 +154,11 @@ public class CString extends AbstractCString
 
 		return charCmp(s1.charAt(n), s2.charAt(n));		
 	}
+
+
+	public static int strrchr(String chars, char c) {
+		return chars.lastIndexOf(c);
+	}
 	
 	
 }

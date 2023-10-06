@@ -364,7 +364,6 @@ public abstract class AbstractCString implements ICString
 		return 0;
 	} */
 
-	// TODO test memcmp(pos...) memicmp
 	public int memcmp(int pos, CharSequence src, int len) {
 		if (len == 0)	         
 			return 0;

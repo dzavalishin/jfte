@@ -40,8 +40,8 @@ import ru.dz.jfte.undo.UndoStackItem;
 public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, ColorDefs, EventDefs, UndoDefs, RxDefs 
 {
 	private static final Logger log = Logger.getLogger(EBuffer.class.getName());
-	
-	
+
+
 	String FileName = null;
 	public int Modified = 0;
 	EPoint TP = new EPoint();
@@ -76,9 +76,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	int [] VV  = null;
 
 
-	// TODO folds
-	//int FCount = 0;
-	//EFold FF = null;
+	int FCount = 0;
+	EFold [] FF = new EFold[0];
 
 	EPoint Match = new EPoint(-1, -1);
 	int MatchLen = 0;
@@ -390,7 +389,6 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			l.line = M.Row;
 		}
 
-		/* TODO FF
 		for (int f = 0; f < FCount; f++) {
 			EPoint M = new EPoint();
 
@@ -398,9 +396,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			M.Row = FF[f].line;
 			UpdateMark(M, Type, Row, Col, Rows, Cols);
 			FF[f].line = M.Row;
-		} */
+		} 
 
-		//for (int b = 0; b < BMCount; b++)			UpdateMark(BMarks[b].BM, Type, Row, Col, Rows, Cols);
+		for (int b = 0; b < BMarks.size(); b++)			
+			UpdateMark(BMarks.get(b).BM, Type, Row, Col, Rows, Cols);
 
 		for( EBookmark bm : BMarks.values() )
 			UpdateMark(bm.BM, Type, Row, Col, Rows, Cols);
@@ -623,9 +622,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		VLine = RToV(Row);
 		assert(VLine != -1);
 
-		/* TODO if (FindFold(Row) != -1) {
+		if (FindFold(Row) != -1) {
 			if (FoldDestroy(Row) == false) return false;
-		} */
+		} 
 
 		VLine = RToV(Row);
 		assert(VLine != -1);
@@ -1436,8 +1435,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 
-
-	boolean ExposeRow(int Row) { /*FOLD00*/
+	/*
+	boolean ExposeRow(int Row) { 
 		int level, oldlevel = 100;
 
 		//DumpFold();
@@ -1447,7 +1446,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		int V = RToV(Row);
 		if (V != -1) return true; // already exposed
 
-		/* TODO fold
+		/* 
 		int f = FindNearFold(Row);
 		assert(f != -1); // if not visible, must be folded
 
@@ -1463,7 +1462,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			f--;
 			if (level == 0) break;
 		}
-		 */
+		 * /
 
 		V = RToV(Row);
 		//	    if (V == -1) {
@@ -1472,7 +1471,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		//	    }
 		assert (V != -1);
 		return true;
-	}
+	} */
 
 
 
@@ -1640,30 +1639,29 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			if (Row < RCount) {
 				int Folded = 0;
 				//static char fold[20];
-				int l;
+				//int l;
 
-				/* TODO fold
 				int f = FindFold(Row);
 				if (f != -1) {
 					int foldColor;
 					if (FF[f].level<5) foldColor=hcPlain_Folds[FF[f].level];
 					else foldColor=hcPlain_Folds[4];
-					if (FF[f].open == 1) {
-						l = sprintf(fold, "[%d]", FF[f].level);
-						MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
-						ECol += l;
+					if (FF[f].open) {
+						String fold = String.format("[%d]", FF[f].level);
+						B.MoveStr(ECol - C + 1, W, fold, foldColor, 10);
+						ECol += fold.length();
 					} else {
 						if (VRow < VCount - 1) {
 							Folded = Vis(VRow + 1) - Vis(VRow) + 1;
 						} else if (VRow < VCount) {
 							Folded = RCount - (VRow + Vis(VRow));
 						}
-						l = sprintf(fold, "(%d:%d)", FF[f].level, Folded);
-						MoveStr(B, ECol - C + 1, W, fold, foldColor, 10);
-						ECol += l;
-						MoveAttr(B, 0, W, foldColor, W);
+						String fold = String.format("(%d:%d)", FF[f].level, Folded);
+						B.MoveStr( ECol - C + 1, W, fold, foldColor, 10);
+						ECol += fold.length();
+						B.MoveAttr(0, W, foldColor, W);
 					}
-				} */
+				} //*/
 			}
 			if (BB.Row != -1 && BE.Row != -1 && Row >= BB.Row && Row <= BE.Row) {
 				switch(BlockMode) {
@@ -2159,10 +2157,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		for (int i = 0; i < WordCount; i++) 
 		{
 			if (BFI(this, BFI_MatchCase)) {
-				//if (strcmp(Word, WordList[i]) == 0) return 1;
+				//if (strcmp(Word, WordList[i]) == 0) return true;
 				if(WordList[i].equals(Word)) return true;
 			} else {
-				//if (stricmp(Word, WordList[i]) == 0) return 1;
+				//if (stricmp(Word, WordList[i]) == 0) return true;
 				if(WordList[i].equalsIgnoreCase(Word)) return true;
 			}
 		}
@@ -2375,36 +2373,36 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	//#ifdef CONFIG_OBJ_ROUTINE
 	boolean ScanForRoutines() {
-	    int line;
-	    //RxMatchRes res;
+		int line;
+		//RxMatchRes res;
 
-	    if (BFS(this, BFS_RoutineRegexp) == null) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
-	        return false;
-	    }
-	    Pattern regx = Pattern.compile(BFS(this, BFS_RoutineRegexp));
-	    if (regx == null) {
-	        View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to compile regexp '%s'", BFS(this, BFS_RoutineRegexp));
-	        return false;
-	    }
+		if (BFS(this, BFS_RoutineRegexp) == null) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "No routine regexp.");
+			return false;
+		}
+		Pattern regx = Pattern.compile(BFS(this, BFS_RoutineRegexp));
+		if (regx == null) {
+			View.MView.Win.Choice(GPC_ERROR, "Error", 1, "O&K", "Failed to compile regexp '%s'", BFS(this, BFS_RoutineRegexp));
+			return false;
+		}
 
-        rlst.lines.clear();
+		rlst.lines.clear();
 
-	    Msg(S_BUSY, "Matching %s", BFS(this, BFS_RoutineRegexp));
-	    for (line = 0; line < RCount; line++) {
-	    	ELine L = RLine(line);
-	    	
-	    	Matcher m = regx.matcher(L.Chars);
-	    	
-	        //if (RxExec(regx, L.Chars, L.getCount(), L.Chars, res) == 1)
-	    	if(m.find())
-	        {
-	            rlst.lines.add( new RoutineDef(line) );
-	            Msg(S_BUSY, "Routines: %d", rlst.lines.size());
-	        }
-	    }
-	    //RxFree(regx);
-	    return true;
+		Msg(S_BUSY, "Matching %s", BFS(this, BFS_RoutineRegexp));
+		for (line = 0; line < RCount; line++) {
+			ELine L = RLine(line);
+
+			Matcher m = regx.matcher(L.Chars);
+
+			//if (RxExec(regx, L.Chars, L.getCount(), L.Chars, res) == 1)
+			if(m.find())
+			{
+				rlst.lines.add( new RoutineDef(line) );
+				Msg(S_BUSY, "Routines: %d", rlst.lines.size());
+			}
+		}
+		//RxFree(regx);
+		return true;
 		// */
 	}
 	//#endif
@@ -3200,9 +3198,9 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 			int L = VToR(CP.Row);
 
 			switch (iBFI(this, BFI_IndentMode)) {
-	        case INDENT_C: rc = CLanguage.Indent_C(this, L, 1); break;
-	        //case INDENT_REXX: rc = Indent_REXX(this, L, 1); break;
-	        case INDENT_SIMPLE: rc = CLanguage.Indent_SIMPLE(this, L, 1); break;
+			case INDENT_C: rc = CLanguage.Indent_C(this, L, 1); break;
+			//case INDENT_REXX: rc = Indent_REXX(this, L, 1); break;
+			case INDENT_SIMPLE: rc = CLanguage.Indent_SIMPLE(this, L, 1); break;
 			default: rc = Hiliter.Indent_Plain(this, L, 1); break;
 			}
 		}
@@ -3514,10 +3512,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				if (VToR(CP.Row) == L)
 					if (CP.Col <= LineIndented(L))
 						if (SetPos(Left, CP.Row) == false) return false; //WFAIL(1);
-						Ind = IndentLine(L, Left);
-						if (VToR(CP.Row) == L)
-							if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) return false; //WFAIL(2);
-						NoChange = 0;
+				Ind = IndentLine(L, Left);
+				if (VToR(CP.Row) == L)
+					if (SetPos((CP.Col + Ind > 0) ? CP.Col + Ind : 0, CP.Row) == false) return false; //WFAIL(2);
+				NoChange = 0;
 			}
 			Len = LineLen(L);
 
@@ -3600,7 +3598,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					(L < RCount - 2) ? (L + 2) :
 						(L < RCount - 1) ? (L + 1) :
 							(RCount - 1))) return false; //WFAIL(7);
-							return true;
+		return true;
 	}
 
 	boolean WrapPara() {
@@ -4617,7 +4615,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		}
 
 		EModel [] em = {(EModel)SSBuffer};
-		
+
 		try( EBuffer B = new EBuffer(0, em, AFileName) )
 		{
 			B.SetFileName(AFileName, null);
@@ -5499,8 +5497,8 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 			Msg(S_INFO, "Wrote %s.", AFileName);
 			if (!BFI(this, BFI_KeepBackups)
-		        // No backups for CVS logs
-		        || this == ECvsLog.CvsLogView
+					// No backups for CVS logs
+					|| this == ECvsLog.CvsLogView
 					) {
 				Console.unlink(ABackupName[0]);
 			}
@@ -5591,21 +5589,21 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		for (l = 0; l < RCount; l++) {
 			ELine L = RLine(l);
-			int foldlen = 0;
 			int blen = 0;
-			/* TODO FindFold
-	        f = FindFold(l);
-
-	        foldlen = 0;
+			//* TODO FindFold
+	        int f = FindFold(l);
+	        String fold = null;
 	        // format fold
-	        if ((f != -1) && (BFI(this, BFI_SaveFolds) != 0)) {
-	            foldlen = sprintf(fold,
+	        if ((f != -1) && (iBFI(this, BFI_SaveFolds) != 0)) {
+	            fold = String.format(
 	                              FF[f].open ? "FOLD%02d" : "fold%02d",
 	                              FF[f].level);
 	        }
-
-	        bindex = 0; blen = 0;
-			 */
+			int foldlen = fold.length();
+	        
+	        //bindex = 0; 
+	        blen = 0;
+			// */
 
 			String book = "BOOK";
 			if (iBFI(this, BFI_SaveBookmarks) == 1 || iBFI(this, BFI_SaveBookmarks) == 2) {
@@ -5640,10 +5638,13 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 						writer.write(BFS(this, BFS_CommentStart), 0, len_start);
 						ByteCount += len_start;
 					}
-					/* TODO if (BFI(this, BFI_SaveFolds) == what && foldlen) {
-	                    if (fwrite(fold, 1, foldlen, fp) != foldlen) goto fail;
+ 
+					if (iBFI(this, BFI_SaveFolds) == what && foldlen > 0) {
+					
+	                    //if (fwrite(fold, 1, foldlen, fp) != foldlen) goto fail;
+	                    writer.write(fold);
 	                    ByteCount += foldlen;
-	                } */
+	                } //*/
 
 					/*
 	                if (iBFI(this, BFI_SaveBookmarks) == what && blen > 0) {
@@ -5989,7 +5990,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		/*
 	        fp = fopen(PrintDevice, "w");
-	    if (fp == NULL) {
+	    if (fp == null) {
 	        Msg(S_ERROR, "Error printing %s to %s.", FileName, PrintDevice);
 	        return false;
 	    }*/
@@ -6015,7 +6016,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	    //fclose(fp);
 	    return 1;
 	fail:
-	    if (fp != NULL) {
+	    if (fp != null) {
 	            fclose(fp);
 	    }
 	    return 0;
@@ -6185,22 +6186,22 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		{
 			Load();
 
-	        if (EMessages.CompilerMsgs != null)
-	        	EMessages.CompilerMsgs.FindFileErrors(this);
+			if (EMessages.CompilerMsgs != null)
+				EMessages.CompilerMsgs.FindFileErrors(this);
 
-	        if (ECvsDiff.CvsDiffView != null) ECvsDiff.CvsDiffView.FindFileLines(this);
+			if (ECvsDiff.CvsDiffView != null) ECvsDiff.CvsDiffView.FindFileLines(this);
 
 			EMarkIndex.markIndex.retrieveForBuffer(this);
 
-	        int [] r = {0}, c = {0};
+			int [] r = {0}, c = {0};
 
-	        if (FPosHistory.RetrieveFPos(FileName, r, c))
-	            SetNearPosR(c[0], r[0]);
-	        //printf("setting to c:%d r:%d f:%s", c, r, FileName);
-	        V.Port.GetPos();
-	        V.Port.ReCenter = 1;
+			if (FPosHistory.RetrieveFPos(FileName, r, c))
+				SetNearPosR(c[0], r[0]);
+			//printf("setting to c:%d r:%d f:%s", c, r, FileName);
+			V.Port.GetPos();
+			V.Port.ReCenter = 1;
 
-	        if (iBFI (this,BFI_SaveBookmarks)==3) FPosHistory.RetrieveBookmarks(this);
+			if (iBFI (this,BFI_SaveBookmarks)==3) FPosHistory.RetrieveBookmarks(this);
 		}
 		return V.Port;
 	}
@@ -6283,7 +6284,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	            }
 	        }
 	    } else
-		*/ // #endif
+		 */ // #endif
 		/* TOD 
 		  if (ExpandTabs) { // use slow mode 
 	        for (i = 0; i < Line.getCount();) {
@@ -6409,16 +6410,16 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 
 	boolean FileSaveAs(ExState State) {
-	    String [] FName = {FileName};
+		String [] FName = {FileName};
 
-	    if (State.GetStrParam(View, FName) == 0)
-	        if (View.MView.Win.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0)
-	            return false;
-	    
-	    return FileSaveAs(FName[0]);
+		if (State.GetStrParam(View, FName) == 0)
+			if (View.MView.Win.GetFile("Save As", FName, HIST_PATH, GF_SAVEAS) == 0)
+				return false;
+
+		return FileSaveAs(FName[0]);
 	}
-	
-	
+
+
 	boolean FileSaveAs(String FName) {
 		String [] Name = {null};
 
@@ -6647,23 +6648,23 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExBlockPasteLine:        return BlockPasteLine();
 		case ExBlockPasteColumn:      return BlockPasteColumn();
 		case ExShowPosition:   		  return ShowPosition();
-		/* TODO fold
-	    case ExFoldCreate:            return FoldCreate(VToR(CP.Row));
-	    case ExFoldDestroy:           return FoldDestroy(VToR(CP.Row));
-	    case ExFoldDestroyAll:        return FoldDestroyAll();
-	    case ExFoldPromote:           return FoldPromote(VToR(CP.Row));
-	    case ExFoldDemote:            return FoldDemote(VToR(CP.Row));
-	    case ExFoldOpen:              return FoldOpen(VToR(CP.Row));
-	    case ExFoldOpenNested:        return FoldOpenNested();
-	    case ExFoldClose:             return FoldClose(VToR(CP.Row));
-	    case ExFoldOpenAll:           return FoldOpenAll();
-	    case ExFoldCloseAll:          return FoldCloseAll();
-	    case ExFoldToggleOpenClose:   return FoldToggleOpenClose();
-	    case ExFoldCreateAtRoutines:  return FoldCreateAtRoutines();
-	    case ExMoveFoldTop:           return MoveFoldTop();
-	    case ExMoveFoldPrev:          return MoveFoldPrev();
-	    case ExMoveFoldNext:          return MoveFoldNext();
-		 */
+
+		case ExFoldCreate:            return FoldCreate(VToR(CP.Row));
+		case ExFoldDestroy:           return FoldDestroy(VToR(CP.Row));
+		case ExFoldDestroyAll:        return FoldDestroyAll();
+		case ExFoldPromote:           return FoldPromote(VToR(CP.Row));
+		case ExFoldDemote:            return FoldDemote(VToR(CP.Row));
+		case ExFoldOpen:              return FoldOpen(VToR(CP.Row));
+		case ExFoldOpenNested:        return FoldOpenNested();
+		case ExFoldClose:             return FoldClose(VToR(CP.Row));
+		case ExFoldOpenAll:           return FoldOpenAll();
+		case ExFoldCloseAll:          return FoldCloseAll();
+		case ExFoldToggleOpenClose:   return FoldToggleOpenClose();
+		case ExFoldCreateAtRoutines:  return FoldCreateAtRoutines();
+		case ExMoveFoldTop:           return MoveFoldTop();
+		case ExMoveFoldPrev:          return MoveFoldPrev();
+		case ExMoveFoldNext:          return MoveFoldNext();
+		// */
 		case ExFileSave:              return Save();
 		case ExFilePrint:             return FilePrint();
 		// TODO case ExBlockPrint:            return BlockPrint();
@@ -6705,7 +6706,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		// stuff with UI
 		case ExMoveToLine:          return MoveToLine(State);
 		case ExMoveToColumn:        return MoveToColumn(State);
-		//case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
+		case ExFoldCreateByRegexp:  return FoldCreateByRegexp(State);
 
 
 		case ExPlaceBookmark:       return PlaceBookmark(State);
@@ -6754,10 +6755,10 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 		case ExLineTrans:           return LineTrans(State);
 		case ExBlockTrans:          return BlockTrans(State);
 
-		/* TODO #ifdef CONFIG_TAGS
+		//* TODO #ifdef CONFIG_TAGS
 	    case ExTagFind:             return FindTag(State);
 	    case ExTagFindWord:         return FindTagWord(State);
-	#endif */
+	    //#endif */
 
 		// TODO case ExSetCIndentStyle:     return SetCIndentStyle(State);
 
@@ -6947,7 +6948,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 				str[0] = buf[0].substring(0, pointPos);
 			/*
 	            dot = strchr(buf, '.');
-	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
+	            while ((dot2 = strchr(dot + 1, '.')) != null)
 	                dot = dot2;
 	            if (dot)
 			 *dot = 0;
@@ -6970,7 +6971,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 			/*
 	            dot = strchr(buf, '.');
-	            while ((dot2 = strchr(dot + 1, '.')) != NULL)
+	            while ((dot2 = strchr(dot + 1, '.')) != null)
 	                dot = dot2;
 	            if (dot)
 	                strcpy(str, dot);
@@ -8199,221 +8200,221 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 	boolean ShowHelpWord(ExState State) 
 	{
-	    //** Code for BlockSelectWord to find the word under the cursor,
-	    String achr = "+-_."; // these are accepted characters
-	    //char    buf[128];
-	    int     Y = VToR(CP.Row);
-	    ELine  L = RLine(Y);
-	    int     P;
+		//** Code for BlockSelectWord to find the word under the cursor,
+		String achr = "+-_."; // these are accepted characters
+		//char    buf[128];
+		int     Y = VToR(CP.Row);
+		ELine  L = RLine(Y);
+		int     P;
 
-	    StringBuilder buf = new StringBuilder();
+		StringBuilder buf = new StringBuilder();
 
-	    P = CharOffset(L, CP.Col);
+		P = CharOffset(L, CP.Col);
 
-	    // fix \b for the case of CATBS
-	    for(int i = 0; i < P; i++) {
-	        //printf("%d - %d  %d   %c %c\n", i, P, L.Chars.charAt(i),
-	        //L.Chars.charAt(i), L.Chars.charAt(P));
-	        if ((L.Chars.charAt(i) == '\b') && (P < (L.getCount() - 2)))
-	            P += 2;
-	    }
-	    //int len = 0;
-	    if (P < L.getCount()) 
-	    {
-	        // To start of word,
+		// fix \b for the case of CATBS
+		for(int i = 0; i < P; i++) {
+			//printf("%d - %d  %d   %c %c\n", i, P, L.Chars.charAt(i),
+			//L.Chars.charAt(i), L.Chars.charAt(P));
+			if ((L.Chars.charAt(i) == '\b') && (P < (L.getCount() - 2)))
+				P += 2;
+		}
+		//int len = 0;
+		if (P < L.getCount()) 
+		{
+			// To start of word,
 
-	        while ((P > 0)
-	               && ((L.Chars.charAt(P - 1) == '\b') || CString.isalnum(L.Chars.charAt(P - 1))
-	                   || (achr.indexOf( L.Chars.charAt(P - 1)) >= 0)))
-	            P--; // '_' for underline is hidden in achr
+			while ((P > 0)
+					&& ((L.Chars.charAt(P - 1) == '\b') || CString.isalnum(L.Chars.charAt(P - 1))
+							|| (achr.indexOf( L.Chars.charAt(P - 1)) >= 0)))
+				P--; // '_' for underline is hidden in achr
 
-	        if ((P < (L.getCount() - 1)) && (L.Chars.charAt(P) == '\b'))
-	            P++;
+			if ((P < (L.getCount() - 1)) && (L.Chars.charAt(P) == '\b'))
+				P++;
 
-	        // To end of word,
+			// To end of word,
 
-	        while( P < L.getCount()) {
-	            if (((P + 1) < L.getCount()) && (L.Chars.charAt(P + 1) == '\b'))
-	                P += 2;
-	            else if (CString.isalnum(L.Chars.charAt(P))
-	                     || (achr.indexOf( L.Chars.charAt(P)) >= 0 ) )
-	                buf.append(  L.Chars.charAt(P++) );
-	            else
-	                break;
-	        }
-	    }
-	    //printf("Word: %s\n", buf);
-	    
-	    if (buf.isEmpty()) {
-	        Msg(S_INFO, "No valid word under the cursor.");
-	        return false;
-	    }
-	    
-	    return Console.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() ) == ExResult.ErOK;
+			while( P < L.getCount()) {
+				if (((P + 1) < L.getCount()) && (L.Chars.charAt(P + 1) == '\b'))
+					P += 2;
+				else if (CString.isalnum(L.Chars.charAt(P))
+						|| (achr.indexOf( L.Chars.charAt(P)) >= 0 ) )
+					buf.append(  L.Chars.charAt(P++) );
+				else
+					break;
+			}
+		}
+		//printf("Word: %s\n", buf);
+
+		if (buf.isEmpty()) {
+			Msg(S_INFO, "No valid word under the cursor.");
+			return false;
+		}
+
+		return Console.SysShowHelp(State, buf.isEmpty() ? null : buf.toString() ) == ExResult.ErOK;
 		// */
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	int FindRx(Pattern rx, int Options) {
-	    int LLen, Start, End;
-	    int C, L;
-	    String P;
-	    ELine X;
-	    //RxMatchRes b;
+		int LLen, Start, End;
+		int C, L;
+		String P;
+		ELine X;
+		//RxMatchRes b;
 
-	    if(0==(Options & SEARCH_RE))
-	        return 0;
-	        
-	    if(0 != (Options & SEARCH_BACK)) { // not supported
-	        View.MView.Win.Choice(GPC_ERROR, "FindRx", 1, "O&K", "Reverse regexp search not supported.");
-	        return 0;
-	    }
-	    if (rx == null)
-	        return 0;
+		if(0==(Options & SEARCH_RE))
+			return 0;
 
-	    if (Match.Row != -1)
-	        Draw(Match.Row, Match.Row);
-	    Match.Row = -1;
-	    Match.Col = -1;
+		if(0 != (Options & SEARCH_BACK)) { // not supported
+			View.MView.Win.Choice(GPC_ERROR, "FindRx", 1, "O&K", "Reverse regexp search not supported.");
+			return 0;
+		}
+		if (rx == null)
+			return 0;
 
-	    C = CP.Col;
-	    L = VToR(CP.Row);
-	    X = RLine(L);
-	    C = CharOffset(X, C);
+		if (Match.Row != -1)
+			Draw(Match.Row, Match.Row);
+		Match.Row = -1;
+		Match.Col = -1;
 
-	    if(0 != (Options & SEARCH_NEXT)) {
-	        int CC = MatchCount != 0 ? MatchCount : 1;
+		C = CP.Col;
+		L = VToR(CP.Row);
+		X = RLine(L);
+		C = CharOffset(X, C);
 
-	        if(0 != (Options & SEARCH_BACK)) {
-	            C -= CC;
-	            if(0 != (Options & SEARCH_BLOCK)) {
-	                if (C < BB.Col && L == BB.Row)
-	                    return 0;
-	                L--;
-	                X = RLine(L);
-	                C = X.getCount();
-	                if (BlockMode == bmColumn)
-	                    if (BE.Col < C)
-	                        C = BE.Col;
-	            } else {
-	                if (C < 0 && L == 0)
-	                    return 0;
-	                L--;
-	                X = RLine(L);
-	                C = X.getCount();
-	            }
-	        } else {
-	            C += CC;
-	            if(0 != (Options & SEARCH_BLOCK)) {
-	                if (BlockMode == bmStream || BlockMode == bmLine) {
-	                    if (C >= X.getCount()) {
-	                        C = 0;
-	                        L++;
-	                        if (BlockMode == bmLine) {
-	                            if (L == BE.Row) return 0;
-	                        } else
-	                            if (L == BE.Row && (C >= BE.Col || C >= X.getCount()))
-	                                return 0;
-	                    }
-	                } else if (BlockMode == bmColumn) {
-	                    if (C >= X.getCount() || C >= BE.Col) {
-	                        C = BB.Col;
-	                        L++;
-	                        if (L == BE.Row) return 0;
-	                    }
-	                }
-	            } else {
-	                if (C >= X.getCount()) {
-	                    C = 0;
-	                    L++;
-	                    if (L == RCount) return 0;
-	                }
-	            }
-	        }
-	    }
-	    MatchLen = 0;
-	    MatchCount = 0;
+		if(0 != (Options & SEARCH_NEXT)) {
+			int CC = MatchCount != 0 ? MatchCount : 1;
 
-	    if(0 != (Options & SEARCH_BLOCK)) {
-	        if(0 != (Options & SEARCH_BACK)) {
-	            if (BlockMode == bmStream) {
-	                if (L > BE.Row) {
-	                    L = BE.Row;
-	                    C = BE.Col;
-	                }
-	                if (L == BE.Row && C > BE.Col)
-	                    C = BE.Col;
-	            } else {
-	                if (L >= BE.Row && BE.Row > 0) {
-	                    L = BE.Row - 1;
-	                    C = RLine(L).getCount();
-	                }
-	                if (BlockMode == bmColumn)
-	                    if (L == BE.Row - 1 && C >= BE.Col)
-	                        C = BE.Col;
-	            }
-	        } else {
-	            if (L < BB.Row) {
-	                L = BB.Row;
-	                C = 0;
-	            }
-	            if (L == BB.Row && C < BB.Col)
-	                C = BB.Col;
-	        }
-	    }
+			if(0 != (Options & SEARCH_BACK)) {
+				C -= CC;
+				if(0 != (Options & SEARCH_BLOCK)) {
+					if (C < BB.Col && L == BB.Row)
+						return 0;
+					L--;
+					X = RLine(L);
+					C = X.getCount();
+					if (BlockMode == bmColumn)
+						if (BE.Col < C)
+							C = BE.Col;
+				} else {
+					if (C < 0 && L == 0)
+						return 0;
+					L--;
+					X = RLine(L);
+					C = X.getCount();
+				}
+			} else {
+				C += CC;
+				if(0 != (Options & SEARCH_BLOCK)) {
+					if (BlockMode == bmStream || BlockMode == bmLine) {
+						if (C >= X.getCount()) {
+							C = 0;
+							L++;
+							if (BlockMode == bmLine) {
+								if (L == BE.Row) return 0;
+							} else
+								if (L == BE.Row && (C >= BE.Col || C >= X.getCount()))
+									return 0;
+						}
+					} else if (BlockMode == bmColumn) {
+						if (C >= X.getCount() || C >= BE.Col) {
+							C = BB.Col;
+							L++;
+							if (L == BE.Row) return 0;
+						}
+					}
+				} else {
+					if (C >= X.getCount()) {
+						C = 0;
+						L++;
+						if (L == RCount) return 0;
+					}
+				}
+			}
+		}
+		MatchLen = 0;
+		MatchCount = 0;
 
-	    while (true) {
-	        if(0 != (Options & SEARCH_BLOCK)) {
-	            if (BlockMode == bmStream) {
-	                if (L > BE.Row || L < BB.Row) break;
-	            } else
-	                if (L >= BE.Row || L < BB.Row) break;
-	        } else
-	            if (L >= RCount || L < 0) break;
+		if(0 != (Options & SEARCH_BLOCK)) {
+			if(0 != (Options & SEARCH_BACK)) {
+				if (BlockMode == bmStream) {
+					if (L > BE.Row) {
+						L = BE.Row;
+						C = BE.Col;
+					}
+					if (L == BE.Row && C > BE.Col)
+						C = BE.Col;
+				} else {
+					if (L >= BE.Row && BE.Row > 0) {
+						L = BE.Row - 1;
+						C = RLine(L).getCount();
+					}
+					if (BlockMode == bmColumn)
+						if (L == BE.Row - 1 && C >= BE.Col)
+							C = BE.Col;
+				}
+			} else {
+				if (L < BB.Row) {
+					L = BB.Row;
+					C = 0;
+				}
+				if (L == BB.Row && C < BB.Col)
+					C = BB.Col;
+			}
+		}
 
-	        X = RLine(L);
-	        LLen = X.getCount();
-	        P = X.Chars.toString();
-	        Start = 0;
-	        End = LLen;
+		while (true) {
+			if(0 != (Options & SEARCH_BLOCK)) {
+				if (BlockMode == bmStream) {
+					if (L > BE.Row || L < BB.Row) break;
+				} else
+					if (L >= BE.Row || L < BB.Row) break;
+			} else
+				if (L >= RCount || L < 0) break;
 
-	        if(0 != (Options & SEARCH_BLOCK)) {
-	            if (BlockMode == bmColumn) {
-	                Start = CharOffset(X, BB.Col);
-	                End = CharOffset(X, BE.Col);
-	            } else if (BlockMode == bmStream) {
-	                if (L == BB.Row)
-	                    Start = CharOffset(X, BB.Col);
-	                if (L == BE.Row)
-	                    End = CharOffset(X, BE.Col);
-	            }
-	            if (End > LLen)
-	                End = LLen;
-	        }
-	        if(0 != (Options & SEARCH_BACK)) {
-	            if (C >= End)
-	                C = End;
-	        } else {
-	            if (C < Start)
-	                C = Start;
-	        }
+			X = RLine(L);
+			LLen = X.getCount();
+			P = X.Chars.toString();
+			Start = 0;
+			End = LLen;
 
-	        if (Start <= End) 
-	        {
-	        	/*
+			if(0 != (Options & SEARCH_BLOCK)) {
+				if (BlockMode == bmColumn) {
+					Start = CharOffset(X, BB.Col);
+					End = CharOffset(X, BE.Col);
+				} else if (BlockMode == bmStream) {
+					if (L == BB.Row)
+						Start = CharOffset(X, BB.Col);
+					if (L == BE.Row)
+						End = CharOffset(X, BE.Col);
+				}
+				if (End > LLen)
+					End = LLen;
+			}
+			if(0 != (Options & SEARCH_BACK)) {
+				if (C >= End)
+					C = End;
+			} else {
+				if (C < Start)
+					C = Start;
+			}
+
+			if (Start <= End) 
+			{
+				/*
 	            if (RxExec(rx, P + Start, End - Start, P + C, b, (Options & SEARCH_NCASE) != 0 ? 0 : RX_CASE) == 1) 
 	            {
 	                C = ScreenPos(X, b.Open[0] + Start);
@@ -8435,57 +8436,706 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 	                Draw(L, L);
 	                return 1;
 	            }
-	            */
-	        	
-	        	// [dz] simplified TODO RX SEARCH_NCASE
-	        	
-	        	Matcher m = rx.matcher(P.subSequence(Start, End));
-	        	if( m.find() )
-	        	{
-	                Match.Col = C;
-	                Match.Row = L;
-	                
-	                
-	                
-	                //MatchCount = b.Close[0] - b.Open[0];
-	                MatchCount = m.end(0) - m.start(0);
-	                //MatchLen = ScreenPos(X, b.Close[0] + Start) - C;
-	                MatchLen = ScreenPos(X, m.end(0) + Start) - C;
-	                
-	                /* TODO MatchRes 
+				 */
+
+				// [dz] simplified TODO RX SEARCH_NCASE
+
+				Matcher m = rx.matcher(P.subSequence(Start, End));
+				if( m.find() )
+				{
+					Match.Col = C;
+					Match.Row = L;
+
+
+
+					//MatchCount = b.Close[0] - b.Open[0];
+					MatchCount = m.end(0) - m.start(0);
+					//MatchLen = ScreenPos(X, b.Close[0] + Start) - C;
+					MatchLen = ScreenPos(X, m.end(0) + Start) - C;
+
+					/* TODO MatchRes 
 	                for (int mm = 0; mm < NSEXPS; mm++) {
 	                    b.Open[mm] += Start;
 	                    b.Close[mm] += Start;
 	                }
 	                MatchRes = b; */
-	                
-	                if (0==(Options & SEARCH_NOPOS)) {
-	                    if(0 != (Options & SEARCH_CENTER))
-	                        CenterPosR(C, L);
-	                    else
-	                        SetPosR(C, L);
-	                }
-	                Draw(L, L);
-	                return 1;
-	        	}
-	        	
-	        }
-	        C = 0;
-	        L++;
-	    }
-	    //SetPos(OC, OL);
-	    return 0;
 
+					if (0==(Options & SEARCH_NOPOS)) {
+						if(0 != (Options & SEARCH_CENTER))
+							CenterPosR(C, L);
+						else
+							SetPosR(C, L);
+					}
+					Draw(L, L);
+					return 1;
+				}
+
+			}
+			C = 0;
+			L++;
+		}
+		//SetPos(OC, OL);
+		return 0;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// -----------------------------------------------------------------------
+	// Folds	
+	// -----------------------------------------------------------------------
+
+
+
+
+
+	int FindFold(int Line) { // optimize /*FOLD00*/
+		int f = FindNearFold(Line);
+		if (f != -1)
+			if (FF[f].line == Line)
+				return f;
+		return -1;
+	}
+
+	int FindNearFold(int Line) { /*FOLD00*/
+		int b = 0, B = FCount - 1, c;
+
+		while (b <= B) {
+			c = (b + B) / 2;
+			//	        printf("%d %d %d %d %d\n", b, B, c, Line, FF[c].line);
+			if (FF[c].line == Line)
+				return c;
+			if (c < FCount - 1) {
+				if (FF[c].line <= Line && FF[c + 1].line > Line)
+					return c;
+			} else {
+				if (FF[c].line <= Line)
+					return c;
+			}
+			if (FF[c].line < Line)
+				b = c + 1;
+			else
+				B = c - 1;
+			if (b > B)
+				break;
+		}
+		return -1;
+	}
+
+	boolean ShowRow(int Row) { /*FOLD00*/
+		int V = RToVN(Row), GapSize;
+
+		//	    printf("Showing row %d\n", Row);
+
+		assert(Row >= 0 && Row < RCount); // 0 cannot be hidden
+
+		if (V + Vis(V) == Row) return true; // already visible
+
+		assert(VCount <= VAllocated);
+		if (VCount == VAllocated) 
+		{
+			if (!AllocVis(VCount != 0? (VCount * 2) : 1)) return false;
+			
+			//memmove(VV + VAllocated - (VCount - VGap),					VV + VGap,					sizeof(int) * (VCount - VGap));
+
+			System.arraycopy(VV, VGap, VV, VAllocated - (VCount - VGap), VCount - VGap);
+		}
+		if (VGap != V + 1)
+			if (!MoveVGap(V + 1)) return false;
+		VV[VGap] = Row - (VGap);
+		VGap++;
+		VCount++;
+
+		GapSize = VAllocated - VCount;
+		if (VGap != V + 2)
+			if (!MoveVGap(V + 2)) return false;
+		for (int i = V + 2; i < VCount; i++)
+			VV[i + GapSize]--;
+		//	        Vis(i, Vis(i) - 1);
+		UpdateVisible(Row, 1);
+		//	    if (CP.Row > Row)
+		//	        if (SetPos(CP.Col, CP.Row + 1) == 0) return false;
+		Draw(Row, -1);
+		return true;
+	}
+
+	boolean HideRow(int Row) { /*FOLD00*/
+		int V = RToV(Row), GapSize;
+
+		assert(Row > 0 && Row < RCount); // 0 cannot be hidden
+
+		if (V == -1) return true; // already hidden
+		UpdateVisible(Row, -1);
+
+		if (VGap != V)
+			if (!MoveVGap(V)) return false;
+		GapSize = VAllocated - VCount;
+		VV[VGap + GapSize] = 0;
+		VCount--;
+		GapSize++;
+		if (VAllocated - VAllocated / 2 > VCount) {
+			//memmove(VV + VGap + GapSize - VAllocated / 3, VV + VGap + GapSize, sizeof(int) * (VCount - VGap));
+			System.arraycopy(VV, VGap + GapSize, VV, VGap + GapSize - VAllocated / 3, VCount - VGap);
+			if (!AllocVis(VAllocated - VAllocated / 3)) return false;
+		}
+		GapSize = VAllocated - VCount;
+		if (VGap != V)
+			if (!MoveVGap(V)) return false;
+		for (int i = V; i < VCount; i++)
+			VV[i + GapSize]++;
+		//	        Vis(i, Vis(i) + 1);
+		//	    if (CP.Row > Row)
+		//	        if (SetPos(CP.Col, CP.Row - 1) == 0) return false;
+		Draw(Row, -1);
+		return true;
+	}
+
+	boolean ExposeRow(int Row) { /*FOLD00*/
+		int V;
+		int f, level, oldlevel = 100;
+
+		//DumpFold();
+
+		assert(Row >= 0 && Row < RCount); // range
+
+		V = RToV(Row);
+		if (V != -1) return true; // already exposed
+
+		f = FindNearFold(Row);
+		assert(f != -1); // if not visible, must be folded
+
+		while (f >= 0) {
+			level = FF[f].level;
+			if (level < oldlevel) {
+				if (!FF[f].open) {
+					//	                printf("opening fold %d\n", f);
+					if (!FoldOpen(FF[f].line)) return false;
+				}
+				oldlevel = level;
+			}
+			f--;
+			if (level == 0) break;
+		}
+
+		V = RToV(Row);
+		//	    if (V == -1) {
+		//	        printf("Expose Row = %d\n", Row);
+		//	        DumpFold();
+		//	    }
+		assert (V != -1);
+		return true;
+	}
+
+	void UpdateVis(EPoint M, int Row, int Delta) { /*FOLD00*/
+		if (Delta < 0) {
+			if (M.Row > Row)
+				if (M.Row < Row - Delta)
+					M.Row = Row;
+				else
+					M.Row += Delta;
+		} else {
+			if (M.Row >= Row)
+				M.Row += Delta;
+		}
+	}
+
+	void UpdateVisible(int Row, int Delta) { /*FOLD00*/
+		EView w;
+
+		Row = RToV(Row);
+		UpdateVis(CP, Row, Delta);
+		w = View;
+		if (w != null) do {
+			UpdateVis(GetViewVPort(w).TP, Row, Delta);
+			UpdateVis(GetViewVPort(w).CP, Row, Delta);
+			w = w.Next;
+		} while (w != View);
+	}
+
+	boolean FoldCreate(int Line) { /*FOLD00*/
+		int n;
+
+		if (!Modify()) return false;
+
+		if (FindFold(Line) != -1) return true; // already exists
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldCreate) == 0) return false;
+			getSlot().
+				pushInt(Line).
+				pushOp(UndoOperation.ucFoldCreate);
+		}
+
+		n = FindNearFold(Line);
+		n++;
+		
+		//FF = (EFold ) realloc(FF, sizeof(EFold) * ((1 + FCount) | 7));
+		FF = Arrays.copyOf(FF, (1 + FCount) | 7);
+		//memmove(FF + n + 1, FF + n, sizeof(EFold) * (FCount - n));
+		System.arraycopy(FF, n, FF, n + 1, FCount - n);
+		
+		FCount++;
+		FF[n].line = Line;
+		FF[n].level = 0;
+		FF[n].open = true;
+		FF[n].flags = 0;
+		Draw(Line, Line);
+		return true;
+	}
+
+	boolean FoldCreateByRegexp(String Regexp) { /*FOLD00*/
+		boolean err = true;
+
+		if (!Modify()) return false;
+
+		Pattern R = Pattern.compile(Regexp);
+		if (R == null) return false;
+
+		return false;
+		/*
+		ELine X;
+		int first = -1;
+		int L;
+
+		for (L = 0; L < RCount; L++) {
+			RxMatchRes RM;
+
+			X = RLine(L);
+			// TODO RxExec
+			if (RxExec(R, X.Chars, X.getCount(), X.Chars, RM) == 1) 
+			{
+				if (first >= 0) {
+					int i;
+
+					for(i = L; i > 0; i--) {
+						ELine Y;
+
+						Y = RLine(i);
+						if ((Y.getCount() == 0) || CString.strrchr(Y.Chars.toString(), '}') >= 0) 
+						{
+							if ((L - i) > 2) {
+								while ((i > 0) && (RLine(i - 1).getCount() == 0))
+									i--;
+								if ((first >= 0) && i != 0
+										&& (!FoldCreate(i)))
+									err = false;
+							}
+							break;
+						}
+					}
+				} else
+					first = L;
+				if (!FoldCreate(L)) {
+					err = false;
+					break;
+				}
+			}
+		}
+
+		return err; // */
+	}
+
+	boolean FoldCreateAtRoutines() { /*FOLD00*/
+		if (BFS(this, BFS_RoutineRegexp) == null)
+			return false;
+		return FoldCreateByRegexp(BFS(this, BFS_RoutineRegexp));
+	}
+
+	boolean FoldDestroy(int Line) { /*FOLD00*/
+		int f = FindFold(Line);
+
+		if (!Modify()) return false;
+
+		if (f == -1) return false;
+		if (!FF[f].open)
+			if (!FoldOpen(Line)) return false;
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(FF[f].level) == 0) return false;
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldDestroy) == 0) return false;
+			getSlot().
+				pushInt(FF[f].level).
+				pushInt(Line).
+				pushOp(UndoOperation.ucFoldDestroy);
+		}
+
+		//memmove(FF + f, FF + f + 1, sizeof(EFold) * (FCount - f - 1));
+		System.arraycopy(FF, f + 1, FF, f, FCount - f - 1);
+		FCount--;
+		//FF = (EFold ) realloc(FF, sizeof(EFold) * (FCount | 7));
+		FF = Arrays.copyOf(FF, FCount | 7);
+		Draw(Line, Line);
+		return true;
+	}
+
+	boolean FoldDestroyAll() { /*FOLD00*/
+		int l;
+
+		if (!Modify()) return false;
+
+		for (l = 0; l < RCount; l++)
+			if (FindFold(l) != -1)
+				if (!FoldDestroy(l)) return false;
+		return true;
+	}
+
+	boolean FoldPromote(int Line) { /*FOLD00*/
+		int f = FindFold(Line);
+
+		if (!Modify()) return false;
+
+		if (f == -1) return false;
+		if (!FF[f].open) return false;
+		if (FF[f].level == 0) return false;
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldPromote) == 0) return false;
+			getSlot().
+				pushInt(Line).
+				pushOp(UndoOperation.ucFoldPromote);
+		}
+
+		if ((FF[f].line > 0) && (!ExposeRow(FF[f].line - 1)))
+			return false;
+
+		FF[f].level--;
+		Draw(Line, Line);
+		return true;
+	}
+
+	boolean FoldDemote(int Line) { /*FOLD00*/
+		int f = FindFold(Line);
+
+		if (!Modify()) return false;
+
+		if (f == -1) return false;
+		if (!FF[f].open) return false;
+		if (FF[f].level == 99) return false;
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldDemote) == 0) return false;
+			getSlot().
+				pushInt(Line).
+				pushOp(UndoOperation.ucFoldDemote);
+		}
+
+		if ((FF[f].line > 0) && (!ExposeRow(FF[f].line - 1)))
+			return false;
+
+		FF[f].level++;
+		Draw(Line, Line);
+		return true;
+	}
+
+	boolean FoldOpen(int Line) { /*FOLD00*/
+		int f = FindFold(Line);
+		int l;
+		int level, toplevel;
+		int top;
+
+		if (f == -1) return false;
+		if (FF[f].open) return true; // already open
+
+		if (!Modify()) return false;
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldOpen) == 0) return false;
+			getSlot().
+			pushInt(Line).
+			pushOp(UndoOperation.ucFoldOpen);
+		}
+
+		FF[f].open = true;
+		top = FF[f].line;
+		toplevel = FF[f].level;
+		//    printf("Fold starts with %d\n", FF[f].line);
+		if (!ShowRow(FF[f].line)) return false;
+		while (f < FCount) {
+			level = FF[f].level;
+			if (FF[f].open) {
+				// fold is open
+				if (f == FCount - 1) {
+					for (l = FF[f].line; l < RCount; l++)
+						if (l != top)
+							if (!ShowRow(l)) return false;
+				} else {
+					for (l = FF[f].line; l < FF[f + 1].line; l++)
+						if (l != top)
+							if (!ShowRow(l)) return false;
+				}
+				f++;
+			} else { // fold is closed
+				// show head line
+				if (!ShowRow(FF[f].line)) return false;
+				// skip closed folds
+				while ((f < FCount) && (level < FF[f + 1].level))
+					f++;
+				f++;
+			}
+			if (f < FCount && FF[f].level <= toplevel)
+				break;
+		}
+		return true;
+	}
+
+	boolean FoldOpenAll() { /*FOLD00*/
+		int l;
+
+		for (l = 0; l < RCount; l++)
+			if (FindFold(l) != -1)
+				if (!FoldOpen(l)) return false;
+		return true;
+	}
+
+	boolean FoldOpenNested() { /*FOLD00*/
+		int Line = VToR(CP.Row);
+		int f = FindFold(Line);
+		int l;
+		int level;
+
+		if (f == -1) return false;
+		level = FF[f].level;
+
+		while (f + 1 < FCount && FF[f + 1].level > level) f++;
+
+		if (f + 1 == FCount) {
+			if (!FoldOpen(Line)) return false;
+		} else {
+			for (l = Line; l < RCount && l < FF[f + 1].line; l++) {
+				if (FindFold(l) != -1)
+					if (!FoldOpen(l)) return false;
+			}
+		}
+		return false;
+	}
+
+	boolean FoldClose(int Line) { /*FOLD00*/
+		int f = FindNearFold(Line);
+		int l, top;
+		int level;
+
+		if (f == -1) return false;
+		if (!FF[f].open) return true; // already closed
+
+		if (!Modify()) return false;
+
+		if (!SetPosR(CP.Col, FF[f].line, tmLeft)) return false;
+
+		if (BFI(this, BFI_Undo)) {
+			//if (PushULong(Line) == 0) return false;
+			//if (PushUChar(ucFoldClose) == 0) return false;
+			getSlot().
+				pushInt(Line).
+				pushOp(UndoOperation.ucFoldClose);
+		}
+
+		FF[f].open = false;
+		top = FF[f].line;
+		level = FF[f].level;
+		while ((f < FCount - 1) && (FF[f + 1].level > level)) f++;
+
+		/* performance tweak: do it in reverse (we'll see if it helps) */
+
+		if (f == FCount - 1) {
+			for (l = RCount - 1; l > top; l--)
+				if (!HideRow(l)) return false;
+		} else {
+			for (l = FF[f + 1].line - 1; l > top; l--)
+				if (!HideRow(l)) return false;
+		}
+
+		/* yup, it does. try below for a (MUCH!) slower version */
+
+		/*if (f == FCount - 1) {
+	     for (l = top + 1; l < RCount; l++)
+	     if (HideRow(l) == 0) return false;
+	     } else {
+	     for (l = top + 1; l < FF[f + 1].line; l++)
+	     if (HideRow(l) == 0) return false;
+	     }*/
+		return true;
+	}
+
+	boolean FoldCloseAll() { /*FOLD00*/
+		int l;
+
+		for (l = RCount - 1; l >= 0; l--)
+			if (FindFold(l) != -1)
+				if (!FoldClose(l)) return false;
+		return true;
+	}
+
+	boolean FoldToggleOpenClose() { /*FOLD00*/
+		int Line = VToR(CP.Row);
+		int f;
+
+		f = FindNearFold(Line);
+		if (f == -1)
+			return false;
+		if (FF[f].open) {
+			if (!FoldClose(Line)) return false;
+		} else {
+			if (!FoldOpen(Line)) return false;
+		}
+		return true;
+	}
+
+	boolean MoveFoldTop() { /*FOLD00*/
+		int f = FindNearFold(VToR(CP.Row));
+
+		if (f == 0 || f == -1) return false;
+
+		if (FF[f].line == VToR(CP.Row))
+			return true;
+		if (!SetPosR(CP.Col, FF[f].line, tmLeft)) return false;
+		return true;
+	}
+
+	boolean MoveFoldPrev() { /*FOLD00*/
+		int f = FindNearFold(VToR(CP.Row));
+
+		if (f == 0 || f == -1) return false;
+
+		if (FF[f].line == VToR(CP.Row)) {
+			do {
+				f--;
+				if (f < 0) return false;
+				if (RToV(FF[f].line) != -1)
+					break;
+			} while (true);
+		}
+		if (!SetPosR(CP.Col, FF[f].line, tmLeft)) return false;
+		return true;
+	}
+
+	boolean MoveFoldNext() { /*FOLD00*/
+		int f = FindNearFold(VToR(CP.Row));
+
+		if (f == FCount - 1 || f == -1) return false;
+
+		do {
+			f++;
+			if (f == FCount) return false;
+			if (RToV(FF[f].line) != -1)
+				break;
+		} while (true);
+		if (!SetPosR(CP.Col, FF[f].line, tmLeft)) return false;
+		return true;
+	}
+
+
+
+
+
+
+
+
+	boolean FoldCreateByRegexp(ExState State) {
+		String [] strbuf = {""};
+
+		if (State.GetStrParam(View, strbuf) == 0) {
+			if (View.MView.Win.GetStr("Create Fold Regexp", strbuf, HIST_REGEXP) == 0) return false;
+		}
+		return FoldCreateByRegexp(strbuf[0]);
+	}
+
+
+
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	boolean FindTagWord(ExState State) {
+	    //char word[MAXSEARCH + 1];
+	    ELine L = VLine(CP.Row);
+	    int P = 0;
+
+	    StringBuilder word = new StringBuilder();
+	    
+	    P = CharOffset(L, CP.Col);
+	    while ((P > 0) && ((ChClass(L.Chars.charAt(P - 1)) == 1) || (L.Chars.charAt(P - 1) == '_')))
+	        P--;
+	    while (P < L.getCount() && (ChClass(L.Chars.charAt(P)) == 1 || L.Chars.charAt(P) == '_'))
+	        word.append( L.Chars.charAt(P++) );
+
+	    if (word.length() == 0) {
+	        Msg(S_INFO, "No word at cursor.");
+	        return false;
+	    }
+
+	    int j = 2;
+	    while (j-- > 0) {
+	        int i;
+
+	        i = Tags.TagFind(this, View, word.toString());
+	        if (i > 0)
+	            return true;
+	        else if (j != 0 && (i < 0)) {
+	            /* Try autoload tags */
+	            if (View.ExecCommand(ExCommands.ExTagLoad, State) == ExResult.ErFAIL)
+	                break;
+	        } else {
+	            Msg(S_INFO, "Tag '%s' not found.", word.toString());
+	            break;
+	        }
+	    }
+	    return false;
+	}
+	
+
+	boolean FindTag(ExState State) {
+	    String [] Tag = {""};
+
+	    if (State.GetStrParam(View, Tag) == 0)
+	        if (View.MView.Win.GetStr("Find tag", Tag, HIST_SEARCH) == 0) return false;
+
+	    int j = 2;
+	    while (j-- > 0) {
+	        int i;
+
+	        i = Tags.TagFind(this, View, Tag[0]);
+	        if (i > 0)
+	            return true;
+	        else if (j != 0 && (i < 0)) {
+	            /* Try autoload tags */
+	            if (View.ExecCommand(ExCommands.ExTagLoad, State) == ExResult.ErFAIL)
+	                break;
+	        } else {
+	            Msg(S_INFO, "Tag '%s' not found.", Tag[0]);
+	            break;
+	        }
+	    }
+	    
+	    return false;
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
+
 
 }
 

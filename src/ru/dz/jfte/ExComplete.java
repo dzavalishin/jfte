@@ -297,7 +297,11 @@ public class ExComplete extends ExView implements GuiDefs
 
 		// fprintf(stderr, "Calling %d  %s\n", wlen, WordBegin);
 		// Search words in TAGS
-		// TODO TagComplete(Words, &WordsLast, MAXCOMPLETEWORDS, WordBegin);
+		{
+			int [] pWordsLast = {WordsLast};
+			Tags.TagComplete(Words, pWordsLast, MAXCOMPLETEWORDS, WordBegin);
+			WordsLast = pWordsLast[0];
+		}
 		// fprintf(stderr, "Located %d words\n", WordsLast);
 		// these words are already sorted
 
