@@ -504,7 +504,6 @@ public class BitOps {
 		return 0;
 	}
 
-	// TODO compare str 
 	public static int strcmp(String s1, String s2) {	
 		return s1.compareTo(s2);
 	}

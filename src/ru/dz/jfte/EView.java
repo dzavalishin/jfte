@@ -720,7 +720,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		command += exp[0];
         command += Main.ConfigFileName;
 
-		// TODO Run conf compiler directly?
+		// XXX Run conf compiler directly?
 		return Compile(command);
 	}
 

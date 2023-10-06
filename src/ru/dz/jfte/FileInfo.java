@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
-public class FileInfo {
+public class FileInfo implements Comparable<FileInfo> 
+{
 	String name;   // minimum set of file information
 	long size;
 	long mtime;
@@ -11,19 +12,12 @@ public class FileInfo {
 	public static final int fiDIRECTORY = 2;
 
 
-	FileInfo(String Name, int Type, long Size, long MTime) {
+	FileInfo(String Name, int Type, long Size, long MTime) 
+	{
 		name = Name;
 		size = Size;
 		type = Type;
-		mtime = MTime;
-		
-		/*
-		 * 			File myFile = new File("/home/mayur/GFG.java");
-	        
-	        long modifiedValue = myFile.lastModified();
-
-		 */
-		
+		mtime = MTime;		
 	}
 
 	String Name() { return name; }
@@ -33,6 +27,18 @@ public class FileInfo {
 
 	public boolean isDir() {
 		return 0 != (type & fiDIRECTORY);
+	}
+
+	@Override
+	public int compareTo(FileInfo o) 
+	{
+	    if (!(Type() == fiDIRECTORY) && (o.Type() == fiDIRECTORY))
+	        return 1;
+
+	    if ((Type() == fiDIRECTORY) && !(o.Type() == fiDIRECTORY))
+	        return -1;
+
+	    return Console.filecmp(Name(), o.Name());
 	}
 
 
