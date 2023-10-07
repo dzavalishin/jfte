@@ -1986,7 +1986,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 					//char num[10];
 
 					dB.MoveStr( 0, W.Cols, s, SColor, W.Cols);
-					String num = String.format(" %s %d", CCharStr, ModelNo);
+					String num = String.format(" %s %d", CCharStr, getModelNo());
 					dB.MoveStr( W.Cols - num.length(), W.Cols, num, SColor, W.Cols);
 
 					fw -= num.length();
@@ -6930,7 +6930,7 @@ public class EBuffer extends EModel implements BufferDefs, ModeDefs, GuiDefs, Co
 
 		return String.format(
 				"%2d %04d:%03d%c%-150s ",
-				ModelNo,
+				getModelNo(),
 				1 + CP.Row, 1 + CP.Col,
 				Modified!=0 ? '*': ' ',
 						winTitle);

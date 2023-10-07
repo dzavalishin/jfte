@@ -2,11 +2,11 @@ package ru.dz.jfte;
 
 public abstract class EList extends EModel
 {
-    String Title = "";
-    int Row, LeftCol, TopRow, Count;
-    int MouseCaptured;
-    int MouseMoved;
-    int NeedsUpdate, NeedsRedraw;
+    protected String Title = "";
+    protected int Row, LeftCol, TopRow, Count;
+    protected int MouseCaptured;
+    protected int MouseMoved;
+    protected int NeedsUpdate, NeedsRedraw;
 
     
     

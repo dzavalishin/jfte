@@ -56,8 +56,11 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 			case ExIncrementalSearch:
 				return View.MView.Win.IncrementalSearch(View) == 0 
 				? ExResult.ErFAIL : ExResult.ErOK;
+				
+				default: break;
 			}
 		}
+		
 		switch (Command) {
 		case ExWinRefresh:              view.Repaint(); return ExResult.ErOK;
 		case ExWinNext:                 return WinNext(view);
@@ -971,13 +974,13 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 				if (M != ECvsLog.CvsLogView)
 				{
 					EBuffer B = (EBuffer )M;
-					w.write( String.format("F|%d|%s\n", B.ModelNo, B.FileName) );
+					w.write( String.format("F|%d|%s\n", B.getModelNo(), B.FileName) );
 				}
 				break;
 			case CONTEXT_DIRECTORY:
 			{
 				EDirectory D = (EDirectory )M;
-				w.write( String.format( "D|%d|%s\n", D.ModelNo, D.Path) );
+				w.write( String.format( "D|%d|%s\n", D.getModelNo(), D.Path) );
 			}
 			break;
 			}

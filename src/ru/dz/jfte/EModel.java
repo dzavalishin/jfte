@@ -8,8 +8,8 @@ import java.util.List;
 public class EModel implements ModeDefs, Closeable 
 {
 	private EModel [] Root;   // root ptr of this list
-	EModel Next;    // next model
-	EModel Prev;    // prev model
+	protected EModel Next;    // next model
+	protected EModel Prev;    // prev model
 	EView View;     // active view of model
 	List<EView> views = new ArrayList<>();
 
@@ -28,7 +28,7 @@ public class EModel implements ModeDefs, Closeable
 		int No = ID;
 
 		while (M != null) {
-			if (M.ModelNo == No)
+			if (M.getModelNo() == No)
 				return M;
 			M = M.Next;
 			if (M == Model)
@@ -195,6 +195,13 @@ public class EModel implements ModeDefs, Closeable
 
 	int GetIntVar(int var, int [] value) {
 		return 0;
+	}
+
+	/**
+	 * @return modelNo
+	 */
+	public int getModelNo() {
+		return ModelNo;
 	}
 
 

@@ -339,7 +339,7 @@ public class EView implements GuiDefs, EventDefs, ModeDefs, ColorDefs, Closeable
 		}
 		M = Model;
 		while (M!=null) {
-			if (M.ModelNo == No[0]) {
+			if (M.getModelNo() == No[0]) {
 				SwitchToModel(M);
 				return ExResult.ErOK;
 			}

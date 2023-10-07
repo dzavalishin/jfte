@@ -241,7 +241,7 @@ public class ECvsLog extends EBuffer
 	String GetInfo () {
 	    return String.format( 
 	    		"%2d %04d:%03d%cCVS log: %-140s",
-	    		ModelNo,1+CP.Row,1+CP.Col,
+	    		getModelNo(),1+CP.Row,1+CP.Col,
 	    		Modified != 0 ? '*':' ', FileName);
 	}
 

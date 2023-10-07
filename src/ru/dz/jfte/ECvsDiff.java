@@ -15,8 +15,8 @@ import ru.dz.jfte.c.BitOps;
 public class ECvsDiff extends ECvsBase implements BufferDefs 
 {
 
-    int 	CurrLine, ToLine, InToFile;
-    String 	CurrFile = null;
+    private int 	CurrLine, ToLine, InToFile;
+    private String 	CurrFile = null;
 	
 	
 	

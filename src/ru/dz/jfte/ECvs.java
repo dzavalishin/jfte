@@ -10,8 +10,8 @@ package ru.dz.jfte;
 
 public class ECvs extends ECvsBase implements GuiDefs 
 {
-    String LogFile = null;
-    int Commiting = 0;
+    private String LogFile = null;
+    private int Commiting = 0;
 
     
 	static ECvs CvsView = null;

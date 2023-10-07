@@ -135,8 +135,6 @@ public class JavaConsole implements GuiDefs, EventDefs
 	}
 
 	public void enableMouse(boolean mouseVisible) {
-		// TODO enableMouse
-		
 	}
 
 	public TEvent pollKeyb() {

@@ -179,7 +179,7 @@ public class EventMapView extends EList implements ConfigCompilerDefs
    @Override
    String GetInfo() {
 	   return String.format( "%2d %04d/%03d EventMapView (%s)",
-               ModelNo,
+               getModelNo(),
                Row + 1, Count,
                EMap.Name);
    	}

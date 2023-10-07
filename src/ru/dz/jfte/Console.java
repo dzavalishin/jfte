@@ -244,13 +244,20 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 
 
 	private static String tt = "", stt = "";
+	
+	/**
+	 * 
+	 * @param title Window title
+	 * @param sTitle Icon/toolbar title - short
+	 * 
+	 */
 	public static void ConSetTitle(String title, String sTitle) {
 
 		tt = title;
 		stt = sTitle;
 
-		// TODO see orig code
-		jc.setTitle("jFTE - "+title+" - "+sTitle);
+		//jc.setTitle("jFTE - "+title+" - "+sTitle);
+		jc.setTitle("jFTE - "+title);
 	}
 
 	public static int ConGetTitle(String[] title, String[] sTitle) {
@@ -277,7 +284,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 
 	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) 
 	{
-		// TODO eventMask, pipe events?
+		// eventMask is ignored in original code
 
 		while(e == null)
 			fillEvent();

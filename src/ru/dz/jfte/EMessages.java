@@ -401,7 +401,7 @@ public class EMessages extends EList implements Closeable
 	String GetInfo() {
 		return String.format( 
 				"%2d %04d/%03d Messages: %d (%s) ",
-				ModelNo,
+				getModelNo(),
 				Row, Count,
 				MatchCount,
 				Command);

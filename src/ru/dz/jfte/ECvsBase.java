@@ -6,20 +6,20 @@ import java.util.regex.Pattern;
 
 public class ECvsBase extends EList 
 {
-	String Command = null;
-	String Directory = null;
-	String OnFiles = null;
-	String OnFilesPos = null;
+	protected String Command = null;
+	protected String Directory = null;
+	protected String OnFiles = null;
+	protected String OnFilesPos = null;
 
 	//int Lines.size();
 	//CvsLine [] Lines = null;
-	List<CvsLine> Lines = new ArrayList<>();
-	boolean Running = false;
+	protected List<CvsLine> Lines = new ArrayList<>();
+	protected boolean Running = false;
 
-	int BufLen = 0;
-	int BufPos = 0;
-	int PipeId = -1;
-	int ReturnCode = -1;
+	protected int BufLen = 0;
+	protected int BufPos = 0;
+	protected int PipeId = -1;
+	protected int ReturnCode = -1;
 
 	//String MsgBuf;
 
@@ -465,7 +465,7 @@ public class ECvsBase extends EList
 		//String s = String.format("%2d %04d/%03d %s (%%.%is) ",ModelNo,Row,Count,Title,MaxLen-24-Title.length());
 		//return String.format(s,Command);
 
-		return String.format("%2d %04d/%03d %s (%s) ",ModelNo,Row,Count,Title,Command);
+		return String.format("%2d %04d/%03d %s (%s) ",getModelNo(),Row,Count,Title,Command);
 	}
 
 	// Used to get default directory of model

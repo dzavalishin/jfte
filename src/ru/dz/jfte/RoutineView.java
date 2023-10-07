@@ -112,7 +112,7 @@ public class RoutineView extends EList implements GuiDefs, ModeDefs, EventDefs, 
 
     @Override
     String GetInfo() {
-        return String.format( "%2d %04d/%03d Routines (%s)", ModelNo, Row + 1, Count, Buffer.FileName);
+        return String.format( "%2d %04d/%03d Routines (%s)", getModelNo(), Row + 1, Count, Buffer.FileName);
     }
 
     @Override

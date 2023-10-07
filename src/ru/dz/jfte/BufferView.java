@@ -251,7 +251,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
     }
 
     void GetInfo(String [] i) {
-    	i[0] = String.format("%2d %04d/%03d Buffers", ModelNo, Row + 1, Count);
+    	i[0] = String.format("%2d %04d/%03d Buffers", getModelNo(), Row + 1, Count);
     }
 
     @Override
@@ -262,7 +262,7 @@ public class BufferView extends EList implements EventDefs, KeyDefs
 
     @Override
     String GetInfo() {
-        return String.format("%2d %04d/%03d Buffers", ModelNo, Row + 1, Count);
+        return String.format("%2d %04d/%03d Buffers", getModelNo(), Row + 1, Count);
     }
     
 }

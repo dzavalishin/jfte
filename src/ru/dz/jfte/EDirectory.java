@@ -458,7 +458,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
 		AInfo = String.format(
 				"%2d %04d/%03d %-150s",
-				ModelNo,
+				getModelNo(),
 				Row + 1, Files.size(),
 				winTitle);
 		/*    sprintf(AInfo,
@@ -528,7 +528,7 @@ public class EDirectory extends EList implements EventDefs, KeyDefs, GuiDefs
 
     	    return String.format(
     	            "%2d %04d/%03d %-150s",
-    	            ModelNo,
+    	            getModelNo(),
     	            Row + 1, Files.size(),
     	            winTitle);
     	
