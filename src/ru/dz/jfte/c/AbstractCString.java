@@ -317,7 +317,7 @@ public abstract class AbstractCString implements ICString
 	}
 
 
-	protected static int charICmp(char c1, char c2) {
+	public static int charICmp(char c1, char c2) {
 		int uc1 = Character.toUpperCase((char)( 0xFFFF & c1));
 		int uc2 = Character.toUpperCase((char)( 0xFFFF & c2));
 
@@ -327,7 +327,7 @@ public abstract class AbstractCString implements ICString
 		return 0;
 	}
 	
-	protected static int charCmp(char c1, char c2) {
+	public static int charCmp(char c1, char c2) {
 		int uc1 = (char)( 0xFFFF & c1);
 		int uc2 = (char)( 0xFFFF & c2);
 

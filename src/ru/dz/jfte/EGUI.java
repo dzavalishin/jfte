@@ -1073,7 +1073,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 					
                     P.Row = Integer.parseInt(ss[0]);
                     P.Col = Integer.parseInt(ss[0]);
-					/* TODO mark
+					/* 
                     //long l;
                     String e;
 

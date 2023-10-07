@@ -161,6 +161,20 @@ public class CString extends AbstractCString
 		return charCmp(s1.charAt(n), s2.charAt(n));		
 	}
 
+	// TODO test strnicmp
+	public static int strnicmp(CharSequence s1, CharSequence s2, int n) 
+	{
+		if (n == 0)	         return 0;
+
+		while (n-- > 0 && s1.charAt(n) == s2.charAt(n)) 
+		{
+			if (n == 0 || s1.charAt(n) == '\0')
+				return 0;
+		}
+
+		return charICmp(s1.charAt(n), s2.charAt(n));		
+	}
+	
 
 	public static int strrchr(String chars, char c) {
 		return chars.lastIndexOf(c);
