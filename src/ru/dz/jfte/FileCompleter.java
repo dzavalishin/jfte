@@ -107,9 +107,18 @@ public class FileCompleter implements Completer
 						/*#ifdef UNIX
 	                        while (cname[o] && dname[o] && (cname[o] == dname[o])) o++;
 						 */
+						if(isWindows)
+						{
 						while( o < cname.length() && o < dname.length() && 
 								0 == CString.charICmp(cname.charAt(o), dname.charAt(o)) ) 
 							o++;
+						}
+						else
+						{
+							while( o < cname.length() && o < dname.length() && 
+									0 == CString.charCmp(cname.charAt(o), dname.charAt(o)) ) 
+								o++;
+						}
 						//#endif
 						//cname[o] = 0;
 						cname = cname.substring(0, o);
