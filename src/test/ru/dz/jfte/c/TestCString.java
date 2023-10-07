@@ -387,12 +387,12 @@ class TestCString {
 		
 
 		
-		p.strcpy(6, 3);  
+		p.strcpy(4, 3);  
 		
 		assertEquals(9, cs.length());
 		assertEquals(9, cs.strlen());
 
-		assertEquals("xyzcefxyz", cs.toString());
+		assertEquals("abxyzcxyz", cs.toString());
 
 		
 	}	
