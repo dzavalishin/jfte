@@ -5,22 +5,22 @@ import ru.dz.jfte.c.CStringPtr;
 
 public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs 
 {
-	String Prompt;
-	CString Line = new CString();
-	String MatchStr;
-	String CurStr;
-	int Pos;
-	int LPos;
-	int MaxLen = 500;
+	private String Prompt;
+	private CString Line = new CString();
+	private String MatchStr;
+	private String CurStr;
+	private int Pos;
+	private int LPos;
+	private int MaxLen = 500;
 
-	Completer Comp;
+	private Completer Comp;
 
-	int TabCount;
-	int HistId;
-	int CurItem;
+	private int TabCount;
+	private int HistId;
+	private int CurItem;
 
-	int SelStart;
-	int SelEnd;
+	private int SelStart;
+	private int SelEnd;
 
 
 	ExView GetViewContext() { return Next; }
@@ -38,8 +38,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 
 		//Line = ALine[0];
 		int w = 80; // TODO ConWidth(); fails for no window yet
-		//Line = new BinaryString(w,' ');
-		Line = new CString(w,' ');
+		//Line = new CString(w,' ');
+		Line = new CString();
+		Line.setSize(ALine[0].length());
 		Line.copyIn(0, ALine[0]);
 		
 		//Pos = Line.getSize();
@@ -54,15 +55,23 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 		CurItem = 0;
 	}
 
+	
+	public String getLine() {
+		return Line.toString();
+	}
+	
 
+	@Override
 	void Activate(boolean gotfocus) {
 		super.Activate(gotfocus);
 	}
 
+	@Override
 	int BeginMacro() {
 		return 1;
 	}
 
+	@Override
 	void HandleEvent(TEvent Event) {
 		switch (Event.What) {
 		case evKeyDown:
@@ -148,8 +157,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 				if (Pos < Line.getSize())
 				{
 					//memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
-					int len = Line.getSize() - Pos;
+					int len = Line.getSize() - Pos - 1;
 					Line.memmove(Pos, Pos+1, len);
+					Line.setSize(Line.getSize()-1);
 				}
 				TabCount = 0;
 				Event.What = evNone;
@@ -166,8 +176,9 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 				if (Pos < Line.getSize())
 				{
 					//memmove(Line + Pos, Line + Pos + 1, strlen(Line + Pos + 1) + 1);
-					int len = Line.getSize() - Pos;
+					int len = Line.getSize() - Pos - 1;
 					Line.memmove(Pos, Pos+1, len);
+					Line.setSize(Line.getSize()-1);
 				}
 				TabCount = 0;
 				Event.What = evNone;
@@ -295,6 +306,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 					//Line[Pos++] = Ch;
 
 					//int mlen = Line.getSize() - Pos + 1;
+					Line.setSize(Line.getSize()+1);
 					int mlen = Line.getSize() - Pos - 1;
 					Line.memmove(Pos+1, Pos, mlen);
 					Line.copyIn(Pos++, ""+Ch, 1);
@@ -310,22 +322,26 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 		}
 	}
 
+	@Override
 	void UpdateView() {
 		if (Next != null) {
 			Next.UpdateView();
 		}
 	}
 
+	@Override
 	void RepaintView() {
 		if (Next != null) {
 			Next.RepaintView();
 		}
 	}
 
+	@Override
 	void UpdateStatus() {
 		RepaintStatus();
 	}
 
+	@Override
 	void RepaintStatus() {
 		TDrawBuffer B = new TDrawBuffer();
 		int [] W = {0}, H = {0};
@@ -359,5 +375,7 @@ public class ExInput extends ExView implements KeyDefs, EventDefs, ColorDefs
 		ConPutBox(0, H[0] - 1, W[0], 1, B);
 		ConShowCursor();
 	}
+
+
 
 }

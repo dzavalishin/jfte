@@ -221,7 +221,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         Repaint();
 
         if (rc != 0)
-            Str[0] = input.Line.toString();
+            Str[0] = input.getLine(); // input.Line.toString();
 
         input.close();
 

@@ -4,9 +4,12 @@ import java.io.File;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.util.logging.Logger;
 
 public class FileFind //implements Closeable
 {
+	//private static final Logger log = Logger.getLogger(FileFind.class.getName());
+	
 	String Directory;
 	//String Pattern;
 	int Flags;
@@ -29,19 +32,12 @@ public class FileFind //implements Closeable
 		Flags = aFlags;
 
 		File d = new File(Directory);
-		//FilenameFilter filter;
-		//list = d.list(filter);
 		list = d.list();
 		
 		if( null != aPattern)
 			matcher = FileSystems.getDefault().getPathMatcher("glob:" + aPattern);
 	}
 
-	/*
-	@Override
-	public void close() {
-
-	}*/
 
 	FileInfo FindNext() {
 
@@ -57,9 +53,6 @@ public class FileFind //implements Closeable
 			if (name.charAt(0) == '.')
 				if ((Flags & ffHIDDEN)==0)
 					continue;
-
-			//if (Pattern != null && FileName.fnmatch(Pattern, name, 0) != 0)
-			//	continue;
 
 			if( matcher!=null)
 			{
@@ -77,7 +70,6 @@ public class FileFind //implements Closeable
 			if(0!=  (Flags & ffFAST)) {
 				ret = new FileInfo(name, FileInfo.fiUNKNOWN, 0, 0);
 			} else {
-				// stat st;
 
 				if(0== (Flags & ffFULLPATH)) // need it now
 					Console.JoinDirFile(fullpath, Directory, name);
@@ -95,7 +87,6 @@ public class FileFind //implements Closeable
 			//printf("ok\n");
 			return ret;
 		}
-		//return null;
 	}
 
 
