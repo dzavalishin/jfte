@@ -308,7 +308,7 @@ class TestCString {
 		cs = new CString( "zyxel".toCharArray() );
 		p = new CStringPtr(cs,2);
 		assertEquals("xel", p.toString());
-		assertEquals(3, cs.length());
+		assertEquals(5, cs.length());
 		
 		cs = new CString( "zyxel".toCharArray(), 3 );
 		p = new CStringPtr(cs,2);
@@ -363,7 +363,7 @@ class TestCString {
 		assertEquals(7, p.length());
 		assertEquals(3, p.strlen());
 
-		assertEquals("bba\0xyz", cs.toString());
+		assertEquals("abbba\0xyz", cs.toString());
 
 		
 		
@@ -372,17 +372,18 @@ class TestCString {
 		assertEquals(7, p.length());
 		assertEquals(2, p.strlen());
 
-		assertEquals("abee\0\0efxyz", cs.toString());
-		assertEquals("ee\0\0efxyz", p.toString());
+		assertEquals("abee\0\0xyz", cs.toString());
+		assertEquals("ee\0\0xyz", p.toString());
 
 		
 		
 		p.strcpy("eeaacc__uu".getBytes(), 2, 4);  
 		
-		assertEquals(7, cs.length());
-		assertEquals(7, cs.strlen());
+		assertEquals(7, p.strlen());
+		assertEquals(9, cs.length());
 
-		assertEquals("aaccefxyz", p.toString());
+		assertEquals("aaccxyz", p.toString());
+		assertEquals("abaaccxyz", cs.toString());
 		
 
 		
@@ -415,16 +416,16 @@ class TestCString {
 		assertEquals("##efxyz", p.toString());
 
 		p.memmove( 2, "aaaqqq", 3, 2); 
-		assertEquals("abqqefxyz", cs.toString());
+		assertEquals("ab##qqxyz", cs.toString());
 
 		p.memmove( 5, "z-!xel".toCharArray(), 1, 2); 
-		assertEquals("abqqefx-!", cs.toString());
+		assertEquals("ab##qqx-!", cs.toString());
 
 		p.memmove( 1, "zyz".getBytes(), 1, 2); 
-		assertEquals("abqyefx-!", cs.toString());
+		assertEquals("ab#yzqx-!", cs.toString());
 		
 		p.memmove( 0, 5, 2); 
-		assertEquals("ab-efx-!", cs.toString());
+		assertEquals("ab-!zqx-!", cs.toString());
 	}	
 
 	
@@ -474,7 +475,7 @@ class TestCString {
 		assertTrue( p.strcmp(new CString("cdefxyz")) == 0 );
 
 		assertTrue( p.strncmp(new CString("ddefxyz"), 3) < 0 );
-		assertTrue( p.strncmp(new CString("cefxyz"), 3) > 0 );
+		assertTrue( p.strncmp(new CString("aacefxyz"), 3) > 0 );
 		assertTrue( p.strncmp(new CString("cde==="), 3) == 0 );
 		
 		assertTrue( p.strncmp(new CString("cde---"), 3) == 0 );
@@ -588,6 +589,12 @@ class TestCString {
 	
 		assertTrue( CString.strncmp("aba!", "aba#", 3) == 0 );
 	
+		assertTrue( CString.strnicmp("aAa#", "aba!", 3) < 0 );
+		assertTrue( CString.strnicmp("aaa#", "aBa!", 3) < 0 );
+		assertTrue( CString.strnicmp("aBa$", "aaa@", 3) > 0 );
+		assertTrue( CString.strnicmp("aba$", "aAa@", 3) > 0 );
+		assertTrue( CString.strnicmp("aBa%", "aba*", 3) == 0 );
+		assertTrue( CString.strnicmp("aba%", "aBa*", 3) == 0 );
 	}
 	
 
