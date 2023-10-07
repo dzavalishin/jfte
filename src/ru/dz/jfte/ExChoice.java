@@ -4,15 +4,15 @@ import java.io.IOException;
 
 public class ExChoice extends ExView implements ColorDefs 
 {
-    String Title;
-    String Prompt;
-    int NOpt;
-    String [] SOpt;
+    private String Title;
+    private String Prompt;
+    private int NOpt;
+    private String [] SOpt;
     
-    int Cur;
-    int lTitle;
-    int lChoice;
-    boolean MouseCaptured = false;
+    private int Cur;
+    private int lTitle;
+    private int lChoice;
+    private boolean MouseCaptured = false;
 
 	
     
@@ -53,6 +53,7 @@ public class ExChoice extends ExView implements ColorDefs
         super.Activate(gotfocus);
     }
 
+    @Override
     int BeginMacro() {
         return 1;
     }

@@ -5,32 +5,42 @@ import java.io.IOException;
 
 public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs, ColorDefs 
 {
-    int Pos, LPos;
+    private int Pos, LPos;
     
-    ExView GetViewContext() { return Next; }
-
     
     static int SPos = 0;
     static int SLPos = 0;
 
+    
+    
     ExASCII() {
         Pos = SPos;
         LPos = SLPos;
     }
 
+    
+    
+    
+    @Override
     public void close() {
         SPos = Pos;
         SLPos = LPos;
     }
 
+    @Override
+    ExView GetViewContext() { return Next; }
+
+    @Override
     void Activate(boolean gotfocus) {
         super.Activate(gotfocus);
     }
 
+    @Override
     int BeginMacro() {
         return 1;
     }
 
+    @Override
     void HandleEvent(TEvent Event) throws IOException {
         int [] W = {0}, H = {0};
         
@@ -91,22 +101,27 @@ public class ExASCII extends ExView implements Closeable, KeyDefs, EventDefs, Co
         }
     }
 
+    @Override
     void UpdateView() {
         if (Next != null) {
             Next.UpdateView();
         }
     }
 
+    @Override
     void RepaintView() {
         if (Next != null) {
             Next.RepaintView();
         }
     }
 
+    @Override
     void UpdateStatus() {
         RepaintStatus();
     }
 
+
+    @Override
     void RepaintStatus() {
         TDrawBuffer B = new TDrawBuffer();
         int [] W = {0}, H = {0};

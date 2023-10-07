@@ -16,7 +16,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 	EKeyMap ActiveMap;
 	EKeyMap OverrideMap;
 	String CharMap = null;
-	private EFrame eFrame; // dz added for GC not to kill
+	//private EFrame eFrame; // dz added for GC not to kill
 
 	static final int  RUN_WAIT = 0;
 	static final int  RUN_ASYNC = 1;
@@ -46,7 +46,7 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 			return ExResult.ErFAIL;
 
 		if (view.IsModelView()) {
-			ExModelView V = (ExModelView)view.Top;
+			ExModelView V = (ExModelView)view.getTop(); // view.Top;
 			EView View = V.View;
 
 			switch (Command) {
@@ -584,7 +584,8 @@ public class EGUI extends GUI implements ModeDefs, GuiDefs, KeyDefs
 		if (0==multiFrame() && frames!=null)
 			return ExResult.ErFAIL;
 
-		eFrame = new EFrame(Config.ScreenSizeX, Config.ScreenSizeY);
+		//eFrame = 
+		new EFrame(Config.ScreenSizeX, Config.ScreenSizeY);
 		assert(frames != null);
 
 		//frames.SetMenu("Main"); //??

@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class ExView implements Closeable, KeyDefs, EventDefs, ModeDefs 
 {
-    GxView Win;
+	protected GxView Win;
     protected ExView Next;
 
 	@Override

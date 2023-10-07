@@ -56,13 +56,18 @@ public class ExComplete extends ExView implements GuiDefs
         ExView::Activate(gotfocus);
     }*/
 
+	@Override
 	int BeginMacro()
 	{
 		return 1;
 	}
 
-	void HandleEvent(TKeyEvent Event) throws IOException
+	@Override
+    void HandleEvent(TEvent pEvent) throws IOException
+	//void HandleEvent(TKeyEvent Event) //throws IOException
 	{
+		TKeyEvent Event = (TKeyEvent) pEvent;
+		
 		int kb = KeyDefs.kbCode(Event.Code);
 		boolean DoQuit = false;
 
@@ -193,6 +198,7 @@ public class ExComplete extends ExView implements GuiDefs
 
 	}
 
+	@Override
 	void UpdateView()
 	{
 		if (Next != null) {
@@ -200,6 +206,7 @@ public class ExComplete extends ExView implements GuiDefs
 		}
 	}
 
+	@Override
 	void RepaintView()
 	{
 		if (Next != null) {
@@ -207,6 +214,7 @@ public class ExComplete extends ExView implements GuiDefs
 		}
 	}
 
+	@Override
 	void UpdateStatus()
 	{
 		RepaintStatus();
@@ -219,6 +227,7 @@ public class ExComplete extends ExView implements GuiDefs
 	static final int COM_MARK =0x2E;
 	static final int COM_ERR  =0x1C;
 
+	@Override
 	void RepaintStatus()
 	{
 		TDrawBuffer B = new TDrawBuffer();

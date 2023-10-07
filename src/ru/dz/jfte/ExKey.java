@@ -4,9 +4,9 @@ import java.io.IOException;
 
 public class ExKey extends ExView 
 {
-    String Prompt;
-    int /*TKeyCode*/ Key;
-    char ch;
+    private String Prompt;
+    private int /*TKeyCode*/ Key;
+    private char ch;
 
     
     ExKey(String APrompt) {
@@ -16,6 +16,7 @@ public class ExKey extends ExView
 
     //void Activate(boolean gotfocus) {        super.Activate(gotfocus);    }
 
+    @Override
     int BeginMacro() {
         return 1;
     }
@@ -32,22 +33,26 @@ public class ExKey extends ExView
         }
     }
 
+    @Override
     void UpdateView() {
         if (Next!=null) {
             Next.UpdateView();
         }
     }
 
+    @Override
     void RepaintView() {
         if (Next!=null) {
             Next.RepaintView();
         }
     }
 
+    @Override
     void UpdateStatus() {
         RepaintStatus();
     }
 
+    @Override
     void RepaintStatus() {
         TDrawBuffer B = new TDrawBuffer();
         int [] W = {0}, H = {0};
@@ -57,5 +62,10 @@ public class ExKey extends ExView
         B.MoveCh(' ', 0x17, W[0]);
         Console.ConPutBox(0, H[0] - 1, W[0], 1, B);
     }
+
+
+	public int getKey() {
+		return Key;
+	}
     
 }

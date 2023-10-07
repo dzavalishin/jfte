@@ -5,9 +5,9 @@ import java.io.IOException;
 
 public class GxView extends GView implements Closeable, EventDefs, KeyDefs, ModeDefs 
 {
-    ExView Top;
-    ExView Bottom;
-    boolean MouseCaptured = false;
+    private ExView Top;
+    private ExView Bottom;
+    private boolean MouseCaptured = false;
     
     ExView GetStatusContext() { if (Top != null) return Top.GetStatusContext(); else return null; }
     ExView GetViewContext() { if (Top != null) return Top.GetViewContext(); else return null; }
@@ -148,6 +148,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
+    @Override
     void Update() {
         if (Top != null) {
             Top.Update();
@@ -155,6 +156,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
            // Repaint();
     }
 
+    @Override
     void Repaint() {
         if (Top != null) {
             Top.Repaint();
@@ -168,6 +170,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
+    @Override
     void Resize(int width, int height) {
         ExView V;
         super.Resize(width, height);
@@ -246,13 +249,11 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         }
     }
 
-    long /*TKeyCode*/ GetChar(String Prompt) {
+    int /*TKeyCode*/ GetChar(String Prompt) {
         int rc;
-        long /*TKeyCode*/K = 0;
+        int /*TKeyCode*/K = 0;
 
         ExKey key = new ExKey(Prompt);
-        if (key == null)
-            return 0;
 
         PushView(key);
         rc = Execute();
@@ -260,7 +261,7 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         Repaint();
 
         if (rc == 1)
-            K = key.Key;
+            K = key.getKey();// key.Key;
         //delete key;
 
         return K;
@@ -346,6 +347,9 @@ public class GxView extends GView implements Closeable, EventDefs, KeyDefs, Mode
         assert(1 == 0);
         return 0;
     }
+	public  ExView getTop() {
+		return Top;
+	}
 
 
     

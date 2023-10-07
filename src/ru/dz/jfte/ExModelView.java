@@ -4,9 +4,9 @@ import java.io.IOException;
 
 public class ExModelView extends ExView 
 {
-    EView View;
-    boolean MouseCaptured = false;
-    boolean MouseMoved = false;
+    protected EView View;
+    protected boolean MouseCaptured = false;
+    protected boolean MouseMoved = false;
 
     @Override
     boolean IsModelView() { return true; }
@@ -71,14 +71,17 @@ public class ExModelView extends ExView
         View.RepaintStatus();
     }
 
+    @Override
     void UpdateStatus() {
         View.UpdateStatus();
     }
 
+    @Override
     void Resize(int width, int height) {
         View.Resize(width, height);
     }
 
+    @Override
     void WnSwitchBuffer(EModel B) {
        if (View!=null)
            View.SwitchToModel(B);
