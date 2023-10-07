@@ -36,6 +36,11 @@ public class CStringPtr extends AbstractCString implements IArrayPtr
 		this(new CString(src, pos));
 	}
 
+	@Override
+	protected void grow(int size) {
+		owner.grow(size);
+		mem = owner.mem;
+	}
 
 	
 	// -------------------------------------------------------------------

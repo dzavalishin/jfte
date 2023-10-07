@@ -37,6 +37,7 @@ public abstract class AbstractCString implements ICString
 		return new CStringPtr(this);
 	}
 
+	
 	// -------------------------------------------------------------------
 	// CharSequence
 	// -------------------------------------------------------------------
@@ -109,7 +110,10 @@ public abstract class AbstractCString implements ICString
 	 */
 
 	protected void reSize(int size) {
-		throw new RuntimeException("AbstractCString.reSize called");		
+		if(owner != null) 
+			owner.setSize(size);
+		else
+			throw new RuntimeException("AbstractCString.reSize called");		
 	}
 
 
@@ -247,7 +251,7 @@ public abstract class AbstractCString implements ICString
 
 	@Override
 	public void memset(char data, int size) {
-		Arrays.fill(mem, 0+shift, size, data);
+		Arrays.fill(mem, 0+shift, 0+shift+size, data);
 
 	}
 
@@ -268,7 +272,8 @@ public abstract class AbstractCString implements ICString
 		int len = src.length();
 		int oldLen = length();
 		int newSize = len + oldLen + shift;
-		owner.grow( newSize );
+		//owner.grow( newSize );
+		grow( newSize );
 		memmove(oldLen, src, 0, len);
 	}
 
@@ -276,7 +281,8 @@ public abstract class AbstractCString implements ICString
 	public void strncat(CharSequence src, int len) {
 		int oldLen = length();
 		int newSize = len + oldLen + shift;
-		owner.grow( newSize );
+		//owner.grow( newSize );
+		grow( newSize );
 		memmove(oldLen, src, 0, len);
 	}
 
