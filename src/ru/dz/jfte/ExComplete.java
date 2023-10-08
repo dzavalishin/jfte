@@ -1,6 +1,7 @@
 package ru.dz.jfte;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import ru.dz.jfte.c.BitOps;
 
@@ -385,11 +386,10 @@ public class ExComplete extends ExView implements GuiDefs
 		Buffer.Match.Row = Buffer.Match.Col = -1;
 		Buffer.MatchLen = Buffer.MatchCount = 0;
 
-		/* TODO		#ifdef LOCALE_SORT
 		// sort by current locales
-		qsort(Words, WordsLast, sizeof(Words[0]), CmpStr);
-		#endif */
-
+		//qsort(Words, WordsLast, sizeof(Words[0]), CmpStr);		
+		Arrays.sort(Words);
+		
 		FixedUpdate(0);
 
 		//for(int i = 0; i < WordsLast; i++)
