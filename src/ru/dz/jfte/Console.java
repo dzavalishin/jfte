@@ -284,7 +284,7 @@ public class Console implements ModeDefs, GuiDefs, EventDefs
 
 	public static TEvent ConGetEvent(int eventMask, int waitTime, boolean delete) 
 	{
-		// eventMask is ignored in original code
+		// TODO eventMask is ignored in some versions of original code, but is used by callers
 
 		while(e == null)
 			fillEvent();
