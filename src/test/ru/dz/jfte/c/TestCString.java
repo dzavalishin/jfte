@@ -543,6 +543,26 @@ class TestCString {
 		
 	}
 
+	
+	@Test
+	void testSpan() 
+	{
+		CString cs = new CString("abc:def/xyz,abc");		
+
+		assertEquals(3, cs.strcspn(":/,") );
+		assertEquals(15, cs.strcspn("#%^") );
+		
+		assertEquals(3, cs.strspn("abc") );
+		assertEquals(0, cs.strspn(":/,") );
+		
+	}
+
+	
+	
+	
+	
+	
+	
 	@Test
 	void testStaticCmp() {
 		assertTrue( CString.memcmp("aaa", "aba", 3) < 0 );

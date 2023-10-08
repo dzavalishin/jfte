@@ -37,7 +37,7 @@ public abstract class AbstractCString implements ICString
 		return new CStringPtr(this);
 	}
 
-	
+
 	// -------------------------------------------------------------------
 	// CharSequence
 	// -------------------------------------------------------------------
@@ -332,7 +332,7 @@ public abstract class AbstractCString implements ICString
 
 		return 0;
 	}
-	
+
 	public static int charCmp(char c1, char c2) {
 		int uc1 = (char)( 0xFFFF & c1);
 		int uc2 = (char)( 0xFFFF & c2);
@@ -342,7 +342,7 @@ public abstract class AbstractCString implements ICString
 
 		return 0;
 	}
-	
+
 	private int charCmp(CharSequence src, int n) {
 		int uc1 = (char)( 0xFFFF & charAt(n));
 		int uc2 = (char)( 0xFFFF & src.charAt(n));
@@ -375,20 +375,20 @@ public abstract class AbstractCString implements ICString
 			return 0;
 
 		int n = pos;
-		
+
 		while (n < len && charAt(n) == src.charAt(n)) 
 			if (n == 0)
 				return 0;
 
 		return charCmp(src, n);		
 	}
-	
+
 	public int memicmp(int pos, CharSequence src, int len) {
 		if (len == 0)	         
 			return 0;
 
 		int n = pos; 
-		
+
 		while (n < len && Character.toUpperCase(charAt(n)) == Character.toUpperCase(src.charAt(n))) 
 			if (n == 0)
 				return 0;
@@ -396,7 +396,7 @@ public abstract class AbstractCString implements ICString
 		return charICmp(src, n);		
 	}
 
-	
+
 	// -------------------------------------------------------------------
 	// Search
 	// -------------------------------------------------------------------
@@ -495,10 +495,35 @@ public abstract class AbstractCString implements ICString
 	}
 
 	@Override
-	public int strspn(CharSequence delimiters, int start) {
-		// TODO Auto-generated method stub
-		throw new RuntimeException();
-		//return 0;
+	public int strspn(CharSequence delimiters, int start) 
+	{
+		int sc1 = 0;
+
+		if (delimiters instanceof CString) 
+		{
+			CString csd = (CString) delimiters;
+
+			for (; sc1 < length() && charAt(sc1) != '\0'; sc1++)
+			{
+				if (csd.strchr(charAt(sc1)) < 0)
+					return sc1;
+			}
+			return sc1;
+		}
+
+		if (delimiters instanceof String) 
+		{
+			String csd = (String) delimiters;
+
+			for (; sc1 < length() && charAt(sc1) != '\0'; sc1++)
+			{
+				if (csd.indexOf(charAt(sc1)) < 0)
+					return sc1;
+			}
+			return sc1;
+		}
+		
+		throw new RuntimeException("Type of delimiters is CString or String");
 	}
 
 	@Override
@@ -509,14 +534,16 @@ public abstract class AbstractCString implements ICString
 	@Override
 	public int strcspn(CharSequence delimiters, int start) 
 	{
-		int ret = -1;
+		int ret = length();
 
 		for (int dn = 0; dn < delimiters.length(); dn++)
 		{
 			int pos = strchr(delimiters.charAt(dn), start);
 			if( pos < 0 )
 				continue;
-			if( ret < 0 || pos < ret )
+
+			//if( ret < 0 || pos < ret )
+			if( pos < ret )
 				ret = pos;
 		}
 
@@ -617,22 +644,17 @@ public abstract class AbstractCString implements ICString
 		copyIn(toPos, data, 0, len);
 	}	
 
-	
-	// -------------------------------------------------------------------
-	// TODO add to IArrayPtr
-	// -------------------------------------------------------------------
 
-	
 	// --------------------------------------------------------------
 	// Read/write
 	// --------------------------------------------------------------
-	
-	
+
+
 	public void write( int pos, char b )
 	{
 		mem[ pos + shift ] = b;
 	}
-	
+
 	/**
 	 * Write character
 	 * @param shift from current ptr pos
@@ -642,12 +664,12 @@ public abstract class AbstractCString implements ICString
 	{
 		write(shift,b);
 	}
-	
+
 	public char read( int pos )
 	{
 		return mem[ pos + shift ];
 	}
-	
+
 	public char r( int shift )
 	{
 		return read( shift );
@@ -657,7 +679,7 @@ public abstract class AbstractCString implements ICString
 	{
 		return read(0);
 	}
-	
+
 	/**
 	 * Read char as unsigned int
 	 * @param shift position to read from
@@ -668,10 +690,10 @@ public abstract class AbstractCString implements ICString
 		return 0xFFFF & read( shift );
 	}
 
-	
-	
-	
-	
+
+
+
+
 }
 
 
